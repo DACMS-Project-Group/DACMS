@@ -1,4 +1,4 @@
-# Full-Stack Web Application (React + Express + PostgreSQL)
+# DACMS Full-Stack Web Application (React + Express + PostgreSQL)
 
 A dockerized full-stack application featuring a React (Vite) frontend, a Node.js (Express) backend API, and a PostgreSQL database.
 
