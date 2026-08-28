@@ -1,5 +1,5 @@
 import React from 'react';
-import Dashboard from './pages/Dashboard';
+import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
 import './index.css';
 
@@ -7,7 +7,7 @@ function App() {
   return (
     <div className="min-h-screen bg-off-white">
       <Navbar />
-      <Dashboard />
+      <AdminDashboard />
     </div>
   );
 }
