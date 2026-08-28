@@ -1,4 +1,5 @@
 import React from 'react';
+import logo from '../assets/NWU-Acronym-Logo-White-Digital.png';
 
 const Navbar = () => {
   return (
@@ -12,7 +13,7 @@ const Navbar = () => {
             Change "logo.png" to your actual filename
           */}
           <img 
-            src="/logo.png" 
+            src= {logo} 
             alt="DACMS Logo" 
             className="h-10 w-auto"  // Adjust height as needed
           />

@@ -2,6 +2,7 @@ import React from 'react';
 import Card from '../components/Card';  // Import the card component
 import StatusBadge from '../components/StatusBadge';  // Import the badge component
 
+
 const Dashboard = () => {
   // ===== DATA - This is like your "database" for this page =====
   
