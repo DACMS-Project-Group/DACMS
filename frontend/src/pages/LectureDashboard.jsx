@@ -1,27 +1,21 @@
 import React from 'react';
 import Card from '../components/Card';
+import nwuLogo from '../assets/NWU-Acronym-Logo-White-Digital.png';
 
 const LectureDashboard = () => {
   return (
     <div className="min-h-screen bg-off-white">
 
-      {/* ================= TOP WHITE HEADER ================= */}
-      <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8">
+      {/* ================= TOP PURPLE HEADER ================= */}
+      <header className="h-20 bg-primary border-b border-neutral flex items-center justify-between px-8">
 
         {/* NWU Logo */}
         <div className="flex items-center gap-4">
-
-          {/* Temporary NWU logo text */}
-          <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-white font-bold text-lg">
-              NWU
-            </span>
-          </div>
-
-          <span className="text-xl font-poppins font-semibold text-primary">
-            North-West University
-          </span>
-
+          <img
+            src={nwuLogo}
+            alt="NWU Logo"
+            className="h-22 w-auto"
+          />
         </div>
 
 
@@ -33,11 +27,11 @@ const LectureDashboard = () => {
           </div>
 
           <div>
-            <p className="font-semibold text-dark">
+            <p className="font-semibold text-white">
               Lecturer
             </p>
 
-            <p className="text-sm text-neutral">
+            <p className="text-sm text-white">
               NWU
             </p>
           </div>
@@ -52,7 +46,7 @@ const LectureDashboard = () => {
 
 
         {/* ================= SIDEBAR ================= */}
-        <aside className="w-64 bg-primary text-white flex flex-col">
+        <aside className="w-64 bg-primary-dark text-white flex flex-col">
 
           {/* Navigation */}
           <nav className="flex-1 p-4">
@@ -60,7 +54,7 @@ const LectureDashboard = () => {
             {/* Dashboard */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl bg-primary-light mb-2 font-semibold"
+              className="block px-4 py-3 rounded-xl bg-primary-light mb-2 font-semibold text-white"
             >
               Dashboard
             </a>
@@ -69,7 +63,7 @@ const LectureDashboard = () => {
             {/* Applications */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2"
+              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2 text-white"
             >
               Applications
             </a>
@@ -78,7 +72,7 @@ const LectureDashboard = () => {
             {/* Claims */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2"
+              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2 text-white"
             >
               Claims
             </a>
@@ -87,7 +81,7 @@ const LectureDashboard = () => {
             {/* Appointments */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2"
+              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2 text-white"
             >
               Appointments
             </a>
@@ -96,7 +90,7 @@ const LectureDashboard = () => {
             {/* Work Overview */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2"
+              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2 text-white"
             >
               Work Overview
             </a>
@@ -105,7 +99,7 @@ const LectureDashboard = () => {
             {/* Notifications */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2"
+              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2 text-white"
             >
               Notifications
             </a>
@@ -114,12 +108,12 @@ const LectureDashboard = () => {
 
 
           {/* Bottom Navigation */}
-          <div className="p-4 border-t border-primary-light">
+          <div className="p-4 border-t border-neutral">
 
             {/* Profile */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2"
+              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2 text-white"
             >
               Profile
             </a>
@@ -128,7 +122,7 @@ const LectureDashboard = () => {
             {/* Logout */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light"
+              className="block px-4 py-3 rounded-xl hover:bg-primary-light text-white"
             >
               Logout
             </a>
@@ -148,11 +142,11 @@ const LectureDashboard = () => {
             {/* Welcome */}
             <div className="mb-8">
 
-              <h1 className="text-3xl font-poppins font-semibold text-primary">
+              <h1 className="text-3xl font-poppins font-bold text-primary">
                 Welcome back, Lecturer!
               </h1>
 
-              <p className="text-neutral mt-2">
+              <p className="text-dark mt-2">
                 Here's an overview of your demi applications and activities.
               </p>
 
@@ -271,7 +265,7 @@ const LectureDashboard = () => {
 
                   <div>
 
-                    <h3 className="text-xl font-poppins font-semibold text-primary">
+                    <h3 className="text-xl font-poppins font-semibold text-dark">
                       Budget Allocation
                     </h3>
 
@@ -319,7 +313,7 @@ const LectureDashboard = () => {
                           Applications to Review
                         </p>
 
-                        <p className="text-neutral">
+                        <p className="text-dark">
                           You have 3 demi applications waiting for your review.
                         </p>
 
@@ -347,7 +341,7 @@ const LectureDashboard = () => {
                           Upcoming Appointment
                         </p>
 
-                        <p className="text-neutral">
+                        <p className="text-dark">
                           You have an appointment scheduled for tomorrow at 10:00.
                         </p>
 
@@ -375,7 +369,7 @@ const LectureDashboard = () => {
                           Work Session Review
                         </p>
 
-                        <p className="text-neutral">
+                        <p className="text-dark">
                           A demi work session has been submitted for your review.
                         </p>
 
@@ -403,7 +397,7 @@ const LectureDashboard = () => {
                           Claim Submitted
                         </p>
 
-                        <p className="text-neutral">
+                        <p className="text-dark">
                           A new claim has been submitted and requires your review.
                         </p>
 
