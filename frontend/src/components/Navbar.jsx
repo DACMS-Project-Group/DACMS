@@ -15,7 +15,7 @@ const Navbar = () => {
           <img 
             src= {logo} 
             alt="DACMS Logo" 
-            className="h-10 w-auto"  // Adjust height as needed
+            className="h-10 w-auto" 
           />
           
           {/* 
