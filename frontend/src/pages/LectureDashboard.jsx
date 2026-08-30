@@ -4,9 +4,9 @@ import nwuLogo from '../assets/NWU-Acronym-Logo-White-Digital.png';
 
 const LectureDashboard = () => {
   return (
-    <div className="min-h-screen bg-off-white">
+    <div className="min-h-screen bg-[#F8F9FA]">
 
-      {/* ================= TOP PURPLE HEADER ================= */}
+      {/* ================= TOP WHITE HEADER ================= */}
       <header className="h-20 bg-primary border-b border-neutral flex items-center justify-between px-8">
 
         {/* NWU Logo */}
@@ -14,28 +14,15 @@ const LectureDashboard = () => {
           <img
             src={nwuLogo}
             alt="NWU Logo"
-            className="h-22 w-auto"
+            className="h-24 w-auto"
           />
         </div>
 
-
-        {/* Lecturer Profile */}
-        <div className="flex items-center gap-3">
-
-          <div className="w-10 h-10 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold">
-            L
-          </div>
-
-          <div>
-            <p className="font-semibold text-white">
-              Lecturer
-            </p>
-
-            <p className="text-sm text-white">
-              NWU
-            </p>
-          </div>
-
+        {/* DACMS */}
+        <div>
+          <p className="text-xl font-semibold text-white">
+            Demi Application and Claims Management System
+          </p>
         </div>
 
       </header>
@@ -54,52 +41,47 @@ const LectureDashboard = () => {
             {/* Dashboard */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl bg-primary-light mb-2 font-semibold text-white"
+              className="block px-4 py-3 rounded-xl bg-[#8B5FA8] mb-2 font-semibold"
             >
               Dashboard
             </a>
 
-
             {/* Applications */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2 text-white"
+              className="block px-4 py-3 rounded-xl hover:bg-[#8B5FA8] mb-2"
             >
               Applications
             </a>
 
-
             {/* Claims */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2 text-white"
+              className="block px-4 py-3 rounded-xl hover:bg-[#8B5FA8] mb-2"
             >
               Claims
             </a>
 
-
             {/* Appointments */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2 text-white"
+              className="block px-4 py-3 rounded-xl hover:bg-[#8B5FA8] mb-2"
             >
               Appointments
             </a>
 
-
             {/* Work Overview */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2 text-white"
+              className="block px-4 py-3 rounded-xl hover:bg-[#8B5FA8] mb-2"
             >
               Work Overview
             </a>
 
-
             {/* Notifications */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2 text-white"
+              className="block px-4 py-3 rounded-xl hover:bg-[#8B5FA8] mb-2"
             >
               Notifications
             </a>
@@ -108,21 +90,20 @@ const LectureDashboard = () => {
 
 
           {/* Bottom Navigation */}
-          <div className="p-4 border-t border-neutral">
+          <div className="p-4 border-t border-[#8B5FA8]">
 
             {/* Profile */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light mb-2 text-white"
+              className="block px-4 py-3 rounded-xl hover:bg-[#8B5FA8] mb-2"
             >
               Profile
             </a>
 
-
             {/* Logout */}
             <a
               href="#"
-              className="block px-4 py-3 rounded-xl hover:bg-primary-light text-white"
+              className="block px-4 py-3 rounded-xl hover:bg-[#5A3280]"
             >
               Logout
             </a>
@@ -135,18 +116,24 @@ const LectureDashboard = () => {
         {/* ================= MAIN CONTENT ================= */}
         <main className="flex-1">
 
+          {/* ================= PAGE TITLE HEADER ================= */}
+          <div className="bg-[#8B5FA8] h-16 flex items-center px-8">
+
+            <h1 className="text-xl font-semibold text-white">
+              Lecturer Dashboard
+            </h1>
+
+          </div>
+
+
           {/* ================= CONTENT ================= */}
           <div className="container mx-auto p-8">
 
 
-            {/* Welcome */}
+            {/* Description */}
             <div className="mb-8">
 
-              <h1 className="text-3xl font-poppins font-bold text-primary">
-                Welcome back, Lecturer!
-              </h1>
-
-              <p className="text-dark mt-2">
+              <p className="text-[#78848E] text-base">
                 Here's an overview of your demi applications and activities.
               </p>
 
@@ -156,7 +143,7 @@ const LectureDashboard = () => {
             {/* ================= OVERVIEW ================= */}
             <div className="mb-8">
 
-              <h2 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              <h2 className="text-2xl font-semibold text-[#6C3D91] mb-4">
                 Overview
               </h2>
 
@@ -168,16 +155,16 @@ const LectureDashboard = () => {
                 <Card>
                   <div className="flex items-center gap-4">
 
-                    <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg">
+                    <div className="w-12 h-12 rounded-full bg-[#E8DDF0] flex items-center justify-center text-[#6C3D91] font-bold text-lg">
                       A
                     </div>
 
                     <div>
-                      <p className="text-sm text-neutral">
+                      <p className="text-sm text-[#78848E]">
                         Applicants
                       </p>
 
-                      <h2 className="text-2xl font-bold text-dark">
+                      <h2 className="text-2xl font-bold text-[#181512]">
                         48
                       </h2>
                     </div>
@@ -190,16 +177,16 @@ const LectureDashboard = () => {
                 <Card>
                   <div className="flex items-center gap-4">
 
-                    <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg">
+                    <div className="w-12 h-12 rounded-full bg-[#E8DDF0] flex items-center justify-center text-[#6C3D91] font-bold text-lg">
                       D
                     </div>
 
                     <div>
-                      <p className="text-sm text-neutral">
+                      <p className="text-sm text-[#78848E]">
                         Approved Demis
                       </p>
 
-                      <h2 className="text-2xl font-bold text-dark">
+                      <h2 className="text-2xl font-bold text-[#181512]">
                         20
                       </h2>
                     </div>
@@ -212,16 +199,16 @@ const LectureDashboard = () => {
                 <Card>
                   <div className="flex items-center gap-4">
 
-                    <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg">
+                    <div className="w-12 h-12 rounded-full bg-[#E8DDF0] flex items-center justify-center text-[#6C3D91] font-bold text-lg">
                       P
                     </div>
 
                     <div>
-                      <p className="text-sm text-neutral">
+                      <p className="text-sm text-[#78848E]">
                         Pending Applications
                       </p>
 
-                      <h2 className="text-2xl font-bold text-dark">
+                      <h2 className="text-2xl font-bold text-[#181512]">
                         3
                       </h2>
                     </div>
@@ -234,16 +221,16 @@ const LectureDashboard = () => {
                 <Card>
                   <div className="flex items-center gap-4">
 
-                    <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg">
+                    <div className="w-12 h-12 rounded-full bg-[#E8DDF0] flex items-center justify-center text-[#6C3D91] font-bold text-lg">
                       H
                     </div>
 
                     <div>
-                      <p className="text-sm text-neutral">
+                      <p className="text-sm text-[#78848E]">
                         Hours Allocated
                       </p>
 
-                      <h2 className="text-2xl font-bold text-dark">
+                      <h2 className="text-2xl font-bold text-[#181512]">
                         120h
                       </h2>
                     </div>
@@ -265,18 +252,18 @@ const LectureDashboard = () => {
 
                   <div>
 
-                    <h3 className="text-xl font-poppins font-semibold text-dark">
+                    <h3 className="text-xl font-semibold text-[#181512]">
                       Budget Allocation
                     </h3>
 
-                    <p className="text-neutral mt-1">
+                    <p className="text-[#78848E] mt-1">
                       View the current budget allocated for demi appointments.
                     </p>
 
                   </div>
 
 
-                  <button className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition">
+                  <button className="bg-[#6C3D91] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#5A3280] transition">
                     View Budget Allocation →
                   </button>
 
@@ -290,7 +277,7 @@ const LectureDashboard = () => {
             {/* ================= NOTIFICATIONS ================= */}
             <div>
 
-              <h2 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              <h2 className="text-2xl font-semibold text-[#6C3D91] mb-4">
                 Notifications
               </h2>
 
@@ -301,23 +288,23 @@ const LectureDashboard = () => {
 
 
                   {/* Applications */}
-                  <div className="border-b border-neutral pb-4">
+                  <div className="border-b border-[#78848E] pb-4">
 
                     <div className="flex items-start gap-3">
 
-                      <div className="w-3 h-3 rounded-full bg-primary mt-2"></div>
+                      <div className="w-3 h-3 rounded-full bg-[#FFC107] mt-2"></div>
 
                       <div>
 
-                        <p className="font-semibold text-dark">
+                        <p className="font-semibold text-[#181512]">
                           Applications to Review
                         </p>
 
-                        <p className="text-dark">
+                        <p className="text-[#181512]">
                           You have 3 demi applications waiting for your review.
                         </p>
 
-                        <p className="text-sm text-neutral mt-1">
+                        <p className="text-sm text-[#78848E] mt-1">
                           Today
                         </p>
 
@@ -329,23 +316,23 @@ const LectureDashboard = () => {
 
 
                   {/* Appointment */}
-                  <div className="border-b border-neutral pb-4">
+                  <div className="border-b border-[#78848E] pb-4">
 
                     <div className="flex items-start gap-3">
 
-                      <div className="w-3 h-3 rounded-full bg-primary mt-2"></div>
+                      <div className="w-3 h-3 rounded-full bg-[#FFC107] mt-2"></div>
 
                       <div>
 
-                        <p className="font-semibold text-dark">
+                        <p className="font-semibold text-[#181512]">
                           Upcoming Appointment
                         </p>
 
-                        <p className="text-dark">
+                        <p className="text-[#181512]">
                           You have an appointment scheduled for tomorrow at 10:00.
                         </p>
 
-                        <p className="text-sm text-neutral mt-1">
+                        <p className="text-sm text-[#78848E] mt-1">
                           Today
                         </p>
 
@@ -357,23 +344,23 @@ const LectureDashboard = () => {
 
 
                   {/* Work Session */}
-                  <div className="border-b border-neutral pb-4">
+                  <div className="border-b border-[#78848E] pb-4">
 
                     <div className="flex items-start gap-3">
 
-                      <div className="w-3 h-3 rounded-full bg-primary mt-2"></div>
+                      <div className="w-3 h-3 rounded-full bg-[#6C3D91] mt-2"></div>
 
                       <div>
 
-                        <p className="font-semibold text-dark">
+                        <p className="font-semibold text-[#181512]">
                           Work Session Review
                         </p>
 
-                        <p className="text-dark">
+                        <p className="text-[#181512]">
                           A demi work session has been submitted for your review.
                         </p>
 
-                        <p className="text-sm text-neutral mt-1">
+                        <p className="text-sm text-[#78848E] mt-1">
                           Yesterday
                         </p>
 
@@ -389,19 +376,19 @@ const LectureDashboard = () => {
 
                     <div className="flex items-start gap-3">
 
-                      <div className="w-3 h-3 rounded-full bg-primary mt-2"></div>
+                      <div className="w-3 h-3 rounded-full bg-[#28A745] mt-2"></div>
 
                       <div>
 
-                        <p className="font-semibold text-dark">
+                        <p className="font-semibold text-[#181512]">
                           Claim Submitted
                         </p>
 
-                        <p className="text-dark">
+                        <p className="text-[#181512]">
                           A new claim has been submitted and requires your review.
                         </p>
 
-                        <p className="text-sm text-neutral mt-1">
+                        <p className="text-sm text-[#78848E] mt-1">
                           Yesterday
                         </p>
 
@@ -417,7 +404,7 @@ const LectureDashboard = () => {
 
                     <a
                       href="#"
-                      className="text-primary font-semibold hover:underline"
+                      className="text-[#6C3D91] font-semibold hover:underline"
                     >
                       View all →
                     </a>
