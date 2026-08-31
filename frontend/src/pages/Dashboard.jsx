@@ -3,9 +3,8 @@ import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 
-
 const Dashboard = () => {
-  // Sample data (same as before)
+  // Sample data
   const overviewData = [
     { module: 'CMPG xxx', hours: 20, earnings: 'R 100,00', pending: 1 },
     { module: 'CMPG xxx', hours: 15, earnings: 'R 75,00', pending: 0 },
@@ -31,7 +30,7 @@ const Dashboard = () => {
   return (
     <div className="flex min-h-screen bg-off-white">
       
-      {/* ===== SIDEBAR ===== */}
+      {/* ===== SIDEBAR - Student Role ===== */}
       <Sidebar userRole="student" />
       
       {/* ===== MAIN CONTENT ===== */}
