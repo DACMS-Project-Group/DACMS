@@ -1,26 +1,30 @@
 import React from 'react';
 import Sidebar from '../components/Sidebar';
+import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 
 const LectureDashboard = () => {
   return (
     <div className="flex min-h-screen bg-off-white">
       
-      {/* ===== SIDEBAR - Lecturer Role ===== */}
+      {/* ===== SIDEBAR ===== */}
       <Sidebar userRole="lecturer" />
       
       {/* ===== MAIN CONTENT ===== */}
       <div className="flex-1">
-
-        {/* Page Title Bar */}
+        
+        {/* ===== TOP NAVBAR ===== */}
+        <Navbar />
+        
+        {/* ===== PAGE TITLE BAR ===== */}
         <div className="bg-primary h-16 flex items-center px-8">
           <h1 className="text-4xl font-poppins font-bold text-white">
             Lecturer Dashboard
           </h1>
         </div>
 
-        {/* Main Content */}
-        <div className="container mx-auto p-8">
+        {/* ===== MAIN CONTENT ===== */}
+        <div className="p-8">
 
           {/* Description */}
           <div className="mb-8">
@@ -94,6 +98,9 @@ const LectureDashboard = () => {
 
           {/* ===== BUDGET ALLOCATION ===== */}
           <div className="mb-8">
+            <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+              Budget Allocation
+            </h2>
             <Card>
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>

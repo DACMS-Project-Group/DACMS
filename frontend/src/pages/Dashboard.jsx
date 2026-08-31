@@ -1,5 +1,6 @@
 import React from 'react';
 import Sidebar from '../components/Sidebar';
+import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 
@@ -30,18 +31,21 @@ const Dashboard = () => {
   return (
     <div className="flex min-h-screen bg-off-white">
       
-      {/* ===== SIDEBAR - Student Role ===== */}
+      {/* ===== SIDEBAR ===== */}
       <Sidebar userRole="student" />
       
       {/* ===== MAIN CONTENT ===== */}
       <div className="flex-1">
         
-        {/* Page Title Bar */}
+        {/* ===== TOP NAVBAR ===== */}
+        <Navbar />
+        
+        {/* ===== PAGE TITLE BAR ===== */}
         <div className="bg-primary h-16 flex items-center px-8">
           <h1 className="text-4xl font-poppins font-bold text-white">Dashboard</h1>
         </div>
 
-        {/* Main Content */}
+        {/* ===== MAIN CONTENT ===== */}
         <div className="p-8">
           
           {/* Welcome Message */}
