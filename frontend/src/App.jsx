@@ -1,14 +1,10 @@
-import React from 'react';
-import LectureDashboard from './pages/LectureDashboard';
-import LandingPage from './pages/LandingPage';
+import AdminDashboard from './pages/AdminDashboard';
+import Navbar from './components/Navbar';
 import './index.css';
-import Dashboard from './pages/Dashboard';
 
 function App() {
-  return (
-    <LandingPage/>
-
-  );
+  <Navbar />
+  return <AdminDashboard />;
 }
 
 export default App;

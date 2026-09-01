@@ -1,4 +1,4 @@
-import React from 'react';
+//import React from 'react';
 import logo from '../assets/NWU-Acronym-Logo-White-Digital.png';
 
 const Navbar = () => {

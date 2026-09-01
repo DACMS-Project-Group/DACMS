@@ -1,4 +1,3 @@
-import React from 'react';
 
 const Sidebar = ({ userRole = 'student' }) => {
   // Student Navigation
@@ -32,19 +31,12 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Notifications', href: '/notifications' },
   ];
 
-  let navItems = [];
-
-  switch (userRole) {
-    case 'lecturer':
-      navItems = lecturerNavItems;
-      break;
-    case 'admin':
-      navItems = adminNavItems;
-      break;
-    default:
-      navItems = studentNavItems;
-      break;
-  }
+  const navItems =
+    userRole === 'lecturer'
+      ? lecturerNavItems
+      : userRole === 'admin'
+        ? adminNavItems
+        : studentNavItems;
 
   return (
     <aside className="w-64 bg-primary-dark text-white flex flex-col min-h-screen">
