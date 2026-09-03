@@ -27,3 +27,5 @@ class SystemRole {
         }
     }
 }
+
+export default SystemRole;
