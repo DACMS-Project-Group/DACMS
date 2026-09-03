@@ -17,9 +17,9 @@ function App() {
       {/* <StudentProfile/> */}
       {/* <ReviewApplications/> */}
       {/* <ApplicationReview/> */}
-
       <Login/>
     </>
   );
 }
+
 export default App;
