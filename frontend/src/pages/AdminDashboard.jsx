@@ -1,7 +1,7 @@
 //import React from 'react';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
-import Navbar from '../components/Navbar';
+//import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 
 const AdminDashboard = () => {
