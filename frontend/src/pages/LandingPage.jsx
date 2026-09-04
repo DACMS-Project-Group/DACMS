@@ -1,6 +1,23 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
+  const navigate = useNavigate();
+
+  // ============================================================
+  // DEMO MODE - ACTIVE
+  // ============================================================
+  const handleRoleSelect = (role) => {
+    navigate(`/login?role=${role}`);
+  };
+
+  // ============================================================
+  // FUNCTIONAL MODE (with AuthContext) - COMMENTED OUT
+  // ============================================================
+  // const handleRoleSelect = (role) => {
+  //   navigate(`/login?role=${role}`);
+  // };
+
   return (
     <div className="min-h-screen bg-white flex flex-col px-4 py-9">
       
@@ -28,13 +45,11 @@ const LandingPage = () => {
             poster="/NWU-Acronym-Logo-Purple-Digital.png"
           >
             <source src="/GradientVideo.mp4" type="video/mp4" />
-            {/* Fallback: Video doesn't load, background shows primary color */}
           </video>
           
           {/* ===== OVERLAY CONTENT ===== */}
           <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-6 py-12">
             
-            {/* ===== DACMS TITLE ===== */}
             <div className="text-center max-w-4xl">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-poppins font-bold text-white drop-shadow-2xl leading-tight">
                 Demi Application &<br />
@@ -45,29 +60,29 @@ const LandingPage = () => {
               </p>
             </div>
 
-            {/* ===== THREE BUTTONS ===== */}
+            {/* ===== THREE ROLE BUTTONS ===== */}
             <div className="mt-10 flex flex-col sm:flex-row gap-4 md:gap-6">
               
-              <a
-                href="/student-dashboard"
-                className="bg-white text-primary-dark px-10 py-4 rounded-xl font-semibold text-center hover:bg-primary-light hover:text-white transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.35)] min-w-[160px]"
+              <button
+                onClick={() => handleRoleSelect('student')}
+                className="bg-white text-primary-dark px-10 py-4 rounded-xl font-semibold text-center hover:bg-primary-light hover:text-white transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.35)] min-w-[160px] cursor-pointer"
               >
                 <span className="block text-lg">Student</span>
-              </a>
+              </button>
 
-              <a
-                href="/lecturer-dashboard"
-                className="bg-white text-primary-dark px-10 py-4 rounded-xl font-semibold text-center hover:bg-primary-light hover:text-white transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.35)] min-w-[160px]"
+              <button
+                onClick={() => handleRoleSelect('lecturer')}
+                className="bg-white text-primary-dark px-10 py-4 rounded-xl font-semibold text-center hover:bg-primary-light hover:text-white transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.35)] min-w-[160px] cursor-pointer"
               >
                 <span className="block text-lg">Lecturer</span>
-              </a>
+              </button>
 
-              <a
-                href="/admin-dashboard"
-                className="bg-white text-primary-dark px-10 py-4 rounded-xl font-semibold text-center hover:bg-primary-light hover:text-white transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.35)] min-w-[160px]"
+              <button
+                onClick={() => handleRoleSelect('admin')}
+                className="bg-white text-primary-dark px-10 py-4 rounded-xl font-semibold text-center hover:bg-primary-light hover:text-white transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.35)] min-w-[160px] cursor-pointer"
               >
                 <span className="block text-lg">Administrator</span>
-              </a>
+              </button>
 
             </div>
 
@@ -76,7 +91,6 @@ const LandingPage = () => {
 
       </div>
 
-      {/* ===== FOOTER ===== */}
       <div className="mt-9 text-neutral/60 text-sm font-inter text-center">
         <p>© 2026 North-West University • DACMS</p>
       </div>
