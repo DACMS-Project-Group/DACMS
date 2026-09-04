@@ -156,7 +156,7 @@ const ExportPayments = () => {
 
       <div className="flex">
 
-        <Sidebar />
+        <Sidebar userRole="admin" />
 
         <main className="flex-1 p-8">
 
