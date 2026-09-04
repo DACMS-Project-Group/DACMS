@@ -9,6 +9,7 @@ import ExportPayments from './pages/ExportPayments';
 //import PageNavigation from './components/PageNavigation';
 
 import './index.css';
+<<<<<<< HEAD
 
 function App() {
   return (
@@ -54,6 +55,25 @@ function App() {
       </Routes>
 
     </BrowserRouter>
+=======
+import Dashboard from './pages/Dashboard';
+import StudentProfile from './pages/StudentProfile';
+import ReviewApplications from './pages/ReviewApplications';
+import ApplicationReview from './pages/ApplicationReview';
+import Login from './pages/Login';
+
+function App() {
+  return (
+    <>
+      {/* <LandingPage/> */}
+      {/* <LectureDashboard/> */}
+      {/* <Dashboard/> */}
+      {/* <StudentProfile/> */}
+      {/* <ReviewApplications/> */}
+      {/* <ApplicationReview/> */}
+      <Login/>
+    </>
+>>>>>>> origin/frontend
   );
 }
 
