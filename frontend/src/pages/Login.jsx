@@ -1,8 +1,17 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
+  
+  const navigate = useNavigate();
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+
+    navigate('/dashboard');
+  };
 
   return (
     <div className="flex w-full h-screen">
@@ -29,7 +38,7 @@ const Login = () => {
               Sign in to access your dashboard
             </p>
             
-            <form className="mt-6">
+            <form onSubmit={handleLogin} className="mt-6">
               <div className="mb-3">
                 <input 
                   type="email" 

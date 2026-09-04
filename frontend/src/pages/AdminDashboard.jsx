@@ -1,10 +1,12 @@
 //import React from 'react';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
-//import Navbar from '../components/Navbar';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+
   const statistics = [
     {
       title: 'Total Modules',
@@ -167,7 +169,10 @@ const AdminDashboard = () => {
 
               </div>
 
-              <button className="text-primary font-semibold hover:underline mt-4">
+              <button
+                onClick={() => navigate('/claims')}
+                className="text-primary font-semibold hover:underline mt-4"
+              >
                 View claims →
               </button>
 
@@ -216,7 +221,10 @@ const AdminDashboard = () => {
 
               </div>
 
-              <button className="text-primary font-semibold hover:underline mt-4">
+              <button
+                onClick={() => navigate('/review-applications')}
+                className="text-primary font-semibold hover:underline mt-4"
+              >
                 Review appointments →
               </button>
 
@@ -238,19 +246,31 @@ const AdminDashboard = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
 
-            <button className="bg-primary text-white px-6 py-4 rounded-xl font-semibold hover:bg-primary-dark transition">
+            <button
+              onClick={() => navigate('/budget-management')}
+              className="bg-primary text-white px-6 py-4 rounded-xl font-semibold hover:bg-primary-dark transition"
+            >
               Manage Budgets
             </button>
 
-            <button className="bg-primary text-white px-6 py-4 rounded-xl font-semibold hover:bg-primary-dark transition">
+            <button
+              onClick={() => navigate('/applications')}
+              className="bg-primary text-white px-6 py-4 rounded-xl font-semibold hover:bg-primary-dark transition"
+            >
               Review Recommendations
             </button>
 
-            <button className="bg-primary text-white px-6 py-4 rounded-xl font-semibold hover:bg-primary-dark transition">
+            <button
+              onClick={() => navigate('/review-applications')}
+              className="bg-primary text-white px-6 py-4 rounded-xl font-semibold hover:bg-primary-dark transition"
+            >
               Approve Appointments
             </button>
 
-            <button className="border-2 border-primary text-primary px-6 py-4 rounded-xl font-semibold hover:bg-primary-lightest transition">
+            <button
+              onClick={() => navigate('/claims')}
+              className="border-2 border-primary text-primary px-6 py-4 rounded-xl font-semibold hover:bg-primary-lightest transition"
+            >
               Verify Claims
             </button>
 
@@ -282,7 +302,10 @@ const AdminDashboard = () => {
                 </p>
               </div>
 
-              <button className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition">
+              <button
+                onClick={() => navigate('/export-payments')}
+                className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition"
+              >
                 Export Payment Information
               </button>
 
