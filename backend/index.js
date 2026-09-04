@@ -5,6 +5,9 @@ import pool from './db.js';
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Import your user registration controller file
+const userController = require('./user_registration_API');
+
 app.use(cors());
 app.use(express.json());
 
@@ -42,6 +45,14 @@ app.get('/api/metrics/tables', async (req, res) => {
   }
 });
 
+
+// Listen for React sending a student registration (POST request)
+app.post('/api/create/user', (req, res) => {
+    // Pass the incoming request, the response box, and our database 'pool'
+    userController.createUser(req, res, pool);
+});
+
 app.listen(PORT, () => {
   console.log(`Backend running on port ${PORT}`);
 });
+
