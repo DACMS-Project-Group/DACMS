@@ -1,4 +1,4 @@
-import React from 'react';
+import { NavLink } from 'react-router-dom';
 
 const Sidebar = ({ userRole = 'student' }) => {
   // Student Navigation
@@ -23,8 +23,9 @@ const Sidebar = ({ userRole = 'student' }) => {
 
   // Administrator Navigation
   const adminNavItems = [
-    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Dashboard', href: '/admin-dashboard' },
     { name: 'Budget Management', href: '/budget-management' },
+    { name: 'Export Payments', href: '/export-payments' },
     { name: 'Appointment Approvals', href: '/appointment-approvals' },
     { name: 'Claims Verification', href: '/claims-verification' },
     { name: 'User Management', href: '/user-management' },
@@ -32,49 +33,58 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Notifications', href: '/notifications' },
   ];
 
-  let navItems = [];
-
-  switch (userRole) {
-    case 'lecturer':
-      navItems = lecturerNavItems;
-      break;
-    case 'admin':
-      navItems = adminNavItems;
-      break;
-    default:
-      navItems = studentNavItems;
-      break;
-  }
+  const navItems =
+    userRole === 'lecturer'
+      ? lecturerNavItems
+      : userRole === 'admin'
+        ? adminNavItems
+        : studentNavItems;
 
   return (
     <aside className="w-64 bg-primary-dark text-white flex flex-col min-h-screen">
-      
+
+      {/* Navigation */}
       <nav className="flex-1 p-4 pt-6">
-        {navItems.map((item, index) => (
-          <a
-            key={index}
-            href={item.href}
-            className={`
-              block px-4 py-3 rounded-xl 
+        {navItems.map((item) => (
+          <NavLink
+            key={item.href}
+            to={item.href}
+            className={({ isActive }) =>
+              `
+              block px-4 py-3 rounded-xl
               transition-colors duration-200 mb-2
-              ${index === 0 
-                ? 'bg-primary-light font-semibold' 
-                : 'hover:bg-primary-light'
+              ${
+                isActive
+                  ? 'bg-primary-light font-semibold'
+                  : 'hover:bg-primary-light'
               }
-            `}
+              `
+            }
           >
             {item.name}
-          </a>
+          </NavLink>
         ))}
       </nav>
 
+      {/* Bottom Navigation */}
       <div className="p-4">
-        <a
-          href="/profile"
-          className="block px-4 py-3 rounded-xl hover:bg-primary-light transition-colors duration-200 mb-2"
+        <NavLink
+          to="/profile"
+          className={({ isActive }) =>
+            `
+            block px-4 py-3 rounded-xl
+            transition-colors duration-200 mb-2
+            ${
+              isActive
+                ? 'bg-primary-light font-semibold'
+                : 'hover:bg-primary-light'
+            }
+            `
+          }
         >
           Profile
-        </a>
+        </NavLink>
+
         <a
           href="/logout"
           className="block px-4 py-3 rounded-xl hover:bg-primary-light transition-colors duration-200"

@@ -1,10 +1,10 @@
-import React from 'react';
+//import React from 'react';
 import logo from '../assets/NWU-Acronym-Logo-White-Digital.png';
 
 const Navbar = () => {
   return (
-    <nav className="bg-primary-dark text-white px-6 py-4">
-      <div className="container mx-auto flex justify-between items-center">
+    <nav className="w-full bg-primary-dark text-white px-6 py-4">
+      <div className="w-full mx-auto flex justify-between items-center">
         
         {/* ===== LEFT SIDE: Logo ===== */}
         <div className="flex items-center gap-4">

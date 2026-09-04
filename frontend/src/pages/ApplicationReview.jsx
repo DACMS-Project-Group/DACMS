@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
+
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 
 const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
+  const navigate = useNavigate();
+
   const [comment, setComment] = useState(application?.comment || '');
   const [message, setMessage] = useState('');
 
@@ -27,7 +31,7 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
 
             <button
               type="button"
-              onClick={onBack}
+              onClick={() => navigate('/review-applications')}
               className="mt-4 bg-primary text-white px-5 py-2 rounded-lg font-semibold"
             >
               Back to Review Applications
@@ -53,6 +57,10 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
     setMessage(
       `Application has been ${newStatus.toLowerCase()}.`
     );
+
+    setTimeout(() => {
+      navigate('/review-applications');
+    }, 1000);
   };
 
   // Save lecturer comment
@@ -90,10 +98,10 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
           {/* Back Button */}
           <button
             type="button"
-            onClick={onBack}
-            className="mb-6 text-primary font-semibold hover:underline"
+            onClick={() => navigate('/review-applications')}
+            className="mt-4 bg-primary text-white px-5 py-2 rounded-lg font-semibold"
           >
-            ← Back to Review Applications
+            Back to Review Applications
           </button>
 
           {/* Application Header */}
