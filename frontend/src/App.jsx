@@ -6,22 +6,27 @@ import CreateBudget from './pages/CreateBudget';
 import EditBudget from './pages/EditBudget';
 import BudgetDetails from './pages/BudgetDetails';
 import ExportPayments from './pages/ExportPayments';
-//import PageNavigation from './components/PageNavigation';
+
+import Dashboard from './pages/Dashboard';
+import StudentProfile from './pages/StudentProfile';
+import ReviewApplications from './pages/ReviewApplications';
+import ApplicationReview from './pages/ApplicationReview';
+import Login from './pages/Login';
 
 import './index.css';
-<<<<<<< HEAD
 
 function App() {
   return (
     <BrowserRouter>
-
       <Routes>
 
+        {/* Login */}
         <Route
           path="/"
-          element={<AdminDashboard />}
+          element={<Login />}
         />
 
+        {/* Admin */}
         <Route
           path="/admin-dashboard"
           element={<AdminDashboard />}
@@ -52,28 +57,29 @@ function App() {
           element={<ExportPayments />}
         />
 
+        {/* Existing frontend pages */}
+        <Route
+          path="/dashboard"
+          element={<Dashboard />}
+        />
+
+        <Route
+          path="/student-profile"
+          element={<StudentProfile />}
+        />
+
+        <Route
+          path="/review-applications"
+          element={<ReviewApplications />}
+        />
+
+        <Route
+          path="/application-review"
+          element={<ApplicationReview />}
+        />
+
       </Routes>
-
     </BrowserRouter>
-=======
-import Dashboard from './pages/Dashboard';
-import StudentProfile from './pages/StudentProfile';
-import ReviewApplications from './pages/ReviewApplications';
-import ApplicationReview from './pages/ApplicationReview';
-import Login from './pages/Login';
-
-function App() {
-  return (
-    <>
-      {/* <LandingPage/> */}
-      {/* <LectureDashboard/> */}
-      {/* <Dashboard/> */}
-      {/* <StudentProfile/> */}
-      {/* <ReviewApplications/> */}
-      {/* <ApplicationReview/> */}
-      <Login/>
-    </>
->>>>>>> origin/frontend
   );
 }
 
