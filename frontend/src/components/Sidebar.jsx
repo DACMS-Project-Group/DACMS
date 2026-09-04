@@ -23,7 +23,7 @@ const Sidebar = ({ userRole = 'student' }) => {
 
   // Administrator Navigation
   const adminNavItems = [
-    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Dashboard', href: '/admin-dashboard' },
     { name: 'Budget Management', href: '/budget-management' },
     { name: 'Export Payments', href: '/export-payments' },
     { name: 'Appointment Approvals', href: '/appointment-approvals' },
