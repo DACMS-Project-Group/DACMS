@@ -1,23 +1,143 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const Login = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
   
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Get the role from URL parameter
+  const selectedRole = searchParams.get('role') || 'student';
 
+  // ============================================================
+  // OPTION 1: DEMO LOGIN (NO CREDENTIALS NEEDED) - ACTIVE
+  // ============================================================
   const handleLogin = (e) => {
     e.preventDefault();
-
-    navigate('/dashboard');
+    // Redirect to the correct dashboard based on role
+    navigate(`/${selectedRole}-dashboard`);
   };
+
+  // ============================================================
+  // OPTION 2: FUNCTIONAL LOGIN (WITH AUTH) - COMMENTED OUT
+  // ============================================================
+  // const handleLogin = async (e) => {
+  //   e.preventDefault();
+  //   setError('');
+  //   
+  //   try {
+  //     // Call your actual login API
+  //     const response = await fetch('/api/login', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ email, password, selectedRole }),
+  //     });
+  //
+  //     if (!response.ok) {
+  //       throw new Error('Invalid email or password');
+  //     }
+  //
+  //     const data = await response.json();
+  //     
+  //     // Store user data
+  //     localStorage.setItem('user', JSON.stringify(data.user));
+  //     
+  //     // Redirect based on role
+  //     navigate(`/${selectedRole}-dashboard`);
+  //   } catch (err) {
+  //     setError(err.message || 'Login failed. Please try again.');
+  //   }
+  // };
+
+  // ============================================================
+  // REGISTER HANDLER (Demo)
+  // ============================================================
+  const handleRegister = (e) => {
+    e.preventDefault();
+    // For demo, just go back to login
+    setShowRegister(false);
+  };
+
+  // ============================================================
+  // FUNCTIONAL REGISTER (Comment out above and uncomment below)
+  // ============================================================
+  // const handleRegister = async (e) => {
+  //   e.preventDefault();
+  //   setError('');
+  //   
+  //   try {
+  //     const formData = new FormData(e.target);
+  //     const userData = {
+  //       name: formData.get('name'),
+  //       email: formData.get('email'),
+  //       password: formData.get('password'),
+  //       role: selectedRole,
+  //     };
+  //
+  //     const response = await fetch('/api/register', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify(userData),
+  //     });
+  //
+  //     if (!response.ok) {
+  //       throw new Error('Registration failed');
+  //     }
+  //
+  //     // After successful registration, go to login
+  //     setShowRegister(false);
+  //   } catch (err) {
+  //     setError(err.message || 'Registration failed. Please try again.');
+  //   }
+  // };
+
+  // ============================================================
+  // FORGOT PASSWORD HANDLER (Demo)
+  // ============================================================
+  const handleForgotPassword = (e) => {
+    e.preventDefault();
+    // For demo, just go back to login
+    setShowForgotPassword(false);
+  };
+
+  // ============================================================
+  // FUNCTIONAL FORGOT PASSWORD (Comment out above and uncomment below)
+  // ============================================================
+  // const handleForgotPassword = async (e) => {
+  //   e.preventDefault();
+  //   setError('');
+  //   
+  //   try {
+  //     const formData = new FormData(e.target);
+  //     const email = formData.get('email');
+  //
+  //     const response = await fetch('/api/forgot-password', {
+  //       method: 'POST',
+  //       headers: { 'Content-Type': 'application/json' },
+  //       body: JSON.stringify({ email }),
+  //     });
+  //
+  //     if (!response.ok) {
+  //       throw new Error('Failed to send reset link');
+  //     }
+  //
+  //     // Show success message, then go back to login
+  //     setShowForgotPassword(false);
+  //   } catch (err) {
+  //     setError(err.message || 'Failed to send reset link. Please try again.');
+  //   }
+  // };
 
   return (
     <div className="flex w-full h-screen">
       
       {/* ===== LEFT: 40% WHITE SIDE ===== */}
-      <div className="w-2/5 bg-white h-full flex flex-col items-center justify-center p-8">
+      <div className="w-2/5 bg-white h-full flex flex-col items-center justify-center p-8 relative">
         
         {/* Logo */}
         <img 
@@ -25,6 +145,16 @@ const Login = () => {
           alt="NWU Logo" 
           className="h-16 w-auto mb-6"
         />
+
+        {/* Selected Role Badge */}
+        <div className="mb-4 px-4 py-1 bg-primary-lightest text-primary-dark rounded-full text-sm font-semibold">
+          {selectedRole.charAt(0).toUpperCase() + selectedRole.slice(1)} Access
+        </div>
+
+        {/* Demo Mode Notice */}
+        <div className="mb-4 px-4 py-2 bg-primary-lightest text-primary-dark rounded-lg text-sm font-inter">
+          🎯 Demo Mode: Click Sign In to continue
+        </div>
 
         {/* ===== SHOW LOGIN / REGISTER / FORGOT PASSWORD ===== */}
         
@@ -35,22 +165,36 @@ const Login = () => {
               Welcome Back
             </h2>
             <p className="text-neutral text-center mt-1 text-sm font-inter">
-              Sign in to access your dashboard
+              Sign in to access your {selectedRole} dashboard
             </p>
+            
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm text-center">
+                {error}
+              </div>
+            )}
             
             <form onSubmit={handleLogin} className="mt-6">
               <div className="mb-3">
                 <input 
                   type="email" 
-                  placeholder="Email Address" 
+                  name="email"
+                  placeholder="Email Address (Demo: any email works)" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
+                  defaultValue="demo@nwu.ac.za"
                 />
               </div>
               <div className="mb-4">
                 <input 
                   type="password" 
-                  placeholder="Password" 
+                  name="password"
+                  placeholder="Password (Demo: any password works)" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
+                  defaultValue="password"
                 />
               </div>
               <button 
@@ -91,36 +235,50 @@ const Login = () => {
               Create Account
             </h2>
             <p className="text-neutral text-center mt-1 text-sm font-inter">
-              Register to get started with DACMS
+              Register as a {selectedRole}
             </p>
             
-            <form className="mt-6">
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm text-center">
+                {error}
+              </div>
+            )}
+            
+            <form onSubmit={handleRegister} className="mt-6">
               <div className="mb-3">
                 <input 
                   type="text" 
+                  name="name"
                   placeholder="Full Name" 
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
+                  required
                 />
               </div>
               <div className="mb-3">
                 <input 
                   type="email" 
+                  name="email"
                   placeholder="Email Address" 
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
+                  required
                 />
               </div>
               <div className="mb-3">
                 <input 
                   type="password" 
+                  name="password"
                   placeholder="Password" 
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
+                  required
                 />
               </div>
               <div className="mb-4">
                 <input 
                   type="password" 
+                  name="confirmPassword"
                   placeholder="Confirm Password" 
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
+                  required
                 />
               </div>
               <button 
@@ -155,12 +313,20 @@ const Login = () => {
               Enter your email and we'll send you a reset link
             </p>
             
-            <form className="mt-6">
+            {error && (
+              <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm text-center">
+                {error}
+              </div>
+            )}
+            
+            <form onSubmit={handleForgotPassword} className="mt-6">
               <div className="mb-4">
                 <input 
                   type="email" 
+                  name="email"
                   placeholder="Email Address" 
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
+                  required
                 />
               </div>
               <button 
