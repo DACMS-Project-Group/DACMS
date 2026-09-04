@@ -3,6 +3,7 @@ import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
+import Navbar from '../components/Navbar';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -69,16 +70,14 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-off-white">
 
-      {/* Top Navbar */}
-      
+      {/* Top Navbar - spans the entire screen */}
+      <Navbar />
 
       {/* Sidebar + Main Dashboard Layout */}
       <div className="flex">
 
-      {/* Administrator Sidebar */}
-      <Sidebar userRole="admin" />
+        <Sidebar userRole="admin" />
 
-      {/* Main Dashboard Content */}
         <main className="flex-1">
 
       {/* Page Title */}

@@ -50,16 +50,17 @@ const Dashboard = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-off-white">
+    <div className="min-h-screen bg-off-white">
+
+      <Navbar />
+
+      <div className="flex">
 
       {/* ===== SIDEBAR ===== */}
-      <Sidebar userRole="student" />
+      <Sidebar userRole="admin" />
 
       {/* ===== MAIN CONTENT ===== */}
-      <div className="flex-1">
-
-        {/* ===== TOP NAVBAR ===== */}
-        <Navbar />
+      <main className="flex-1">
 
         {/* ===== PAGE TITLE BAR ===== */}
         <div className="bg-primary h-16 flex items-center px-8">
@@ -457,7 +458,8 @@ const Dashboard = () => {
           </div>
 
         </div>
-      </div>
+      </main>
+    </div>
     </div>
   );
 };
