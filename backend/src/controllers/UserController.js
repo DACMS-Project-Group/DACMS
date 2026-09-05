@@ -1,5 +1,9 @@
 import bcrypt from 'bcrypt';
 import pool from '../config/db.js';
+import User from '../models/User.js';
+import Student from '../models/Student.js';
+import Lecturer from '../models/Lecturer.js';
+import Administrator from '../models/Administrator.js';
 
 const BCRYPT_SALT_ROUNDS = 10;
 
@@ -13,10 +17,6 @@ function readRequiredString(value) {
     return typeof value === 'string' && value.trim() !== ''
         ? value.trim()
         : null;
-}
-
-function isValidEmail(email) {
-    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
 function parseRoleId(value) {
@@ -59,34 +59,77 @@ class UserController {
         const password = body.password;
         const roleId = parseRoleId(body.role_id);
 
-        if (!firstName || !lastName || !email || !password || !roleId) {
+        if (!password || typeof password !== 'string' || password.length < 8) {
             return res.status(400).json({
-                error: 'First name, last name, email, password, and a valid role are required.'
+                error: 'Password must be at least 8 characters long.'
             });
         }
 
-        if (!isValidEmail(email)) {
-            return res.status(400).json({
-                error: 'A valid email address is required.', email: email
-            });
-        }
+        let userModel;
+        const hashedPassword = await bcrypt.hash(password, BCRYPT_SALT_ROUNDS);
 
-        if (typeof password !== 'string' || password.length < 8) {
-            return res.status(400).json({
-                error: 'Password must contain at least 8 characters.'
-            });
+        try {
+            // Instantiate models using class constructors based on role
+            if (roleId === ROLE_IDS.STUDENT) {
+                const studyLevel = readRequiredString(body.study_level);
+                if (studyLevel && !['Undergraduate', 'Postgraduate'].includes(studyLevel)) {
+                    return res.status(400).json({
+                        error: 'Study level must be Undergraduate or Postgraduate.'
+                    });
+                }
+
+                userModel = new Student({
+                    first_name: firstName,
+                    last_name: lastName,
+                    email,
+                    password_hash: hashedPassword,
+                    role_id: roleId,
+                    student_number: readRequiredString(body.student_number),
+                    study_level: studyLevel,
+                    contact_details: readRequiredString(body.contact_details),
+                    bank_name: readRequiredString(body.bank_name),
+                    account_number: readRequiredString(body.account_number),
+                    branch_code: readRequiredString(body.branch_code)
+                });
+            } else if (roleId === ROLE_IDS.LECTURER) {
+                userModel = new Lecturer({
+                    first_name: firstName,
+                    last_name: lastName,
+                    email,
+                    password_hash: hashedPassword,
+                    role_id: roleId,
+                    department: readRequiredString(body.department)
+                });
+            } else if (roleId === ROLE_IDS.ADMINISTRATOR) {
+                userModel = new Administrator({
+                    first_name: firstName,
+                    last_name: lastName,
+                    email,
+                    password_hash: hashedPassword,
+                    role_id: roleId,
+                    mfa_enabled: body.mfa_enabled ?? true,
+                    budget_allocation_rights: body.budget_allocation_rights ?? true
+                });
+            } else {
+                return res.status(400).json({
+                    error: 'First name, last name, email, password, and a valid role are required.'
+                });
+            }
+
+            // Leverage built-in model validation rules
+            userModel.validate();
+        } catch (valErr) {
+            return res.status(400).json({ error: valErr.message });
         }
 
         const databaseClient = await pool.connect();
 
         try {
-            const hashedPassword = await bcrypt.hash(
-                password,
-                BCRYPT_SALT_ROUNDS
-            );
-
             await databaseClient.query('BEGIN');
 
+            const dbData = userModel.toDb();
+
+            // Insert base user
             const userResult = await databaseClient.query(
                 `
                     INSERT INTO "APP_USER"
@@ -94,120 +137,48 @@ class UserController {
                     VALUES ($1, $2, $3, $4, $5)
                     RETURNING "UserID";
                 `,
-                [firstName, lastName, email, hashedPassword, roleId]
+                [dbData.FName, dbData.LName, dbData.Email, dbData.PasswordHash, dbData.RoleID]
             );
 
             const userId = userResult.rows[0].UserID;
+            userModel.user_id = userId;
 
+            // Insert role-specific database fields
             if (roleId === ROLE_IDS.STUDENT) {
-                const studentNumber = readRequiredString(body.student_number);
-                const studyLevel = readRequiredString(body.study_level);
-                const contactDetails = readRequiredString(body.contact_details);
-                const bankName = readRequiredString(body.bank_name);
-                const accountNumber = readRequiredString(body.account_number);
-                const branchCode = readRequiredString(body.branch_code);
-
-                if (
-                    !studentNumber ||
-                    !studyLevel ||
-                    !contactDetails ||
-                    !bankName ||
-                    !accountNumber ||
-                    !branchCode
-                ) {
-                    return await this.rollbackWithResponse(
-                        databaseClient,
-                        res,
-                        400,
-                        'All student profile fields are required.'
-                    );
-                }
-
-                if (!['Undergraduate', 'Postgraduate'].includes(studyLevel)) {
-                    return await this.rollbackWithResponse(
-                        databaseClient,
-                        res,
-                        400,
-                        'Study level must be Undergraduate or Postgraduate.'
-                    );
-                }
-
+                userModel.student_id = userId;
                 await databaseClient.query(
                     `
                         INSERT INTO "STUDENT"
-                            (
-                                "StudentID",
-                                "StudentNumber",
-                                "StudyLevel",
-                                "ContactDetails",
-                                "BankName",
-                                "AccountNumber",
-                                "BranchCode"
-                            )
+                            ("StudentID", "StudentNumber", "StudyLevel", "ContactDetails", "BankName", "AccountNumber", "BranchCode")
                         VALUES ($1, $2, $3, $4, $5, $6, $7);
                     `,
                     [
                         userId,
-                        studentNumber,
-                        studyLevel,
-                        contactDetails,
-                        bankName,
-                        accountNumber,
-                        branchCode
+                        userModel.student_number,
+                        userModel.study_level,
+                        userModel.contact_details,
+                        userModel.bank_name,
+                        userModel.account_number,
+                        userModel.branch_code
                     ]
                 );
-            }
-
-            if (roleId === ROLE_IDS.LECTURER) {
-                const department = readRequiredString(body.department);
-
-                if (!department) {
-                    return await this.rollbackWithResponse(
-                        databaseClient,
-                        res,
-                        400,
-                        'Department is required for lecturers.'
-                    );
-                }
-
+            } else if (roleId === ROLE_IDS.LECTURER) {
+                userModel.lecturer_id = userId;
                 await databaseClient.query(
                     `
-                        INSERT INTO "LECTURER"
-                            ("LecturerID", "Department")
+                        INSERT INTO "LECTURER" ("LecturerID", "Department")
                         VALUES ($1, $2);
                     `,
-                    [userId, department]
+                    [userId, userModel.department]
                 );
-            }
-
-            if (roleId === ROLE_IDS.ADMINISTRATOR) {
-                const mfaEnabled = body.mfa_enabled ?? true;
-                const budgetRights =
-                    body.budget_allocation_rights ?? true;
-
-                if (
-                    typeof mfaEnabled !== 'boolean' ||
-                    typeof budgetRights !== 'boolean'
-                ) {
-                    return await this.rollbackWithResponse(
-                        databaseClient,
-                        res,
-                        400,
-                        'Administrator permissions must be boolean values.'
-                    );
-                }
-
+            } else if (roleId === ROLE_IDS.ADMINISTRATOR) {
+                userModel.admin_id = userId;
                 await databaseClient.query(
                     `
-                        INSERT INTO "ADMINISTRATOR"
-                            (
-                                "AdminID",
-                                "MFA_Enabled",
-                                "BudgetAllocationRights"
-                            )
+                        INSERT INTO "ADMINISTRATOR" ("AdminID", "MFA_Enabled", "BudgetAllocationRights")
                         VALUES ($1, $2, $3);
                     `,
-                    [userId, mfaEnabled, budgetRights]
+                    [userId, userModel.mfa_enabled, userModel.budget_allocation_rights]
                 );
             }
 
@@ -216,14 +187,13 @@ class UserController {
             return res.status(201).json({
                 message: 'User created successfully.',
                 user_id: userId,
-                email,
-                role_id: roleId
+                email: userModel.email,
+                role_id: userModel.role_id
             });
         } catch (error) {
             await databaseClient.query('ROLLBACK');
 
             const databaseError = getDatabaseError(error);
-
             console.error('User creation failed:', error);
 
             return res.status(databaseError.status).json({
@@ -232,14 +202,6 @@ class UserController {
         } finally {
             databaseClient.release();
         }
-    }
-
-    async rollbackWithResponse(databaseClient, res, status, message) {
-        await databaseClient.query('ROLLBACK');
-
-        return res.status(status).json({
-            error: message
-        });
     }
 
     async getUserById(req, res) {
@@ -255,12 +217,14 @@ class UserController {
             const result = await pool.query(
                 `
                     SELECT
-                        u."UserID" AS user_id,
-                        u."FName" AS first_name,
-                        u."LName" AS last_name,
-                        u."Email" AS email,
-                        r."RoleName" AS role_name,
-                        u."CreatedAt" AS created_at
+                        u."UserID",
+                        u."FName",
+                        u."LName",
+                        u."Email",
+                        u."PasswordHash",
+                        u."RoleID",
+                        u."CreatedAt",
+                        r."RoleName"
                     FROM "APP_USER" u
                     JOIN "SYSTEM_ROLE" r
                         ON u."RoleID" = r."RoleID"
@@ -275,7 +239,18 @@ class UserController {
                 });
             }
 
-            return res.status(200).json(result.rows[0]);
+            // Hydrate base domain model using the static `fromDb` mapper
+            const user = User.fromDb(result.rows[0]);
+
+            return res.status(200).json({
+                user_id: user.user_id,
+                first_name: user.first_name,
+                last_name: user.last_name,
+                full_name: user.fullName,
+                email: user.email,
+                role_name: result.rows[0].RoleName,
+                created_at: user.created_at
+            });
         } catch (error) {
             console.error('Fetching user failed:', error);
 
