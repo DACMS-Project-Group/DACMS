@@ -6,7 +6,7 @@ import UserController from '../controllers/UserController.js';
 const router = Router();
 
 router.use('/', metricsRoutes);
-router.use('/'), userRoutes
+router.use('/', userRoutes);
 
 router.post('/create/user', (req, res) =>
     UserController.createUser(req, res)

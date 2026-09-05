@@ -53,8 +53,8 @@ class UserController {
     async createUser(req, res) {
         const body = req.body ?? {};
 
-        const firstName = readRequiredString(body.f_name);
-        const lastName = readRequiredString(body.l_name);
+        const firstName = readRequiredString(body.first_name);
+        const lastName = readRequiredString(body.last_name);
         const email = readRequiredString(body.email)?.toLowerCase();
         const password = body.password;
         const roleId = parseRoleId(body.role_id);
@@ -67,7 +67,7 @@ class UserController {
 
         if (!isValidEmail(email)) {
             return res.status(400).json({
-                error: 'A valid email address is required.'
+                error: 'A valid email address is required.', email: email
             });
         }
 
