@@ -1,9 +1,12 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 
 const LectureDashboard = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="flex min-h-screen bg-off-white">
       
@@ -44,7 +47,7 @@ const LectureDashboard = () => {
               {/* Applicants */}
               <Card>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg">
+                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
                     A
                   </div>
                   <div>
@@ -57,7 +60,7 @@ const LectureDashboard = () => {
               {/* Approved Demis */}
               <Card>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg">
+                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
                     D
                   </div>
                   <div>
@@ -70,7 +73,7 @@ const LectureDashboard = () => {
               {/* Pending Applications */}
               <Card>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg">
+                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
                     P
                   </div>
                   <div>
@@ -83,7 +86,7 @@ const LectureDashboard = () => {
               {/* Hours Allocated */}
               <Card>
                 <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg">
+                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
                     H
                   </div>
                   <div>
@@ -111,7 +114,10 @@ const LectureDashboard = () => {
                     View the current budget allocated for demi appointments.
                   </p>
                 </div>
-                <button className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition text-center">
+                <button 
+                  onClick={() => navigate('/budget-management')}
+                  className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition text-center font-inter"
+                >
                   View Budget Allocation →
                 </button>
               </div>
@@ -193,9 +199,12 @@ const LectureDashboard = () => {
 
                 {/* View All */}
                 <div className="text-right pt-2">
-                  <a href="#" className="text-primary font-semibold hover:underline font-inter">
+                  <button 
+                    onClick={() => navigate('/notifications')}
+                    className="text-primary font-semibold hover:underline font-inter"
+                  >
                     View all →
-                  </a>
+                  </button>
                 </div>
 
               </div>
