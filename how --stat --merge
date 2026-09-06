@@ -1,0 +1,17 @@
+*   [33m0679982[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mCole[m[33m, [m[1;31morigin/Frontend[m[33m)[m Merge pull request #8 from DACMS-Project-Group/tswarelo
+[31m|[m[32m\[m  
+[31m|[m * [33me27c807[m[33m ([m[1;31morigin/tswarelo[m[33m)[m Clean up component folder naming
+[31m|[m *   [33m03de4f1[m Merge Frontend branch into tswarelo
+[31m|[m [33m|[m[31m\[m  
+[31m|[m [33m|[m[31m/[m  
+[31m|[m[31m/[m[33m|[m   
+* [33m|[m   [33mddd4b87[m Merge pull request #7 from DACMS-Project-Group/Cole
+[35m|[m[36m\[m [33m\[m  
+[35m|[m * [33m|[m [33m424ae38[m[33m ([m[1;31morigin/Cole[m[33m)[m added side navifation component for 3 users
+[35m|[m[35m/[m [33m/[m  
+[35m|[m * [33m25e0aef[m Update lecture dashboard design
+[35m|[m * [33mdcb3e9b[m Update lecturer dashboard
+[35m|[m * [33m79f562c[m Update lecturer dashboard
+[35m|[m [36m|[m *   [33m1c4c59c[m[33m ([m[1;31morigin/backend[m[33m)[m Merge pull request #6 from DACMS-Project-Group/ernst
+[35m|[m [36m|[m [1;31m|[m[1;32m\[m  
+[35m|[m [36m|[m [1;31m|[m * [33m43fa3ae[m[33m ([m[1;31morigin/ernst[m[33m)[m add metrics api calls, add Thato dummy data to init.sql
