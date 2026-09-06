@@ -43,7 +43,7 @@ function App() {
           {/* ===== STUDENT ROUTES ===== */}
           <Route element={<ProtectedRoute requiredRoles={['student']} />}>
             <Route path="/student-dashboard" element={<Dashboard />} />
-            <Route path="/student-profile" element={<StudentProfile />} />
+            <Route path="/profile" element={<StudentProfile />} />
             <Route path="/applications" element={<Applications />} />
             <Route path="/apply-for-demi" element={<ApplyForDemi />} />
             <Route path="/application-detail/:id" element={<ApplicationDetail />} />
