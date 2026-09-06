@@ -8,6 +8,9 @@ import Login from './pages/Login';
 // ===== STUDENT PAGES =====
 import Dashboard from './pages/Dashboard';
 import StudentProfile from './pages/StudentProfile';
+import Applications from './pages/Applications';
+import ApplyForDemi from './pages/ApplyForDemi';
+import ApplicationDetail from './pages/ApplicationDetail';
 
 // ===== LECTURER PAGES =====
 import LectureDashboard from './pages/LectureDashboard';
@@ -38,7 +41,10 @@ function App() {
           {/* ===== STUDENT ROUTES ===== */}
           <Route element={<ProtectedRoute requiredRoles={['student']} />}>
             <Route path="/student-dashboard" element={<Dashboard />} />
-            <Route path="/student-profile" element={<StudentProfile />} />
+            <Route path="/profile" element={<StudentProfile />}/>
+            <Route path="/applications" element={<Applications />}/>
+            <Route path="/apply-for-demi" element={<ApplyForDemi />} />
+             <Route path="/application-detail/:id" element={<ApplicationDetail />} />
           </Route>
 
           {/* ===== LECTURER ROUTES ===== */}
