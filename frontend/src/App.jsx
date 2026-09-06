@@ -27,6 +27,8 @@ import ExportPayments from './pages/ExportPayments';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import './index.css';
+// ===== NAVIGATION ITEMS =====
+import Notifications from './pages/Notifications';
 
 function App() {
   return (
@@ -41,10 +43,11 @@ function App() {
           {/* ===== STUDENT ROUTES ===== */}
           <Route element={<ProtectedRoute requiredRoles={['student']} />}>
             <Route path="/student-dashboard" element={<Dashboard />} />
-            <Route path="/profile" element={<StudentProfile />}/>
-            <Route path="/applications" element={<Applications />}/>
+            <Route path="/student-profile" element={<StudentProfile />} />
+            <Route path="/applications" element={<Applications />} />
             <Route path="/apply-for-demi" element={<ApplyForDemi />} />
-             <Route path="/application-detail/:id" element={<ApplicationDetail />} />
+            <Route path="/application-detail/:id" element={<ApplicationDetail />} />
+            <Route path="/notifications" element={<Notifications />} />
           </Route>
 
           {/* ===== LECTURER ROUTES ===== */}
@@ -52,6 +55,7 @@ function App() {
             <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
             <Route path="/review-applications" element={<ReviewApplications />} />
             <Route path="/application-review/:id" element={<ApplicationReview />} />
+            <Route path="/notifications" element={<Notifications />} />
           </Route>
 
           {/* ===== ADMIN ROUTES ===== */}
@@ -62,6 +66,7 @@ function App() {
             <Route path="/edit-budget/:id" element={<EditBudget />} />
             <Route path="/budget-details/:id" element={<BudgetDetails />} />
             <Route path="/export-payments" element={<ExportPayments />} />
+            <Route path="/notifications" element={<Notifications />} />
           </Route>
 
           {/* ===== FALLBACK ===== */}
@@ -73,4 +78,4 @@ function App() {
   );
 }
 
-export default App;
+export default App
