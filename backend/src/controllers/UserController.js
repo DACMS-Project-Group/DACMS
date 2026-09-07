@@ -265,22 +265,30 @@ class UserController {
     async login(req, res) {
         try {
             const { email, password } = req.body;
+            const { sign, verify } = jwt;
             
             // Query email to find user
-            const user = await pool.query(
+            const result = await pool.query(
                 `
-                    SELECT *
-                    FROM APP_USER u
-                    WHERE u.Email = $1
+                    SELECT 
+                        u."UserID",
+                        u."Email",
+                        u."PasswordHash",
+                        u."RoleID"
+                    FROM "APP_USER" u
+                    JOIN "SYSTEM_ROLE" r ON u."RoleID" = r."RoleID"
+                    WHERE u."Email" = $1
                 `,
                 [email]
             );
-            if (!user) {
+            if (result.rows.length === 0) {
                 return res.status(401).json({ message: 'Invalid Email' });
             }
 
+            const user = User.fromDb(result.rows[0]);
+
             // Authenticate password
-            const isMatch = await bcrypt.compare(password, user.password);
+            const isMatch = await bcrypt.compare(password, user.password_hash);
             if (!isMatch) {
                 return res.status(401).json({ message: 'Invalid password'});
             }
@@ -289,14 +297,14 @@ class UserController {
             const token = jwt.sign(
                 { id: user.id, role_id: user.role_id },
                 process.env.JWT_SECRET || 'your_super_secret_key',
-                { expiresIn: '30m' }
+                { expiresIn: '1h' }
             );
 
             //Send token via HTTP-only cookie
             res.cookie('token', token, {
                 httpOnly: true,
                 sameSite: 'strict',
-                maxAge: 1800000
+                maxAge: 3600000
             });
 
             res.status(200).json({

@@ -9,7 +9,7 @@ router.post('/login', UserController.login.bind(UserController));
 router.post('/logout', UserController.logout.bind(UserController));
 
 router.get(
-    '/:id', 
+    '/fetch/:id', 
     authenticate, 
     UserController.getUserById.bind(UserController)
 );

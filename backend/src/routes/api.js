@@ -20,7 +20,7 @@ router.post('/users/logout', (req, res) =>
     UserController.logout(req, res)
 );
 
-router.get('/users/:id', (req, res) =>
+router.get('/users/fetch/:id', (req, res) =>
     UserController.getUserById(req, res)
 );
 
