@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 import User from '../models/User.js';
 import Student from '../models/Student.js';
@@ -257,6 +258,67 @@ class UserController {
             return res.status(500).json({
                 error: 'Unable to fetch user.'
             });
+        }
+    }
+
+    // LOGIN FLOW :: Neil
+    async login(req, res) {
+        try {
+            const { email, password } = req.body;
+            
+            // Query email to find user
+            const user = await pool.query(
+                `
+                    SELECT *
+                    FROM APP_USER u
+                    WHERE u.Email = $1
+                `,
+                [email]
+            );
+            if (!user) {
+                return res.status(401).json({ message: 'Invalid Email' });
+            }
+
+            // Authenticate password
+            const isMatch = await bcrypt.compare(password, user.password);
+            if (!isMatch) {
+                return res.status(401).json({ message: 'Invalid password'});
+            }
+
+            // Generate session token
+            const token = jwt.sign(
+                { id: user.id, role_id: user.role_id },
+                process.env.JWT_SECRET || 'your_super_secret_key',
+                { expiresIn: '30m' }
+            );
+
+            //Send token via HTTP-only cookie
+            res.cookie('token', token, {
+                httpOnly: true,
+                sameSite: 'strict',
+                maxAge: 1800000
+            });
+
+            res.status(200).json({
+                message: 'Login Successful',
+                user: { id: user.id, email: user.email, role_id: user.role_id }
+            });
+        } catch (error) {
+            console.error('Login failed:', error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    async logout(req, res) {
+        try {
+            res.clearCookie('token', {
+                httpOnly: true,
+                sameSite: 'strict'
+            });
+            res.status(200).json({ message: 'Logout Successful' });
+        } catch (error) {
+            console.error('Logout failed:', error);
+            res.status(500).json({ message: 'Internal Server Error' });
         }
     }
 }
