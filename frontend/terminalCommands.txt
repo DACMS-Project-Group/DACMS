@@ -1,0 +1,148 @@
+╔═══════════════════════════════════════════════════════════════╗
+║            VS Code TERMINAL CHEAT SHEET - WINDOWS            ║
+╚═══════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1️⃣  NAVIGATION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+pwd                    → Show current folder
+dir                    → List files in current folder
+cd ..                  → Go back one folder
+cd frontend            → Go into frontend folder
+cd C:\Users\user\source\repos\DACMS\DACMS  → Go to project root
+cls                    → Clear terminal
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+2️⃣  GIT COMMANDS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+git status             → See what files changed
+git branch             → See your current branch
+git pull               → Get latest code from GitHub
+git add .              → Add ALL changes to commit
+git add -A             → Add ALL changes (alternative)
+git commit -m "message" → Commit changes with a message
+git push               → Push your commits to GitHub
+git checkout main      → Switch to main branch
+git branch new-branch  → Create a new branch
+git log --oneline      → See commit history
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+3️⃣  DOCKER COMMANDS (Run from PROJECT ROOT)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+cd C:\Users\user\source\repos\DACMS\DACMS  → Go to project root first
+
+docker compose up --build     → Start Docker (build first)
+docker compose up             → Start Docker (no rebuild)
+Ctrl + C                      → Stop Docker
+docker compose down           → Stop and remove containers
+docker compose down -v        → Stop and remove EVERYTHING
+docker compose logs           → View Docker logs
+docker ps                     → See running containers
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+4️⃣  NPM COMMANDS (Run from FRONTEND folder)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+cd frontend  → Go to frontend folder first
+
+npm install               → Install dependencies
+npm install -D package    → Install dev package
+npm run dev               → Start the app
+node node_modules/vite/bin/vite.js  → Start app (alternative)
+Ctrl + C                  → Stop the app
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+5️⃣  COMPLETE WORKFLOWS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+=== START YOUR DAY (PULL LATEST) ===
+cd C:\Users\user\source\repos\DACMS\DACMS
+git pull
+cd frontend
+npm install
+
+=== START THE APP (LOCAL) ===
+cd C:\Users\user\source\repos\DACMS\DACMS\frontend
+node node_modules/vite/bin/vite.js
+→ Open http://localhost:5173/
+
+=== START THE APP (DOCKER) ===
+cd C:\Users\user\source\repos\DACMS\DACMS
+docker compose up --build
+→ Open http://localhost:5173/
+
+=== SAVE YOUR CHANGES (COMMIT & PUSH) ===
+git status                (Check what changed)
+git add .                 (Add all changes)
+git commit -m "message"   (Commit)
+git push                  (Push to GitHub)
+
+=== FULL WORKFLOW (Pull → Work → Commit → Push) ===
+git pull                  (Get latest)
+[Make your changes in VS Code]
+git status                (Check changes)
+git add .                 (Add changes)
+git commit -m "message"   (Commit)
+git push                  (Push to GitHub)
+
+=== FIX MERGE CONFLICTS ===
+git pull                  (Pull - conflicts will show)
+[Open files with conflicts - look for <<<<<<< HEAD]
+[Keep the code you want, delete the rest]
+git add .                 (Mark as resolved)
+git commit -m "Resolved merge conflicts"
+git push
+
+=== SWITCH BRANCHES ===
+git branch                (See current branch)
+git checkout other-branch (Switch to other branch)
+git pull                  (Get latest from that branch)
+git checkout your-branch  (Switch back)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+6️⃣  TROUBLESHOOTING
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROBLEM                    SOLUTION
+────────────────────────────────────────────────────────────────
+npm not found              Use Command Prompt (not PowerShell) or
+                           run: Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+Port 5173 in use           npm run dev -- --port 5174
+
+Docker not running         Open Docker Desktop, wait for green light
+
+Git push rejected          git pull first, then git push
+
+Merge conflicts            Open files with conflicts, look for <<<<<<<
+                           Fix the code, then git add . and git commit
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+7️⃣  QUICK REFERENCE (DAILY COMMANDS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+git pull              → Get latest
+git add .             → Add changes
+git commit -m "msg"   → Commit
+git push              → Push
+
+cd frontend           → Go to frontend
+node node_modules/vite/bin/vite.js  → Start app
+
+cd C:\Users\user\source\repos\DACMS\DACMS  → Go to project root
+docker compose up --build  → Start Docker
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📝 PRO TIPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+• Always git pull before you start working
+• git status often - know what you're about to commit
+• Commit small and often - easier to undo
+• Write clear commit messages: "Fixed navbar bug" not "stuff"
+• Test before pushing - make sure your code works
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
