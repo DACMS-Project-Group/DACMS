@@ -1,3 +1,26 @@
+import jwt from 'jsonwebtoken';
+
 export function authenticate(req, res, next) {
-    next();
+    const token = req.cookies.token;
+
+    //verify token
+    if (!token) {
+        return res.status(401).json({ message: 'Access Denied' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_super_secret_key');
+        req.user = decoded;
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Invalid Token' });
+    }
+
+    //verify role
+    const requiredRole = req.requiredRole;
+    if (req.user.role_id !== requiredRole) {
+        return res.status(403).json({ message: 'Insufficient Permissions' });
+    }       
 }
+
+export default authenticate;
