@@ -14,13 +14,7 @@ export function authenticate(req, res, next) {
         next();
     } catch (error) {
         return res.status(401).json({ message: 'Invalid Token' });
-    }
-
-    //verify role
-    const requiredRole = req.requiredRole;
-    if (req.user.role_id !== requiredRole) {
-        return res.status(403).json({ message: 'Insufficient Permissions' });
-    }       
+    }  
 }
 
 export default authenticate;

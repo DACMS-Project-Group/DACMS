@@ -15,12 +15,10 @@ router.get(
 );
 
 router.get(
-    '/admin', 
+    '/perms', 
     authenticate, 
-    (req, res, next) => {
-        req.requiredRole = 1;
-        res.json( { message: 'Admin access granted' });
-    }
+    UserController.checkUserPerms.bind(UserController)
 );
+
 
 export default router;

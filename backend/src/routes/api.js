@@ -24,4 +24,8 @@ router.get('/users/fetch/:id', (req, res) =>
     UserController.getUserById(req, res)
 );
 
+router.get('/users/perms', (req, res) => {
+    UserController.checkUserPerms(req, res);
+});
+
 export default router;

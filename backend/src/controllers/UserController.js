@@ -309,7 +309,7 @@ class UserController {
 
             res.status(200).json({
                 message: 'Login Successful',
-                user: { id: user.id, email: user.email, role_id: user.role_id }
+                user: { id: user.user_id, email: user.email, role_id: user.role_id }
             });
         } catch (error) {
             console.error('Login failed:', error);
@@ -326,6 +326,24 @@ class UserController {
             res.status(200).json({ message: 'Logout Successful' });
         } catch (error) {
             console.error('Logout failed:', error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    async checkUserPerms(req, res) {
+        try {
+            const { user_id, required_role } = req.body;
+
+            const result = await pool.query(` SELECT u."RoleID" FROM "APP_USER" u WHERE u."UserID" = $1 `, [user_id]);
+            const user = User.fromDb(result.rows[0]);
+            
+            if (user.role_id > required_role) {
+                return res.status(403).json({ message: 'Insufficient Permissions' });
+            } else {
+                return res.status(200).json({ message: 'Permission check passed' });
+            }
+        } catch (error) {
+            console.error('Permission check failed:', error);
             res.status(500).json({ message: 'Internal Server Error' });
         }
     }
