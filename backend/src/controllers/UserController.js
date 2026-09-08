@@ -1,4 +1,5 @@
 import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import pool from '../config/db.js';
 import User from '../models/User.js';
 import Student from '../models/Student.js';
@@ -257,6 +258,93 @@ class UserController {
             return res.status(500).json({
                 error: 'Unable to fetch user.'
             });
+        }
+    }
+
+    // LOGIN FLOW :: Neil
+    async login(req, res) {
+        try {
+            const { email, password } = req.body;
+            const { sign, verify } = jwt;
+            
+            // Query email to find user
+            const result = await pool.query(
+                `
+                    SELECT 
+                        u."UserID",
+                        u."Email",
+                        u."PasswordHash",
+                        u."RoleID"
+                    FROM "APP_USER" u
+                    JOIN "SYSTEM_ROLE" r ON u."RoleID" = r."RoleID"
+                    WHERE u."Email" = $1
+                `,
+                [email]
+            );
+            if (result.rows.length === 0) {
+                return res.status(401).json({ message: 'Invalid Email' });
+            }
+
+            const user = User.fromDb(result.rows[0]);
+
+            // Authenticate password
+            const isMatch = await bcrypt.compare(password, user.password_hash);
+            if (!isMatch) {
+                return res.status(401).json({ message: 'Invalid password'});
+            }
+
+            // Generate session token
+            const token = jwt.sign(
+                { id: user.id, role_id: user.role_id },
+                process.env.JWT_SECRET || 'your_super_secret_key',
+                { expiresIn: '1h' }
+            );
+
+            //Send token via HTTP-only cookie
+            res.cookie('token', token, {
+                httpOnly: true,
+                sameSite: 'strict',
+                maxAge: 3600000
+            });
+
+            res.status(200).json({
+                message: 'Login Successful',
+                user: { id: user.user_id, email: user.email, role_id: user.role_id }
+            });
+        } catch (error) {
+            console.error('Login failed:', error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    async logout(req, res) {
+        try {
+            res.clearCookie('token', {
+                httpOnly: true,
+                sameSite: 'strict'
+            });
+            res.status(200).json({ message: 'Logout Successful' });
+        } catch (error) {
+            console.error('Logout failed:', error);
+            res.status(500).json({ message: 'Internal Server Error' });
+        }
+    }
+
+    async checkUserPerms(req, res) {
+        try {
+            const { user_id, required_role } = req.body;
+
+            const result = await pool.query(` SELECT u."RoleID" FROM "APP_USER" u WHERE u."UserID" = $1 `, [user_id]);
+            const user = User.fromDb(result.rows[0]);
+            
+            if (user.role_id > required_role) {
+                return res.status(403).json({ message: 'Insufficient Permissions' });
+            } else {
+                return res.status(200).json({ message: 'Permission check passed' });
+            }
+        } catch (error) {
+            console.error('Permission check failed:', error);
+            res.status(500).json({ message: 'Internal Server Error' });
         }
     }
 }
