@@ -337,7 +337,7 @@ class UserController {
             const result = await pool.query(` SELECT u."RoleID" FROM "APP_USER" u WHERE u."UserID" = $1 `, [user_id]);
             const user = User.fromDb(result.rows[0]);
             
-            if (user.role_id > required_role) {
+            if (user.role_id < required_role) {
                 return res.status(403).json({ message: 'Insufficient Permissions' });
             } else {
                 return res.status(200).json({ message: 'Permission check passed' });
