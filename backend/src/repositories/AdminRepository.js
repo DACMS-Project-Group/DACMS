@@ -25,6 +25,33 @@ class AdminRepository {
             total_pending_claims: Number(row.total_pending_claims ?? 0),
         };
     }
+
+    static async getMonthlyWorkSessions() {
+        const query = `
+            SELECT
+                TO_CHAR("StartTime", 'YYYY-MM') AS month,
+                COUNT(*) AS total_sessions
+            FROM "WORK_SESSION"
+            WHERE "StartTime" >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months'
+            GROUP BY TO_CHAR("StartTime", 'YYYY-MM')
+            ORDER BY month;
+        `;
+
+        const result = await pool.query(query);
+        return result.rows;
+    }
+
+    static async getPendingAppointments() {
+        const query = `
+            SELECT *
+            FROM "DEMI_APPLICATION"
+            WHERE "ApplicationStatus" = 'Pending'
+            ORDER BY "DateSubmitted" DESC;
+        `;
+
+        const result = await pool.query(query);
+        return result.rows;
+    }
 }
 
 export default AdminRepository;
