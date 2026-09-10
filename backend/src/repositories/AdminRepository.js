@@ -38,19 +38,49 @@ class AdminRepository {
         `;
 
         const result = await pool.query(query);
-        return result.rows;
+
+        return result.rows.map((row) => ({
+            month: row.month || null,
+            total_sessions: Number(row.total_sessions ?? 0),
+        }));
     }
 
     static async getPendingAppointments() {
         const query = `
-            SELECT *
-            FROM "DEMI_APPLICATION"
-            WHERE "ApplicationStatus" = 'Pending'
-            ORDER BY "DateSubmitted" DESC;
+            SELECT
+                da."ApplicationID" AS application_id,
+                da."ApplicationStatus" AS status,
+                da."DateSubmitted" AS date_submitted,
+                nm."ModuleCode" AS module,
+                CONCAT(au_lect."Title", ' ', au_lect."FName", ' ', au_lect."LName") AS lecturer,
+                CONCAT(au_stud."Title", ' ', au_stud."FName", ' ', au_stud."LName") AS student
+            FROM "DEMI_APPLICATION" da
+            JOIN "DEMI_LISTING" dl
+                ON dl."ListingID" = da."ListingID"
+            JOIN "NWU_MODULE" nm
+                ON nm."ModuleID" = dl."ModuleID"
+            JOIN "STUDENT" st
+                ON st."StudentID" = da."StudentID"
+            JOIN "APP_USER" au_stud
+                ON au_stud."UserID" = st."StudentID"
+            JOIN "LECTURER" lect
+                ON lect."LecturerID" = dl."LecturerID"
+            JOIN "APP_USER" au_lect
+                ON au_lect."UserID" = lect."LecturerID"
+            WHERE da."ApplicationStatus" = 'Pending'
+            ORDER BY da."DateSubmitted" DESC;
         `;
 
         const result = await pool.query(query);
-        return result.rows;
+
+        return result.rows.map((row) => ({
+            application_id: row.application_id,
+            status: row.status,
+            date_submitted: row.date_submitted,
+            module: row.module,
+            lecturer: row.lecturer,
+            student: row.student,
+        }));
     }
 }
 
