@@ -1,4 +1,4 @@
-import React from 'react';
+//import React from 'react';
 import logo from '../assets/NWU-Acronym-Logo-White-Digital.png';
 
 const Navbar = () => {
@@ -10,7 +10,7 @@ const Navbar = () => {
         <div className="flex items-center relative h-24">
           <img 
             src={logo} 
-            alt="DACMS Logo" 
+            alt="AACMS Logo" 
             className="h-[124px] w-auto absolute -top-7 left-0" 
           />
         </div>
