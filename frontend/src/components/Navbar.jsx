@@ -17,8 +17,8 @@ const Navbar = () => {
         
         {/* RIGHT: Title */}
         <div className="flex items-center ml-32">
-          <h1 className="text-xl font-poppins font-semibold tracking-wide">
-            Demi Application and Claims Management System
+          <h1 className="text-2xl font-poppins font-semibold tracking-wide">
+            AACMS
           </h1>
         </div>
 

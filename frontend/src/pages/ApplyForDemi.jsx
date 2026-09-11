@@ -45,7 +45,7 @@ const ApplyForDemi = () => {
         <main className="flex-1">
           <div className="bg-primary h-16 flex items-center px-8">
             <h1 className="text-3xl font-poppins font-bold text-white">
-              Apply for Demi
+              Assistant Applications
             </h1>
           </div>
 
