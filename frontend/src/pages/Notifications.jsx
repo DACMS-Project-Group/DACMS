@@ -13,7 +13,7 @@ const Notifications = () => {
     {
       id: 1,
       title: 'Application Approved',
-      message: 'Your application for CMPG 323 Demi position has been approved. You will receive your appointment letter shortly.',
+      message: 'Your application for CMPG 323 Assistant position has been approved. You will receive your appointment letter shortly.',
       timestamp: '2026-09-06 14:30',
       read: false,
       type: 'success',
@@ -58,7 +58,7 @@ const Notifications = () => {
     {
       id: 6,
       title: 'New Application Received',
-      message: 'A new Demi application has been submitted for CMPG 323. Please review it.',
+      message: 'A new Assistant application has been submitted for CMPG 323. Please review it.',
       timestamp: '2026-09-01 08:30',
       read: false,
       type: 'info',

@@ -15,7 +15,7 @@ const ReviewApplications = () => {
       module: 'CMPG323',
       applicationDate: '01 September 2026',
       status: 'Pending Review',
-      reason: 'Application to become a Demi for CMPG323.',
+      reason: 'Application to become an Assistant for CMPG323.',
       documents: [
         { name: 'Academic Transcript', status: 'Submitted' },
         { name: 'Certified Identity Document', status: 'Submitted' },
@@ -34,7 +34,7 @@ const ReviewApplications = () => {
       module: 'CMPG315',
       applicationDate: '30 August 2026',
       status: 'Pending Review',
-      reason: 'Application to become a Demi for CMPG315.',
+      reason: 'Application to become an Assistant for CMPG315.',
       documents: [
         { name: 'Academic Transcript', status: 'Submitted' },
         { name: 'Certified Identity Document', status: 'Submitted' },
@@ -53,7 +53,7 @@ const ReviewApplications = () => {
       module: 'CMPG321',
       applicationDate: '28 August 2026',
       status: 'Approved',
-      reason: 'Application to become a Demi for CMPG321.',
+      reason: 'Application to become an Assistant for CMPG321.',
       documents: [
         { name: 'Academic Transcript', status: 'Submitted' },
         { name: 'Certified Identity Document', status: 'Submitted' },
@@ -72,7 +72,7 @@ const ReviewApplications = () => {
       module: 'CMPG313',
       applicationDate: '27 August 2026',
       status: 'Pending Review',
-      reason: 'Application to become a Demi for CMPG313.',
+      reason: 'Application to become an Assistant for CMPG313.',
       documents: [
         { name: 'Academic Transcript', status: 'Submitted' },
         { name: 'Certified Identity Document', status: 'Submitted' },

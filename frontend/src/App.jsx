@@ -9,7 +9,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import StudentProfile from './pages/StudentProfile';
 import Applications from './pages/Applications';
-import ApplyForDemi from './pages/ApplyForDemi';
+import ApplyForAssistant from './pages/ApplyForAssistant';
 import ApplicationDetail from './pages/ApplicationDetail';
 
 // ===== LECTURER PAGES =====
@@ -45,7 +45,7 @@ function App() {
             <Route path="/student-dashboard" element={<Dashboard />} />
             <Route path="/profile" element={<StudentProfile />} />
             <Route path="/applications" element={<Applications />} />
-            <Route path="/apply-for-demi" element={<ApplyForDemi />} />
+            <Route path="/apply-for-assistant" element={<ApplyForAssistant />} />
             <Route path="/application-detail/:id" element={<ApplicationDetail />} />
             <Route path="/notifications" element={<Notifications />} />
           </Route>
