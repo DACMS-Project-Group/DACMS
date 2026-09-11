@@ -38,8 +38,18 @@ const LandingPage = () => {
               <source src="/GradientVideo.mp4" type="video/mp4" />
             </video>
             
-            {/* ===== OVERLAY CONTENT ===== */}
-            <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-6 py-8">
+            <div className="text-center max-w-4xl">
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-poppins font-bold text-white drop-shadow-2xl leading-tight">
+                Assistants Application &<br />
+                <span className="text-white">Claims Management System</span>
+              </h1>
+              <p className="text-white/90 text-base md:text-lg mt-3 font-inter max-w-2xl mx-auto drop-shadow-lg">
+                Streamline your assistants applications, track working hours, and manage claims all in one place.
+              </p>
+            </div>
+
+            {/* ===== THREE ROLE BUTTONS ===== */}
+            <div className="mt-10 flex flex-col sm:flex-row gap-4 md:gap-6">
               
               <div className="text-center max-w-4xl">
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-poppins font-bold text-white drop-shadow-2xl leading-tight">
@@ -86,8 +96,7 @@ const LandingPage = () => {
         </div>
       </div>
 
-      {/* ===== COPYRIGHT BELOW RECTANGLE ===== */}
-      <div className="text-neutral/60 text-sm font-inter text-center mt-6">
+      <div className="mt-9 text-neutral/60 text-sm font-inter text-center">
         <p>© 2026 North-West University • AACMS</p>
       </div>
 
