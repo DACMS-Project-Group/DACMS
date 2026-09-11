@@ -81,15 +81,15 @@ const Applications = () => {
                 </h2>
 
                 <p className="text-neutral mt-2">
-                  View and track your Demi applications.
+                  View and track your Assistant applications.
                 </p>
               </div>
 
               <button
-                onClick={() => navigate('/apply-for-demi')}
+                onClick={() => navigate('/apply-for-assistant')}
                 className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition"
               >
-                + Apply for Demi
+                + Apply for Assistant
               </button>
 
             </div>

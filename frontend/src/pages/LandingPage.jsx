@@ -1,4 +1,4 @@
-import React from 'react';
+//import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
@@ -52,12 +52,14 @@ const LandingPage = () => {
             
             <div className="text-center max-w-4xl">
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-poppins font-bold text-white drop-shadow-2xl leading-tight">
-                Assistant Application &<br />
-                <span className="text-white">Claims Management System</span>
+                
+              Assistant Applications &<br />
+              <span className="text-white">Claims Management System</span>
               </h1>
               <p className="text-white/90 text-base md:text-lg mt-3 font-inter max-w-2xl mx-auto drop-shadow-lg">
                 Streamline your Assistant applications, track working hours, and manage claims all in one place.
               </p>
+
             </div>
 
             {/* ===== THREE ROLE BUTTONS ===== */}
