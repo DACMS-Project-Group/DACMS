@@ -7,30 +7,53 @@ const StudentProfile = () => {
   const signatureCanvasRef = useRef(null);
   const isDrawing = useRef(false);
 
-  // Edit Mode State: Set to true initially for creation, false once saved
+  // Edit Mode State
   const [isEditing, setIsEditing] = useState(true);
 
   const [formData, setFormData] = useState({
-    // Section A
+    // Section A: Student Information
+    justifiableReason: 'Student Assistant',
     studentType: 'local',
     studentNumber: '',
-    surname: '',
-    fullNames: '',
-    initials: '',
-    dateOfBirth: '',
     idPassportNumber: '',
+    passportNumber: '',
+    personType: 'Student Assistant',
+    title: '',
+    surname: '',
+    firstName: '',
+    initials: '',
+    middleNames: '',
+    nickName: '',
     gender: '',
-    programme: '',
-    yearOfStudy: '',
+    race: '',
+    maritalStatus: '',
+    previousSurname: '',
+    dateOfBirth: '',
+    homeLanguage: '',
+    preferenceLanguage: '',
+    disability: '',
+    primaryEmploymentOutside: '',
+    saCitizen: '',
+    nationality: '',
+    countryOfBirth: '',
+    countryOfPassportIssue: '',
+    permitNumber: '',
+    incomeTaxNo: '',
+    currentlyEmployedByNwu: '',
+    oeCodeAndName1: '',
+    jobName1: '',
+    oeCodeAndName2: '',
+    jobName2: '',
 
     // Section B: Next of Kin
     nextOfKinTitle: '',
     nextOfKinInitials: '',
     nextOfKinSurname: '',
+    nextOfKinName: '',
     nextOfKinRelationship: '',
-    nextOfKinWorkTelephoneNo: '',
+    nextOfKinDaytimePhoneNo: '',
     nextOfKinMobile: '',
-    isNextOfKinNwuEmployee: 'No',
+    isNextOfKinNwuEmployee: '',
     nextOfKinNwuNumber: '',
 
     // Section C: Contact Details
@@ -45,14 +68,14 @@ const StudentProfile = () => {
     workPhoneNo: '',
     emailAddress: '',
 
-    sameAsResidential: false,
+    sameAsResidential: true,
     poBoxNo: '',
     privateBagNo: '',
     postOfficeBranch: '',
     postalCode: '',
 
     // Section D: Highest Qualification
-    institution: 'North-West University',
+    institution: '',
     qualificationType: '',
     qualificationStatus: '',
     awardedDate: '',
@@ -63,31 +86,63 @@ const StudentProfile = () => {
     branchCode: '',
     accountNumber: '',
     accountType: '',
-    accountHolderRelationship: 'Own',
+    accountHolderRelationship: '',
 
-    // Section F: Declaration
+    // Declaration
+    declarationInitialsSurname: '',
     declarationDate: '',
   });
 
+  // Dynamically update required documents based on SA Citizenship state
   const requiredDocuments = useMemo(() => {
     const baseDocuments = [
-      { key: 'academicTranscript', name: 'Academic Transcript', required: true },
-      { key: 'identityDocument', name: 'Certified Identity Document', required: true },
-      { key: 'highestQualification', name: 'Certified Highest Qualification', required: true },
-      { key: 'bankConfirmation', name: 'Bank Confirmation Letter', required: true },
-      { key: 'registrationProof', name: 'NWU Registration Proof', required: true },
+      {
+        key: 'academicTranscript',
+        name: 'Academic Transcript',
+        required: true,
+      },
+      {
+        key: 'identityDocument',
+        name:
+          formData.saCitizen === 'Yes'
+            ? 'Certified ID Document'
+            : 'Certified Passport Copy',
+        required: true,
+      },
+      {
+        key: 'highestQualification',
+        name: 'Certified Highest Qualification',
+        required: true,
+      },
+      {
+        key: 'bankConfirmation',
+        name: 'Bank Confirmation Letter (Not older than 3 months)',
+        required: true,
+      },
+      {
+        key: 'registrationProof',
+        name: 'NWU Registration Proof',
+        required: true,
+      },
     ];
 
-    if (formData.studentType === 'international') {
+    if (formData.saCitizen === 'No') {
       baseDocuments.push(
-        { key: 'passport', name: 'Certified Passport', required: true },
-        { key: 'workPermission', name: 'Work Permission (P&C101F)', required: true },
-        { key: 'studyPermit', name: 'Study Permit', required: true }
+        {
+          key: 'studyPermit',
+          name: 'Valid Study Permit',
+          required: true,
+        },
+        {
+          key: 'workPermission',
+          name: 'Work Permission Document (P&C101F)',
+          required: true,
+        }
       );
     }
 
     return baseDocuments;
-  }, [formData.studentType]);
+  }, [formData.saCitizen]);
 
   const [uploadedFiles, setUploadedFiles] = useState({});
   const [agreed, setAgreed] = useState(false);
@@ -96,6 +151,7 @@ const StudentProfile = () => {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -104,10 +160,20 @@ const StudentProfile = () => {
 
   const getCanvasCoordinates = (event) => {
     const canvas = signatureCanvasRef.current;
-    if (!canvas) return { x: 0, y: 0 };
+
+    if (!canvas) {
+      return { x: 0, y: 0 };
+    }
+
     const rect = canvas.getBoundingClientRect();
-    const clientX = event.touches ? event.touches[0].clientX : event.clientX;
-    const clientY = event.touches ? event.touches[0].clientY : event.clientY;
+
+    const clientX = event.touches
+      ? event.touches[0].clientX
+      : event.clientX;
+
+    const clientY = event.touches
+      ? event.touches[0].clientY
+      : event.clientY;
 
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
@@ -120,17 +186,20 @@ const StudentProfile = () => {
 
   const startDrawing = (event) => {
     if (!isEditing) return;
+
     const canvas = signatureCanvasRef.current;
     const context = canvas.getContext('2d');
     const { x, y } = getCanvasCoordinates(event);
 
     isDrawing.current = true;
+
     context.beginPath();
     context.moveTo(x, y);
   };
 
   const draw = (event) => {
     if (!isDrawing.current || !isEditing) return;
+
     const canvas = signatureCanvasRef.current;
     const context = canvas.getContext('2d');
     const { x, y } = getCanvasCoordinates(event);
@@ -138,30 +207,45 @@ const StudentProfile = () => {
     context.lineWidth = 2;
     context.lineCap = 'round';
     context.strokeStyle = '#000000';
+
     context.lineTo(x, y);
     context.stroke();
   };
 
   const stopDrawing = () => {
     if (!isDrawing.current || !isEditing) return;
+
     isDrawing.current = false;
+
     const canvas = signatureCanvasRef.current;
+
     setSignature(canvas.toDataURL());
   };
 
   const clearSignature = () => {
     if (!isEditing) return;
+
     const canvas = signatureCanvasRef.current;
+
     if (canvas) {
       const context = canvas.getContext('2d');
-      context.clearRect(0, 0, canvas.width, canvas.height);
+
+      context.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
     }
+
     setSignature('');
   };
 
   const handleFileUpload = (docKey, event) => {
     if (!isEditing) return;
+
     const file = event.target.files[0];
+
     if (!file) return;
 
     setUploadedFiles((prev) => ({
@@ -175,7 +259,9 @@ const StudentProfile = () => {
 
     setUploadedFiles((prev) => {
       const updatedFiles = { ...prev };
+
       delete updatedFiles[docKey];
+
       return updatedFiles;
     });
   };
@@ -187,10 +273,12 @@ const StudentProfile = () => {
       setMessage('Please confirm the declaration before saving.');
       return;
     }
+
     if (!signature) {
       setMessage('Please provide your signature before saving.');
       return;
     }
+
     if (!formData.declarationDate) {
       setMessage('Please enter the date in the declaration section.');
       return;
@@ -206,11 +294,12 @@ const StudentProfile = () => {
           .map((d) => d.name)
           .join(', ')}`
       );
+
       return;
     }
 
     setIsEditing(false);
-    setMessage('Student profile saved successfully. Information is locked for editing.');
+    setMessage('Student profile saved successfully.');
   };
 
   return (
@@ -219,8 +308,13 @@ const StudentProfile = () => {
 
       <main className="flex-1">
         <Navbar />
+
+        {/* Header */}
         <div className="bg-primary text-white px-8 py-5 flex items-center justify-between">
-          <h1 className="text-2xl font-bold">Student Profile</h1>
+          <h1 className="text-2xl font-bold">
+            Student Profile
+          </h1>
+
           {!isEditing && (
             <button
               type="button"
@@ -235,35 +329,41 @@ const StudentProfile = () => {
           )}
         </div>
 
-        <form onSubmit={handleSaveProfile} className="p-8 space-y-6">
+        <form
+          onSubmit={handleSaveProfile}
+          className="p-8 space-y-6"
+        >
           {/* SECTION A */}
           <Card>
             <div className="p-6">
               <h2 className="text-xl font-bold text-primary-dark mb-6">
-                Section A: Student Details
+                Section A: Student Information
               </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
                   <label className="block font-semibold mb-2">
-                    Student Type <span className="text-red-500">*</span>
+                    Justifiable Reason{' '}
+                    <span className="text-red-500">*</span>
                   </label>
-                  <select
-                    name="studentType"
-                    value={formData.studentType}
+
+                  <input
+                    type="text"
+                    name="justifiableReason"
+                    value={formData.justifiableReason}
                     onChange={handleChange}
                     disabled={!isEditing}
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                     required
-                  >
-                    <option value="local">South African Student</option>
-                    <option value="international">International Student</option>
-                  </select>
+                  />
                 </div>
 
                 <div>
                   <label className="block font-semibold mb-2">
-                    Student Number <span className="text-red-500">*</span>
+                    Student Number{' '}
+                    <span className="text-red-500">*</span>
                   </label>
+
                   <input
                     type="text"
                     name="studentNumber"
@@ -277,70 +377,11 @@ const StudentProfile = () => {
 
                 <div>
                   <label className="block font-semibold mb-2">
-                    Surname <span className="text-red-500">*</span>
+                    {formData.saCitizen === 'Yes'
+                      ? 'ID No.'
+                      : 'ID / Identity No.'}
                   </label>
-                  <input
-                    type="text"
-                    name="surname"
-                    value={formData.surname}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    placeholder=""
-                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
-                    required
-                  />
-                </div>
 
-                <div>
-                  <label className="block font-semibold mb-2">
-                    Full Names <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="fullNames"
-                    value={formData.fullNames}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold mb-2">
-                    Initials <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="initials"
-                    value={formData.initials}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    placeholder=""
-                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold mb-2">
-                    Date of Birth <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleChange}
-                    disabled={!isEditing}
-                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label className="block font-semibold mb-2">
-                    ID / Passport Number <span className="text-red-500">*</span>
-                  </label>
                   <input
                     type="text"
                     name="idPassportNumber"
@@ -348,14 +389,135 @@ const StudentProfile = () => {
                     onChange={handleChange}
                     disabled={!isEditing}
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Person Type{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    type="text"
+                    name="personType"
+                    value={formData.personType}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                     required
                   />
                 </div>
 
                 <div>
                   <label className="block font-semibold mb-2">
-                    Gender <span className="text-red-500">*</span>
+                    Title{' '}
+                    <span className="text-red-500">*</span>
                   </label>
+
+                  <select
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  >
+                    <option value="">Select title</option>
+                    <option value="Mr">Mr</option>
+                    <option value="Mrs">Mrs</option>
+                    <option value="Ms">Ms</option>
+                    <option value="Dr">Dr</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Surname{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    type="text"
+                    name="surname"
+                    value={formData.surname}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    First Name{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    type="text"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Initials{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    type="text"
+                    name="initials"
+                    value={formData.initials}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Middle Names
+                  </label>
+
+                  <input
+                    type="text"
+                    name="middleNames"
+                    value={formData.middleNames}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Nick Name
+                  </label>
+
+                  <input
+                    type="text"
+                    name="nickName"
+                    value={formData.nickName}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Gender{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
                   <select
                     name="gender"
                     value={formData.gender}
@@ -373,15 +535,75 @@ const StudentProfile = () => {
 
                 <div>
                   <label className="block font-semibold mb-2">
-                    Academic Programme <span className="text-red-500">*</span>
+                    Race{' '}
+                    <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
-                    name="programme"
-                    value={formData.programme}
+
+                  <select
+                    name="race"
+                    value={formData.race}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    placeholder="e.g. BSc Information Technology"
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  >
+                    <option value="">Select race</option>
+                    <option value="African">African</option>
+                    <option value="Colored">Colored</option>
+                    <option value="Indian">Indian</option>
+                    <option value="White">White</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Marital Status{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <select
+                    name="maritalStatus"
+                    value={formData.maritalStatus}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  >
+                    <option value="">Select option</option>
+                    <option value="Single">Single</option>
+                    <option value="Married">Married</option>
+                    <option value="Divorced">Divorced</option>
+                    <option value="Widowed">Widowed</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Previous Surname
+                  </label>
+
+                  <input
+                    type="text"
+                    name="previousSurname"
+                    value={formData.previousSurname}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Date of Birth{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    type="date"
+                    name="dateOfBirth"
+                    value={formData.dateOfBirth}
+                    onChange={handleChange}
+                    disabled={!isEditing}
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                     required
                   />
@@ -389,25 +611,316 @@ const StudentProfile = () => {
 
                 <div>
                   <label className="block font-semibold mb-2">
-                    Year of Study <span className="text-red-500">*</span>
+                    Home Language{' '}
+                    <span className="text-red-500">*</span>
                   </label>
+
                   <select
-                    name="yearOfStudy"
-                    value={formData.yearOfStudy}
+                    name="homeLanguage"
+                    value={formData.homeLanguage}
                     onChange={handleChange}
                     disabled={!isEditing}
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                     required
                   >
-                    <option value="">Select year of study</option>
-                    <option value="1st Year">1st Year</option>
-                    <option value="2nd Year">2nd Year</option>
-                    <option value="3rd Year">3rd Year</option>
-                    <option value="4th Year / Honours">4th Year / Honours</option>
-                    <option value="Master's">Master's</option>
-                    <option value="Doctorate">Doctorate</option>
+                    <option value="">Select language</option>
+                    <option value="Afrikaans">Afrikaans</option>
+                    <option value="English">English</option>
+                    <option value="isiNdebele">isiNdebele</option>
+                    <option value="isiXhosa">isiXhosa</option>
+                    <option value="isiZulu">isiZulu</option>
+                    <option value="Sepedi">Sepedi</option>
+                    <option value="Sesotho">Sesotho</option>
+                    <option value="Setswana">Setswana</option>
+                    <option value="siSwati">siSwati</option>
+                    <option value="Tshivenda">Tshivenda</option>
+                    <option value="TshiVenda">TshiVenda</option>
+                    <option value="Other">Other</option>
                   </select>
                 </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Preference Language{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <select
+                    name="preferenceLanguage"
+                    value={formData.preferenceLanguage}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  >
+                    <option value="">Select language</option>
+                    <option value="English">English</option>
+                    <option value="Afrikaans">Afrikaans</option>
+                    <option value="Setswana">Setswana</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Disability{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <select
+                    name="disability"
+                    value={formData.disability}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  >
+                    <option value="">Select option</option>
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                  </select>
+                </div>
+
+                {/* FIXED: NWU EMPLOYMENT FIELD */}
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Are you currently employed by NWU?{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <select
+                    name="currentlyEmployedByNwu"
+                    value={formData.currentlyEmployedByNwu}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  >
+                    <option value="">Select option</option>
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Primary Employment Outside of Organization?{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <select
+                    name="primaryEmploymentOutside"
+                    value={formData.primaryEmploymentOutside}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  >
+                    <option value="">Select option</option>
+                    <option value="No">No</option>
+                    <option value="Yes">Yes</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    SA Citizen{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <select
+                    name="saCitizen"
+                    value={formData.saCitizen}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  >
+                    <option value="">Select option</option>
+                    <option value="Yes">Yes</option>
+                    <option value="No">No</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Nationality{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    type="text"
+                    name="nationality"
+                    value={formData.nationality}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Country of Birth
+                  </label>
+
+                  <input
+                    type="text"
+                    name="countryOfBirth"
+                    value={formData.countryOfBirth}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                  />
+                </div>
+
+                {/* FIXED: INCOME TAX FIELD */}
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Income Tax No.
+                  </label>
+
+                  <input
+                    type="text"
+                    name="incomeTaxNo"
+                    value={formData.incomeTaxNo}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                  />
+                </div>
+
+                {/* Conditional Fields for Non-SA Citizens */}
+                {formData.saCitizen === 'No' && (
+                  <>
+                    <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200 col-span-1 md:col-span-3">
+                      <p className="text-xs text-yellow-800 font-semibold">
+                        Non-SA Citizen Details Required
+                      </p>
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold mb-2">
+                        Passport Number{' '}
+                        <span className="text-red-500">*</span>
+                      </label>
+
+                      <input
+                        type="text"
+                        name="passportNumber"
+                        value={formData.passportNumber}
+                        onChange={handleChange}
+                        disabled={!isEditing}
+                        className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                        required={formData.saCitizen === 'No'}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold mb-2">
+                        Country of Passport Issue{' '}
+                        <span className="text-red-500">*</span>
+                      </label>
+
+                      <input
+                        type="text"
+                        name="countryOfPassportIssue"
+                        value={formData.countryOfPassportIssue}
+                        onChange={handleChange}
+                        disabled={!isEditing}
+                        className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                        required={formData.saCitizen === 'No'}
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block font-semibold mb-2">
+                        Study / Work Permit Number{' '}
+                        <span className="text-red-500">*</span>
+                      </label>
+
+                      <input
+                        type="text"
+                        name="permitNumber"
+                        value={formData.permitNumber}
+                        onChange={handleChange}
+                        disabled={!isEditing}
+                        className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                        required={formData.saCitizen === 'No'}
+                      />
+                    </div>
+                  </>
+                )}
+
+                {/* NWU Employment Details */}
+                {formData.currentlyEmployedByNwu === 'Yes' && (
+                  <div className="mt-6 pt-4 border-t bg-gray-50 p-4 rounded-lg col-span-1 md:col-span-3">
+                    <p className="font-semibold text-sm text-gray-700 mb-3">
+                      NWU Employment Details:
+                    </p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold mb-1">
+                          OE Code and Name (1)
+                        </label>
+
+                        <input
+                          type="text"
+                          name="oeCodeAndName1"
+                          value={formData.oeCodeAndName1}
+                          onChange={handleChange}
+                          disabled={!isEditing}
+                          className="w-full border border-gray-300 rounded-lg p-2.5 disabled:bg-gray-100"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold mb-1">
+                          Job Name (1)
+                        </label>
+
+                        <input
+                          type="text"
+                          name="jobName1"
+                          value={formData.jobName1}
+                          onChange={handleChange}
+                          disabled={!isEditing}
+                          className="w-full border border-gray-300 rounded-lg p-2.5 disabled:bg-gray-100"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold mb-1">
+                          OE Code and Name (2)
+                        </label>
+
+                        <input
+                          type="text"
+                          name="oeCodeAndName2"
+                          value={formData.oeCodeAndName2}
+                          onChange={handleChange}
+                          disabled={!isEditing}
+                          className="w-full border border-gray-300 rounded-lg p-2.5 disabled:bg-gray-100"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-semibold mb-1">
+                          Job Name (2)
+                        </label>
+
+                        <input
+                          type="text"
+                          name="jobName2"
+                          value={formData.jobName2}
+                          onChange={handleChange}
+                          disabled={!isEditing}
+                          className="w-full border border-gray-300 rounded-lg p-2.5 disabled:bg-gray-100"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </Card>
@@ -416,13 +929,18 @@ const StudentProfile = () => {
           <Card>
             <div className="p-6">
               <h2 className="text-xl font-bold text-primary-dark mb-6">
-                Section B: Next of Kin <span className="text-sm font-normal text-gray-500">(in case of emergency)</span>
+                Section B: Next of Kin{' '}
+                <span className="text-sm font-normal text-gray-500">
+                  (in case of emergency)
+                </span>
               </h2>
+
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
                   <label className="block font-semibold mb-2">
                     Title <span className="text-red-500">*</span>
                   </label>
+
                   <select
                     name="nextOfKinTitle"
                     value={formData.nextOfKinTitle}
@@ -431,7 +949,7 @@ const StudentProfile = () => {
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                     required
                   >
-                    <option value="">Select title</option>
+                    <option value="">Select option</option>
                     <option value="Mr">Mr</option>
                     <option value="Mrs">Mrs</option>
                     <option value="Ms">Ms</option>
@@ -439,25 +957,28 @@ const StudentProfile = () => {
                     <option value="Prof">Prof</option>
                   </select>
                 </div>
+
                 <div>
                   <label className="block font-semibold mb-2">
                     Initials <span className="text-red-500">*</span>
                   </label>
+
                   <input
                     type="text"
                     name="nextOfKinInitials"
                     value={formData.nextOfKinInitials}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    placeholder="e.g. N S"
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                     required
                   />
                 </div>
+
                 <div>
                   <label className="block font-semibold mb-2">
                     Surname <span className="text-red-500">*</span>
                   </label>
+
                   <input
                     type="text"
                     name="nextOfKinSurname"
@@ -468,21 +989,60 @@ const StudentProfile = () => {
                     required
                   />
                 </div>
+
                 <div>
-                  <label className="block font-semibold mb-2">Work Telephone No.</label>
+                  <label className="block font-semibold mb-2">
+                    Name <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    type="text"
+                    name="nextOfKinName"
+                    value={formData.nextOfKinName}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Relationship{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+
+                  <input
+                    type="text"
+                    name="nextOfKinRelationship"
+                    value={formData.nextOfKinRelationship}
+                    onChange={handleChange}
+                    disabled={!isEditing}
+                    className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block font-semibold mb-2">
+                    Daytime Phone No.
+                  </label>
+
                   <input
                     type="tel"
-                    name="nextOfKinWorkTelephoneNo"
-                    value={formData.nextOfKinWorkTelephoneNo}
+                    name="nextOfKinDaytimePhoneNo"
+                    value={formData.nextOfKinDaytimePhoneNo}
                     onChange={handleChange}
                     disabled={!isEditing}
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                   />
                 </div>
+
                 <div>
                   <label className="block font-semibold mb-2">
                     Mobile No. <span className="text-red-500">*</span>
                   </label>
+
                   <input
                     type="tel"
                     name="nextOfKinMobile"
@@ -493,8 +1053,12 @@ const StudentProfile = () => {
                     required
                   />
                 </div>
+
                 <div>
-                  <label className="block font-semibold mb-2">Is Next of Kin an NWU Employee?</label>
+                  <label className="block font-semibold mb-2">
+                    Is Next of Kin an NWU Employee?
+                  </label>
+
                   <select
                     name="isNextOfKinNwuEmployee"
                     value={formData.isNextOfKinNwuEmployee}
@@ -502,15 +1066,19 @@ const StudentProfile = () => {
                     disabled={!isEditing}
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                   >
+                    <option value="">Select option</option>
                     <option value="No">No</option>
                     <option value="Yes">Yes</option>
                   </select>
                 </div>
+
                 {formData.isNextOfKinNwuEmployee === 'Yes' && (
                   <div>
                     <label className="block font-semibold mb-2">
-                      NWU Staff Number <span className="text-red-500">*</span>
+                      If yes, his/her NWU No.{' '}
+                      <span className="text-red-500">*</span>
                     </label>
+
                     <input
                       type="text"
                       name="nextOfKinNwuNumber"
@@ -532,14 +1100,20 @@ const StudentProfile = () => {
               <h2 className="text-xl font-bold text-primary-dark mb-6">
                 Section C: Contact Details
               </h2>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 {/* Residential Address */}
                 <div className="space-y-4">
-                  <h3 className="font-bold text-lg text-gray-800 border-b pb-2">Residential Address</h3>
+                  <h3 className="font-bold text-lg text-gray-800 border-b pb-2">
+                    Residential Address
+                  </h3>
+
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-sm font-semibold mb-1">Unit No.</label>
+                      <label className="block text-sm font-semibold mb-1">
+                        Unit No.
+                      </label>
+
                       <input
                         type="text"
                         name="resUnitNo"
@@ -549,8 +1123,12 @@ const StudentProfile = () => {
                         className="w-full border border-gray-300 rounded-lg p-2.5 disabled:bg-gray-100"
                       />
                     </div>
+
                     <div>
-                      <label className="block text-sm font-semibold mb-1">Complex</label>
+                      <label className="block text-sm font-semibold mb-1">
+                        Complex
+                      </label>
+
                       <input
                         type="text"
                         name="resComplex"
@@ -565,8 +1143,10 @@ const StudentProfile = () => {
                   <div className="grid grid-cols-3 gap-3">
                     <div>
                       <label className="block text-sm font-semibold mb-1">
-                        Street No. <span className="text-red-500">*</span>
+                        Street No.{' '}
+                        <span className="text-red-500">*</span>
                       </label>
+
                       <input
                         type="text"
                         name="resStreetNo"
@@ -577,10 +1157,13 @@ const StudentProfile = () => {
                         required
                       />
                     </div>
+
                     <div className="col-span-2">
                       <label className="block text-sm font-semibold mb-1">
-                        Street / Farm Name <span className="text-red-500">*</span>
+                        Street Name / Farm Name{' '}
+                        <span className="text-red-500">*</span>
                       </label>
+
                       <input
                         type="text"
                         name="resStreetName"
@@ -595,8 +1178,10 @@ const StudentProfile = () => {
 
                   <div>
                     <label className="block text-sm font-semibold mb-1">
-                      Suburb / District <span className="text-red-500">*</span>
+                      Suburb / District{' '}
+                      <span className="text-red-500">*</span>
                     </label>
+
                     <input
                       type="text"
                       name="resSuburb"
@@ -611,8 +1196,10 @@ const StudentProfile = () => {
                   <div className="grid grid-cols-2 gap-3">
                     <div>
                       <label className="block text-sm font-semibold mb-1">
-                        Town / City <span className="text-red-500">*</span>
+                        Town / City{' '}
+                        <span className="text-red-500">*</span>
                       </label>
+
                       <input
                         type="text"
                         name="resTownCity"
@@ -623,10 +1210,13 @@ const StudentProfile = () => {
                         required
                       />
                     </div>
+
                     <div>
                       <label className="block text-sm font-semibold mb-1">
-                        Postal Code <span className="text-red-500">*</span>
+                        Postal Code{' '}
+                        <span className="text-red-500">*</span>
                       </label>
+
                       <input
                         type="text"
                         name="resPostalCode"
@@ -643,7 +1233,10 @@ const StudentProfile = () => {
                 {/* Postal Address */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between border-b pb-2">
-                    <h3 className="font-bold text-lg text-gray-800">Postal Address</h3>
+                    <h3 className="font-bold text-lg text-gray-800">
+                      Postal Address
+                    </h3>
+
                     <label className="flex items-center text-xs text-gray-600 gap-1.5 cursor-pointer">
                       <input
                         type="checkbox"
@@ -653,14 +1246,18 @@ const StudentProfile = () => {
                         disabled={!isEditing}
                         className="rounded"
                       />
-                      Same as residential
+
+                      Same as residential address
                     </label>
                   </div>
 
                   {!formData.sameAsResidential && (
                     <>
                       <div>
-                        <label className="block text-sm font-semibold mb-1">PO Box No.</label>
+                        <label className="block text-sm font-semibold mb-1">
+                          PO Box No.
+                        </label>
+
                         <input
                           type="text"
                           name="poBoxNo"
@@ -670,8 +1267,12 @@ const StudentProfile = () => {
                           className="w-full border border-gray-300 rounded-lg p-2.5 disabled:bg-gray-100"
                         />
                       </div>
+
                       <div>
-                        <label className="block text-sm font-semibold mb-1">Private Bag No.</label>
+                        <label className="block text-sm font-semibold mb-1">
+                          Private Bag No.
+                        </label>
+
                         <input
                           type="text"
                           name="privateBagNo"
@@ -681,8 +1282,12 @@ const StudentProfile = () => {
                           className="w-full border border-gray-300 rounded-lg p-2.5 disabled:bg-gray-100"
                         />
                       </div>
+
                       <div>
-                        <label className="block text-sm font-semibold mb-1">Post Office Branch Name</label>
+                        <label className="block text-sm font-semibold mb-1">
+                          Post Office Branch Name
+                        </label>
+
                         <input
                           type="text"
                           name="postOfficeBranch"
@@ -692,8 +1297,12 @@ const StudentProfile = () => {
                           className="w-full border border-gray-300 rounded-lg p-2.5 disabled:bg-gray-100"
                         />
                       </div>
+
                       <div>
-                        <label className="block text-sm font-semibold mb-1">Postal Code</label>
+                        <label className="block text-sm font-semibold mb-1">
+                          Postal Code
+                        </label>
+
                         <input
                           type="text"
                           name="postalCode"
@@ -713,6 +1322,7 @@ const StudentProfile = () => {
                   <label className="block font-semibold mb-2">
                     Mobile No. <span className="text-red-500">*</span>
                   </label>
+
                   <input
                     type="tel"
                     name="mobileNo"
@@ -723,8 +1333,12 @@ const StudentProfile = () => {
                     required
                   />
                 </div>
+
                 <div>
-                  <label className="block font-semibold mb-2">Work Telephone No.</label>
+                  <label className="block font-semibold mb-2">
+                    Work Telephone No.
+                  </label>
+
                   <input
                     type="tel"
                     name="workPhoneNo"
@@ -734,10 +1348,13 @@ const StudentProfile = () => {
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                   />
                 </div>
+
                 <div>
                   <label className="block font-semibold mb-2">
-                    Email Address <span className="text-red-500">*</span>
+                    Email Address{' '}
+                    <span className="text-red-500">*</span>
                   </label>
+
                   <input
                     type="email"
                     name="emailAddress"
@@ -756,13 +1373,19 @@ const StudentProfile = () => {
           <Card>
             <div className="p-6">
               <h2 className="text-xl font-bold text-primary-dark mb-6">
-                Section D: Highest Qualification <span className="text-sm font-normal text-gray-500">(Certified copy must accompany this form)</span>
+                Section D: Highest Qualification{' '}
+                <span className="text-sm font-normal text-gray-500">
+                  (Certified copy must accompany this form)
+                </span>
               </h2>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block font-semibold mb-2">
-                    Institution <span className="text-red-500">*</span>
+                    Institution{' '}
+                    <span className="text-red-500">*</span>
                   </label>
+
                   <input
                     type="text"
                     name="institution"
@@ -773,25 +1396,30 @@ const StudentProfile = () => {
                     required
                   />
                 </div>
+
                 <div>
                   <label className="block font-semibold mb-2">
-                    Qualification Type <span className="text-red-500">*</span>
+                    Qualification Type{' '}
+                    <span className="text-red-500">*</span>
                   </label>
+
                   <input
                     type="text"
                     name="qualificationType"
                     value={formData.qualificationType}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    placeholder="e.g. BSc Information Technology"
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                     required
                   />
                 </div>
+
                 <div>
                   <label className="block font-semibold mb-2">
-                    Qualification Status <span className="text-red-500">*</span>
+                    Qualification Status{' '}
+                    <span className="text-red-500">*</span>
                   </label>
+
                   <select
                     name="qualificationStatus"
                     value={formData.qualificationStatus}
@@ -800,13 +1428,17 @@ const StudentProfile = () => {
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                     required
                   >
-                    <option value="">Select status</option>
+                    <option value="">Select option</option>
                     <option value="Completed">Completed</option>
                     <option value="In Progress">In Progress</option>
                   </select>
                 </div>
+
                 <div>
-                  <label className="block font-semibold mb-2">Awarded Date</label>
+                  <label className="block font-semibold mb-2">
+                    Awarded Date
+                  </label>
+
                   <input
                     type="date"
                     name="awardedDate"
@@ -826,14 +1458,19 @@ const StudentProfile = () => {
               <h2 className="text-xl font-bold text-primary-dark mb-2">
                 Section E: Bank Details
               </h2>
-              <p className="text-sm text-gray-600 mb-6">
-                Please provide South African bank account details for claim disbursements.
+
+              <p className="text-xs text-red-600 mb-6 italic">
+                (No payment will be made if the bank account confirmation
+                letter, not older than 3 months, is not attached)
               </p>
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div>
                   <label className="block font-semibold mb-2">
-                    Account Holder Surname & Initials <span className="text-red-500">*</span>
+                    Account Holder Surname and Initials{' '}
+                    <span className="text-red-500">*</span>
                   </label>
+
                   <input
                     type="text"
                     name="accountHolderSurnameInitials"
@@ -844,25 +1481,30 @@ const StudentProfile = () => {
                     required
                   />
                 </div>
+
                 <div>
                   <label className="block font-semibold mb-2">
-                    Bank Name <span className="text-red-500">*</span>
+                    Name of Bank{' '}
+                    <span className="text-red-500">*</span>
                   </label>
+
                   <input
                     type="text"
                     name="bankName"
                     value={formData.bankName}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    placeholder="e.g. ABSA, FNB, Standard Bank, Capitec"
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                     required
                   />
                 </div>
+
                 <div>
                   <label className="block font-semibold mb-2">
-                    Branch Code <span className="text-red-500">*</span>
+                    Bank Branch Code{' '}
+                    <span className="text-red-500">*</span>
                   </label>
+
                   <input
                     type="text"
                     name="branchCode"
@@ -873,10 +1515,13 @@ const StudentProfile = () => {
                     required
                   />
                 </div>
+
                 <div>
                   <label className="block font-semibold mb-2">
-                    Account Number <span className="text-red-500">*</span>
+                    Account Number{' '}
+                    <span className="text-red-500">*</span>
                   </label>
+
                   <input
                     type="text"
                     name="accountNumber"
@@ -887,10 +1532,13 @@ const StudentProfile = () => {
                     required
                   />
                 </div>
+
                 <div>
                   <label className="block font-semibold mb-2">
-                    Account Type <span className="text-red-500">*</span>
+                    Account Type{' '}
+                    <span className="text-red-500">*</span>
                   </label>
+
                   <select
                     name="accountType"
                     value={formData.accountType}
@@ -900,131 +1548,224 @@ const StudentProfile = () => {
                     required
                   >
                     <option value="">Select account type</option>
-                    <option value="Cheque / Current">Cheque / Current</option>
+                    <option value="Cheque / Current">
+                      Cheque / Current
+                    </option>
                     <option value="Savings">Savings</option>
-                    <option value="Transmission">Transmission</option>
+                    <option value="Transmission">
+                      Transmission
+                    </option>
                   </select>
                 </div>
+
                 <div>
                   <label className="block font-semibold mb-2">
-                    Relationship to Account Holder <span className="text-red-500">*</span>
+                    Account Holder Relationship{' '}
+                    <span className="text-red-500">*</span>
                   </label>
-                  <input
-                    type="text"
+
+                  <select
                     name="accountHolderRelationship"
                     value={formData.accountHolderRelationship}
                     onChange={handleChange}
                     disabled={!isEditing}
-                    placeholder="Own, Parent, Spouse, etc."
                     className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
                     required
-                  />
+                  >
+                    <option value="">Select relationship</option>
+                    <option value="Own">Own Account</option>
+                    <option value="Parent/Guardian">
+                      Parent/Guardian Account
+                    </option>
+                    <option value="Spouse">Spouse Account</option>
+                    <option value="Other">Other</option>
+                  </select>
                 </div>
               </div>
             </div>
           </Card>
 
-          {/* SECTION F */}
+          {/* REQUIRED DOCUMENTS */}
           <Card>
-            <div className="p-6 space-y-6">
+            <div className="p-6">
               <h2 className="text-xl font-bold text-primary-dark mb-4">
-                Section F: Required Documents & Declaration
+                Required Document Attachments
               </h2>
 
-              {/* Document Uploads */}
+              <p className="text-sm text-gray-600 mb-6">
+                Please attach clear copies of all required supporting
+                documentation below.
+              </p>
+
               <div className="space-y-4">
-                <h3 className="font-semibold text-lg text-gray-800">1. Supporting Documents</h3>
-                <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-                  {requiredDocuments.map((doc) => (
-                    <div key={doc.key} className="border p-4 rounded-lg bg-gray-50 flex flex-col justify-between space-y-3">
-                      <div>
-                        <p className="font-medium text-sm text-gray-800">
-                          {doc.name} {doc.required && <span className="text-red-500">*</span>}
-                        </p>
-                        {uploadedFiles[doc.key] ? (
-                          <div className="mt-2 flex items-center justify-between gap-3">
-                            <p className="text-xs text-green-600 font-semibold">
-                              Uploaded: {uploadedFiles[doc.key].name}
-                            </p>
-                            {isEditing && (
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveFile(doc.key)}
-                                className="text-xs text-red-600 hover:underline font-semibold"
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </div>
-                        ) : (
-                          <p className="text-xs text-gray-500 mt-1">No file selected</p>
+                {requiredDocuments.map((doc) => (
+                  <div
+                    key={doc.key}
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg bg-gray-50 gap-4"
+                  >
+                    <div>
+                      <p className="font-semibold text-gray-800">
+                        {doc.name}{' '}
+                        {doc.required && (
+                          <span className="text-red-500">*</span>
                         )}
-                      </div>
-                      <input
-                        type="file"
-                        onChange={(e) => handleFileUpload(doc.key, e)}
-                        disabled={!isEditing}
-                        className="text-xs text-gray-500 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-primary file:text-white hover:file:bg-primary-dark cursor-pointer disabled:opacity-50"
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
+                      </p>
 
-              {/* Signature Canvas & Declaration */}
-              <div className="pt-6 border-t space-y-4">
-                <h3 className="font-semibold text-lg text-gray-800">2. Legal Declaration</h3>
-                
-                <label className="flex items-start gap-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={agreed}
-                    onChange={(e) => setAgreed(e.target.checked)}
-                    disabled={!isEditing}
-                    className="mt-1 rounded border-gray-300 text-primary focus:ring-primary"
-                  />
-                  <span className="text-sm text-gray-700 leading-relaxed">
-                    I declare that all information supplied in this profile and attached documentation is true and correct. I understand that false or misleading details may result in administrative action or disqualification from appointment and claims processing.
-                  </span>
-                </label>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4">
-                  <div>
-                    <div className="flex justify-between items-center mb-2">
-                      <label className="block font-semibold text-sm">
-                        Digital Signature <span className="text-red-500">*</span>
-                      </label>
-                      {isEditing && (
-                        <button
-                          type="button"
-                          onClick={clearSignature}
-                          className="text-xs text-red-600 hover:underline font-semibold"
-                        >
-                          Clear Signature
-                        </button>
+                      {uploadedFiles[doc.key] && (
+                        <p className="text-xs text-green-600 mt-1">
+                          Selected: {uploadedFiles[doc.key].name}
+                        </p>
                       )}
                     </div>
-                    <div className="border border-gray-300 rounded-lg overflow-hidden bg-white">
-                      <canvas
-                        ref={signatureCanvasRef}
-                        width={400}
-                        height={120}
-                        onMouseDown={startDrawing}
-                        onMouseMove={draw}
-                        onMouseUp={stopDrawing}
-                        onMouseLeave={stopDrawing}
-                        onTouchStart={startDrawing}
-                        onTouchMove={draw}
-                        onTouchEnd={stopDrawing}
-                        className={`w-full h-30 touch-none ${!isEditing ? 'bg-gray-100 cursor-not-allowed' : 'cursor-crosshair'}`}
-                      />
+
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                      {isEditing ? (
+                        <>
+                          <input
+                            type="file"
+                            id={`file-${doc.key}`}
+                            onChange={(e) =>
+                              handleFileUpload(doc.key, e)
+                            }
+                            className="hidden"
+                          />
+
+                          <label
+                            htmlFor={`file-${doc.key}`}
+                            className="cursor-pointer bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 shadow-sm"
+                          >
+                            {uploadedFiles[doc.key]
+                              ? 'Change File'
+                              : 'Choose File'}
+                          </label>
+
+                          {uploadedFiles[doc.key] && (
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleRemoveFile(doc.key)
+                              }
+                              className="text-red-600 hover:text-red-800 text-sm font-medium"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-sm font-medium text-gray-500">
+                          {uploadedFiles[doc.key]
+                            ? 'Attached'
+                            : 'Not Provided'}
+                        </span>
+                      )}
                     </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </Card>
+
+          {/* DECLARATION */}
+          <Card>
+            <div className="p-6">
+              <h2 className="text-xl font-bold text-primary-dark mb-4">
+                Declaration
+              </h2>
+
+              <div className="space-y-4">
+                <p className="text-sm text-gray-700 leading-relaxed font-medium">
+                  I, the undersigned, hereby confirm that the information I
+                  provided is true and correct.
+                </p>
+
+                <div className="flex items-start gap-3 mt-4">
+                  <input
+                    type="checkbox"
+                    id="declarationAgreement"
+                    checked={agreed}
+                    onChange={(e) =>
+                      isEditing && setAgreed(e.target.checked)
+                    }
+                    disabled={!isEditing}
+                    className="mt-1 h-4 w-4 text-primary rounded border-gray-300"
+                  />
+
+                  <label
+                    htmlFor="declarationAgreement"
+                    className="text-sm font-medium text-gray-800"
+                  >
+                    I agree to the declaration statement above{' '}
+                    <span className="text-red-500">*</span>
+                  </label>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 pt-4 border-t items-end">
+                  <div>
+                    <label className="block font-semibold mb-2">
+                      Initials and Surname{' '}
+                      <span className="text-red-500">*</span>
+                    </label>
+
+                    <input
+                      type="text"
+                      name="declarationInitialsSurname"
+                      value={formData.declarationInitialsSurname}
+                      onChange={handleChange}
+                      placeholder="e.g. A.B. Smith"
+                      disabled={!isEditing}
+                      className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
+                      required
+                    />
                   </div>
 
                   <div>
-                    <label className="block font-semibold mb-2 text-sm">
+                    <label className="block font-semibold mb-2">
+                      Student Signature{' '}
+                      <span className="text-red-500">*</span>
+                    </label>
+
+                    {isEditing ? (
+                      <div className="space-y-2">
+                        <canvas
+                          ref={signatureCanvasRef}
+                          width={300}
+                          height={100}
+                          onMouseDown={startDrawing}
+                          onMouseMove={draw}
+                          onMouseUp={stopDrawing}
+                          onMouseLeave={stopDrawing}
+                          onTouchStart={startDrawing}
+                          onTouchMove={draw}
+                          onTouchEnd={stopDrawing}
+                          className="border border-gray-300 rounded-lg bg-white w-full cursor-crosshair"
+                        />
+
+                        <button
+                          type="button"
+                          onClick={clearSignature}
+                          className="text-xs text-red-600 font-semibold hover:underline"
+                        >
+                          Clear Signature
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="border rounded-lg p-2 bg-gray-50 inline-block">
+                        {signature && (
+                          <img
+                            src={signature}
+                            alt="Student Signature"
+                            className="h-16 object-contain"
+                          />
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block font-semibold mb-2">
                       Date <span className="text-red-500">*</span>
                     </label>
+
                     <input
                       type="date"
                       name="declarationDate"
@@ -1040,26 +1781,27 @@ const StudentProfile = () => {
             </div>
           </Card>
 
-          {/* Feedback Messages & Submit Button */}
+          {/* MESSAGE DISPLAY */}
           {message && (
             <div
               className={`p-4 rounded-lg font-medium text-sm ${
-                !isEditing
-                  ? 'bg-green-100 text-green-800 border border-green-200'
-                  : 'bg-red-100 text-red-800 border border-red-200'
+                message.includes('successfully')
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-red-100 text-red-800'
               }`}
             >
               {message}
             </div>
           )}
 
+          {/* SUBMIT BUTTON */}
           {isEditing && (
-            <div className="flex justify-end">
+            <div className="flex justify-end pt-4">
               <button
                 type="submit"
-                className="bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-bold transition shadow-lg"
+                className="bg-primary text-white px-8 py-3 rounded-lg font-bold hover:bg-primary-dark transition shadow-md"
               >
-                Save Profile Details
+                Save Profile
               </button>
             </div>
           )}
