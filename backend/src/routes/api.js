@@ -11,7 +11,7 @@ router.use('/', metricsRoutes);
 router.use('/', userRoutes);
 router.use('/admin', adminRoutes);
 
-router.post('/create/user', (req, res) =>
+router.post('/users/create', (req, res) =>
     UserController.createUser(req, res)
 );
 
