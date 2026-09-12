@@ -1,10 +1,10 @@
-import NotificationService from '../services/NotificationService.js';
+import pool from '../config/db.js';
+import { io, userSockets } from '../app.js';
 
-const { io, userSockets } = require('../server');
-const pool = require('../db');
+
 
 class NotificationService {
-    static async sendNotification({ recipientId, senderId, type, message }) {
+    static async sendNotification({ recipientId, type, message }) {
         // 1. Save to PostgreSQL using parameterized query
         const insertQuery = `
             INSERT INTO notifications (RecipientUserID, NotificationType, Message)
@@ -13,7 +13,6 @@ class NotificationService {
         `;
         const { rows } = await pool.query(insertQuery, [
             recipientId, 
-            senderId, 
             type, 
             message
         ]);
