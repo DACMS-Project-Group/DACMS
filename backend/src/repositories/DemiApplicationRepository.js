@@ -1,0 +1,122 @@
+import BaseRepository from './BaseRepository.js';
+import DemiApplication from '../models/DemiApplication.js';
+
+class DemiApplicationRepository extends BaseRepository {
+    constructor() {
+        super('"DEMI_APPLICATION"', DemiApplication);
+    }
+
+    /** All applications submitted by a student, with listing/module context. */
+    async findByStudentId(studentId) {
+        const sql = `
+            SELECT
+                a.*,
+                l."ModuleID",
+                l."Deadline",
+                l."MinimumGrade",
+                m."ModuleCode",
+                m."ModuleName"
+            FROM "DEMI_APPLICATION" a
+            JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+            WHERE a."StudentID" = $1
+            ORDER BY a."DateSubmitted" DESC
+        `;
+        return this.query(sql, [studentId]);
+    }
+
+    async findById(applicationId) {
+        const rows = await this.query(
+            `SELECT * FROM "DEMI_APPLICATION" WHERE "ApplicationID" = $1`,
+            [applicationId]
+        );
+        return rows[0] ? DemiApplication.fromDb(rows[0]) : null;
+    }
+
+    /** Prevents a student from applying to the same listing twice. */
+    async findExisting(studentId, listingId) {
+        const rows = await this.query(
+            `SELECT * FROM "DEMI_APPLICATION" WHERE "StudentID" = $1 AND "ListingID" = $2`,
+            [studentId, listingId]
+        );
+        return rows[0] ? DemiApplication.fromDb(rows[0]) : null;
+    }
+
+    /** Currently open listings a student could apply to (deadline not passed). */
+    async findOpenListings() {
+        return this.query(`
+            SELECT
+                l."ListingID",
+                l."ModuleID",
+                l."LecturerID",
+                l."Deadline",
+                l."MinimumGrade",
+                m."ModuleCode",
+                m."ModuleName"
+            FROM "DEMI_LISTING" l
+            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+            WHERE l."Deadline" > NOW()
+            ORDER BY l."Deadline" ASC
+        `);
+    }
+
+    /**
+     * Checks a student's grade for the listing's module against the
+     * listing's minimum grade requirement. Returns 'Eligible',
+     * 'Ineligible', or 'Unverified' (no grade on record for that module).
+     */
+    async checkEligibility(studentId, listingId) {
+        const rows = await this.query(
+            `
+            SELECT g."GradeAchieved", l."MinimumGrade"
+            FROM "DEMI_LISTING" l
+            LEFT JOIN "STUDENT_MODULE_GRADE" g
+                ON g."ModuleID" = l."ModuleID" AND g."StudentID" = $1
+            WHERE l."ListingID" = $2
+            `,
+            [studentId, listingId]
+        );
+
+        if (!rows.length || rows[0].GradeAchieved == null) {
+            return 'Unverified';
+        }
+
+        return Number(rows[0].GradeAchieved) >= Number(rows[0].MinimumGrade)
+            ? 'Eligible'
+            : 'Ineligible';
+    }
+
+    async create({ studentId, listingId, verificationEligibilityStatus }) {
+        const rows = await this.query(
+            `
+            INSERT INTO "DEMI_APPLICATION"
+                ("StudentID", "ListingID", "VerificationEligibilityStatus")
+            VALUES ($1, $2, $3)
+            RETURNING *
+            `,
+            [studentId, listingId, verificationEligibilityStatus]
+        );
+        return DemiApplication.fromDb(rows[0]);
+    }
+
+    async addSupportingDocument({ studentId, documentType, filePath }) {
+        const rows = await this.query(
+            `
+            INSERT INTO "SUPPORTING_DOCUMENT" ("StudentID", "DocumentType", "FilePath")
+            VALUES ($1, $2, $3)
+            RETURNING *
+            `,
+            [studentId, documentType, filePath]
+        );
+        return rows[0];
+    }
+
+    async findDocumentsByStudentId(studentId) {
+        return this.query(
+            `SELECT * FROM "SUPPORTING_DOCUMENT" WHERE "StudentID" = $1 ORDER BY "UploadTimestamp" DESC`,
+            [studentId]
+        );
+    }
+}
+
+export default DemiApplicationRepository;
