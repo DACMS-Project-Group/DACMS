@@ -3,7 +3,6 @@ import metricsRoutes from './metricsRoutes.js';
 import userRoutes from './userRoutes.js';
 import adminRoutes from './adminRoutes.js';
 import UserController from '../controllers/UserController.js';
-import AdminController from '../controllers/AdminController.js';
 
 const router = Router();
 
