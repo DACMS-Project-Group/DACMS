@@ -1,12 +1,14 @@
 import { Router } from 'express';
 import metricsRoutes from './metricsRoutes.js';
 import userRoutes from './userRoutes.js';
+import adminRoutes from './adminRoutes.js';
 import UserController from '../controllers/UserController.js';
 
 const router = Router();
 
 router.use('/', metricsRoutes);
 router.use('/', userRoutes);
+router.use('/admin', adminRoutes);
 
 router.post('/create/user', (req, res) =>
     UserController.createUser(req, res)
