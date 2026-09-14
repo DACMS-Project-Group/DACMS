@@ -21,7 +21,7 @@ const LectureDashboard = () => {
         
         {/* ===== PAGE TITLE BAR ===== */}
         <div className="bg-primary h-16 flex items-center px-8">
-          <h1 className="text-4xl font-poppins font-bold text-white">
+          <h1 className="text-3xl font-poppins font-bold text-white">
             Lecturer Dashboard
           </h1>
         </div>

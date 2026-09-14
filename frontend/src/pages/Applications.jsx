@@ -64,7 +64,7 @@ const Applications = () => {
 
           {/* ===== PAGE TITLE BAR ===== */}
           <div className="bg-primary h-16 flex items-center px-8">
-            <h1 className="text-4xl font-poppins font-bold text-white">
+            <h1 className="text-3xl font-poppins font-bold text-white">
               Applications
             </h1>
           </div>
@@ -76,7 +76,7 @@ const Applications = () => {
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
 
               <div>
-                <h2 className="text-3xl font-poppins font-semibold text-primary">
+                <h2 className="text-2xl font-poppins font-semibold text-primary">
                   My Applications
                 </h2>
 
