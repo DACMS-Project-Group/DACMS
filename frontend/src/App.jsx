@@ -62,8 +62,8 @@ function App() {
             <Route path="/work-tracking" element={<WorkTracking />} />
             <Route path="/session-detail/:id" element={<SessionDetail />} />
             <Route path="/claims" element={<Claims />} />
-            <Route path="/generate-new-claim"element={<GenerateNewClaim />}/>
-            <Route path="/claim-detail/:id"element={<ClaimDetail />}/>
+            <Route path="/generate-new-claim" element={<GenerateNewClaim />} />
+            <Route path="/claim-detail/:id" element={<ClaimDetail />} />
           </Route>
 
           {/* ===== LECTURER ROUTES ===== */}
