@@ -13,10 +13,10 @@ const Sidebar = ({ userRole = 'student' }) => {
 
   // Lecturer Navigation
   const lecturerNavItems = [
-    { name: 'Dashboard', href: '/dashboard' },
+    { name: 'Dashboard', href: '/lecturer-dashboard' },
     { name: 'Module Management', href: '/modules' },
     { name: 'Review Applications', href: '/review-applications' },
-    { name: 'Assign Duties', href: '/assign-duties' },
+    { name: 'Assign Duties', href: '/assign-responsibilities' },
     { name: 'Verify Hours', href: '/verify-hours' },
     { name: 'Notifications', href: '/notifications' },
   ];
