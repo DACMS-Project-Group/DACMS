@@ -11,6 +11,11 @@ import StudentProfile from './pages/StudentProfile';
 import Applications from './pages/Applications';
 import ApplyForAssistant from './pages/ApplyForAssistant';
 import ApplicationDetail from './pages/ApplicationDetail';
+import WorkTracking from './pages/WorkTracking';
+import SessionDetail from './pages/SessionDetail';
+import Claims from './pages/Claims';
+import GenerateNewClaim from './pages/GenerateNewClaim';
+import ClaimDetail from './pages/ClaimDetail';
 
 // ===== LECTURER PAGES =====
 import LectureDashboard from './pages/LectureDashboard';
@@ -48,6 +53,11 @@ function App() {
             <Route path="/apply-for-assistant" element={<ApplyForAssistant />} />
             <Route path="/application-detail/:id" element={<ApplicationDetail />} />
             <Route path="/notifications" element={<Notifications />} />
+            <Route path="/work-tracking" element={<WorkTracking />} />
+            <Route path="/session-detail/:id" element={<SessionDetail />} />
+            <Route path="/claims" element={<Claims />} />
+            <Route path="/generate-new-claim"element={<GenerateNewClaim />}/>
+            <Route path="/claim-detail/:id"element={<ClaimDetail />}/>
           </Route>
 
           {/* ===== LECTURER ROUTES ===== */}
