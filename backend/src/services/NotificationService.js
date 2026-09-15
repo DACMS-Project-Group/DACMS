@@ -1,22 +1,29 @@
 import pool from '../config/db.js';
-import { io, userSockets } from '../app.js';
-
-
+import { io, userSockets } from '../server.js';
+import UserController from '../controllers/UserController.js';
+import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken';
 
 class NotificationService {
     static async sendNotification({ recipientId, type, message }) {
         // 1. Save to PostgreSQL using parameterized query
-        const insertQuery = `
-            INSERT INTO notifications (RecipientUserID, NotificationType, Message)
+        const insertQuery = await pool.query(
+            `
+            INSERT INTO "NOTIFICATION" ("RecipientUserID", "NotificationType", "Message")
             VALUES ($1, $2, $3)
             RETURNING *
-        `;
-        const { rows } = await pool.query(insertQuery, [
-            recipientId, 
-            type, 
-            message
-        ]);
-    
+        `, [recipientId, type, message]);
+
+        const { rows } = await pool.query(
+            `
+            SELECT * 
+            FROM "NOTIFICATION"
+            WHERE "NotificationID" = $1
+            `
+            , 
+            [insertQuery.rows[0].NotificationID]
+ 
+        );
         const newNotification = rows[0];
 
         // 2. Push via Socket if the recipient is online
@@ -29,33 +36,46 @@ class NotificationService {
     }
 
     //get existing notifications for the authenticated user
-    static async getNotifications(req, res) {
-        const query = `
-                SELECT * FROM notifications 
-                WHERE RecipientUserID = $1 
-                ORDER BY NotificationTimestamp DESC 
+    static async getNotifications(req) {
+        const userId = await this.unpackUserID(req);
+        console.log(userId);
+        const { rows } = await pool.query(
+             `
+                SELECT * FROM "NOTIFICATION" 
+                WHERE "RecipientUserID" = $1 
+                ORDER BY "CreatedTimestamp" DESC 
                 LIMIT 20
-            `;
-        const { rows } = await pool.query(query, [req.user.id]);
-        res.json(rows[0]);
+            `,
+         [userId]);
+        return rows;
     }
 
     //mark a notification as read
-    static async markAsRead(req, res) {
+    static async markAsRead(req) {
+        const userId = await this.unpackUserID(req);
 
-        const query = `
-            UPDATE notifications 
-            SET read = true 
-            WHERE id = $1 AND recipient_id = $2 
+        const { rows } = await pool.query(
+            `
+            UPDATE "NOTIFICATION"
+            SET "IsRead" = true 
+            WHERE "NotificationID" = $1 AND "RecipientUserID" = $2 
             RETURNING *
-        `;
-        const { rows } = await pool.query(query, [req.params.id, req.user.id]);
+        `, [req.params.id, userId]);
+       
 
         if (rows.length === 0) {
-            return res.status(404).json({ error: 'Notification not found' });
+            return { error: 'Notification not found' };
         }
 
-        res.json(rows[0]);
+        return rows[0];
+    }
+
+    static async unpackUserID(req) {
+        const token = req.cookies.token;
+        if (!token) return 'Access denied.';
+        const verifiedData = jwt.verify(token, process.env.JWT_SECRET || 'your_super_secret_key');
+        console.log(verifiedData);
+        return verifiedData.id;
     }
 
 }
