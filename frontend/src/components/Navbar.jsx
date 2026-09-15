@@ -17,11 +17,7 @@ const Navbar = () => {
         
         {/* RIGHT: Title */}
         <div className="flex items-center ml-32">
-<<<<<<< HEAD
-          <h1 className="text-2xl font-poppins font-semibold tracking-wide">
-=======
           <h1 className="text-xl font-poppins font-semibold tracking-wide">
->>>>>>> 0221489 (Changed dacms to aacms and demi to assistant)
             AACMS
           </h1>
         </div>

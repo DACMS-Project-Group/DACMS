@@ -21,6 +21,7 @@ import ClaimDetail from './pages/ClaimDetail';
 import LectureDashboard from './pages/LectureDashboard';
 import ReviewApplications from './pages/ReviewApplications';
 import ApplicationReview from './pages/ApplicationReview';
+import AssignAssistantResponsibilities from './pages/AssignAssistantResponsibilities';
 
 // ===== ADMIN PAGES =====
 import AdminDashboard from './pages/AdminDashboard';
@@ -32,15 +33,16 @@ import ExportPayments from './pages/ExportPayments';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import './index.css';
+
 // ===== NAVIGATION ITEMS =====
 import Notifications from './pages/Notifications';
 
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>  {/* ← Moved INSIDE BrowserRouter */}
+      <AuthProvider>
         <Routes>
-          
+
           {/* ===== PUBLIC ROUTES ===== */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
@@ -56,8 +58,8 @@ function App() {
             <Route path="/work-tracking" element={<WorkTracking />} />
             <Route path="/session-detail/:id" element={<SessionDetail />} />
             <Route path="/claims" element={<Claims />} />
-            <Route path="/generate-new-claim"element={<GenerateNewClaim />}/>
-            <Route path="/claim-detail/:id"element={<ClaimDetail />}/>
+            <Route path="/generate-new-claim" element={<GenerateNewClaim />} />
+            <Route path="/claim-detail/:id" element={<ClaimDetail />} />
           </Route>
 
           {/* ===== LECTURER ROUTES ===== */}
@@ -65,6 +67,7 @@ function App() {
             <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
             <Route path="/review-applications" element={<ReviewApplications />} />
             <Route path="/application-review/:id" element={<ApplicationReview />} />
+            <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
             <Route path="/notifications" element={<Notifications />} />
           </Route>
 
@@ -88,4 +91,4 @@ function App() {
   );
 }
 
-export default App
+export default App;
