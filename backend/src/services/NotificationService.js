@@ -25,7 +25,6 @@ class NotificationService {
             [insertQuery.rows[0].NotificationID]
  
         );
-
         const newNotification = rows[0];
 
         // 2. Push via Socket if the recipient is online
