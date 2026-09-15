@@ -8,9 +8,4 @@ const Card = ({ children, className = '' }) => {
   );
 };
 
-export default Card;
-//eg
-//<Card>
-  //<h3>My Title</h3>
- // <p>My content</p>
-//</Card>
+export default Card;  // ← Make sure this is here
