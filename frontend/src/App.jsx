@@ -16,6 +16,7 @@ import ApplicationDetail from './pages/ApplicationDetail';
 import LectureDashboard from './pages/LectureDashboard';
 import ReviewApplications from './pages/ReviewApplications';
 import ApplicationReview from './pages/ApplicationReview';
+import AssignAssistantResponsibilities from './pages/AssignAssistantResponsibilities'; 
 
 // ===== ADMIN PAGES =====
 import AdminDashboard from './pages/AdminDashboard';
@@ -56,6 +57,7 @@ function App() {
             <Route path="/review-applications" element={<ReviewApplications />} />
             <Route path="/application-review/:id" element={<ApplicationReview />} />
             <Route path="/notifications" element={<Notifications />} />
+             <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
           </Route>
 
           {/* ===== ADMIN ROUTES ===== */}
