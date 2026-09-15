@@ -32,6 +32,8 @@ import BudgetDetails from './pages/BudgetDetails';
 import ExportPayments from './pages/ExportPayments';
 import ClaimsVerification from './pages/ClaimsVerification';
 import ClaimReview from './pages/ClaimReview';
+import AppointmentApprovals from './pages/AppointmentApprovals';
+import AppointmentReview from './pages/AppointmentReview';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import './index.css';
