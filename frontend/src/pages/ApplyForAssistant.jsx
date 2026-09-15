@@ -3,7 +3,7 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 
-const ApplyForDemi = () => {
+const ApplyForAssistant = () => {
   const navigate = useNavigate();
 
   const modules = [
@@ -52,11 +52,11 @@ const ApplyForDemi = () => {
           <div className="p-8">
             <div className="mb-8">
               <h2 className="text-3xl font-poppins font-semibold text-primary">
-                Available Demi Positions
+                Available Assistant Positions
               </h2>
 
               <p className="text-neutral mt-2">
-                View available modules and apply for a Demi position if you
+                View available modules and apply for an Assistant position if you
                 meet the eligibility requirements.
               </p>
             </div>
@@ -126,4 +126,4 @@ const ApplyForDemi = () => {
   );
 };
 
-export default ApplyForDemi;
+export default ApplyForAssistant;
