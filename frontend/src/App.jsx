@@ -30,6 +30,8 @@ import CreateBudget from './pages/CreateBudget';
 import EditBudget from './pages/EditBudget';
 import BudgetDetails from './pages/BudgetDetails';
 import ExportPayments from './pages/ExportPayments';
+import ClaimsVerification from './pages/ClaimsVerification';
+import ClaimReview from './pages/ClaimReview';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import './index.css';
@@ -78,6 +80,14 @@ function App() {
             <Route path="/create-budget" element={<CreateBudget />} />
             <Route path="/edit-budget/:id" element={<EditBudget />} />
             <Route path="/budget-details/:id" element={<BudgetDetails />} />
+            <Route
+              path="/claims-verification"
+              element={<ClaimsVerification />}
+            />
+            <Route
+              path="/claim-review/:id"
+              element={<ClaimReview />}
+            />
             <Route path="/export-payments" element={<ExportPayments />} />
             <Route path="/notifications" element={<Notifications />} />
           </Route>
