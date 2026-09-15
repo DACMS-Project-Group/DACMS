@@ -32,6 +32,8 @@ import BudgetDetails from './pages/BudgetDetails';
 import ExportPayments from './pages/ExportPayments';
 import ClaimsVerification from './pages/ClaimsVerification';
 import ClaimReview from './pages/ClaimReview';
+import AppointmentApprovals from './pages/AppointmentApprovals';
+import AppointmentReview from './pages/AppointmentReview';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import './index.css';
@@ -90,7 +92,16 @@ function App() {
               element={<ClaimReview />}
             />
             <Route path="/export-payments" element={<ExportPayments />} />
-            <Route path="/notifications" element={<Notifications />} />
+            <Route
+              path="/appointment-approvals"
+              element={<AppointmentApprovals />}
+            />
+
+            <Route
+              path="/appointment-review/:id"
+              element={<AppointmentReview />}
+            />
+                        <Route path="/notifications" element={<Notifications />} />
           </Route>
 
           {/* ===== FALLBACK ===== */}
