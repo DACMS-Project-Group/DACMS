@@ -2,6 +2,9 @@ import app from './app.js';
 import { Server } from "socket.io";
 import http from 'http';
 import { createServer } from "node:http";
+import env from 'dotenv';
+
+env.config();
 
 const PORT = process.env.PORT || 5000;
 
@@ -23,7 +26,7 @@ io.on('connection', (socket) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Backend running on port ${PORT}`);
+    console.log(`Backend running on port ${PORT}, ${process.env.JWT_SECRET}`);
 });
 
 export { io, userSockets };
