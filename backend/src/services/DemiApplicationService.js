@@ -18,6 +18,15 @@ class DemiApplicationService {
             throw new Error('listingId is required.');
         }
 
+        const listing = await this.demiApplicationRepository.findListingById(listingId);
+        if (!listing) {
+            throw new Error('That listing does not exist.');
+        }
+
+        if (new Date(listing.Deadline) <= new Date()) {
+            throw new Error('The application deadline for this listing has passed.');
+        }
+
         const existing = await this.demiApplicationRepository.findExisting(studentId, listingId);
         if (existing) {
             throw new Error('You have already applied to this listing.');

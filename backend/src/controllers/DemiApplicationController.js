@@ -29,8 +29,13 @@ class DemiApplicationController {
             const application = await demiApplicationService.applyForListing(studentId, listingId);
             res.status(201).json({ application });
         } catch (err) {
-            // Known validation errors (duplicate application, missing listingId) -> 400
-            if (err.message.includes('already applied') || err.message.includes('required')) {
+            // Known validation errors -> 400
+            if (
+                err.message.includes('already applied') ||
+                err.message.includes('required') ||
+                err.message.includes('does not exist') ||
+                err.message.includes('deadline')
+            ) {
                 return res.status(400).json({ message: err.message });
             }
             next(err);

@@ -37,10 +37,17 @@ class RemunerationClaimService {
         const totalAmount = Math.round(totalHours * hourlyRate * 100) / 100;
         const referenceNumber = this._generateReferenceNumber(applicationId);
 
+        // Claim period runs from the last claim's date (or the beginning of time if
+        // this is the first claim) through today.
+        const periodStartDate = sinceDate ? new Date(sinceDate) : null;
+        const periodEndDate = new Date();
+
         return this.remunerationClaimRepository.create({
             referenceNumber,
             applicationId,
             moduleId: application.ModuleID,
+            periodStartDate,
+            periodEndDate,
             totalHoursClaimed: totalHours,
             totalClaimAmount: totalAmount,
             hourlyRateApplied: hourlyRate,

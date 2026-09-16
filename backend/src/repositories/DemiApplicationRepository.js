@@ -33,6 +33,15 @@ class DemiApplicationRepository extends BaseRepository {
         return rows[0] ? DemiApplication.fromDb(rows[0]) : null;
     }
 
+    /** Fetches a single listing by ID, or null if it doesn't exist. */
+    async findListingById(listingId) {
+        const rows = await this.query(
+            `SELECT "ListingID", "ModuleID", "LecturerID", "Deadline", "MinimumGrade" FROM "DEMI_LISTING" WHERE "ListingID" = $1`,
+            [listingId]
+        );
+        return rows[0] || null;
+    }
+
     /** Prevents a student from applying to the same listing twice. */
     async findExisting(studentId, listingId) {
         const rows = await this.query(
