@@ -46,7 +46,6 @@ class NotificationService {
     //get existing notifications for the authenticated user
     static async getNotifications(req) {
         const userId = await this.unpackUserID(req);
-
         const { rows } = await pool.query(
              `
                 SELECT "NotificationID", "NotificationTitle", "NotificationType", "Message", "IsRead", "CreatedTimestamp"
