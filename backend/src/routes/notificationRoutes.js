@@ -16,7 +16,6 @@ router.get(
     NotificationController.getNotifications.bind(NotificationController)
 
 );
-
 router.patch(
     '/read/:id', 
     authenticate, 
