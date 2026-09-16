@@ -3,6 +3,7 @@ import { io, userSockets } from '../server.js';
 import UserController from '../controllers/UserController.js';
 import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
 
 class NotificationService {
     static async sendNotification({ recipientId, type, message }) {
@@ -38,7 +39,6 @@ class NotificationService {
     //get existing notifications for the authenticated user
     static async getNotifications(req) {
         const userId = await this.unpackUserID(req);
-        console.log(userId);
         const { rows } = await pool.query(
              `
                 SELECT * FROM "NOTIFICATION" 
@@ -70,11 +70,64 @@ class NotificationService {
         return rows[0];
     }
 
+    //email notifcation
+    static async sendEmailNotification({ recipientUserId, notificationID }) {
+        // Fetch the recipient's email from the database
+        const { rows: userEmailRows } = await pool.query(
+            `
+            SELECT "Email" FROM "USER" 
+            WHERE "UserID" = $1
+            `,
+            [recipientUserId]
+        );
+
+        // Fetch notification details from the database
+        const { rows: notificationRows } = await pool.query(
+            `
+            SELECT * FROM "NOTIFICATION" 
+            WHERE "NotificationID" = $1
+            `,
+            [notificationID]
+        );
+
+        let testAccount = await nodemailer.createTestAccount(); //Create test account, remove this in production
+
+        //create transporter with SMTP settings
+        let transporter = nodemailer.createTransport({
+            host: "smtp.ethereal.email", // Use Ethereal for testing
+            port: 587,
+            secure: false, 
+            auth: {
+                user: testAccount.user, // generated ethereal user
+                pass: testAccount.pass, // generated ethereal password
+            },
+        });
+
+        // Compose the email
+        let mailOptions = {
+            from: '"AACMS Notifications" <notifications@aacms.com>',
+            to: userEmailRows[0].Email,
+            subject: notificationRows[0].NotificationType,
+            text: notificationRows[0].Message
+        };
+
+        // Send the email
+        await transporter.sendMail(mailOptions);
+
+        //preview email can be viewed in browswer using link in log
+        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(mailOptions));
+
+        return { message: 'Email notification sent successfully.' };
+    }
+
     static async unpackUserID(req) {
         const token = req.cookies.token;
-        if (!token) return 'Access denied.';
+
+        if (!token) 
+            return 'Access denied.';
+
         const verifiedData = jwt.verify(token, process.env.JWT_SECRET || 'your_super_secret_key');
-        console.log(verifiedData);
+
         return verifiedData.id;
     }
 
