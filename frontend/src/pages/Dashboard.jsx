@@ -81,7 +81,7 @@ const Dashboard = () => {
                   onClick={() => navigate('/applications')}
                   className="bg-primary-lightest text-dark px-6 py-3 rounded-xl font-semibold hover:bg-primary-light hover:text-white transition text-center"
                 >
-                  Apply to Demi
+                  Apply to Assistant
                 </button>
 
                 <button
