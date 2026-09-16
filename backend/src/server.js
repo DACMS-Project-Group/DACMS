@@ -26,7 +26,7 @@ io.on('connection', (socket) => {
 });
 
 app.listen(PORT, () => {
-    console.log(`Backend running on port ${PORT}, ${process.env.JWT_SECRET}`);
+    console.log(`Backend running on port ${PORT}`);
 });
 
 export { io, userSockets };
