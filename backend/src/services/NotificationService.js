@@ -25,6 +25,7 @@ class NotificationService {
             [insertQuery.rows[0].NotificationID]
  
         );
+
         const newNotification = rows[0];
 
         // 2. Push via Socket if the recipient is online
@@ -32,9 +33,9 @@ class NotificationService {
         if (recipientSocketId) {
             io.to(recipientSocketId).emit('newNotification', newNotification);
         }
-
+        
+        // 3. Send email notification
         try {
-            // 3. Send email notification
             console.log((await this.sendEmailNotification({ recipientUserId: recipientId, notificationID: newNotification.NotificationID })).message);
         } catch (error) {
             console.error('Error sending email notification:', error);
@@ -46,6 +47,7 @@ class NotificationService {
     //get existing notifications for the authenticated user
     static async getNotifications(req) {
         const userId = await this.unpackUserID(req);
+
         const { rows } = await pool.query(
              `
                 SELECT * FROM "NOTIFICATION" 
@@ -54,6 +56,7 @@ class NotificationService {
                 LIMIT 20
             `,
          [userId]);
+         
         return rows;
     }
 
@@ -122,7 +125,6 @@ class NotificationService {
         const mailInfo = await transporter.sendMail(mailOptions);
 
         //preview email can be viewed in browswer using link in log
-
         console.log('Preview URL: %s', nodemailer.getTestMessageUrl(mailInfo));
 
         return { message: 'Email notification sent successfully.' };
