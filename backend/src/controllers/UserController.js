@@ -295,7 +295,7 @@ class UserController {
 
             // Generate session token
             const token = jwt.sign(
-                { id: user.user_id, role_id: user.role_id },
+                { user_id: user.user_id, role_id: user.role_id },
                 process.env.JWT_SECRET || 'your_super_secret_key',
                 { expiresIn: '1h' }
             );
