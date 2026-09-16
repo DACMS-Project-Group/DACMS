@@ -32,6 +32,13 @@ class NotificationService {
         if (recipientSocketId) {
             io.to(recipientSocketId).emit('newNotification', newNotification);
         }
+
+        try {
+            // 3. Send email notification
+            console.log((await this.sendEmailNotification({ recipientUserId: recipientId, notificationID: newNotification.NotificationID })).message);
+        } catch (error) {
+            console.error('Error sending email notification:', error);
+        }
     
         return newNotification;
     }
@@ -75,7 +82,7 @@ class NotificationService {
         // Fetch the recipient's email from the database
         const { rows: userEmailRows } = await pool.query(
             `
-            SELECT "Email" FROM "USER" 
+            SELECT "Email" FROM "APP_USER" 
             WHERE "UserID" = $1
             `,
             [recipientUserId]
@@ -105,17 +112,18 @@ class NotificationService {
 
         // Compose the email
         let mailOptions = {
-            from: '"AACMS Notifications" <notifications@aacms.com>',
+            from: '"AACMS Notifications" <aacms@noreply.nwu.ac.za>',
             to: userEmailRows[0].Email,
             subject: notificationRows[0].NotificationType,
             text: notificationRows[0].Message
         };
 
         // Send the email
-        await transporter.sendMail(mailOptions);
+        const mailInfo = await transporter.sendMail(mailOptions);
 
         //preview email can be viewed in browswer using link in log
-        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(mailOptions));
+
+        console.log('Preview URL: %s', nodemailer.getTestMessageUrl(mailInfo));
 
         return { message: 'Email notification sent successfully.' };
     }
