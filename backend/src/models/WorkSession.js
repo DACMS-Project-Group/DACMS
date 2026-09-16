@@ -7,6 +7,7 @@ class WorkSession {
         total_hours = start_time && end_time ? (end_time - start_time) / (1000 * 60 * 60) : null,
         estimated_remuneration,
         lecturer_approval,
+        activity_description = null,
     }) {
         this.session_id = session_id;
         this.position_id = position_id;
@@ -15,6 +16,7 @@ class WorkSession {
         this.total_hours = total_hours;
         this.estimated_remuneration = estimated_remuneration;
         this.lecturer_approval = lecturer_approval;
+        this.activity_description = activity_description;
     }
 
     static fromDb(row) {
@@ -25,7 +27,8 @@ class WorkSession {
             end_time: row.EndTime,
             total_hours: row.TotalHoursWorked,
             estimated_remuneration: row.EstimatedRemuneration,
-            lecturer_approval: row.LecturerApproval
+            lecturer_approval: row.LecturerApproval,
+            activity_description: row.ActivityDescription,
         });
     }
 
@@ -37,7 +40,8 @@ class WorkSession {
             EndTime: this.end_time,
             TotalHoursWorked: this.total_hours,
             EstimatedRemuneration: this.estimated_remuneration,
-            LecturerApproval: this.lecturer_approval
+            LecturerApproval: this.lecturer_approval,
+            ActivityDescription: this.activity_description,
         };
     }
 

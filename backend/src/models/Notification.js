@@ -4,6 +4,7 @@ class Notification {
         user_id,
         type,
         message,
+        subject = null,
         is_read = false,
         created_timestamp = new Date(),
     }) {
@@ -11,6 +12,7 @@ class Notification {
         this.user_id = user_id;
         this.type = type;
         this.message = message;
+        this.subject = subject;
         this.is_read = is_read;
         this.created_timestamp = created_timestamp;
     }
@@ -18,9 +20,10 @@ class Notification {
     static fromDb(row) {
         return new Notification({
             notification_id: row.NotificationID,
-            user_id: row.RecipientUserID, 
+            user_id: row.RecipientUserID,
             type: row.NotificationType,
             message: row.Message,
+            subject: row.Subject,
             is_read: row.IsRead,
             created_timestamp: row.CreatedTimestamp,
         });
@@ -29,9 +32,10 @@ class Notification {
     toDb() {
         return {
             NotificationID: this.notification_id,
-            RecipientUserID: this.user_id, 
+            RecipientUserID: this.user_id,
             NotificationType: this.type,
             Message: this.message,
+            Subject: this.subject,
             IsRead: this.is_read,
             CreatedTimestamp: this.created_timestamp,
         };
@@ -39,7 +43,9 @@ class Notification {
 
     validate() {
         if (!this.user_id) throw new Error("Recipient User ID is required.");
-        if (!this.message || this.message.trim() === "") throw new Error("Message is required.");
+        if (!this.message || this.message.trim() === "") {
+            throw new Error("Message is required.");
+        }
     }
 }
 
