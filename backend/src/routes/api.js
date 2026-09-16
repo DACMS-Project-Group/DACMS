@@ -4,7 +4,6 @@ import userRoutes from './userRoutes.js';
 import adminRoutes from './adminRoutes.js';
 import notificationRoutes from './notificationRoutes.js';
 import UserController from '../controllers/UserController.js';
-import AdminController from '../controllers/AdminController.js';
 
 const router = Router();
 
