@@ -8,6 +8,7 @@ RUN npm install jsonwebtoken
 RUN npm install cookie-parser
 RUN npm install socket.io
 RUN npm install http-server
+RUN npm install nodemailer
 
 COPY . .
 
