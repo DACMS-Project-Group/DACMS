@@ -6,14 +6,14 @@ import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 
 class NotificationService {
-    static async sendNotification({ recipientId, type, message }) {
+    static async sendNotification({ recipientId, title, type, message }) {
         // 1. Save to PostgreSQL using parameterized query
         const insertQuery = await pool.query(
             `
-            INSERT INTO "NOTIFICATION" ("RecipientUserID", "NotificationType", "Message")
-            VALUES ($1, $2, $3)
+            INSERT INTO "NOTIFICATION" ("RecipientUserID", "NotificationTitle", "NotificationType", "Message")
+            VALUES ($1, $2, $3, $4)
             RETURNING *
-        `, [recipientId, type, message]);
+        `, [recipientId, title, type, message]);
 
         const { rows } = await pool.query(
             `
@@ -50,7 +50,8 @@ class NotificationService {
 
         const { rows } = await pool.query(
              `
-                SELECT * FROM "NOTIFICATION" 
+                SELECT "NotificationID", "NotificationTitle", "NotificationType", "Message", "IsRead", "CreatedTimestamp"
+                FROM "NOTIFICATION" 
                 WHERE "RecipientUserID" = $1 
                 ORDER BY "CreatedTimestamp" DESC 
                 LIMIT 20
@@ -117,7 +118,7 @@ class NotificationService {
         let mailOptions = {
             from: '"AACMS Notifications" <aacms@noreply.nwu.ac.za>',
             to: userEmailRows[0].Email,
-            subject: notificationRows[0].NotificationType,
+            subject: notificationRows[0].NotificationTitle,
             text: notificationRows[0].Message
         };
 
@@ -138,7 +139,7 @@ class NotificationService {
 
         const verifiedData = jwt.verify(token, process.env.JWT_SECRET || 'your_super_secret_key');
 
-        return verifiedData.id;
+        return verifiedData.user_id;
     }
 
 }
