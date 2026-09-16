@@ -4,8 +4,8 @@ class NotificationController {
     //fetch notifications for the authenticated user
     static async sendNotification(req, res) {
         try {
-            const { recipientId, type, message } = req.body;
-            const notification = await NotificationService.sendNotification({ recipientId, type, message });
+            const { recipientId, title, type, message } = req.body;
+            const notification = await NotificationService.sendNotification({ recipientId, title, type, message });
             res.status(201).json(notification);
         } catch (error) {
             console.error('Error sending notification:', error);
