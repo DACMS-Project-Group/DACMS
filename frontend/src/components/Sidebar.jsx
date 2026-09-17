@@ -7,9 +7,12 @@ const Sidebar = ({ userRole = 'student' }) => {
   // are treated the same way.
   const role = userRole?.toLowerCase().trim();
 
+<<<<<<< HEAD
   const { logout } = useAuth();
   const { unreadCount } = liveNotifs();
 
+=======
+>>>>>>> ab698f2 (Fix role-based login and sidebar)
   // Student Navigation
   const studentNavItems = [
     { name: 'Dashboard', href: '/student-dashboard' },
@@ -81,6 +84,29 @@ const Sidebar = ({ userRole = 'student' }) => {
 
       {/* Bottom Navigation */}
       <div className="p-4">
+<<<<<<< HEAD
+=======
+
+        {/* Profile is strictly for students */}
+        {role === 'student' && (
+          <NavLink
+            to="/profile"
+            className={({ isActive }) =>
+              `
+              block px-4 py-3 rounded-xl
+              transition-colors duration-200 mb-2
+              ${
+                isActive
+                  ? 'bg-primary-light font-semibold'
+                  : 'hover:bg-primary-light'
+              }
+              `
+            }
+          >
+            Profile
+          </NavLink>
+        )}
+>>>>>>> ab698f2 (Fix role-based login and sidebar)
 
         {/* Profile is strictly for students */}
         {role === 'student' && (
