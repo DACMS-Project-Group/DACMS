@@ -4,9 +4,20 @@ import { authenticate } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post('/create_user', UserController.createUser.bind(UserController));
-router.post('/login', UserController.login.bind(UserController));
-router.post('/logout', UserController.logout.bind(UserController));
+router.post(
+    '/create', 
+    UserController.createUser.bind(UserController)
+);
+
+router.post(
+    '/login', 
+    UserController.login.bind(UserController)
+);
+
+router.post(
+    '/logout', 
+    UserController.logout.bind(UserController)
+);
 
 router.get(
     '/fetch/:id', 

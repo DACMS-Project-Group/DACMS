@@ -11,7 +11,7 @@ const AdminDashboard = () => {
   const statistics = [
     { title: 'Total Modules', value: '24' },
     { title: 'Total Lecturers', value: '56' },
-    { title: 'Total DEMIs', value: '60' },
+    { title: 'Total Assistants', value: '60' },
     { title: 'Pending Approvals', value: '18' },
     { title: 'Pending Claims', value: '12' },
     { title: 'Budget Usage', value: '78%' },
@@ -26,14 +26,14 @@ const AdminDashboard = () => {
   const pendingAppointments = [
     {
       lecturer: 'Dr Example',
-      demi: 'Demi Example',
+      assistant: 'Assistant Example',
       module: 'CMPG xxx',
       date: '28 August 2026',
       status: 'Pending',
     },
     {
       lecturer: 'Prof Example',
-      demi: 'Demi Example',
+      assistant: 'Assistant Example',
       module: 'CMPG xxx',
       date: '29 August 2026',
       status: 'Pending',
@@ -68,7 +68,7 @@ const AdminDashboard = () => {
               Administrator Overview
             </h2>
             <p className="text-neutral mt-2 font-inter">
-              Monitor and manage the Demi Application and Claims Management System.
+              Monitor and manage the Assistant Applications and Claims Management System.
             </p>
           </div>
 
@@ -156,7 +156,7 @@ const AdminDashboard = () => {
                             {appointment.module}
                           </p>
                           <p className="text-sm text-neutral mt-1 font-inter">
-                            {appointment.lecturer} → {appointment.demi}
+                            {appointment.lecturer} → {appointment.assistant}
                           </p>
                           <p className="text-sm text-neutral mt-1 font-inter">
                             {appointment.date}

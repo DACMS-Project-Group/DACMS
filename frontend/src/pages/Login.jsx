@@ -351,7 +351,7 @@ const Login = () => {
         {/* Footer */}
         <div className="absolute bottom-6 text-center">
           <p className="text-xs text-neutral/50 font-inter">
-            © 2026 North-West University • DACMS
+            © 2026 North-West University • AACMS
           </p>
         </div>
         
