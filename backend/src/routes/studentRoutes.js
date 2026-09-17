@@ -12,91 +12,91 @@ const router = express.Router();
 
 // -- Dashboard ------------------------------------------------------------
 router.get(
-    '/students/dashboard',
+    '/dashboard',
     authenticate,
     StudentDashboardController.getDashboard.bind(StudentDashboardController)
 );
 
 // -- Demi Applications ------------------------------------------------------
 router.get(
-    '/students/listings/open',
+    '/listings/open',
     authenticate,
     DemiApplicationController.getOpenListings.bind(DemiApplicationController)
 );
 
 router.get(
-    '/students/applications',
+    '/applications',
     authenticate,
     DemiApplicationController.getMyApplications.bind(DemiApplicationController)
 );
 
 router.post(
-    '/students/applications',
+    '/applications',
     authenticate,
     DemiApplicationController.apply.bind(DemiApplicationController)
 );
 
 // -- Supporting Documents -----------------------------------------------------
 router.post(
-    '/students/documents',
+    '/documents',
     authenticate,
     upload.single('file'),
     DemiApplicationController.uploadDocument.bind(DemiApplicationController)
 );
 
 router.get(
-    '/students/documents',
+    '/documents',
     authenticate,
     DemiApplicationController.getMyDocuments.bind(DemiApplicationController)
 );
 
 // -- Working Hours ------------------------------------------------------------
 router.get(
-    '/students/positions',
+    '/positions',
     authenticate,
     WorkSessionController.getMyPositions.bind(WorkSessionController)
 );
 
 router.get(
-    '/students/sessions',
+    '/sessions',
     authenticate,
     WorkSessionController.getMySessions.bind(WorkSessionController)
 );
 
 router.post(
-    '/students/positions/:positionId/sessions/clock-in',
+    '/positions/:positionId/sessions/clock-in',
     authenticate,
     WorkSessionController.clockIn.bind(WorkSessionController)
 );
 
 router.patch(
-    '/students/sessions/:sessionId/clock-out',
+    '/sessions/:sessionId/clock-out',
     authenticate,
     WorkSessionController.clockOut.bind(WorkSessionController)
 );
 
 // -- Remuneration Claims --------------------------------------------------------
 router.get(
-    '/students/claims',
+    '/claims',
     authenticate,
     RemunerationClaimController.getMyClaims.bind(RemunerationClaimController)
 );
 
 router.post(
-    '/students/applications/:applicationId/claims',
+    '/applications/:applicationId/claims',
     authenticate,
     RemunerationClaimController.generateClaim.bind(RemunerationClaimController)
 );
 
 // -- Profile --------------------------------------------------------------------
 router.get(
-    '/students/profile',
+    '/profile',
     authenticate,
     StudentController.getProfile.bind(StudentController)
 );
 
 router.patch(
-    '/students/profile',
+    '/profile',
     authenticate,
     StudentController.updateProfile.bind(StudentController)
 );
