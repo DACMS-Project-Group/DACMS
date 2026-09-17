@@ -1,6 +1,10 @@
 import { NavLink } from 'react-router-dom';
 
 const Sidebar = ({ userRole = 'student' }) => {
+  // Normalise the role so that Lecturer, LECTURER, lecturer, etc.
+  // are treated the same way.
+  const role = userRole?.toLowerCase().trim();
+
   // Student Navigation
   const studentNavItems = [
     { name: 'Dashboard', href: '/dashboard' },
@@ -34,9 +38,9 @@ const Sidebar = ({ userRole = 'student' }) => {
   ];
 
   const navItems =
-    userRole === 'lecturer'
+    role === 'lecturer'
       ? lecturerNavItems
-      : userRole === 'admin'
+      : role === 'admin'
         ? adminNavItems
         : studentNavItems;
 
@@ -68,22 +72,26 @@ const Sidebar = ({ userRole = 'student' }) => {
 
       {/* Bottom Navigation */}
       <div className="p-4">
-        <NavLink
-          to="/profile"
-          className={({ isActive }) =>
-            `
-            block px-4 py-3 rounded-xl
-            transition-colors duration-200 mb-2
-            ${
-              isActive
-                ? 'bg-primary-light font-semibold'
-                : 'hover:bg-primary-light'
+
+        {/* Profile is strictly for students */}
+        {role === 'student' && (
+          <NavLink
+            to="/profile"
+            className={({ isActive }) =>
+              `
+              block px-4 py-3 rounded-xl
+              transition-colors duration-200 mb-2
+              ${
+                isActive
+                  ? 'bg-primary-light font-semibold'
+                  : 'hover:bg-primary-light'
+              }
+              `
             }
-            `
-          }
-        >
-          Profile
-        </NavLink>
+          >
+            Profile
+          </NavLink>
+        )}
 
         <a
           href="/logout"
