@@ -1,5 +1,5 @@
 ╔═══════════════════════════════════════════════════════════════╗
-║            VS Code TERMINAL CHEAT SHEET - WINDOWS            ║
+║            VS Code TERMINAL CHEAT SHEET - TEAM               ║
 ╚═══════════════════════════════════════════════════════════════╝
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -20,11 +20,13 @@ cls                    → Clear terminal
 git status             → See what files changed
 git branch             → See your current branch
 git pull               → Get latest code from GitHub
+git pull origin Frontend → Pull Frontend into your branch (DAILY!)
 git add .              → Add ALL changes to commit
 git add -A             → Add ALL changes (alternative)
 git commit -m "message" → Commit changes with a message
 git push               → Push your commits to GitHub
 git checkout main      → Switch to main branch
+git checkout Frontend  → Switch to Frontend branch
 git branch new-branch  → Create a new branch
 git log --oneline      → See commit history
 
@@ -58,9 +60,9 @@ Ctrl + C                  → Stop the app
 5️⃣  COMPLETE WORKFLOWS
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-=== START YOUR DAY (PULL LATEST) ===
+=== START YOUR DAY (PULL LATEST Frontend) ===
 cd C:\Users\user\source\repos\DACMS\DACMS
-git pull
+git pull origin Frontend    ← IMPORTANT! Do this EVERY morning
 cd frontend
 npm install
 
@@ -81,15 +83,22 @@ git commit -m "message"   (Commit)
 git push                  (Push to GitHub)
 
 === FULL WORKFLOW (Pull → Work → Commit → Push) ===
-git pull                  (Get latest)
+git pull origin Frontend  (Get latest Frontend - DO THIS DAILY)
 [Make your changes in VS Code]
 git status                (Check changes)
 git add .                 (Add changes)
 git commit -m "message"   (Commit)
 git push                  (Push to GitHub)
 
+=== WHEN A PAGE IS COMPLETE → MERGE TO Frontend ===
+git checkout Frontend
+git pull origin Frontend
+git merge your-branch-name
+git push
+git checkout your-branch-name
+
 === FIX MERGE CONFLICTS ===
-git pull                  (Pull - conflicts will show)
+git pull origin Frontend   (Pull - conflicts will show)
 [Open files with conflicts - look for <<<<<<< HEAD]
 [Keep the code you want, delete the rest]
 git add .                 (Mark as resolved)
@@ -115,34 +124,51 @@ Port 5173 in use           npm run dev -- --port 5174
 
 Docker not running         Open Docker Desktop, wait for green light
 
-Git push rejected          git pull first, then git push
+Git push rejected          git pull origin Frontend first, then git push
 
 Merge conflicts            Open files with conflicts, look for <<<<<<<
                            Fix the code, then git add . and git commit
 
+"frontend could be both"   Use: git checkout -- Frontend
+error
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-7️⃣  QUICK REFERENCE (DAILY COMMANDS)
+7️⃣  THE MOST IMPORTANT RULE ⭐
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-git pull              → Get latest
-git add .             → Add changes
-git commit -m "msg"   → Commit
-git push              → Push
+RUN THIS EVERY DAY BEFORE YOU CODE:
 
-cd frontend           → Go to frontend
+    git pull origin Frontend
+
+This pulls the latest Frontend into your branch.
+Do it daily = small conflicts (2 min)
+Skip it = huge conflicts (2 hours)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+8️⃣  QUICK REFERENCE (DAILY COMMANDS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+git pull origin Frontend  → Get latest Frontend (DO THIS DAILY)
+git add .                 → Add changes
+git commit -m "msg"       → Commit
+git push                  → Push
+
+cd frontend               → Go to frontend
 node node_modules/vite/bin/vite.js  → Start app
 
 cd C:\Users\user\source\repos\DACMS\DACMS  → Go to project root
 docker compose up --build  → Start Docker
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📝 PRO TIPS
+📝 TEAM RULES
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-• Always git pull before you start working
-• git status often - know what you're about to commit
-• Commit small and often - easier to undo
-• Write clear commit messages: "Fixed navbar bug" not "stuff"
-• Test before pushing - make sure your code works
+1. git pull origin Frontend EVERY DAY before coding
+2. When a page is complete → MERGE to Frontend
+3. Don't let your branch fall behind
+4. git status often - know what you're about to commit
+5. Commit small and often - easier to undo
+6. Write clear commit messages: "Fixed navbar bug" not "stuff"
+7. Test before pushing - make sure your code works
 
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
