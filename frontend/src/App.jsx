@@ -1,11 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 
-
 // ===== PUBLIC PAGES =====
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
-
 
 // ===== STUDENT PAGES =====
 import Dashboard from './pages/Dashboard';
@@ -19,7 +17,6 @@ import Claims from './pages/Claims';
 import GenerateNewClaim from './pages/GenerateNewClaim';
 import ClaimDetail from './pages/ClaimDetail';
 
-
 // ===== LECTURER PAGES =====
 import LectureDashboard from './pages/LectureDashboard';
 import ReviewApplications from './pages/ReviewApplications';
@@ -27,7 +24,6 @@ import ApplicationReview from './pages/ApplicationReview';
 import AssignAssistantResponsibilities from './pages/AssignAssistantResponsibilities';
 import VerifyWorkHours from './pages/VerifyWorkHours';
 import AssistantPositions from './pages/AssistantPositions';
-
 
 // ===== ADMIN PAGES =====
 import AdminDashboard from './pages/AdminDashboard';
@@ -48,14 +44,11 @@ import { NotificationProvider } from './contexts/NotificationContext';
 // ===== SHARED PAGES =====
 import Notifications from './pages/Notifications';
 
+// ===== SHARED PAGES =====
+import Notifications from './pages/Notifications';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import './index.css';
-
-
-// ===== NAVIGATION ITEMS =====
-import Notifications from './pages/Notifications';
-
 
 function App() {
   return (
@@ -115,7 +108,6 @@ function App() {
              <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
             </Route>
 
-
           {/* ===== LECTURER ROUTES ===== */}
           <Route element={<ProtectedRoute requiredRoles={['lecturer']} />}>
             <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
@@ -139,13 +131,19 @@ function App() {
             <Route path="/edit-budget/:id" element={<EditBudget />} />
             <Route path="/budget-details/:id" element={<BudgetDetails />} />
             <Route path="/export-payments" element={<ExportPayments />} />
+            <Route
+              path="/appointment-approvals"
+              element={<AppointmentApprovals />}
+            />
+            <Route
+              path="/appointment-review/:id"
+              element={<AppointmentReview />}
+            />
             <Route path="/notifications" element={<Notifications />} />
           </Route>
 
-
           {/* ===== FALLBACK ===== */}
           <Route path="*" element={<Navigate to="/" replace />} />
-
 
         </Routes>
         </NotificationProvider>
@@ -153,6 +151,5 @@ function App() {
     </BrowserRouter>
   );
 }
-
 
 export default App;
