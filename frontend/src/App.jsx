@@ -1,9 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 
+
 // ===== PUBLIC PAGES =====
 import LandingPage from './pages/LandingPage';
 import Login from './pages/Login';
+
 
 // ===== STUDENT PAGES =====
 import Dashboard from './pages/Dashboard';
@@ -17,6 +19,7 @@ import Claims from './pages/Claims';
 import GenerateNewClaim from './pages/GenerateNewClaim';
 import ClaimDetail from './pages/ClaimDetail';
 
+
 // ===== LECTURER PAGES =====
 import LectureDashboard from './pages/LectureDashboard';
 import ReviewApplications from './pages/ReviewApplications';
@@ -24,6 +27,7 @@ import ApplicationReview from './pages/ApplicationReview';
 import AssignAssistantResponsibilities from './pages/AssignAssistantResponsibilities';
 import VerifyWorkHours from './pages/VerifyWorkHours';
 import AssistantPositions from './pages/AssistantPositions';
+
 
 // ===== ADMIN PAGES =====
 import AdminDashboard from './pages/AdminDashboard';
@@ -38,11 +42,14 @@ import AppointmentApprovals from './pages/AppointmentApprovals';
 import AppointmentReview from './pages/AppointmentReview';
 import ReviewClaims from './pages/ReviewClaims';
 
-// ===== SHARED PAGES =====
-import Notifications from './pages/Notifications';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import './index.css';
+
+
+// ===== NAVIGATION ITEMS =====
+import Notifications from './pages/Notifications';
+
 
 function App() {
   return (
@@ -50,9 +57,11 @@ function App() {
       <AuthProvider>
         <Routes>
 
+
           {/* ===== PUBLIC ROUTES ===== */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
+
 
           {/* ===== STUDENT ROUTES ===== */}
           <Route element={<ProtectedRoute requiredRoles={['student']} />}>
@@ -68,6 +77,7 @@ function App() {
             <Route path="/generate-new-claim" element={<GenerateNewClaim />} />
             <Route path="/claim-detail/:id" element={<ClaimDetail />} />
           </Route>
+
 
           {/* ===== LECTURER ROUTES ===== */}
           <Route element={<ProtectedRoute requiredRoles={['lecturer']} />}>
@@ -87,6 +97,7 @@ function App() {
             <Route path="/notifications" element={<Notifications />} />
              <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
           </Route>
+
 
           {/* ===== ADMIN ROUTES ===== */}
           <Route element={<ProtectedRoute requiredRoles={['admin']} />}>
@@ -120,10 +131,12 @@ function App() {
           {/* ===== FALLBACK ===== */}
           <Route path="*" element={<Navigate to="/" replace />} />
 
+
         </Routes>
       </AuthProvider>
     </BrowserRouter>
   );
 }
+
 
 export default App;
