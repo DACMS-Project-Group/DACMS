@@ -32,7 +32,7 @@ const LectureDashboard = () => {
           {/* Description */}
           <div className="mb-8">
             <p className="text-neutral text-base font-inter">
-              Here's an overview of your demi applications and activities.
+              Here's an overview of your assistant applications and activities.
             </p>
           </div>
 
@@ -57,14 +57,14 @@ const LectureDashboard = () => {
                 </div>
               </Card>
 
-              {/* Approved Demis */}
+              {/* Approved Assistants */}
               <Card>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
                     D
                   </div>
                   <div>
-                    <p className="text-sm text-neutral font-inter">Approved Demis</p>
+                    <p className="text-sm text-neutral font-inter">Approved Assistants</p>
                     <h2 className="text-2xl font-poppins font-bold text-dark">20</h2>
                   </div>
                 </div>
@@ -111,7 +111,7 @@ const LectureDashboard = () => {
                     Budget Allocation
                   </h3>
                   <p className="text-neutral mt-1 font-inter">
-                    View the current budget allocated for demi appointments.
+                    View the current budget allocated for assistant appointments.
                   </p>
                 </div>
                 <button 
@@ -142,7 +142,7 @@ const LectureDashboard = () => {
                         Applications to Review
                       </p>
                       <p className="text-dark font-inter">
-                        You have 3 demi applications waiting for your review.
+                        You have 3 assistant applications waiting for your review.
                       </p>
                       <p className="text-sm text-neutral mt-1 font-inter">Today</p>
                     </div>
@@ -174,7 +174,7 @@ const LectureDashboard = () => {
                         Work Session Review
                       </p>
                       <p className="text-dark font-inter">
-                        A demi work session has been submitted for your review.
+                        An assistant work session has been submitted for your review.
                       </p>
                       <p className="text-sm text-neutral mt-1 font-inter">Yesterday</p>
                     </div>
