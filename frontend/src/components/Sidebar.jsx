@@ -18,7 +18,7 @@ const Sidebar = ({ userRole = 'student' }) => {
   // Lecturer Navigation
   const lecturerNavItems = [
     { name: 'Dashboard', href: '/lecturer-dashboard' },
-    { name: 'Module Management', href: '/modules' },
+    { name: 'Assistant Positions', href: '/assistant-positions' },
     { name: 'Review Applications', href: '/review-applications' },
     { name: 'Assign Duties', href: '/assign-responsibilities' },
     { name: 'Review Claims', href: '/review-claims' },
@@ -33,8 +33,6 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Export Payments', href: '/export-payments' },
     { name: 'Appointment Approvals', href: '/appointment-approvals' },
     { name: 'Claims Verification', href: '/claims-verification' },
-    { name: 'User Management', href: '/user-management' },
-    { name: 'Reports', href: '/reports' },
     { name: 'Notifications', href: '/notifications' },
   ];
 
