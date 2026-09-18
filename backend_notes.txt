@@ -16,9 +16,9 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 			"request_1" : "<value 1>",
 			"request_2" : "<value 2>"
 		}
-		return body {
-			"return_1" : "<result 1>",
-			"return_2" : "<result_2>"
+		response body {
+			"response_1" : "<result 1>",
+			"response_2" : "<result_2>"
 		}
 	}
 }
@@ -29,15 +29,15 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 	/health {
 		type: GET
 		auth: false
-		desc: Returns status of backend and DB server
+		desc: responses status of backend and DB server
 	}
 
 	/metrics {
 		/tables {
 			type: GET
 			auth: false
-			desc: Returns all DB entries
-			return body {
+			desc: responses all DB entries
+			response body {
 				"<table1>" :
 					"<attribute1>" : "<value1>"
 				"<table2>" :
@@ -69,7 +69,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				"account_number": "user_bank_acc",
 				"branch_code": "user_branch_code"
 			}
-			return body {
+			response body {
 				"message" : "status message",
 				"user_id" : user_id,
 				"email" : "account email address",
@@ -85,7 +85,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				"email" : "account email",
 				"password" : "user password"
 			}
-			return body {
+			response body {
 				"id" : "user id",
 				"email" : "account email",
 				"role_id" : account role
@@ -100,7 +100,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 			type: POST
 			auth: false
 			desc: Logs user out
-			return body {
+			response body {
 				"message" : "Process status"
 			}
 		}
@@ -109,8 +109,8 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 			param: user id
 			type: GET 
 			auth: true
-			desc: Returns user information based in ID
-			return body {
+			desc: responses user information based in ID
+			response body {
 				"user_id": 17,
 				"first_name": "user fname",
 				"last_name": "user lname",
@@ -132,7 +132,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 			type: GET
 			auth: true, admin
 			desc: Fetches data to populate admin dashboard
-			return body {
+			response body {
 				"stats": {
 					"total_modules": modules in system,
 					"total_lecturers": lectures in system,
@@ -172,7 +172,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 			type: GET
 			auth: true, lecturer
 			desc: Fetches data to populate lecturer dashboard
-			return body {
+			response body {
 				"total_appicants" : total # applicants to lecturer's positions
 				"approvied_demis" : total # approved demis in a lecturer's appointment
 				"pending_applications" : total # pending applications
@@ -190,7 +190,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 			type: GET
 			auth: true
 			desc: Fetches data to populate student dashboard
-			return body {
+			response body {
 				"profile": {
 					"student_id": user id,
 					"name": "student full name",
@@ -213,7 +213,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				type: GET
 				auth: true
 				desc: Fetches available positions
-				return body {
+				response body {
 					"listings" : [
 						"ListingID" :
 						"ModuleID" :
@@ -232,7 +232,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 			type: GET
 			auth: true
 			desc: Fetches student applications
-			return body {
+			response body {
 				"studentId" :
 				"listingId" :
 				"verificationEligibilityStatus" : true/pending/false
@@ -247,7 +247,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				"StudentID" :
 				"ListingID" :
 			}
-			return body {
+			response body {
 				"studentId" :
 				"listingId" :
 				"verificationEligibilityStatus" : true/pending/false
@@ -280,7 +280,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 			type: GET
 			auth: true
 			desc: Fetches all renumerations claims related to student
-			return body {
+			response body {
 				"claim" [
 					"ClaimID" :
 					"ClaimReferenceNumber" :
@@ -298,7 +298,150 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				[ ... ]
 			}
 		}
+		
+		/profile {
+			type: GET
+			auth: true
+			desc: Fetches student profile information
+			response body { 
+				"UserId" :
+				"Title" :
+				"FName" :
+				"LName" :
+				"Email" :
+				"PasswordHash" :
+				"RoleID" :
+				"CreatedAt" :
+				"StudentID" :
+				"StudentNumber" :
+				"StudyLevel" :
+				"ID_PassportNumber" :
+				"Gender" :
+				"DateOfBirth" :
+				"IncomeTaxNumber" :
+				"SACitizen" : true/false
+				"ResidentialAddress" :
+				"PostalAddress" :
+				"NextOfKinName" : 
+				"NextOfKinMobile" : 
+				"HighestQualification" :
+				"ContactDetails" :
+				"BankName" :
+				"AccountNumber" :
+				"AccountType" :
+				"BranchCode" :
+				"AccountHolderName" :
+			}
+		}
+		
+		/profile {
+			type: PATCH
+			auth: true
+			desc: Allows student to change profile details
+			request body {
+				"userId" : User to be updated
+				"contactDetails" : 
+				"bankName" :
+				"accountNumber" :
+				"BranchCode" :
+			}
+			response body { 
+				"UserId" :
+				"Title" :
+				"FName" :
+				"LName" :
+				"Email" :
+				"PasswordHash" :
+				"RoleID" :
+				"CreatedAt" :
+				"StudentID" :
+				"StudentNumber" :
+				"StudyLevel" :
+				"ID_PassportNumber" :
+				"Gender" :
+				"DateOfBirth" :
+				"IncomeTaxNumber" :
+				"SACitizen" : true/false
+				"ResidentialAddress" :
+				"PostalAddress" :
+				"NextOfKinName" : 
+				"NextOfKinMobile" : 
+				"HighestQualification" :
+				"ContactDetails" :
+				"BankName" :
+				"AccountNumber" :
+				"AccountType" :
+				"BranchCode" :
+				"AccountHolderName" :
+			}
+		}
+	}
 }
 
-				
+=======================NOTIFICATION=======================	
+
+NOTE: seperate connection to user socket using socket-client.io required for in-app notifications
+
+/api {
+	/notifications {
+		/send {
+			type: POST
+			auth: true
+			desc: Sends notification to db, email and user socket
+			request body {
+				"RecipientId" :
+				"title" :
+				"type" :
+				"message" :
+			}
+			response body {
+				"NotificationId" :
+				"RecipientId" :
+				"title" :
+				"type" :
+				"message" :
+				"IsRead" :
+				"CreatedTimestamp" :
+			}
+		}
+		
+		/fetch {
+			type: GET
+			auth: true
+			desc: Gets all notifications for signed-in user based on cookie
+			response body {
+				"notification" [
+					"NotificationId" :
+					"RecipientId" :
+					"title" :
+					"type" :
+					"message" :
+					"IsRead" :
+					"CreatedTimestamp"
+				],
+				[ ... ]
+			}
+		}
+		
+		/read/:id {
+		    params: id = notification id
+			type: PATCH
+			auth: true
+			desc: Marks given notification as read/
+			response body {
+				"NotificationId" :
+				"RecipientId" :
+				"title" :
+				"type" :
+				"message" :
+				"IsRead" :
+				"CreatedTimestamp" :
+			}
+		}
+	}
+}
+			
+			
+			
+			
 			
