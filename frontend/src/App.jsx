@@ -22,6 +22,8 @@ import LectureDashboard from './pages/LectureDashboard';
 import ReviewApplications from './pages/ReviewApplications';
 import ApplicationReview from './pages/ApplicationReview';
 import AssignAssistantResponsibilities from './pages/AssignAssistantResponsibilities';
+import VerifyWorkHours from './pages/VerifyWorkHours';
+import AssistantPositions from './pages/AssistantPositions';
 
 // ===== ADMIN PAGES =====
 import AdminDashboard from './pages/AdminDashboard';
@@ -71,10 +73,13 @@ function App() {
             <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
             <Route path="/review-applications" element={<ReviewApplications />} />
             <Route path="/application-review/:id" element={<ApplicationReview />} />
+              <Route path="/assistant-positions" element={<AssistantPositions />} />
             <Route
               path="/assign-responsibilities"
               element={<AssignAssistantResponsibilities />}
+              
             />
+           <Route path="/verify-hours" element={<VerifyWorkHours />} />
             <Route path="/notifications" element={<Notifications />} />
           </Route>
 
