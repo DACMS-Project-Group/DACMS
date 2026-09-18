@@ -113,8 +113,13 @@ function App() {
             <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
             <Route path="/review-applications" element={<ReviewApplications />} />
             <Route path="/application-review/:id" element={<ApplicationReview />} />
-            <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
-            <Route path="/review-claims" element={<ReviewClaims />} />
+              <Route path="/assistant-positions" element={<AssistantPositions />} />
+            <Route
+              path="/assign-responsibilities"
+              element={<AssignAssistantResponsibilities />}
+              
+            />
+           <Route path="/verify-hours" element={<VerifyWorkHours />} />
             <Route path="/notifications" element={<Notifications />} />
           </Route>
 
