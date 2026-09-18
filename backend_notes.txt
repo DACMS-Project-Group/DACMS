@@ -4,6 +4,8 @@ BACKEND API RELEASE: Here follows the first set of functional API functions impl
 
 =======================FORMAT=======================
 
+EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
+
 /api/<root> {
 	/<call>/:<param> {
 		<param>	 :	call parameter
@@ -47,6 +49,7 @@ BACKEND API RELEASE: Here follows the first set of functional API functions impl
 
 
 =======================USER=======================
+
 /api {
 	/users {
 		/create {
@@ -119,4 +122,183 @@ BACKEND API RELEASE: Here follows the first set of functional API functions impl
 		}
 	}			
 }
+			
+
+=======================ADMIN=======================
+
+/api {
+	/admin {
+		/dashboard_statistics {
+			type: GET
+			auth: true, admin
+			desc: Fetches data to populate admin dashboard
+			return body {
+				"stats": {
+					"total_modules": modules in system,
+					"total_lecturers": lectures in system,
+					"total_demis": assistants appointed,
+					"total_pending_approvals": applications pending approval,
+					"total_pending_claims": claims pending approval
+				},
+				"monthlyWork": [
+					{
+						"month": "month work was done{yyyy-mm)",
+						"total_sessions": sessions done
+					}
+				],
+				"pendingAppointments": [
+					{
+						"application_id": application id 1,
+						"status": "Pending/Approved/Rejected",
+						"date_submitted": "<yyyy-mm-dd> T<hh:mm:ss:ms>Z",
+						"module": "relevant module code",
+						"lecturer": "lecturer title + name",
+						"student": "student title + name"
+					},
+					{
+					...
+					}
+				]
+			}
+		}
+	}	
+}
+
+=======================LECTURER=======================
+
+/api {
+	/lecturer {
+		/dashboard_statistics {
+			type: GET
+			auth: true, lecturer
+			desc: Fetches data to populate lecturer dashboard
+			return body {
+				"total_appicants" : total # applicants to lecturer's positions
+				"approvied_demis" : total # approved demis in a lecturer's appointment
+				"pending_applications" : total # pending applications
+				"hours_allocated" : total # of hours allocated to demis by lecturer
+			}
+		}
+	}
+}
+
+=======================STUDENT=======================
+
+/api {
+	/student {
+		/dashboard {
+			type: GET
+			auth: true
+			desc: Fetches data to populate student dashboard
+			return body {
+				"profile": {
+					"student_id": user id,
+					"name": "student full name",
+					"student_number": "university number",
+					"study_level": "postgraduate/pregraduate"
+				},
+				"stats": {
+					"active_positions": # of active positions,
+					"pending_applications": # of pending applications,
+					"hours_this_month": # of hours worked in calendar month,
+					"pending_claims": # of pending claims
+				},
+				"monthlyHours": [monthly hours per module],
+				"pendingApplications": [list of current app;ications]
+		    }
+		}
+		
+		/listings {
+			/open {
+				type: GET
+				auth: true
+				desc: Fetches available positions
+				return body {
+					"listings" : [
+						"ListingID" :
+						"ModuleID" :
+						"LecturerID" :
+						"Deadline" :
+						"MinimumGrade" :
+						"ModuleCode" :
+						"ModuleName" :
+					],
+					[ ... ]
+				}
+			}
+		}
+		
+		/applications {
+			type: GET
+			auth: true
+			desc: Fetches student applications
+			return body {
+				"studentId" :
+				"listingId" :
+				"verificationEligibilityStatus" : true/pending/false
+			}
+		}
+		
+		/applications {
+			type: POST
+			auth: true
+			desc: Submits response to open application
+			request body {
+				"StudentID" :
+				"ListingID" :
+			}
+			return body {
+				"studentId" :
+				"listingId" :
+				"verificationEligibilityStatus" : true/pending/false
+			}
+		}
+		
+		/applications {
+			/:applicationId/claims {
+				params : applicationId
+				type: POST
+				auth: true
+				request body {
+					"applicationId" :
+					"studentId" :
+				}
+				response body {
+					"referenceNumber" :
+					"applicationId" :
+					"moduleId" :
+					"periodStartDate" :
+					"periodEndDate" :
+					"totalHoursClaimed" :
+					"totalClaimAmount" :
+					"hourlyRateApplied" :
+				}
+			}
+		}
+		
+		/claims {
+			type: GET
+			auth: true
+			desc: Fetches all renumerations claims related to student
+			return body {
+				"claim" [
+					"ClaimID" :
+					"ClaimReferenceNumber" :
+					"ApplicationID" :
+					"ModuleID" :
+					"PeriodStartDate" :
+					"TotalHoursClaimed" :
+					"TotalClaimAmount" :
+					"HourlyRateApplied" :
+					"ClaimStatus" : "Approved/Pending/Denied"
+					"SubmissionDate" :
+					"ModuleCode" :
+					"ModuleName" :
+				],
+				[ ... ]
+			}
+		}
+}
+
 				
+			
