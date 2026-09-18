@@ -1,0 +1,122 @@
+BACKEND API RELEASE: Here follows the first set of functional API functions implemented in the main branch of AACMS
+
+=======================AACMS API SUITE===========================
+
+=======================FORMAT=======================
+
+/api/<root> {
+	/<call>/:<param> {
+		<param>	 :	call parameter
+		type	:	call type
+		auth	:	true/false
+		desc	:	<description>
+		request body {
+			"request_1" : "<value 1>",
+			"request_2" : "<value 2>"
+		}
+		return body {
+			"return_1" : "<result 1>",
+			"return_2" : "<result_2>"
+		}
+	}
+}
+	
+=======================METRICS=======================
+
+/api {
+	/health {
+		type: GET
+		auth: false
+		desc: Returns status of backend and DB server
+	}
+
+	/metrics {
+		/tables {
+			type: GET
+			auth: false
+			desc: Returns all DB entries
+			return body {
+				"<table1>" :
+					"<attribute1>" : "<value1>"
+				"<table2>" :
+					...
+			}
+		}
+	}
+}
+
+
+=======================USER=======================
+/api {
+	/users {
+		/create {
+			type: POST
+			auth: false
+			desc: Creates a new User account of any type
+			request body {
+				"first_name" : "user_fname",
+				"last_name" : "userser_lname",
+				"email" : "user_email",
+				"password" : "user password",
+				"role_id" : 1 - student, 2 - lecturer, 3 - admin,
+				"student_number" : "user_student_number",
+				"study_level": "Undergrad/postgrad/staff",
+				"contact_details": "user_primary_contact",
+				"bank_name": "user_bank_name",
+				"account_number": "user_bank_acc",
+				"branch_code": "user_branch_code"
+			}
+			return body {
+				"message" : "status message",
+				"user_id" : user_id,
+				"email" : "account email address",
+				"role_id" : account role
+			}
+		}
+		
+		/login {
+			type: POST
+			auth: false
+			desc: Logs into user account based on email
+			request body {
+				"email" : "account email",
+				"password" : "user password"
+			}
+			return body {
+				"id" : "user id",
+				"email" : "account email",
+				"role_id" : account role
+				cookie params {
+					"user_id" : "user id",
+					"role_id" : "account role"
+				}
+			}
+		}
+		
+		/logout {
+			type: POST
+			auth: false
+			desc: Logs user out
+			return body {
+				"message" : "Process status"
+			}
+		}
+		
+		/fetch/:id {
+			param: user id
+			type: GET 
+			auth: true
+			desc: Returns user information based in ID
+			return body {
+				"user_id": 17,
+				"first_name": "user fname",
+				"last_name": "user lname",
+				"full_name": "user fullname",
+				"email": "account email",
+				"role_name": "user role name",
+				"created_at": "user created timestamp"
+			}
+		}
+	}			
+}
+				
