@@ -22,6 +22,8 @@ import LectureDashboard from './pages/LectureDashboard';
 import ReviewApplications from './pages/ReviewApplications';
 import ApplicationReview from './pages/ApplicationReview';
 import AssignAssistantResponsibilities from './pages/AssignAssistantResponsibilities';
+import VerifyWorkHours from './pages/VerifyWorkHours';
+import AssistantPositions from './pages/AssistantPositions';
 
 // ===== ADMIN PAGES =====
 import AdminDashboard from './pages/AdminDashboard';
@@ -36,11 +38,11 @@ import AppointmentApprovals from './pages/AppointmentApprovals';
 import AppointmentReview from './pages/AppointmentReview';
 import ReviewClaims from './pages/ReviewClaims';
 
+// ===== SHARED PAGES =====
+import Notifications from './pages/Notifications';
+
 import ProtectedRoute from './routes/ProtectedRoute';
 import './index.css';
-
-// ===== NAVIGATION ITEMS =====
-import Notifications from './pages/Notifications';
 
 function App() {
   return (
@@ -72,8 +74,16 @@ function App() {
             <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
             <Route path="/review-applications" element={<ReviewApplications />} />
             <Route path="/application-review/:id" element={<ApplicationReview />} />
-            <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
+            <Route
+              path="/assign-responsibilities"
+              element={<AssignAssistantResponsibilities />}
+            />
             <Route path="/review-claims" element={<ReviewClaims />} />
+            <Route
+              path="/assistant-positions"
+              element={<AssistantPositions />}
+            />
+            <Route path="/verify-hours" element={<VerifyWorkHours />} />
             <Route path="/notifications" element={<Notifications />} />
           </Route>
 
@@ -97,12 +107,11 @@ function App() {
               path="/appointment-approvals"
               element={<AppointmentApprovals />}
             />
-
             <Route
               path="/appointment-review/:id"
               element={<AppointmentReview />}
             />
-                        <Route path="/notifications" element={<Notifications />} />
+            <Route path="/notifications" element={<Notifications />} />
           </Route>
 
           {/* ===== FALLBACK ===== */}

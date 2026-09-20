@@ -7,10 +7,10 @@ const Login = () => {
   const [error, setError] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showRegister, setShowRegister] = useState(false);
-  
+
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  
+
   // Get the role from URL parameter
   const selectedRole = searchParams.get('role') || 'student';
 
@@ -19,8 +19,16 @@ const Login = () => {
   // ============================================================
   const handleLogin = (e) => {
     e.preventDefault();
+
+    // Store the selected role for the current demo user
+    const userData = {
+      role: selectedRole,
+    };
+
+    localStorage.setItem('user', JSON.stringify(userData));
+
     // Redirect to the correct dashboard based on role
-    navigate(`/${selectedRole}-dashboard`);
+    window.location.href = `/${selectedRole}-dashboard`;
   };
 
   // ============================================================
@@ -29,7 +37,7 @@ const Login = () => {
   // const handleLogin = async (e) => {
   //   e.preventDefault();
   //   setError('');
-  //   
+  //
   //   try {
   //     // Call your actual login API
   //     const response = await fetch('/api/login', {
@@ -43,10 +51,10 @@ const Login = () => {
   //     }
   //
   //     const data = await response.json();
-  //     
+  //
   //     // Store user data
   //     localStorage.setItem('user', JSON.stringify(data.user));
-  //     
+  //
   //     // Redirect based on role
   //     navigate(`/${selectedRole}-dashboard`);
   //   } catch (err) {
@@ -59,6 +67,7 @@ const Login = () => {
   // ============================================================
   const handleRegister = (e) => {
     e.preventDefault();
+
     // For demo, just go back to login
     setShowRegister(false);
   };
@@ -69,7 +78,7 @@ const Login = () => {
   // const handleRegister = async (e) => {
   //   e.preventDefault();
   //   setError('');
-  //   
+  //
   //   try {
   //     const formData = new FormData(e.target);
   //     const userData = {
@@ -101,6 +110,7 @@ const Login = () => {
   // ============================================================
   const handleForgotPassword = (e) => {
     e.preventDefault();
+
     // For demo, just go back to login
     setShowForgotPassword(false);
   };
@@ -111,7 +121,7 @@ const Login = () => {
   // const handleForgotPassword = async (e) => {
   //   e.preventDefault();
   //   setError('');
-  //   
+  //
   //   try {
   //     const formData = new FormData(e.target);
   //     const email = formData.get('email');
@@ -135,14 +145,14 @@ const Login = () => {
 
   return (
     <div className="flex w-full h-screen">
-      
+
       {/* ===== LEFT: 40% WHITE SIDE ===== */}
       <div className="w-2/5 bg-white h-full flex flex-col items-center justify-center p-8 relative">
-        
+
         {/* Logo */}
-        <img 
-          src="/NWU-Acronym-Logo-Purple-Digital.png" 
-          alt="NWU Logo" 
+        <img
+          src="/NWU-Acronym-Logo-Purple-Digital.png"
+          alt="NWU Logo"
           className="h-16 w-auto mb-6"
         />
 
@@ -157,67 +167,73 @@ const Login = () => {
         </div>
 
         {/* ===== SHOW LOGIN / REGISTER / FORGOT PASSWORD ===== */}
-        
+
         {/* ===== LOGIN FORM ===== */}
         {!showForgotPassword && !showRegister && (
           <div className="max-w-sm w-full">
+
             <h2 className="text-2xl font-poppins font-bold text-primary-dark text-center">
               Welcome Back
             </h2>
+
             <p className="text-neutral text-center mt-1 text-sm font-inter">
               Sign in to access your {selectedRole} dashboard
             </p>
-            
+
             {error && (
               <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm text-center">
                 {error}
               </div>
             )}
-            
+
             <form onSubmit={handleLogin} className="mt-6">
+
               <div className="mb-3">
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   name="email"
-                  placeholder="Email Address (Demo: any email works)" 
+                  placeholder="Email Address (Demo: any email works)"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
                   defaultValue="demo@nwu.ac.za"
                 />
               </div>
+
               <div className="mb-4">
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   name="password"
-                  placeholder="Password (Demo: any password works)" 
+                  placeholder="Password (Demo: any password works)"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
                   defaultValue="password"
                 />
               </div>
-              <button 
+
+              <button
                 type="submit"
                 className="w-full bg-primary text-white p-3 rounded-xl font-semibold hover:bg-primary-dark transition text-sm"
               >
                 Sign In
               </button>
+
             </form>
-            
+
             <div className="text-center mt-3">
-              <button 
+              <button
                 onClick={() => setShowForgotPassword(true)}
                 className="text-primary text-xs hover:underline font-inter cursor-pointer"
               >
                 Forgot Password?
               </button>
             </div>
-            
+
             <div className="text-center mt-4 pt-4 border-t border-neutral/20">
               <p className="text-xs text-neutral font-inter">
                 Don't have an account?{' '}
-                <button 
+                <button
                   onClick={() => setShowRegister(true)}
                   className="text-primary font-semibold hover:underline cursor-pointer"
                 >
@@ -225,74 +241,83 @@ const Login = () => {
                 </button>
               </p>
             </div>
+
           </div>
         )}
 
         {/* ===== REGISTER FORM ===== */}
         {showRegister && (
           <div className="max-w-sm w-full">
+
             <h2 className="text-2xl font-poppins font-bold text-primary-dark text-center">
               Create Account
             </h2>
+
             <p className="text-neutral text-center mt-1 text-sm font-inter">
               Register as a {selectedRole}
             </p>
-            
+
             {error && (
               <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm text-center">
                 {error}
               </div>
             )}
-            
+
             <form onSubmit={handleRegister} className="mt-6">
+
               <div className="mb-3">
-                <input 
-                  type="text" 
+                <input
+                  type="text"
                   name="name"
-                  placeholder="Full Name" 
+                  placeholder="Full Name"
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
                   required
                 />
               </div>
+
               <div className="mb-3">
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   name="email"
-                  placeholder="Email Address" 
+                  placeholder="Email Address"
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
                   required
                 />
               </div>
+
               <div className="mb-3">
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   name="password"
-                  placeholder="Password" 
+                  placeholder="Password"
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
                   required
                 />
               </div>
+
               <div className="mb-4">
-                <input 
-                  type="password" 
+                <input
+                  type="password"
                   name="confirmPassword"
-                  placeholder="Confirm Password" 
+                  placeholder="Confirm Password"
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
                   required
                 />
               </div>
-              <button 
+
+              <button
                 type="submit"
                 className="w-full bg-primary text-white p-3 rounded-xl font-semibold hover:bg-primary-dark transition text-sm"
               >
                 Register
               </button>
+
             </form>
-            
+
             <div className="text-center mt-4">
               <p className="text-xs text-neutral font-inter">
                 Already have an account?{' '}
-                <button 
+                <button
                   onClick={() => setShowRegister(false)}
                   className="text-primary font-semibold hover:underline cursor-pointer"
                 >
@@ -300,65 +325,73 @@ const Login = () => {
                 </button>
               </p>
             </div>
+
           </div>
         )}
 
         {/* ===== FORGOT PASSWORD FORM ===== */}
         {showForgotPassword && (
           <div className="max-w-sm w-full">
+
             <h2 className="text-2xl font-poppins font-bold text-primary-dark text-center">
               Reset Password
             </h2>
+
             <p className="text-neutral text-center mt-1 text-sm font-inter">
               Enter your email and we'll send you a reset link
             </p>
-            
+
             {error && (
               <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm text-center">
                 {error}
               </div>
             )}
-            
+
             <form onSubmit={handleForgotPassword} className="mt-6">
+
               <div className="mb-4">
-                <input 
-                  type="email" 
+                <input
+                  type="email"
                   name="email"
-                  placeholder="Email Address" 
+                  placeholder="Email Address"
                   className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
                   required
                 />
               </div>
-              <button 
+
+              <button
                 type="submit"
                 className="w-full bg-primary text-white p-3 rounded-xl font-semibold hover:bg-primary-dark transition text-sm"
               >
                 Send Reset Link
               </button>
+
             </form>
-            
+
             <div className="text-center mt-4">
-              <button 
+              <button
                 onClick={() => setShowForgotPassword(false)}
                 className="text-primary text-xs hover:underline font-inter cursor-pointer"
               >
                 ← Back to Login
               </button>
             </div>
+
           </div>
         )}
-        
+
         {/* Footer */}
         <div className="absolute bottom-6 text-center">
           <p className="text-xs text-neutral/50 font-inter">
             © 2026 North-West University • AACMS
           </p>
         </div>
-        
+
       </div>
-      
+
       {/* ===== RIGHT: 60% VIDEO SIDE ===== */}
       <div className="w-3/5 h-full relative overflow-hidden">
+
         <video
           autoPlay
           loop
@@ -369,8 +402,9 @@ const Login = () => {
         >
           <source src="/GradientVideo.mp4" type="video/mp4" />
         </video>
+
       </div>
-      
+
     </div>
   );
 };
