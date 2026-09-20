@@ -93,35 +93,21 @@ const AppointmentReview = () => {
   };
 
   return (
-    <div className="min-h-screen bg-off-white">
+    <div className="flex min-h-screen bg-off-white">
+    <Sidebar userRole="admin" />
 
-      <Navbar />
+  <div className="flex-1">
+    <Navbar />
 
-      <div className="flex">
-
-        <Sidebar userRole="admin" />
-
-        <main className="flex-1">
-
-          {/* Page Header */}
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white">
+    <div className="bg-primary h-16 flex items-center px-8">
+      <h1 className="text-3xl font-poppins font-bold text-white">
               Appointment Review
             </h1>
           </div>
 
           <div className="p-8">
 
-            {/* Back Button */}
-            <div className="mb-6">
-              <button
-                type="button"
-                onClick={handleBack}
-                className="font-medium text-primary transition hover:text-primary-dark"
-              >
-                ← Back to Appointment Approvals
-              </button>
-            </div>
+            
 
             {/* Appointment Overview */}
             <Card className="mb-6">
@@ -582,7 +568,7 @@ const AppointmentReview = () => {
             </Card>
 
           </div>
-        </main>
+      
       </div>
     </div>
   );

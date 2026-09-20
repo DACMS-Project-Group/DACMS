@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
+import Card from '../components/Card';
 
 const EditBudget = () => {
   const navigate = useNavigate();
@@ -50,10 +51,7 @@ const EditBudget = () => {
   };
 
   const addLecturer = () => {
-    if (
-      !lecturerForm.lecturer ||
-      !lecturerForm.allocation
-    ) {
+    if (!lecturerForm.lecturer || !lecturerForm.allocation) {
       return;
     }
 
@@ -93,109 +91,126 @@ const EditBudget = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA]">
+    <div className="flex min-h-screen bg-off-white">
+      <Sidebar userRole="admin" />
 
-      <Navbar />
+      <div className="flex-1">
+        <Navbar />
 
-      <div className="flex">
+        {/* Page Header */}
+        <div className="bg-primary h-16 flex items-center px-8">
+          <h1 className="text-3xl font-poppins font-bold text-white">
+            Edit Budget
+          </h1>
+        </div>
 
-        <Sidebar userRole="admin" />
+        <main className="p-8">
 
-        <main className="flex-1 p-8">
+          {/* Page Introduction */}
+          <div className="mb-8">
+            <h2 className="text-3xl font-poppins font-semibold text-primary">
+              Edit Budget Information
+            </h2>
 
-          <div className="bg-[#6C3D91] text-white px-8 py-5 rounded-t-lg">
-            <h1 className="text-3xl font-bold">
-              Edit Budget
-            </h1>
+            <p className="text-neutral mt-2 font-inter">
+              Update the budget allocation and lecturer information.
+            </p>
           </div>
 
-          <div className="bg-white p-8">
+          <form onSubmit={handleSubmit}>
 
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold text-[#6C3D91]">
-                Edit Budget Information
-              </h2>
+            {/* Budget Information */}
+            <section className="mb-8">
 
-              <p className="text-[#78848E] mt-1">
-                Update the budget allocation and lecturer information.
-              </p>
-            </div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-poppins font-semibold text-primary">
+                  Budget Information
+                </h3>
 
-            <form onSubmit={handleSubmit}>
+                <span className="text-sm text-neutral font-inter">
+                  Budget ID: {id}
+                </span>
+              </div>
 
-              {/* Budget details */}
-              <div className="border border-[#78848E] rounded-xl p-6 mb-8">
-
-                <div className="flex justify-between mb-6">
-
-                  <h3 className="text-lg font-semibold text-[#6C3D91]">
-                    Budget Information
-                  </h3>
-
-                  <span className="text-sm text-[#78848E]">
-                    Budget ID: {id}
-                  </span>
-
-                </div>
-
+              <Card>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
+                  {/* Module Code */}
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                    <label
+                      htmlFor="moduleCode"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
                       Module Code
                     </label>
 
                     <input
+                      id="moduleCode"
                       type="text"
                       value={formData.moduleCode}
                       readOnly
-                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl bg-[#F3F4F6]"
+                      className="w-full h-12 px-4 border border-neutral rounded-xl bg-primary-lightest font-inter"
                     />
                   </div>
 
+                  {/* Module Name */}
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                    <label
+                      htmlFor="moduleName"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
                       Module Name
                     </label>
 
                     <input
+                      id="moduleName"
                       type="text"
                       value={formData.moduleName}
                       readOnly
-                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl bg-[#F3F4F6]"
+                      className="w-full h-12 px-4 border border-neutral rounded-xl bg-primary-lightest font-inter"
                     />
                   </div>
 
+                  {/* Allocated Budget */}
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                    <label
+                      htmlFor="allocatedBudget"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
                       Allocated Budget
                     </label>
 
                     <div className="flex">
-                      <span className="flex items-center px-4 bg-[#F3F4F6] border border-r-0 border-[#78848E] rounded-l-xl">
+                      <span className="flex items-center px-4 bg-primary-lightest border border-r-0 border-neutral rounded-l-xl font-inter text-primary font-semibold">
                         R
                       </span>
 
                       <input
+                        id="allocatedBudget"
                         type="number"
                         name="allocatedBudget"
                         value={formData.allocatedBudget}
                         onChange={handleChange}
-                        className="w-full h-12 px-4 border border-[#78848E] rounded-r-xl"
+                        className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
                       />
                     </div>
                   </div>
 
+                  {/* Budget Year */}
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                    <label
+                      htmlFor="year"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
                       Budget Year
                     </label>
 
                     <select
+                      id="year"
                       name="year"
                       value={formData.year}
                       onChange={handleChange}
-                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl"
+                      className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
                     >
                       <option>2026</option>
                       <option>2027</option>
@@ -203,16 +218,21 @@ const EditBudget = () => {
                     </select>
                   </div>
 
+                  {/* Budget Period */}
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                    <label
+                      htmlFor="budgetPeriod"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
                       Budget Period
                     </label>
 
                     <select
+                      id="budgetPeriod"
                       name="budgetPeriod"
                       value={formData.budgetPeriod}
                       onChange={handleChange}
-                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl"
+                      className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
                     >
                       <option>Semester 1</option>
                       <option>Semester 2</option>
@@ -221,15 +241,17 @@ const EditBudget = () => {
                   </div>
 
                 </div>
+              </Card>
+            </section>
 
-              </div>
+            {/* Lecturer Allocation */}
+            <section className="mb-8">
 
-              {/* Lecturer allocation */}
-              <div className="border border-[#78848E] rounded-xl p-6 mb-8">
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                Lecturer Allocation
+              </h3>
 
-                <h3 className="text-lg font-semibold text-[#6C3D91] mb-6">
-                  Lecturer Allocation
-                </h3>
+              <Card>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
@@ -241,7 +263,7 @@ const EditBudget = () => {
                         lecturer: e.target.value,
                       })
                     }
-                    className="h-12 px-4 border border-[#78848E] rounded-xl"
+                    className="h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
                   >
                     <option value="">
                       Select Lecturer
@@ -254,149 +276,141 @@ const EditBudget = () => {
                     ))}
                   </select>
 
-                  <input
-                    type="number"
-                    placeholder="Allocation Amount"
-                    value={lecturerForm.allocation}
-                    onChange={(e) =>
-                      setLecturerForm({
-                        ...lecturerForm,
-                        allocation: e.target.value,
-                      })
-                    }
-                    className="h-12 px-4 border border-[#78848E] rounded-xl"
-                  />
+                  <div className="flex">
+                    <span className="flex items-center px-4 bg-primary-lightest border border-r-0 border-neutral rounded-l-xl font-inter text-primary font-semibold">
+                      R
+                    </span>
+
+                    <input
+                      type="number"
+                      placeholder="Allocation Amount"
+                      value={lecturerForm.allocation}
+                      onChange={(e) =>
+                        setLecturerForm({
+                          ...lecturerForm,
+                          allocation: e.target.value,
+                        })
+                      }
+                      className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
+                    />
+                  </div>
 
                   <button
                     type="button"
                     onClick={addLecturer}
-                    className="h-12 px-6 border-2 border-[#6C3D91] text-[#6C3D91] rounded-xl font-semibold hover:bg-[#E8DDF0]"
+                    className="h-12 px-6 border-2 border-primary text-primary rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
                   >
                     + Add Lecturer
                   </button>
 
                 </div>
 
-                <div className="mt-6">
+                {/* Lecturer Table */}
+                <div className="mt-6 overflow-x-auto">
 
                   <table className="w-full">
 
-                    <thead className="bg-[#F3F4F6]">
-
+                    <thead className="bg-primary-lightest">
                       <tr>
-                        <th className="text-left p-4 text-sm text-[#78848E]">
+                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
                           Lecturer
                         </th>
 
-                        <th className="text-left p-4 text-sm text-[#78848E]">
+                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
                           Allocation
                         </th>
 
-                        <th className="text-right p-4 text-sm text-[#78848E]">
+                        <th className="p-4 text-right text-sm font-semibold text-primary font-inter">
                           Action
                         </th>
                       </tr>
-
                     </thead>
 
                     <tbody>
+                      {lecturers.map((lecturer, index) => (
+                        <tr
+                          key={index}
+                          className="border-t border-neutral/30 hover:bg-primary-lightest/30 transition"
+                        >
+                          <td className="p-4 text-dark font-inter">
+                            {lecturer.lecturer}
+                          </td>
 
-                      {lecturers.map(
-                        (lecturer, index) => (
-                          <tr
-                            key={index}
-                            className="border-b"
-                          >
+                          <td className="p-4 text-dark font-inter">
+                            R{' '}
+                            {Number(
+                              lecturer.allocation
+                            ).toLocaleString('en-ZA')}
+                          </td>
 
-                            <td className="p-4">
-                              {lecturer.lecturer}
-                            </td>
-
-                            <td className="p-4">
-                              R{' '}
-                              {Number(
-                                lecturer.allocation
-                              ).toLocaleString(
-                                'en-ZA'
-                              )}
-                            </td>
-
-                            <td className="p-4 text-right">
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  removeLecturer(
-                                    index
-                                  )
-                                }
-                                className="text-[#DC3545] font-semibold"
-                              >
-                                Remove
-                              </button>
-
-                            </td>
-
-                          </tr>
-                        )
-                      )}
-
+                          <td className="p-4 text-right">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeLecturer(index)
+                              }
+                              className="text-red-600 font-semibold hover:underline font-inter"
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
 
                   </table>
-
                 </div>
 
-                <div className="flex justify-end mt-6">
+                {/* Total Allocation */}
+                <div className="flex justify-end mt-6 pt-6 border-t border-neutral/30">
 
                   <div className="text-right">
-                    <p className="text-sm text-[#78848E]">
+
+                    <p className="text-sm text-neutral font-inter">
                       Total Lecturer Allocation
                     </p>
 
-                    <p className="text-xl font-bold text-[#6C3D91]">
+                    <p className="text-2xl font-poppins font-bold text-primary mt-1">
                       R{' '}
                       {totalAllocation.toLocaleString(
                         'en-ZA'
                       )}
                     </p>
+
                   </div>
 
                 </div>
 
-              </div>
+              </Card>
+            </section>
 
-              <div className="flex justify-end gap-4">
+            {/* Form Actions */}
+            <div className="flex justify-end gap-4">
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate(
-                      `/budget-management/details/${id}`
-                    )
-                  }
-                  className="h-11 px-6 border border-[#78848E] rounded-xl font-semibold"
-                >
-                  Cancel
-                </button>
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/budget-management/details/${id}`
+                  )
+                }
+                className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
+              >
+                Cancel
+              </button>
 
-                <button
-                  type="submit"
-                  className="h-11 px-6 bg-[#6C3D91] text-white rounded-xl font-semibold hover:bg-[#5A3280]"
-                >
-                  Save Changes
-                </button>
+              <button
+                type="submit"
+                className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
+              >
+                Save Changes
+              </button>
 
-              </div>
+            </div>
 
-            </form>
-
-          </div>
-
+          </form>
         </main>
-
       </div>
-
     </div>
   );
 };

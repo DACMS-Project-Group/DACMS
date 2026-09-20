@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
+import Card from '../components/Card';
 
 const CreateBudget = () => {
   const navigate = useNavigate();
@@ -55,50 +56,59 @@ const CreateBudget = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA]">
-      <Navbar />
+    <div className="flex min-h-screen bg-off-white">
+      <Sidebar userRole="admin" />
 
-      <div className="flex">
-        <Sidebar userRole="admin" />
+      <div className="flex-1">
+        <Navbar />
 
-        <main className="flex-1 p-8">
-          <div className="bg-[#6C3D91] text-white px-8 py-5 rounded-t-lg">
-            <h1 className="text-3xl font-bold">
-              Create Budget
-            </h1>
+        {/* Page Header */}
+        <div className="bg-primary h-16 flex items-center px-8">
+          <h1 className="text-3xl font-poppins font-bold text-white">
+            Create Budget
+          </h1>
+        </div>
+
+        <main className="p-8">
+
+          {/* Page Introduction */}
+          <div className="mb-8">
+            <h2 className="text-3xl font-poppins font-semibold text-primary">
+              Budget Information
+            </h2>
+
+            <p className="text-neutral mt-2 font-inter">
+              Create a new module budget and allocate funding.
+            </p>
           </div>
 
-          <div className="bg-white p-8">
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold text-[#6C3D91]">
-                Budget Information
-              </h2>
+          <form onSubmit={handleSubmit}>
 
-              <p className="text-[#78848E] mt-1">
-                Create a new module budget and allocate funding.
-              </p>
-            </div>
+            {/* Budget Details */}
+            <section className="mb-8">
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                Budget Details
+              </h3>
 
-            <form onSubmit={handleSubmit}>
-              <div className="border border-[#78848E] rounded-xl p-6 mb-8">
-                <h3 className="text-lg font-semibold text-[#6C3D91] mb-6">
-                  Budget Details
-                </h3>
-
+              <Card>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                   {/* Module */}
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                    <label
+                      htmlFor="module"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
                       Module
                     </label>
 
                     <select
+                      id="module"
                       name="module"
                       value={formData.module}
                       onChange={handleChange}
                       required
-                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl focus:outline-none focus:border-[#6C3D91]"
+                      className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
                     >
                       <option value="">
                         Select Module
@@ -117,16 +127,20 @@ const CreateBudget = () => {
 
                   {/* Lecturer */}
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                    <label
+                      htmlFor="lecturer"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
                       Lecturer
                     </label>
 
                     <select
+                      id="lecturer"
                       name="lecturer"
                       value={formData.lecturer}
                       onChange={handleChange}
                       required
-                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl focus:outline-none focus:border-[#6C3D91]"
+                      className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
                     >
                       <option value="">
                         Select Lecturer
@@ -145,16 +159,20 @@ const CreateBudget = () => {
 
                   {/* Academic Year */}
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                    <label
+                      htmlFor="academicYear"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
                       Academic Year
                     </label>
 
                     <select
+                      id="academicYear"
                       name="academicYear"
                       value={formData.academicYear}
                       onChange={handleChange}
                       required
-                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl focus:outline-none focus:border-[#6C3D91]"
+                      className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
                     >
                       <option value="2026">2026</option>
                       <option value="2027">2027</option>
@@ -164,16 +182,20 @@ const CreateBudget = () => {
 
                   {/* Allocated Amount */}
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                    <label
+                      htmlFor="allocatedAmount"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
                       Allocated Amount
                     </label>
 
                     <div className="flex">
-                      <span className="flex items-center px-4 bg-[#F3F4F6] border border-r-0 border-[#78848E] rounded-l-xl">
+                      <span className="flex items-center px-4 bg-primary-lightest border border-r-0 border-neutral rounded-l-xl font-inter text-primary font-semibold">
                         R
                       </span>
 
                       <input
+                        id="allocatedAmount"
                         type="number"
                         name="allocatedAmount"
                         value={formData.allocatedAmount}
@@ -181,23 +203,27 @@ const CreateBudget = () => {
                         min="0"
                         step="0.01"
                         required
-                        className="w-full h-12 px-4 border border-[#78848E] rounded-r-xl focus:outline-none focus:border-[#6C3D91]"
+                        className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
                       />
                     </div>
                   </div>
 
                   {/* Current Usage */}
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                    <label
+                      htmlFor="currentUsage"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
                       Current Usage
                     </label>
 
                     <div className="flex">
-                      <span className="flex items-center px-4 bg-[#F3F4F6] border border-r-0 border-[#78848E] rounded-l-xl">
+                      <span className="flex items-center px-4 bg-primary-lightest border border-r-0 border-neutral rounded-l-xl font-inter text-primary font-semibold">
                         R
                       </span>
 
                       <input
+                        id="currentUsage"
                         type="number"
                         name="currentUsage"
                         value={formData.currentUsage}
@@ -205,18 +231,22 @@ const CreateBudget = () => {
                         min="0"
                         step="0.01"
                         required
-                        className="w-full h-12 px-4 border border-[#78848E] rounded-r-xl focus:outline-none focus:border-[#6C3D91]"
+                        className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
                       />
                     </div>
                   </div>
 
                   {/* Max Hours */}
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                    <label
+                      htmlFor="maxHours"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
                       Max Hours
                     </label>
 
                     <input
+                      id="maxHours"
                       type="number"
                       name="maxHours"
                       value={formData.maxHours}
@@ -224,34 +254,35 @@ const CreateBudget = () => {
                       min="0"
                       step="0.5"
                       required
-                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl focus:outline-none focus:border-[#6C3D91]"
+                      className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
                     />
                   </div>
 
                 </div>
-              </div>
+              </Card>
+            </section>
 
-              {/* Buttons */}
-              <div className="flex justify-end gap-4">
+            {/* Form Actions */}
+            <div className="flex justify-end gap-4">
 
-                <button
-                  type="button"
-                  onClick={() => navigate('/budget-management')}
-                  className="h-11 px-6 border border-[#78848E] rounded-xl font-semibold hover:bg-[#F3F4F6]"
-                >
-                  Cancel
-                </button>
+              <button
+                type="button"
+                onClick={() => navigate('/budget-management')}
+                className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
+              >
+                Cancel
+              </button>
 
-                <button
-                  type="submit"
-                  className="h-11 px-6 bg-[#6C3D91] text-white rounded-xl font-semibold hover:bg-[#5A3280]"
-                >
-                  Create Budget
-                </button>
+              <button
+                type="submit"
+                className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
+              >
+                Create Budget
+              </button>
 
-              </div>
-            </form>
-          </div>
+            </div>
+
+          </form>
         </main>
       </div>
     </div>
