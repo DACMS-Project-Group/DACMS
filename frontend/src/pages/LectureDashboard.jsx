@@ -103,11 +103,10 @@ const LectureDashboard = () => {
 
   return (
     <div className="min-h-screen bg-off-white">
-      {/* Top Navigation */}
       <Navbar />
 
-      {/* Sidebar + Main Content */}
       <div className="flex">
+        {/* ===== SIDEBAR ===== */}
         <Sidebar userRole="lecturer" />
 
         <main className="flex-1">
@@ -118,13 +117,12 @@ const LectureDashboard = () => {
             </h1>
           </div>
 
-          {/* Page Content */}
+          {/* ===== MAIN CONTENT ===== */}
           <div className="p-8">
             {/* Introduction */}
             <div className="mb-8">
               <p className="text-neutral text-base font-inter">
-                Here's an overview of your assistant applications and
-                activities.
+                Here's an overview of your assistant applications and activities.
               </p>
 
               {error && (
@@ -134,7 +132,7 @@ const LectureDashboard = () => {
               )}
             </div>
 
-            {/* Overview */}
+            {/* ===== OVERVIEW STATS ===== */}
             <div className="mb-8">
               <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
                 Overview
@@ -180,7 +178,6 @@ const LectureDashboard = () => {
                     </p>
                   </div>
                 </Card>
-
               </div>
             </div>
 
@@ -345,7 +342,32 @@ const LectureDashboard = () => {
             {/* Budget Utilisation */}
             <div className="mb-8">
               <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
-                Budget Utilisation
+                Budget Allocation
+              </h2>
+              <Card>
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div>
+                    <h3 className="text-2xl font-poppins font-semibold text-dark">
+                      Budget Allocation
+                    </h3>
+                    <p className="text-neutral mt-1 font-inter">
+                      View the current budget allocated for assistant appointments.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => navigate('/budget-management')}
+                    className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition text-center font-inter"
+                  >
+                    View Budget Allocation →
+                  </button>
+                </div>
+              </Card>
+            </div>
+
+            {/* ===== NOTIFICATIONS ===== */}
+            <div>
+              <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+                Notifications
               </h2>
 
               <Card>
@@ -443,7 +465,6 @@ const LectureDashboard = () => {
                 )}
               </Card>
             </div>
-
           </div>
         </main>
       </div>

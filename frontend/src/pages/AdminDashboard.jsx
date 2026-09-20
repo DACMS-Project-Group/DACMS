@@ -63,15 +63,19 @@ const AdminDashboard = () => {
       <Navbar />
 
       <div className="flex">
+        {/* Sidebar */}
         <Sidebar userRole="admin" />
 
+        {/* Main Content */}
         <main className="flex-1">
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white">
+          {/* Page Title */}
+          <div className="bg-primary h-16 flex items-center px-8">
+            <h1 className="text-3xl font-poppins font-bold text-white">
               Administrator Dashboard
             </h1>
           </div>
 
+          {/* Main Content */}
           <div className="p-8">
             {/* Welcome */}
             <div className="mb-8">
@@ -81,22 +85,18 @@ const AdminDashboard = () => {
               <p className="text-neutral mt-2 font-inter">
                 Monitor and manage the Assistant Applications and Claims Management System.
               </p>
-
-              {error && (
-                <p className="mt-2 text-sm text-error font-inter">
-                  Could not load dashboard data: {error}
-                </p>
-              )}
             </div>
 
-            {/* SYSTEM STATISTICS */}
+            {/* ================================
+                SYSTEM STATISTICS
+            ================================= */}
             <section className="mb-8">
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 System Statistics
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {statisticCards.map((stat) => (
+                {statistics.map((stat) => (
                   <Card key={stat.title}>
                     <div className="flex justify-between items-start">
                       <div>
@@ -104,7 +104,7 @@ const AdminDashboard = () => {
                           {stat.title}
                         </p>
                         <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                          {loading ? '—' : stat.value}
+                          {stat.value}
                         </p>
                       </div>
                     </div>
@@ -120,7 +120,7 @@ const AdminDashboard = () => {
               {/* Monthly Claims */}
               <section className="min-w-0 h-full flex flex-col">
                 <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                  Monthly Work Summary
+                  Monthly Claims Summary
                 </h3>
 
                 <Card className="h-full flex flex-col justify-between">
@@ -210,6 +210,7 @@ const AdminDashboard = () => {
                               <StatusBadge status={appointment.status} />
                             </div>
                           </div>
+                          <StatusBadge status={appointment.status} />
                         </div>
                       ))
                     ) : (
@@ -273,7 +274,9 @@ const AdminDashboard = () => {
               </section>
             </div>
 
-            {/* ADMINISTRATOR ACTIONS */}
+            {/* ================================
+                ADMINISTRATOR ACTIONS
+            ================================= */}
             <section className="mb-8">
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 Administrator Actions
@@ -311,7 +314,11 @@ const AdminDashboard = () => {
             </section>
 
             {/* ================================
+<<<<<<< HEAD
                 Claims Export
+=======
+                PAYMENT INFORMATION
+>>>>>>> c09018f (fixed routing for some pages and fixed sidebar sitting on top of the navbar in some pages)
             ================================= */}
             <section>
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
