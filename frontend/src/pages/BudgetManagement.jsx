@@ -270,113 +270,13 @@ const BudgetManagement = () => {
                         <th className="px-5 py-4 text-left text-sm font-semibold text-primary font-inter">
                           Status
                         </th>
-                      </tr>
-                    const remaining =
-                      budget.allocated - budget.used;
 
-                    return (
-                      <tr
-                        key={budget.id}
-                        className="border-t border-[#78848E]/40 hover:bg-[#E8DDF0]/30"
-                      >
-
-                        <td className="px-5 py-5">
-                          <p className="font-semibold text-[#181512]">
-                            {budget.moduleCode}
-                          </p>
-
-                          <p className="text-sm text-[#78848E]">
-                            {budget.moduleName}
-                          </p>
-                        </td>
-
-                        <td className="px-5 py-5 text-[#181512]">
-                          {formatCurrency(budget.allocated)}
-                        </td>
-
-                        <td className="px-5 py-5 text-[#181512]">
-                          {formatCurrency(budget.used)}
-                        </td>
-
-                        <td
-                          className={`px-5 py-5 font-medium ${
-                            remaining < 0
-                              ? 'text-[#DC3545]'
-                              : 'text-[#181512]'
-                          }`}
-                        >
-                          {formatCurrency(remaining)}
-                        </td>
-
-                        <td className="px-5 py-5 min-w-[170px]">
-
-                          <div className="flex justify-between mb-1">
-                            <span className="text-sm">
-                              {percentage}%
-                            </span>
-                          </div>
-
-                          <div className="w-full h-2 bg-gray-200 rounded-full">
-                            <div
-                              className={`h-2 rounded-full ${
-                                percentage >= 100
-                                  ? 'bg-[#DC3545]'
-                                  : percentage >= 80
-                                  ? 'bg-[#FFC107]'
-                                  : 'bg-[#28A745]'
-                              }`}
-                              style={{
-                                width: `${Math.min(
-                                  percentage,
-                                  100
-                                )}%`,
-                              }}
-                            />
-                          </div>
-
-                        </td>
-
-                        <td className="px-5 py-5">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(
-                              budget.status
-                            )}`}
-                          >
-                            {budget.status}
-                          </span>
-                        </td>
-
-                        <td className="px-5 py-5">
-
-                          <div className="flex gap-2">
-
-                            <button
-                              onClick={() =>
-                                navigate(
-                                  `/budget-details/${budget.id}`
-                                )
-                              }
-                              className="text-[#6C3D91] font-semibold hover:underline"
-                            >
-                              View
-                            </button>
-
-                            <button
-                              onClick={() =>
-                                navigate(
-                                  `/edit-budget/${budget.id}`
-                                )
-                              }
-                              className="text-[#78848E] font-semibold hover:underline"
-                            >
-                              Edit
-                            </button>
-
-                          </div>
-
-                        </td>
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-primary font-inter">
+                          Actions
+                        </th>
 
                       </tr>
+
                     </thead>
 
                     {/* Table Body */}
@@ -548,4 +448,3 @@ const BudgetManagement = () => {
 };
 
 export default BudgetManagement;
-

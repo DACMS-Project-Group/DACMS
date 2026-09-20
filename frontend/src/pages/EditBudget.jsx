@@ -93,6 +93,7 @@ const EditBudget = () => {
   return (
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
     <div className="min-h-screen bg-off-white">
 =======
     <div className="flex min-h-screen bg-off-white">
@@ -101,12 +102,13 @@ const EditBudget = () => {
 =======
     <div className="min-h-screen bg-off-white">
 >>>>>>> 27f538a (Standardize frontend page layouts)
+=======
+    <div className="flex min-h-screen bg-off-white">
+      <Sidebar userRole="admin" />
+>>>>>>> 3f57c17 (Update admin budget pages and styling)
 
-      <Navbar />
-
-      <div className="flex">
-
-        <Sidebar userRole="admin" />
+      <div className="flex-1">
+        <Navbar />
 
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -544,13 +546,17 @@ const EditBudget = () => {
 
                     {/* Allocation */}
                     <div className="flex">
+<<<<<<< HEAD
 
 >>>>>>> 27f538a (Standardize frontend page layouts)
+=======
+>>>>>>> 3f57c17 (Update admin budget pages and styling)
                       <span className="flex items-center px-4 bg-primary-lightest border border-r-0 border-neutral rounded-l-xl font-inter text-primary font-semibold">
                         R
                       </span>
 
                       <input
+                        id="allocatedBudget"
                         type="number"
 <<<<<<< HEAD
 <<<<<<< HEAD
@@ -984,16 +990,12 @@ const EditBudget = () => {
                   Save Changes
                 </button>
 
-              </div>
+            </div>
 
-            </form>
-
+          </form>
           </div>
-
         </main>
-
       </div>
-
     </div>
   );
 };

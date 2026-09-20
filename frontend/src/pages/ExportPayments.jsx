@@ -63,15 +63,9 @@ const ExportPayments = () => {
 
   const filteredClaims = claims.filter(
     (claim) =>
-      claim.id
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      claim.student
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      claim.module
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
+      claim.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      claim.student.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      claim.module.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const toggleClaim = (id) => {
@@ -80,10 +74,7 @@ const ExportPayments = () => {
         selectedClaims.filter((claimId) => claimId !== id)
       );
     } else {
-      setSelectedClaims([
-        ...selectedClaims,
-        id,
-      ]);
+      setSelectedClaims([...selectedClaims, id]);
     }
   };
 
@@ -137,399 +128,464 @@ const ExportPayments = () => {
   };
 
   return (
-    <div className="min-h-screen bg-off-white">
+    <div className="flex min-h-screen bg-off-white">
 
-      <Navbar />
+      {/* Sidebar */}
+      <Sidebar userRole="admin" />
 
-      <div className="flex">
+      {/* Main Content */}
+      <div className="flex-1">
 
-        <Sidebar userRole="admin" />
+        {/* Top Navbar */}
+        <Navbar />
 
-        <main className="flex-1">
+        {/* Page Title */}
+        <div className="bg-primary h-16 flex items-center px-8">
+          <h1 className="text-3xl font-poppins font-bold text-white">
+            Export Payments
+          </h1>
+        </div>
 
-          {/* Page Header */}
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white font-poppins">
-              Export Payments
-            </h1>
+        {/* Page Content */}
+        <main className="p-8">
+
+          {/* Introduction */}
+          <div className="mb-8">
+            <h2 className="text-3xl font-poppins font-semibold text-primary">
+              Payment Export
+            </h2>
+
+            <p className="text-neutral mt-2 font-inter">
+              Review approved claims and export remuneration
+              information for payment processing.
+            </p>
           </div>
 
-          {/* Page Content */}
-          <div className="p-8">
+          {/* Filters */}
+          <section className="mb-8">
 
-            {/* Introduction */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-poppins font-semibold text-primary">
-                Payment Export
-              </h2>
+            <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              Filter Claims
+            </h3>
 
-              <p className="text-neutral mt-2 font-inter">
-                Review approved claims and export remuneration
-                information for payment processing.
-              </p>
-            </div>
+            <Card>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
-            {/* Filters */}
-            <section className="mb-8">
+                {/* Search */}
+                <div>
+                  <label className="block text-sm text-neutral mb-2 font-inter font-medium">
+                    Search
+                  </label>
 
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                Filter Claims
-              </h3>
-
-              <Card>
-
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-
-                  {/* Search */}
-                  <div>
-                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
-                      Search
-                    </label>
-
-                    <input
-                      type="text"
-                      placeholder="Claim, student or module"
-                      value={searchTerm}
-                      onChange={(e) =>
-                        setSearchTerm(e.target.value)
-                      }
-                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
-                    />
-                  </div>
-
-                  {/* Status */}
-                  <div>
-                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
-                      Status
-                    </label>
-
-                    <select
-                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
-                    >
-                      <option>Approved</option>
-                      <option>Paid</option>
-                      <option>All</option>
-                    </select>
-                  </div>
-
-                  {/* Date From */}
-                  <div>
-                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
-                      Date From
-                    </label>
-
-                    <input
-                      type="date"
-                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
-                    />
-                  </div>
-
-                  {/* Date To */}
-                  <div>
-                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
-                      Date To
-                    </label>
-
-                    <input
-                      type="date"
-                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
-                    />
-                  </div>
-
+                  <input
+                    type="text"
+                    placeholder="Claim, student or module"
+                    value={searchTerm}
+                    onChange={(e) =>
+                      setSearchTerm(e.target.value)
+                    }
+                    className="
+                      w-full
+                      h-11
+                      px-4
+                      border
+                      border-neutral
+                      rounded-xl
+                      focus:outline-none
+                      focus:border-primary
+                      focus:ring-2
+                      focus:ring-primary/25
+                      font-inter
+                    "
+                  />
                 </div>
 
-              </Card>
+                {/* Status */}
+                <div>
+                  <label className="block text-sm text-neutral mb-2 font-inter font-medium">
+                    Status
+                  </label>
 
-            </section>
+                  <select
+                    className="
+                      w-full
+                      h-11
+                      px-4
+                      border
+                      border-neutral
+                      rounded-xl
+                      focus:outline-none
+                      focus:border-primary
+                      focus:ring-2
+                      focus:ring-primary/25
+                      font-inter
+                    "
+                  >
+                    <option>Approved</option>
+                    <option>Paid</option>
+                    <option>All</option>
+                  </select>
+                </div>
 
-            {/* Summary Statistics */}
-            <section className="mb-8">
+                {/* Date From */}
+                <div>
+                  <label className="block text-sm text-neutral mb-2 font-inter font-medium">
+                    Date From
+                  </label>
 
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                Payment Summary
-              </h3>
+                  <input
+                    type="date"
+                    className="
+                      w-full
+                      h-11
+                      px-4
+                      border
+                      border-neutral
+                      rounded-xl
+                      focus:outline-none
+                      focus:border-primary
+                      focus:ring-2
+                      focus:ring-primary/25
+                      font-inter
+                    "
+                  />
+                </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Date To */}
+                <div>
+                  <label className="block text-sm text-neutral mb-2 font-inter font-medium">
+                    Date To
+                  </label>
 
-                <Card>
-                  <p className="text-neutral font-inter font-medium">
-                    Approved Claims
-                  </p>
-
-                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                    {claims.length}
-                  </p>
-                </Card>
-
-                <Card>
-                  <p className="text-neutral font-inter font-medium">
-                    Selected Claims
-                  </p>
-
-                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                    {selectedClaims.length}
-                  </p>
-                </Card>
-
-                <Card>
-                  <p className="text-neutral font-inter font-medium">
-                    Total Hours
-                  </p>
-
-                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                    {totalHours}
-                  </p>
-                </Card>
-
-                <Card>
-                  <p className="text-neutral font-inter font-medium">
-                    Total Payment
-                  </p>
-
-                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                    {formatCurrency(totalPayment)}
-                  </p>
-                </Card>
+                  <input
+                    type="date"
+                    className="
+                      w-full
+                      h-11
+                      px-4
+                      border
+                      border-neutral
+                      rounded-xl
+                      focus:outline-none
+                      focus:border-primary
+                      focus:ring-2
+                      focus:ring-primary/25
+                      font-inter
+                    "
+                  />
+                </div>
 
               </div>
+            </Card>
 
-            </section>
+          </section>
 
-            {/* Approved Claims */}
-            <section className="mb-8">
+          {/* Summary Statistics */}
+          <section className="mb-8">
 
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+            <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              Payment Summary
+            </h3>
 
-                <h3 className="text-2xl font-poppins font-semibold text-primary">
-                  Approved Claims
-                </h3>
-
-                <span className="text-sm text-neutral font-inter">
-                  {selectedClaims.length} selected
-                </span>
-
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
               <Card>
+                <p className="text-neutral font-inter font-medium">
+                  Approved Claims
+                </p>
 
-                <div className="overflow-x-auto">
+                <p className="text-3xl font-poppins font-bold text-primary mt-3">
+                  {claims.length}
+                </p>
+              </Card>
 
-                  <table className="w-full">
+              <Card>
+                <p className="text-neutral font-inter font-medium">
+                  Selected Claims
+                </p>
 
-                    <thead className="bg-primary-lightest">
+                <p className="text-3xl font-poppins font-bold text-primary mt-3">
+                  {selectedClaims.length}
+                </p>
+              </Card>
 
-                      <tr>
+              <Card>
+                <p className="text-neutral font-inter font-medium">
+                  Total Hours
+                </p>
 
-                        <th className="px-5 py-4 text-left">
-                          <input
-                            type="checkbox"
-                            checked={
-                              selectedClaims.length ===
-                                filteredClaims.length &&
-                              filteredClaims.length > 0
-                            }
-                            onChange={toggleAll}
-                            className="w-4 h-4 accent-primary"
-                          />
-                        </th>
+                <p className="text-3xl font-poppins font-bold text-primary mt-3">
+                  {totalHours}
+                </p>
+              </Card>
 
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Claim ID
-                        </th>
+              <Card>
+                <p className="text-neutral font-inter font-medium">
+                  Total Payment
+                </p>
 
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Student
-                        </th>
+                <p className="text-3xl font-poppins font-bold text-primary mt-3">
+                  {formatCurrency(totalPayment)}
+                </p>
+              </Card>
 
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Module
-                        </th>
+            </div>
 
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Hours
-                        </th>
+          </section>
 
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Rate
-                        </th>
+          {/* Approved Claims */}
+          <section className="mb-8">
 
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Amount
-                        </th>
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
 
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Status
-                        </th>
+              <h3 className="text-2xl font-poppins font-semibold text-primary">
+                Approved Claims
+              </h3>
 
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Date
-                        </th>
+              <span className="text-sm text-neutral font-inter">
+                {selectedClaims.length} selected
+              </span>
 
-                      </tr>
+            </div>
 
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+
+              <div className="overflow-x-auto">
+
+                <table className="min-w-full">
+                  <thead className="bg-primary-lightest">
+                    <tr>
+
+                      <th className="px-5 py-4 text-left">
+                        <input
+                          type="checkbox"
+                          checked={
+                            selectedClaims.length ===
+                              filteredClaims.length &&
+                            filteredClaims.length > 0
+                          }
+                          onChange={toggleAll}
+                          className="w-4 h-4 accent-primary"
+                        />
+                      </th>
+
+                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                        Claim ID
+                      </th>
+
+                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                        Student
+                      </th>
+
+                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                        Module
+                      </th>
+
+                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                        Hours
+                      </th>
+
+                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                        Rate
+                      </th>
+
+                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                        Amount
+                      </th>
+
+                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                        Status
+                      </th>
+
+                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                        Date
+                      </th>
+
+                    </tr>
                     </thead>
 
                     <tbody>
 
-                      {filteredClaims.map((claim) => (
+                    {filteredClaims.map((claim) => (
 
-                        <tr
-                          key={claim.id}
-                          className="border-t border-neutral/30 hover:bg-primary-lightest/30 transition"
+                      <tr
+                        key={claim.id}
+                        className="
+                          border-t
+                          border-neutral/30
+                          hover:bg-primary-lightest/30
+                          transition
+                        "
+                      >
+
+                        <td className="px-5 py-5">
+
+                          <input
+                            type="checkbox"
+                            checked={selectedClaims.includes(
+                              claim.id
+                            )}
+                            onChange={() =>
+                              toggleClaim(claim.id)
+                            }
+                            className="w-4 h-4 accent-primary"
+                          />
+
+                        </td>
+
+                        <td className="px-5 py-5 font-semibold text-dark font-inter">
+                          {claim.id}
+                        </td>
+
+                        <td className="px-5 py-5 text-dark font-inter">
+                          {claim.student}
+                        </td>
+
+                        <td className="px-5 py-5 text-dark font-inter">
+                          {claim.module}
+                        </td>
+
+                        <td className="px-5 py-5 text-dark font-inter">
+                          {claim.hours}
+                        </td>
+
+                        <td className="px-5 py-5 text-dark font-inter">
+                          {formatCurrency(claim.rate)}
+                        </td>
+
+                        <td className="px-5 py-5 font-semibold text-dark font-inter">
+                          {formatCurrency(claim.amount)}
+                        </td>
+
+                        <td className="px-5 py-5">
+                          <StatusBadge status={claim.status} />
+                        </td>
+
+                        <td className="px-5 py-5 text-sm text-neutral font-inter">
+                          {claim.date}
+                        </td>
+
+                      </tr>
+
+                    ))}
+
+                    {filteredClaims.length === 0 && (
+
+                      <tr>
+
+                        <td
+                          colSpan="9"
+                          className="px-5 py-10 text-center text-neutral font-inter"
                         >
+                          No approved claims found matching your search.
+                        </td>
 
-                          <td className="px-5 py-5">
+                      </tr>
 
-                            <input
-                              type="checkbox"
-                              checked={selectedClaims.includes(
-                                claim.id
-                              )}
-                              onChange={() =>
-                                toggleClaim(claim.id)
-                              }
-                              className="w-4 h-4 accent-primary"
-                            />
-
-                          </td>
-
-                          <td className="px-5 py-5 font-semibold text-dark font-inter">
-                            {claim.id}
-                          </td>
-
-                          <td className="px-5 py-5 text-dark font-inter">
-                            {claim.student}
-                          </td>
-
-                          <td className="px-5 py-5 text-dark font-inter">
-                            {claim.module}
-                          </td>
-
-                          <td className="px-5 py-5 text-dark font-inter">
-                            {claim.hours}
-                          </td>
-
-                          <td className="px-5 py-5 text-dark font-inter">
-                            {formatCurrency(claim.rate)}
-                          </td>
-
-                          <td className="px-5 py-5 font-semibold text-dark font-inter">
-                            {formatCurrency(claim.amount)}
-                          </td>
-
-                          <td className="px-5 py-5">
-                            <StatusBadge status={claim.status} />
-                          </td>
-
-                          <td className="px-5 py-5 text-sm text-neutral font-inter">
-                            {claim.date}
-                          </td>
-
-                        </tr>
-
-                      ))}
-
-                      {filteredClaims.length === 0 && (
-
-                        <tr>
-
-                          <td
-                            colSpan="9"
-                            className="px-5 py-10 text-center text-neutral font-inter"
-                          >
-                            No approved claims found matching your search.
-                          </td>
-
-                        </tr>
-
-                      )}
+                    )}
 
                     </tbody>
-
                   </table>
+                </div>
+              </div>
 
+          </section>
+
+          {/* Payment Export Summary */}
+          <section>
+
+            <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              Payment Export Summary
+            </h3>
+
+            <Card>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <div>
+                  <p className="text-sm text-neutral font-inter">
+                    Selected Claims
+                  </p>
+
+                  <p className="text-xl font-poppins font-semibold text-dark mt-1">
+                    {selectedClaims.length}
+                  </p>
                 </div>
 
-              </Card>
+                <div>
+                  <p className="text-sm text-neutral font-inter">
+                    Total Hours
+                  </p>
 
-            </section>
-
-            {/* Payment Export Summary */}
-            <section>
-
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                Payment Export Summary
-              </h3>
-
-              <Card>
-
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-
-                  <div>
-                    <p className="text-sm text-neutral font-inter">
-                      Selected Claims
-                    </p>
-
-                    <p className="text-xl font-poppins font-semibold text-dark mt-1">
-                      {selectedClaims.length}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-neutral font-inter">
-                      Total Hours
-                    </p>
-
-                    <p className="text-xl font-poppins font-semibold text-dark mt-1">
-                      {totalHours}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-neutral font-inter">
-                      Total Remuneration
-                    </p>
-
-                    <p className="text-xl font-poppins font-semibold text-primary mt-1">
-                      {formatCurrency(totalPayment)}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-neutral font-inter">
-                      Export Period
-                    </p>
-
-                    <p className="text-xl font-poppins font-semibold text-dark mt-1">
-                      August 2026
-                    </p>
-                  </div>
-
+                  <p className="text-xl font-poppins font-semibold text-dark mt-1">
+                    {totalHours}
+                  </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+                <div>
+                  <p className="text-sm text-neutral font-inter">
+                    Total Remuneration
+                  </p>
 
-                  <button
-                    onClick={exportPDF}
-                    className="px-6 py-3 border-2 border-primary text-primary rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
-                  >
-                    Export PDF
-                  </button>
-
-                  <button
-                    onClick={exportExcel}
-                    className="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
-                  >
-                    Export Excel
-                  </button>
-
+                  <p className="text-xl font-poppins font-semibold text-primary mt-1">
+                    {formatCurrency(totalPayment)}
+                  </p>
                 </div>
 
-              </Card>
+                <div>
+                  <p className="text-sm text-neutral font-inter">
+                    Export Period
+                  </p>
 
-            </section>
+                  <p className="text-xl font-poppins font-semibold text-dark mt-1">
+                    August 2026
+                  </p>
+                </div>
 
-          </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+
+                <button
+                  onClick={exportPDF}
+                  className="
+                    px-6
+                    py-3
+                    border-2
+                    border-primary
+                    text-primary
+                    rounded-xl
+                    font-semibold
+                    hover:bg-primary-lightest
+                    transition
+                    font-inter
+                  "
+                >
+                  Export PDF
+                </button>
+
+                <button
+                  onClick={exportExcel}
+                  className="
+                    px-6
+                    py-3
+                    bg-primary
+                    text-white
+                    rounded-xl
+                    font-semibold
+                    hover:bg-primary-dark
+                    transition
+                    font-inter
+                  "
+                >
+                  Export Excel
+                </button>
+
+              </div>
+
+            </Card>
+
+          </section>
 
         </main>
 
