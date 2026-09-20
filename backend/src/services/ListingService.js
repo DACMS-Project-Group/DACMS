@@ -1,4 +1,5 @@
 import ListingRepository from '../repositories/ListingRepository.js';
+import getAuthUserId from '../utils/getAuthUserId.js';
 
 class ListingService {
     constructor() {
@@ -18,13 +19,9 @@ class ListingService {
         return rows;
     }
 
-    async createListing(listingData) {
+    async createListing(req, listingData) {
         if (!listingData.moduleId) {
             throw new Error('moduleId is required.');
-        }
-
-        if (!listingData.lecturerId) {
-            throw new Error('lecturerId is required.');
         }
 
         if (!listingData.deadline) {
@@ -35,14 +32,18 @@ class ListingService {
             throw new Error('minimumGrade is required.');
         }
 
+        listingData.lecturerId = getAuthUserId(req);
+
         const rows = await this.listingRepository.createListing(listingData);
         return rows;
     }
 
-    async editListing(listingId, listingData) {
+    async editListing(req, listingId, listingData) {
         if (!listingId) {
             throw new Error('listingId is required.');
         }
+
+        listingData.lecturerId = getAuthUserId(req);
 
         const rows = await this.listingRepository.editListing(listingId, listingData);
         return rows;
