@@ -985,6 +985,7 @@ const StudentProfile = () => {
                       />
                     </div>
 
+                    {/* Student Signature */}
                     <div>
                       <label className="block font-semibold mb-2">
                         Surname <span className="text-red-500">*</span>
@@ -1000,6 +1001,7 @@ const StudentProfile = () => {
                       />
                     </div>
 
+                    {/* Automatically Recorded Date */}
                     <div>
                       <label className="block font-semibold mb-2">
                         Name <span className="text-red-500">*</span>

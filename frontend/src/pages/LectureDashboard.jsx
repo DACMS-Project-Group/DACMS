@@ -103,8 +103,10 @@ const LectureDashboard = () => {
 
   return (
     <div className="min-h-screen bg-off-white">
+      {/* Top Navigation */}
       <Navbar />
 
+      {/* Sidebar + Main Content */}
       <div className="flex">
         <Sidebar userRole="lecturer" />
 
@@ -178,6 +180,7 @@ const LectureDashboard = () => {
                     </p>
                   </div>
                 </Card>
+
               </div>
             </div>
 
@@ -440,6 +443,7 @@ const LectureDashboard = () => {
                 )}
               </Card>
             </div>
+
           </div>
         </main>
       </div>

@@ -137,15 +137,11 @@ const ExportPayments = () => {
   };
 
   return (
-<<<<<<< HEAD
-<<<<<<< HEAD
+
+
     <div className="min-h-screen bg-off-white">
-=======
     <div className="flex min-h-screen bg-off-white">
->>>>>>> 34d86e6 (Update admin budget pages and styling)
-=======
     <div className="min-h-screen bg-off-white">
->>>>>>> 27f538a (Standardize frontend page layouts)
 
       <Navbar />
 
@@ -153,8 +149,8 @@ const ExportPayments = () => {
 
         <Sidebar userRole="admin" />
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
+
         <main className="flex-1">
 
           {/* Page Header */}
@@ -300,16 +296,13 @@ const ExportPayments = () => {
                     {formatCurrency(totalPayment)}
                   </p>
                 </Card>
-=======
         {/* Page Title */}
         <div className="bg-primary h-16 flex items-center px-8">
           <h1 className="text-3xl font-poppins font-bold text-white">
             Export Payments
           </h1>
         </div>
-=======
         <main className="flex-1">
->>>>>>> 27f538a (Standardize frontend page layouts)
 
           {/* Page Header */}
           <div className="bg-primary px-8 py-4">
@@ -321,7 +314,7 @@ const ExportPayments = () => {
           {/* Page Content */}
           <div className="p-8">
 
-<<<<<<< HEAD
+
             <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
               Filter Claims
             </h3>
@@ -432,12 +425,11 @@ const ExportPayments = () => {
                     "
                   />
                 </div>
->>>>>>> 34d86e6 (Update admin budget pages and styling)
 
               </div>
             </Card>
 
-<<<<<<< HEAD
+
             </section>
 
             {/* Approved Claims */}
@@ -452,7 +444,6 @@ const ExportPayments = () => {
                 <span className="text-sm text-neutral font-inter">
                   {selectedClaims.length} selected
                 </span>
-=======
           </section>
 
           {/* Summary Statistics */}
@@ -503,13 +494,11 @@ const ExportPayments = () => {
                   {formatCurrency(totalPayment)}
                 </p>
               </Card>
-=======
             {/* Introduction */}
             <div className="mb-8">
               <h2 className="text-3xl font-poppins font-semibold text-primary">
                 Payment Export
               </h2>
->>>>>>> 27f538a (Standardize frontend page layouts)
 
               <p className="text-neutral mt-2 font-inter">
                 Review approved claims and export remuneration
@@ -523,18 +512,14 @@ const ExportPayments = () => {
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 Filter Claims
               </h3>
->>>>>>> 34d86e6 (Update admin budget pages and styling)
 
               <Card>
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
+
               <Card>
-=======
             </div>
-=======
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
->>>>>>> 27f538a (Standardize frontend page layouts)
 
                   {/* Search */}
                   <div>
@@ -542,21 +527,18 @@ const ExportPayments = () => {
                       Search
                     </label>
 
-<<<<<<< HEAD
+
               <div className="overflow-x-auto">
->>>>>>> 34d86e6 (Update admin budget pages and styling)
 
                 <div className="overflow-x-auto">
 
-<<<<<<< HEAD
+
                   <table className="w-full">
-=======
                   <thead className="bg-primary-lightest">
->>>>>>> 34d86e6 (Update admin budget pages and styling)
 
                     <thead className="bg-primary-lightest">
 
-<<<<<<< HEAD
+
                       <tr>
 
                         <th className="px-5 py-4 text-left">
@@ -605,7 +587,6 @@ const ExportPayments = () => {
                         </th>
 
                       </tr>
-=======
                       <th className="px-5 py-4 text-left">
                         <input
                           type="checkbox"
@@ -618,7 +599,6 @@ const ExportPayments = () => {
                           className="w-4 h-4 accent-primary"
                         />
                       </th>
-=======
                     <input
                       type="text"
                       placeholder="Claim, student or module"
@@ -656,7 +636,6 @@ const ExportPayments = () => {
                       className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
                     />
                   </div>
->>>>>>> 27f538a (Standardize frontend page layouts)
 
                   {/* Date To */}
                   <div>
@@ -683,23 +662,20 @@ const ExportPayments = () => {
                 Payment Summary
               </h3>
 
-<<<<<<< HEAD
                       <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
                         Date
                       </th>
->>>>>>> 34d86e6 (Update admin budget pages and styling)
 
                     </thead>
 
                     <tbody>
 
-<<<<<<< HEAD
                       {filteredClaims.map((claim) => (
 
                         <tr
                           key={claim.id}
                           className="border-t border-neutral/30 hover:bg-primary-lightest/30 transition"
-=======
+
                   <tbody>
 
                     {filteredClaims.map((claim) => (
@@ -772,12 +748,10 @@ const ExportPayments = () => {
                         <td
                           colSpan="9"
                           className="px-5 py-10 text-center text-neutral font-inter"
->>>>>>> 34d86e6 (Update admin budget pages and styling)
                         >
                           No approved claims found matching your search.
                         </td>
 
-<<<<<<< HEAD
                           <td className="px-5 py-5">
 
                             <input
@@ -828,11 +802,9 @@ const ExportPayments = () => {
                         </tr>
 
                       ))}
-=======
                       </tr>
 
                     )}
->>>>>>> 34d86e6 (Update admin budget pages and styling)
 
                       {filteredClaims.length === 0 && (
 
@@ -847,7 +819,7 @@ const ExportPayments = () => {
 
                         </tr>
 
-<<<<<<< HEAD
+
                       )}
 
                     </tbody>
@@ -877,11 +849,9 @@ const ExportPayments = () => {
             </h3>
 
             <Card>
->>>>>>> 34d86e6 (Update admin budget pages and styling)
 
               <Card>
 
-<<<<<<< HEAD
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
                   <div>
@@ -947,10 +917,8 @@ const ExportPayments = () => {
               </Card>
 
             </section>
-=======
                 <div>
                   <p className="text-sm text-neutral font-inter">
-=======
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
                 <Card>
@@ -965,7 +933,6 @@ const ExportPayments = () => {
 
                 <Card>
                   <p className="text-neutral font-inter font-medium">
->>>>>>> 27f538a (Standardize frontend page layouts)
                     Selected Claims
                   </p>
 
@@ -1013,12 +980,10 @@ const ExportPayments = () => {
 
               </div>
 
-<<<<<<< HEAD
+
             </Card>
->>>>>>> 34d86e6 (Update admin budget pages and styling)
-=======
+
               <Card>
->>>>>>> 27f538a (Standardize frontend page layouts)
 
                 <div className="overflow-x-auto">
 
