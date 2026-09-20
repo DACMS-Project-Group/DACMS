@@ -28,6 +28,16 @@ class AdminService {
         const data = await AdminRepository.getBudgetById(budget_id);
         return { data }
     }
+
+    static async createBudget(Budget) {
+        const data = await AdminRepository.createBudget(Budget);
+        return { data };
+    }
+
+    static async editBudget(budget_id, updateData) {
+        const data = await AdminRepository.editBudget(budget_id, updateData);
+        return { data };
+    }
 }
 
 export default AdminService;

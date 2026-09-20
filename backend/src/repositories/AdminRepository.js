@@ -119,8 +119,7 @@ class AdminRepository {
             FROM "MODULE_BUDGET" b
             JOIN "NWU_MODULE" m
                 ON m."ModuleID" = b."ModuleID"
-            WHERE b."AcademicYear" = EXTRACT(YEAR FROM CURRENT_DATE)
-            ORDER BY m."ModuleCode";
+            WHERE b."AcademicYear" = EXTRACT(YEAR FROM CURRENT_DATE);
         `;
 
         const result = await pool.query(query);
@@ -168,6 +167,79 @@ class AdminRepository {
             current_budget_usage: Number(row.CurrentBudgetUsage ?? 0),
             remaining_budget: Number(row.RemainingBudget ?? 0),
         }));
+    }
+
+    static async editBudget(budget_id, updateData) {
+        const fields = [];
+        const values = [];
+        let index = 1;
+
+        if (updateData.module_id !== undefined) {
+            fields.push(`"ModuleID" = $${index++}`);
+            values.push(updateData.module_id);
+        }
+        if (updateData.lecturer_id !== undefined) {
+            fields.push(`"LecturerID" = $${index++}`);
+            values.push(updateData.lecturer_id);
+        }
+        if (updateData.allocated_budget !== undefined) {
+            fields.push(`"AllocatedBudget" = $${index++}`);
+            values.push(updateData.allocated_budget);
+        }
+        if (updateData.current_budget_usage !== undefined) {
+            fields.push(`"CurrentBudgetUsage" = $${index++}`);
+            values.push(updateData.current_budget_usage);
+        }
+        if (updateData.max_allowable_work_hours !== undefined) {
+            fields.push(`"MaxAllowableWorkHours" = $${index++}`);
+            values.push(updateData.max_allowable_work_hours);
+        }
+        if (updateData.academic_year !== undefined) {
+            fields.push(`"AcademicYear" = $${index++}`);
+            values.push(updateData.academic_year);
+        }
+
+        if (fields.length === 0) {
+            throw new Error("No fields provided to update");
+        }
+
+        values.push(budget_id);
+        const query = `
+            UPDATE "MODULE_BUDGET"
+            SET ${fields.join(', ')}
+            WHERE "BudgetID" = $${index}
+            RETURNING *;
+        `;
+        
+        const result = await pool.query(query, values);
+        if (result.rows.length === 0) {
+            throw new Error("Budget not found");
+        }
+        return result.rows[0];
+    }
+
+    static async createBudget(Budget) {
+        const query = `
+            INSERT INTO "MODULE_BUDGET" (
+                "ModuleID",
+                "LecturerID",
+                "AllocatedBudget",
+                "CurrentBudgetUsage",
+                "MaxAllowableWorkHours",
+                "AcademicYear"
+            ) VALUES ($1, $2, $3, $4, $5, $6)
+            RETURNING "BudgetID";
+        `;
+        const values = [
+            Budget.module_id,
+            Budget.lecturer_id,
+            Budget.allocated_budget,
+            Budget.current_budget_usage,
+            Budget.max_allowable_work_hours,
+            Budget.academic_year
+        ];
+        const result = await pool.query(query, values);
+        return result.rows[0].BudgetID;
     }
 }
 
