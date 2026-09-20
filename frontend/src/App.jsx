@@ -34,6 +34,7 @@ import ClaimsVerification from './pages/ClaimsVerification';
 import ClaimReview from './pages/ClaimReview';
 import AppointmentApprovals from './pages/AppointmentApprovals';
 import AppointmentReview from './pages/AppointmentReview';
+import ReviewClaims from './pages/ReviewClaims';
 
 import ProtectedRoute from './routes/ProtectedRoute';
 import './index.css';
@@ -72,6 +73,7 @@ function App() {
             <Route path="/review-applications" element={<ReviewApplications />} />
             <Route path="/application-review/:id" element={<ApplicationReview />} />
             <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
+            <Route path="/review-claims" element={<ReviewClaims />} />
             <Route path="/notifications" element={<Notifications />} />
           </Route>
 
