@@ -17,6 +17,7 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Module Management', href: '/modules' },
     { name: 'Review Applications', href: '/review-applications' },
     { name: 'Assign Duties', href: '/assign-responsibilities' },
+    { name: 'Review Claims', href: '/review-claims' },
     { name: 'Verify Hours', href: '/verify-hours' },
     { name: 'Notifications', href: '/notifications' },
   ];
