@@ -1,5 +1,7 @@
 import pool from '../config/db.js';
 
+const BUDGET_WARNING = 0.8;
+
 class AdminRepository {
     static async getDashboardMetrics() {
         const query = `
@@ -80,6 +82,56 @@ class AdminRepository {
             module: row.module,
             lecturer: row.lecturer,
             student: row.student,
+        }));
+    }
+
+    static async getBudgetsMetrics() {
+        const query = `
+            SELECT
+                COALESCE(SUM("AllocatedBudget"), 0) AS total_allocated,
+                COALESCE(SUM("CurrentBudgetUsage"), 0) AS total_used,
+                COALESCE(SUM("AllocatedBudget" - "CurrentBudgetUsage"), 0) AS total_remaining,
+                COUNT(*) FILTER (
+                    WHERE "CurrentBudgetUsage" >= "AllocatedBudget" * $1
+                ) AS count_near_limit
+            FROM "MODULE_BUDGET"
+            WHERE "AcademicYear" = EXTRACT(YEAR FROM CURRENT_DATE);`;
+        const result = await pool.query(query, [BUDGET_WARNING]);
+        const row = result.rows[0] || {};
+
+        return {
+            total_allocated: Number(row.total_allocated ?? 0),
+            total_used: Number(row.total_used ?? 0),
+            total_remaining: Number(row.total_remaining ?? 0),
+            count_near_limit: Number(row.count_near_limit ?? 0)
+        }
+    }
+
+    static async getBudgetsSummary() {
+        const query = `
+            SELECT
+                b."BudgetID",
+                m."ModuleCode",
+                m."Description",
+                b."AllocatedBudget",
+                b."CurrentBudgetUsage",
+                (b."AllocatedBudget" - b."CurrentBudgetUsage") AS "RemainingBudget"
+            FROM "MODULE_BUDGET" b
+            JOIN "NWU_MODULE" m
+                ON m."ModuleID" = b."ModuleID"
+            WHERE b."AcademicYear" = EXTRACT(YEAR FROM CURRENT_DATE)
+            ORDER BY m."ModuleCode";
+        `;
+
+        const result = await pool.query(query);
+
+        return result.rows.map((row) => ({
+            budget_id: row.BudgetID,
+            module_code: row.ModuleCode,
+            module_description: row.Description,
+            allocated_budget: Number(row.AllocatedBudget ?? 0),
+            current_budget_usage: Number(row.CurrentBudgetUsage ?? 0),
+            remaining_budget: Number(row.RemainingBudget ?? 0),
         }));
     }
 }
