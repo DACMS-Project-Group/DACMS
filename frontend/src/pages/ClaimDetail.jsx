@@ -29,7 +29,7 @@ const ClaimDetail = () => {
 
   const student = {
     studentNumber: '12345678',
-    fullName: 'Tswarelo Motloung',
+    fullName: 'John Doe',
     bankingStatus: 'Banking details verified',
   };
 
