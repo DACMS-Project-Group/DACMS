@@ -105,18 +105,16 @@ const Notifications = () => {
   };
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <div className="flex min-h-screen bg-off-white">
+      <Sidebar userRole="userRole" />
 
-      <div className="flex">
-        {/* ===== SIDEBAR ===== */}
-        <Sidebar userRole={userRole} />
+      <div className="flex-1">
+        <Navbar />
 
-        {/* ===== MAIN CONTENT ===== */}
-        <main className="flex-1">
-          {/* Page Title */}
-          <div className="bg-primary h-16 flex items-center justify-between px-8">
-            <h1 className="text-4xl font-poppins font-bold text-white">Notifications</h1>
+        {/* Page Header */}
+        <div className="bg-primary h-16 flex items-center justify-between px-8">
+
+          <h1 className="text-3xl font-poppins font-bold text-white">Notifications</h1>
 
             <div className="flex items-center gap-4">
               <span className="text-white/80 text-sm font-inter">
@@ -258,7 +256,6 @@ const Notifications = () => {
               )}
             </Card>
           </div>
-        </main>
       </div>
     </div>
   );

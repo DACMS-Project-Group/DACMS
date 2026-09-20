@@ -114,6 +114,8 @@ function App() {
             <Route path="/notifications" element={<Notifications />} />
           </Route>
 
+          
+
           {/* ===== FALLBACK ===== */}
           <Route path="*" element={<Navigate to="/" replace />} />
 

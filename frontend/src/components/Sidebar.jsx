@@ -30,7 +30,6 @@ const Sidebar = ({ userRole = 'student' }) => {
   const adminNavItems = [
     { name: 'Dashboard', href: '/admin-dashboard' },
     { name: 'Budget Management', href: '/budget-management' },
-    { name: 'Export Payments', href: '/export-payments' },
     { name: 'Appointment Approvals', href: '/appointment-approvals' },
     { name: 'Claims Verification', href: '/claims-verification' },
     { name: 'Notifications', href: '/notifications' },
