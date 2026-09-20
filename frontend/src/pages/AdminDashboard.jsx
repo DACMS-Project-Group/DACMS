@@ -41,16 +41,15 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="flex min-h-screen bg-off-white">
-      <Sidebar userRole="admin" />
+    <div className="min-h-screen bg-off-white">
+      <Navbar />
 
-      <div className="flex-1">
-        <Navbar />
+      <div className="flex">
+        <Sidebar userRole="admin" />
 
-        {/* Page Header */}
-        <div className="bg-primary h-16 flex items-center justify-between px-8">
-
-          <h1 className="text-3xl font-poppins font-bold text-white">
+        <main className="flex-1">
+          <div className="bg-primary px-8 py-4">
+            <h1 className="text-2xl font-semibold text-white">
               Administrator Dashboard
             </h1>
           </div>
@@ -238,7 +237,9 @@ const AdminDashboard = () => {
               </Card>
             </section>
           </div>
+        </main>
       </div>
+
     </div>
   );
 };
