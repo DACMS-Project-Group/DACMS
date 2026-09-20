@@ -377,7 +377,6 @@ const BudgetManagement = () => {
                         </td>
 
                       </tr>
-
                     </thead>
 
                     {/* Table Body */}
