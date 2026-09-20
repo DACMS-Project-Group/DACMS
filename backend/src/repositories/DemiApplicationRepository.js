@@ -1,9 +1,31 @@
 import BaseRepository from './BaseRepository.js';
 import DemiApplication from '../models/DemiApplication.js';
+import getAuthUserId  from '../utils/getAuthUserId.js';
 
 class DemiApplicationRepository extends BaseRepository {
     constructor() {
         super('"DEMI_APPLICATION"', DemiApplication);
+    }
+
+    /** Lecturer access to applications */
+    async lecturerFetchApplications(lecturerId) {
+        const rows = await this.query(
+            `
+            SELECT 
+            a.*, 
+            l."ModuleID",
+            l."Deadline"
+            FROM "DEMI_LISTING" l
+            JOIN "DEMI_APPLICATION" a ON a."ListingID" = l."ListingID"
+            WHERE l."LecturerID" = $1
+            `
+            , [lecturerId]
+        )
+
+        if(rows.length == 0)
+            return { output: "No applications found" };
+
+        return { output: rows.length, rows };
     }
 
     /** All applications submitted by a student, with listing/module context. */

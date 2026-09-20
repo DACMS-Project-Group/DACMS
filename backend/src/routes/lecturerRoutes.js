@@ -2,6 +2,7 @@ import express from 'express';
 
 import LecturerController from '../controllers/LecturerController.js';
 import ListingController from '../controllers/ListingController.js';
+import DemiApplicationController from '../controllers/DemiApplicationController.js';
 
 import {
     authenticate,
@@ -44,4 +45,12 @@ router.patch(
     authorize([2]),
     ListingController.editOldListing.bind(ListingController)
 );
+
+router.get(
+    '/applications',
+    authenticate,
+    authorize([2]),
+    DemiApplicationController.lecturerFetchApplications.bind(DemiApplicationController)  
+);
+
 export default router;
