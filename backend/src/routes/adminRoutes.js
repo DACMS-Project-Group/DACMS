@@ -8,6 +8,12 @@ router.get('/dashboard_statistics',
            authenticate, 
            authorize([3]), 
            AdminController.getDashboardSummary
-           );
+);
+
+router.get('/budgets',
+            authenticate,
+            authorize([3]),
+            AdminController.getBudgetsSummary
+);
 
 export default router;

@@ -13,6 +13,16 @@ class AdminService {
             pendingAppointments
         };
     }
+
+    static async getBudgetsSummary() {
+        const stats = await AdminRepository.getBudgetsMetrics();
+        const module_budgets = await AdminRepository.getBudgetsSummary();
+        
+        return {
+            stats,
+            module_budgets
+        };
+    }
 }
 
 export default AdminService;
