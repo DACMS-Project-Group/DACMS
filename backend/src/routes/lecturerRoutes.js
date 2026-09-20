@@ -93,7 +93,6 @@ router.patch(
     authenticate,
     authorize([2]),
     LecturerController.lecturerReviewSession.bind(LecturerController)
-<<<<<<< HEAD
 );
 
 router.get(
@@ -164,8 +163,6 @@ router.get(
     authenticate,
     authorize([2]),
     LecturerController.getBudgetById
-=======
->>>>>>> cfb9a08 (Neil refactoring)
 );
 
 export default router;

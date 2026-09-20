@@ -105,32 +105,15 @@ function App() {
              <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
             </Route>
 
-            {/* ===== ADMIN ROUTES ===== */}
-            <Route element={<ProtectedRoute requiredRoles={['admin']} />}>
-              <Route path="/admin-dashboard" element={<AdminDashboard />} />
-              <Route path="/budget-management" element={<BudgetManagement />} />
-              <Route path="/create-budget" element={<CreateBudget />} />
-              <Route path="/edit-budget/:id" element={<EditBudget />} />
-              <Route path="/budget-details/:id" element={<BudgetDetails />} />
-              <Route
-                path="/claims-verification"
-                element={<ClaimsVerification />}
-              />
-              <Route
-                path="/claim-review/:id"
-                element={<ClaimReview />}
-              />
-              <Route path="/export-payments" element={<ExportPayments />} />
-              <Route
-                path="/appointment-approvals"
-                element={<AppointmentApprovals />}
-              />
-              <Route
-                path="/appointment-review/:id"
-                element={<AppointmentReview />}
-              />
-              <Route path="/notifications" element={<Notifications />} />
-            </Route>
+          {/* ===== LECTURER ROUTES ===== */}
+          <Route element={<ProtectedRoute requiredRoles={['lecturer']} />}>
+            <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
+            <Route path="/review-applications" element={<ReviewApplications />} />
+            <Route path="/application-review/:id" element={<ApplicationReview />} />
+            <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
+            <Route path="/review-claims" element={<ReviewClaims />} />
+            <Route path="/notifications" element={<Notifications />} />
+          </Route>
 
           
 
