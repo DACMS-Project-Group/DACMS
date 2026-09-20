@@ -38,6 +38,16 @@ class AdminService {
         const data = await AdminRepository.editBudget(budget_id, updateData);
         return { data };
     }
+
+    static async getClaimsSummary() {
+        const stats = await AdminRepository.getClaimsMetrics();
+        const claims = await AdminRepository.getClaims();
+
+        return {
+            stats,
+            claims
+        };
+    }
 }
 
 export default AdminService;

@@ -33,4 +33,10 @@ router.put('/budgets/edit/:id',
             AdminController.editBudget
 );
 
+router.get('/claims',
+            authenticate,
+            authorize([3]),
+            AdminController.getClaimsSummary
+);
+
 export default router;

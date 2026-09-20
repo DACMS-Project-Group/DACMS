@@ -241,6 +241,55 @@ class AdminRepository {
         const result = await pool.query(query, values);
         return result.rows[0].BudgetID;
     }
+
+    static async getClaimsMetrics() {
+        const query = `
+            SELECT
+                (SELECT COUNT(*) FROM "REMUNERATION_CLAIM") AS total_claims,
+                (SELECT COUNT(*) FROM "REMUNERATION_CLAIM" WHERE "ClaimStatus" = 'Pending') AS total_pending,
+                (SELECT COUNT(*) FROM "REMUNERATION_CLAIM" WHERE "ClaimStatus" = 'Under Review') AS total_under_review,
+                (SELECT COUNT(*) FROM "REMUNERATION_CLAIM" WHERE "ClaimStatus" = 'Verified') AS total_verified
+        `;
+        const result = await pool.query(query);
+        const row = result.rows[0] || {};
+        return {
+            total_claims: Number(row.total_claims ?? 0),
+            total_pending: Number(row.total_pending ?? 0),
+            total_under_review: Number(row.total_under_review ?? 0),
+            total_verified: Number(row.total_verified ?? 0)
+        };
+    }
+
+    static async getClaims() {
+        const query = `
+            SELECT
+                c."ClaimID",
+                c."ClaimReferenceNumber",
+                c."TotalHoursClaimed",
+                c."TotalClaimAmount",
+                c."ClaimStatus",
+                c."SubmissionDate",
+                m."ModuleCode",
+                CONCAT(au."Title", ' ', au."FName", ' ', au."LName") AS student_name
+            FROM "REMUNERATION_CLAIM" c
+            JOIN "NWU_MODULE" m ON m."ModuleID" = c."ModuleID"
+            JOIN "DEMI_APPLICATION" da ON da."ApplicationID" = c."ApplicationID"
+            JOIN "STUDENT" s ON s."StudentID" = da."StudentID"
+            JOIN "APP_USER" au ON au."UserID" = s."StudentID"
+            ORDER BY c."SubmissionDate" DESC;
+        `;
+        const result = await pool.query(query);
+        return result.rows.map(row => ({
+            claim_id: row.ClaimID,
+            reference_number: row.ClaimReferenceNumber,
+            total_hours_claimed: Number(row.TotalHoursClaimed ?? 0),
+            total_claim_amount: Number(row.TotalClaimAmount ?? 0),
+            claim_status: row.ClaimStatus,
+            submission_date: row.SubmissionDate,
+            module_code: row.ModuleCode,
+            student_name: row.student_name
+        }));
+    }
 }
 
 export default AdminRepository;
