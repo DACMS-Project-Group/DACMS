@@ -91,14 +91,26 @@ const EditBudget = () => {
   };
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-off-white">
+=======
+    <div className="flex min-h-screen bg-off-white">
+      <Sidebar userRole="admin" />
+>>>>>>> 34d86e6 (Update admin budget pages and styling)
 
-      <Navbar />
+      <div className="flex-1">
+        <Navbar />
 
-      <div className="flex">
+        {/* Page Header */}
+        <div className="bg-primary h-16 flex items-center px-8">
+          <h1 className="text-3xl font-poppins font-bold text-white">
+            Edit Budget
+          </h1>
+        </div>
 
-        <Sidebar userRole="admin" />
+        <main className="p-8">
 
+<<<<<<< HEAD
         <main className="flex-1">
 
           {/* Page Header */}
@@ -258,6 +270,81 @@ const EditBudget = () => {
 
               {/* Lecturer Allocation */}
               <section className="mb-8">
+=======
+          {/* Page Introduction */}
+          <div className="mb-8">
+            <h2 className="text-3xl font-poppins font-semibold text-primary">
+              Edit Budget Information
+            </h2>
+
+            <p className="text-neutral mt-2 font-inter">
+              Update the budget allocation and lecturer information.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit}>
+
+            {/* Budget Information */}
+            <section className="mb-8">
+
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-poppins font-semibold text-primary">
+                  Budget Information
+                </h3>
+
+                <span className="text-sm text-neutral font-inter">
+                  Budget ID: {id}
+                </span>
+              </div>
+
+              <Card>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                  {/* Module Code */}
+                  <div>
+                    <label
+                      htmlFor="moduleCode"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
+                      Module Code
+                    </label>
+
+                    <input
+                      id="moduleCode"
+                      type="text"
+                      value={formData.moduleCode}
+                      readOnly
+                      className="w-full h-12 px-4 border border-neutral rounded-xl bg-primary-lightest font-inter"
+                    />
+                  </div>
+
+                  {/* Module Name */}
+                  <div>
+                    <label
+                      htmlFor="moduleName"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
+                      Module Name
+                    </label>
+
+                    <input
+                      id="moduleName"
+                      type="text"
+                      value={formData.moduleName}
+                      readOnly
+                      className="w-full h-12 px-4 border border-neutral rounded-xl bg-primary-lightest font-inter"
+                    />
+                  </div>
+
+                  {/* Allocated Budget */}
+                  <div>
+                    <label
+                      htmlFor="allocatedBudget"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
+                      Allocated Budget
+                    </label>
+>>>>>>> 34d86e6 (Update admin budget pages and styling)
 
                 <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                   Lecturer Allocation
@@ -291,13 +378,18 @@ const EditBudget = () => {
 
                     {/* Allocation */}
                     <div className="flex">
+<<<<<<< HEAD
 
+=======
+>>>>>>> 34d86e6 (Update admin budget pages and styling)
                       <span className="flex items-center px-4 bg-primary-lightest border border-r-0 border-neutral rounded-l-xl font-inter text-primary font-semibold">
                         R
                       </span>
 
                       <input
+                        id="allocatedBudget"
                         type="number"
+<<<<<<< HEAD
                         placeholder="Allocation Amount"
                         value={lecturerForm.allocation}
                         onChange={(e) =>
@@ -306,22 +398,46 @@ const EditBudget = () => {
                             allocation: e.target.value,
                           })
                         }
+=======
+                        name="allocatedBudget"
+                        value={formData.allocatedBudget}
+                        onChange={handleChange}
+>>>>>>> 34d86e6 (Update admin budget pages and styling)
                         className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
                       />
 
                     </div>
 
+<<<<<<< HEAD
                     {/* Add Lecturer */}
                     <button
                       type="button"
                       onClick={addLecturer}
                       className="h-12 px-6 border-2 border-primary text-primary rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
+=======
+                  {/* Budget Year */}
+                  <div>
+                    <label
+                      htmlFor="year"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
+                      Budget Year
+                    </label>
+
+                    <select
+                      id="year"
+                      name="year"
+                      value={formData.year}
+                      onChange={handleChange}
+                      className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
+>>>>>>> 34d86e6 (Update admin budget pages and styling)
                     >
                       + Add Lecturer
                     </button>
 
                   </div>
 
+<<<<<<< HEAD
                   {/* Lecturer Table */}
                   <div className="mt-6 overflow-x-auto">
 
@@ -341,10 +457,47 @@ const EditBudget = () => {
                           <th className="p-4 text-right text-sm font-semibold text-primary font-inter">
                             Action
                           </th>
+=======
+                  {/* Budget Period */}
+                  <div>
+                    <label
+                      htmlFor="budgetPeriod"
+                      className="block text-sm font-medium text-neutral mb-2 font-inter"
+                    >
+                      Budget Period
+                    </label>
+
+                    <select
+                      id="budgetPeriod"
+                      name="budgetPeriod"
+                      value={formData.budgetPeriod}
+                      onChange={handleChange}
+                      className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
+                    >
+                      <option>Semester 1</option>
+                      <option>Semester 2</option>
+                      <option>Full Year</option>
+                    </select>
+                  </div>
+
+                </div>
+              </Card>
+            </section>
+
+            {/* Lecturer Allocation */}
+            <section className="mb-8">
+
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                Lecturer Allocation
+              </h3>
+
+              <Card>
+>>>>>>> 34d86e6 (Update admin budget pages and styling)
 
                         </tr>
                       </thead>
 
+<<<<<<< HEAD
                       <tbody>
 
                         {lecturers.map((lecturer, index) => (
@@ -384,12 +537,136 @@ const EditBudget = () => {
                       </tbody>
 
                     </table>
+=======
+                  <select
+                    value={lecturerForm.lecturer}
+                    onChange={(e) =>
+                      setLecturerForm({
+                        ...lecturerForm,
+                        lecturer: e.target.value,
+                      })
+                    }
+                    className="h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
+                  >
+                    <option value="">
+                      Select Lecturer
+                    </option>
+
+                    {lecturerList.map((lecturer) => (
+                      <option key={lecturer}>
+                        {lecturer}
+                      </option>
+                    ))}
+                  </select>
+
+                  <div className="flex">
+                    <span className="flex items-center px-4 bg-primary-lightest border border-r-0 border-neutral rounded-l-xl font-inter text-primary font-semibold">
+                      R
+                    </span>
+
+                    <input
+                      type="number"
+                      placeholder="Allocation Amount"
+                      value={lecturerForm.allocation}
+                      onChange={(e) =>
+                        setLecturerForm({
+                          ...lecturerForm,
+                          allocation: e.target.value,
+                        })
+                      }
+                      className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={addLecturer}
+                    className="h-12 px-6 border-2 border-primary text-primary rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
+                  >
+                    + Add Lecturer
+                  </button>
+
+                </div>
+
+                {/* Lecturer Table */}
+                <div className="mt-6 overflow-x-auto">
+
+                  <table className="w-full">
+
+                    <thead className="bg-primary-lightest">
+                      <tr>
+                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
+                          Lecturer
+                        </th>
+
+                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
+                          Allocation
+                        </th>
+
+                        <th className="p-4 text-right text-sm font-semibold text-primary font-inter">
+                          Action
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {lecturers.map((lecturer, index) => (
+                        <tr
+                          key={index}
+                          className="border-t border-neutral/30 hover:bg-primary-lightest/30 transition"
+                        >
+                          <td className="p-4 text-dark font-inter">
+                            {lecturer.lecturer}
+                          </td>
+
+                          <td className="p-4 text-dark font-inter">
+                            R{' '}
+                            {Number(
+                              lecturer.allocation
+                            ).toLocaleString('en-ZA')}
+                          </td>
+
+                          <td className="p-4 text-right">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                removeLecturer(index)
+                              }
+                              className="text-red-600 font-semibold hover:underline font-inter"
+                            >
+                              Remove
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+
+                  </table>
+                </div>
+
+                {/* Total Allocation */}
+                <div className="flex justify-end mt-6 pt-6 border-t border-neutral/30">
+
+                  <div className="text-right">
+
+                    <p className="text-sm text-neutral font-inter">
+                      Total Lecturer Allocation
+                    </p>
+
+                    <p className="text-2xl font-poppins font-bold text-primary mt-1">
+                      R{' '}
+                      {totalAllocation.toLocaleString(
+                        'en-ZA'
+                      )}
+                    </p>
+>>>>>>> 34d86e6 (Update admin budget pages and styling)
 
                   </div>
 
                   {/* Total Allocation */}
                   <div className="flex justify-end mt-6 pt-6 border-t border-neutral/30">
 
+<<<<<<< HEAD
                     <div className="text-right">
 
                       <p className="text-sm text-neutral font-inter">
@@ -432,17 +709,38 @@ const EditBudget = () => {
                 >
                   Save Changes
                 </button>
+=======
+              </Card>
+            </section>
 
-              </div>
+            {/* Form Actions */}
+            <div className="flex justify-end gap-4">
 
-            </form>
+              <button
+                type="button"
+                onClick={() =>
+                  navigate(
+                    `/budget-management/details/${id}`
+                  )
+                }
+                className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
+              >
+                Cancel
+              </button>
 
-          </div>
+              <button
+                type="submit"
+                className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
+              >
+                Save Changes
+              </button>
+>>>>>>> 34d86e6 (Update admin budget pages and styling)
 
+            </div>
+
+          </form>
         </main>
-
       </div>
-
     </div>
   );
 };

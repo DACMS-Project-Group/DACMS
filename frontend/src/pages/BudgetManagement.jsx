@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
@@ -91,8 +92,8 @@ const BudgetManagement = () => {
     <div className="min-h-screen bg-off-white">
       <Navbar />
 
-      <div className="flex">
-        <Sidebar userRole="admin" />
+      {/* Sidebar */}
+      <Sidebar userRole="admin" />
 
         <main className="flex-1">
           {/* Page Header */}
@@ -543,8 +544,9 @@ const BudgetManagement = () => {
 
           </div>
         </main>
+
       </div>
-    </div>
+
   );
 };
 

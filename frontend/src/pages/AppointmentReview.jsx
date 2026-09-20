@@ -92,6 +92,7 @@ const AppointmentReview = () => {
   };
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-off-white">
       <Navbar />
 
@@ -101,11 +102,27 @@ const AppointmentReview = () => {
         <main className="flex-1">
           <div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-semibold text-white font-poppins">
+=======
+    <div className="flex min-h-screen bg-off-white">
+    <Sidebar userRole="admin" />
+
+  <div className="flex-1">
+    <Navbar />
+
+    <div className="bg-primary h-16 flex items-center px-8">
+      <h1 className="text-3xl font-poppins font-bold text-white">
+>>>>>>> 34d86e6 (Update admin budget pages and styling)
               Appointment Review
             </h1>
           </div>
 
           <div className="p-8">
+<<<<<<< HEAD
+=======
+
+            
+
+>>>>>>> 34d86e6 (Update admin budget pages and styling)
             {/* Appointment Overview */}
             <Card className="mb-6">
               <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -516,7 +533,7 @@ const AppointmentReview = () => {
               )}
             </Card>
           </div>
-        </main>
+      
       </div>
     </div>
   );
