@@ -61,7 +61,6 @@ const CreateBudget = () => {
       <Navbar />
 
       <div className="flex">
-
         <Sidebar userRole="admin" />
 
         <main className="flex-1">
@@ -294,15 +293,10 @@ const CreateBudget = () => {
                 </button>
 
               </div>
-
             </form>
-
           </div>
-
         </main>
-
       </div>
-
     </div>
   );
 };
