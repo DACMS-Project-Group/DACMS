@@ -279,11 +279,6 @@ const StudentProfile = () => {
       return;
     }
 
-    if (!formData.declarationDate) {
-      setMessage('Please enter the date in the declaration section.');
-      return;
-    }
-
     const unuploadedRequired = requiredDocuments.filter(
       (doc) => doc.required && !uploadedFiles[doc.key]
     );
@@ -297,6 +292,18 @@ const StudentProfile = () => {
 
       return;
     }
+
+    // Automatically record the student's initials and surname
+    const declarationName = `${formData.initials} ${formData.surname}`.trim();
+
+    // Automatically record the date when the declaration is saved
+    const declarationDate = new Date().toISOString().split('T')[0];
+
+    setFormData((prev) => ({
+      ...prev,
+      declarationInitialsSurname: declarationName,
+      declarationDate: declarationDate,
+    }));
 
     setIsEditing(false);
     setMessage('Student profile saved successfully.');
@@ -1699,24 +1706,24 @@ const StudentProfile = () => {
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 pt-4 border-t items-end">
+                    {/* Automatically Recorded Initials and Surname */}
                     <div>
                       <label className="block font-semibold mb-2">
-                        Initials and Surname{' '}
-                        <span className="text-red-500">*</span>
+                        Initials and Surname
                       </label>
 
-                      <input
-                        type="text"
-                        name="declarationInitialsSurname"
-                        value={formData.declarationInitialsSurname}
-                        onChange={handleChange}
-                        placeholder="e.g. A.B. Smith"
-                        disabled={!isEditing}
-                        className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
-                        required
-                      />
+                      <div className="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 text-gray-700">
+                        {formData.declarationInitialsSurname ||
+                          `${formData.initials} ${formData.surname}`.trim() ||
+                          'Automatically recorded'}
+                      </div>
+
+                      <p className="text-xs text-gray-500 mt-1">
+                        Automatically recorded from the student information above.
+                      </p>
                     </div>
 
+                    {/* Student Signature */}
                     <div>
                       <label className="block font-semibold mb-2">
                         Student Signature{' '}
@@ -1760,20 +1767,20 @@ const StudentProfile = () => {
                       )}
                     </div>
 
+                    {/* Automatically Recorded Date */}
                     <div>
                       <label className="block font-semibold mb-2">
-                        Date <span className="text-red-500">*</span>
+                        Date
                       </label>
 
-                      <input
-                        type="date"
-                        name="declarationDate"
-                        value={formData.declarationDate}
-                        onChange={handleChange}
-                        disabled={!isEditing}
-                        className="w-full border border-gray-300 rounded-lg p-3 disabled:bg-gray-100"
-                        required
-                      />
+                      <div className="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 text-gray-700">
+                        {formData.declarationDate ||
+                          'Automatically recorded when saved'}
+                      </div>
+
+                      <p className="text-xs text-gray-500 mt-1">
+                        Automatically recorded when the declaration is saved.
+                      </p>
                     </div>
                   </div>
                 </div>
