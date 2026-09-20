@@ -19,6 +19,18 @@ router.get('/budgets/fetch/:budget_id',
             authenticate,
             authorize([3]),
             AdminController.getBudgetById
-)
+);
+
+router.post('/budgets/create',
+            authenticate,
+            authorize([3]),
+            AdminController.createBudget
+);
+
+router.put('/budgets/edit/:id',
+            authenticate,
+            authorize([3]),
+            AdminController.editBudget
+);
 
 export default router;
