@@ -1,7 +1,12 @@
-import pool from '../config/db.js'
+import BaseRepository from "./BaseRepository.js";
+import DemiListing from "../models/DemiListing.js";
 
-class ListingRepository { 
-    static async getOpenListings() {
+class ListingRepository extends BaseRepository { 
+    constructor() {
+        super('"DEMI_LISTING"', DemiListing);
+    }
+
+    async getOpenListings() {
         const rows = await this.query(
             `
             SELECT "ListingID", "ModuleID", "Deadline"
@@ -9,11 +14,11 @@ class ListingRepository {
             WHERE "Deadline" > NOW()
             ORDER BY "Deadline" ASC
             `
-        )
-        return rows 
+        );
+        return rows.rows; 
     }
 
-    static async getListingById(listingId) {
+    async getListingById(listingId) {
         const rows = await this.query(
             `
             SELECT "ListingID", "ModuleID", "Deadline"
@@ -21,11 +26,11 @@ class ListingRepository {
             WHERE "ListingID" = $1
             `,
             [listingId]
-        )
-        return rows[0] || null
+        );
+        return rows[0] || null;
     }
 
-    static async createListing( {moduleId, lecturerId, deadline, minimumGrade} ) {
+    async createListing( {moduleId, lecturerId, deadline, minimumGrade} ) {
         const rows = await this.query(
             `
             INSERT INTO "DEMI_LISTING" ("ModuleID", "LecturerID", "Deadline", "MinimumGrade")
@@ -33,11 +38,11 @@ class ListingRepository {
             RETURNING *
             `,
             [moduleId, lecturerId, deadline, minimumGrade]
-        )
-        return rows[0] || null
+        );
+        return rows[0] || null;
     }
 
-    static async editListing(listingId, {moduleId, lecturerId, deadline, minimumGrade}) {
+    async editListing(listingId, {moduleId, lecturerId, deadline, minimumGrade}) {
         const rows = await this.query(
             `
             UPDATE "DEMI_LISTING"
@@ -46,7 +51,9 @@ class ListingRepository {
             RETURNING *
             `,
             [moduleId, lecturerId, deadline, minimumGrade, listingId]
-        )
-        return rows[0] || null
+        );
+        return rows[0] || null;
     }
 }
+
+export default ListingRepository;

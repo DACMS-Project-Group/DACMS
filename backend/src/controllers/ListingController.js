@@ -2,7 +2,8 @@ import ListingService from '../services/ListingService.js';
 
 class ListingController {
     
-    static async getOpenListings(req, res) {
+    static async fetchOpenListings(req, res) {
+
         try {
             const listings = await ListingService.getOpenListings();
             return res.status(200).json(listings);
@@ -12,7 +13,7 @@ class ListingController {
         }
     }
 
-    static async getListingById(req, res) {
+    static async fetchListingById(req, res) {
         try {
             const listingId = req.params.Id;
             const listing = await ListingService.getListingById(listingId);
@@ -23,7 +24,7 @@ class ListingController {
         }
     }
 
-    static async createListing(req, res) {
+    static async createNewListing(req, res) {
         try {
             const listingData = req.body;
             const newListing = await ListingService.createListing(listingData);
@@ -34,7 +35,7 @@ class ListingController {
         }
     }
 
-    static async editListing(req, res) {
+    static async editOldListing(req, res) {
         try {
             const listingId = req.params.Id;
             const listingData = req.body;
@@ -46,3 +47,5 @@ class ListingController {
         }
     }
 }
+
+export default ListingController;

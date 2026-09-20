@@ -14,34 +14,34 @@ router.get(
     '/dashboard_statistics',
     authenticate,
     authorize([2]),
-    LecturerController.getDashboardSummary
+    LecturerController.getDashboardSummary.bind(LecturerController)
 );
 
 router.get(
-    '/listings/open',
+    '/listings',
     authenticate,
     authorize([2]),
-    ListingController.getOpenListings
+    ListingController.fetchOpenListings.bind(ListingController)
 );
 
 router.get(
-    '/listings/:Id',
+    '/listings/fetch/:Id',
     authenticate,
     authorize([2]),
-    ListingController.getListingById
+    ListingController.fetchListingById.bind(ListingController)
 );
 
 router.post(
     '/listings/create',
     authenticate,
     authorize([2]),
-    ListingController.createListing
+    ListingController.createNewListing.bind(ListingController)
 );
 
 router.patch(
     '/listings/edit/:Id',
     authenticate,
     authorize([2]),
-    ListingController.editListing
+    ListingController.editOldListing.bind(ListingController)
 );
 export default router;
