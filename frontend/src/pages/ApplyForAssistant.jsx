@@ -9,7 +9,7 @@ const ApplyForAssistant = () => {
   const modules = [
     {
       code: 'CMPG 311',
-      name: '',
+      name: 'Introduction to Programming',
       lecturer: 'Dr. John Smith',
       requirement: 'Minimum mark: 70%',
       eligible: true,
