@@ -41,7 +41,7 @@ class ListingRepository {
         const rows = await this.query(
             `
             UPDATE "DEMI_LISTING"
-            IF SET "ModuleID" = $1, "LecturerID" = $2, "Deadline" = $3, "MinimumGrade" = $4
+            SET "ModuleID" = $1, "LecturerID" = $2, "Deadline" = $3, "MinimumGrade" = $4
             WHERE "ListingID" = $5
             RETURNING *
             `,
