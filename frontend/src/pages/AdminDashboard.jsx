@@ -58,8 +58,8 @@ const AdminDashboard = () => {
   );
 
   return (
-    <div className="flex min-h-screen bg-off-white">
-      <Sidebar userRole="admin" />
+    <div className="min-h-screen bg-off-white">
+      <Navbar />
 
       <div className="flex">
         <Sidebar userRole="admin" />

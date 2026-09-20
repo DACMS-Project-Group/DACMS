@@ -109,9 +109,10 @@ const ClaimReview = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-off-white">
-    <Sidebar userRole="admin" />
+    <div className="min-h-screen bg-off-white">
+      <Navbar />
 
+<<<<<<< HEAD
 <<<<<<< HEAD
       <div className="flex">
         <Sidebar userRole="admin" />
@@ -127,16 +128,28 @@ const ClaimReview = () => {
     <div className="bg-primary h-16 flex items-center px-8">
       <h1 className="text-3xl font-poppins font-bold text-white">
 >>>>>>> 34d86e6 (Update admin budget pages and styling)
+=======
+      <div className="flex">
+        <Sidebar userRole="admin" />
+
+        <main className="flex-1">
+          {/* Page Header */}
+          <div className="bg-primary px-8 py-4">
+            <h1 className="text-2xl font-semibold text-white font-poppins">
+>>>>>>> 27f538a (Standardize frontend page layouts)
               Claim Review
             </h1>
           </div>
 
           <div className="p-8">
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
             
 
 >>>>>>> 34d86e6 (Update admin budget pages and styling)
+=======
+>>>>>>> 27f538a (Standardize frontend page layouts)
             {/* Claim Overview */}
             <Card className="mb-6">
               <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
@@ -560,7 +573,7 @@ const ClaimReview = () => {
               </div>
             </Card>
           </div>
-        
+        </main>
       </div>
     </div>
   );

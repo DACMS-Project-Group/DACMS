@@ -124,8 +124,8 @@ const Notifications = () => {
   };
 
   return (
-    <div className="flex min-h-screen bg-off-white">
-      <Sidebar userRole="userRole" />
+    <div className="min-h-screen bg-off-white">
+      <Navbar />
 
       <div className="flex">
         <Sidebar userRole={userRole} />

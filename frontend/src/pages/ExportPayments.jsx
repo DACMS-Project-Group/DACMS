@@ -63,9 +63,15 @@ const ExportPayments = () => {
 
   const filteredClaims = claims.filter(
     (claim) =>
-      claim.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      claim.student.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      claim.module.toLowerCase().includes(searchTerm.toLowerCase())
+      claim.id
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      claim.student
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
+      claim.module
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
   );
 
   const toggleClaim = (id) => {
@@ -74,7 +80,10 @@ const ExportPayments = () => {
         selectedClaims.filter((claimId) => claimId !== id)
       );
     } else {
-      setSelectedClaims([...selectedClaims, id]);
+      setSelectedClaims([
+        ...selectedClaims,
+        id,
+      ]);
     }
   };
 
@@ -129,20 +138,22 @@ const ExportPayments = () => {
 
   return (
 <<<<<<< HEAD
+<<<<<<< HEAD
     <div className="min-h-screen bg-off-white">
 =======
     <div className="flex min-h-screen bg-off-white">
 >>>>>>> 34d86e6 (Update admin budget pages and styling)
+=======
+    <div className="min-h-screen bg-off-white">
+>>>>>>> 27f538a (Standardize frontend page layouts)
 
-      {/* Sidebar */}
-      <Sidebar userRole="admin" />
+      <Navbar />
 
-      {/* Main Content */}
-      <div className="flex-1">
+      <div className="flex">
 
-        {/* Top Navbar */}
-        <Navbar />
+        <Sidebar userRole="admin" />
 
+<<<<<<< HEAD
 <<<<<<< HEAD
         <main className="flex-1">
 
@@ -296,25 +307,21 @@ const ExportPayments = () => {
             Export Payments
           </h1>
         </div>
+=======
+        <main className="flex-1">
+>>>>>>> 27f538a (Standardize frontend page layouts)
 
-        {/* Page Content */}
-        <main className="p-8">
-
-          {/* Introduction */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-poppins font-semibold text-primary">
-              Payment Export
-            </h2>
-
-            <p className="text-neutral mt-2 font-inter">
-              Review approved claims and export remuneration
-              information for payment processing.
-            </p>
+          {/* Page Header */}
+          <div className="bg-primary px-8 py-4">
+            <h1 className="text-2xl font-semibold text-white font-poppins">
+              Export Payments
+            </h1>
           </div>
 
-          {/* Filters */}
-          <section className="mb-8">
+          {/* Page Content */}
+          <div className="p-8">
 
+<<<<<<< HEAD
             <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
               Filter Claims
             </h3>
@@ -496,32 +503,46 @@ const ExportPayments = () => {
                   {formatCurrency(totalPayment)}
                 </p>
               </Card>
+=======
+            {/* Introduction */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-poppins font-semibold text-primary">
+                Payment Export
+              </h2>
+>>>>>>> 27f538a (Standardize frontend page layouts)
 
+              <p className="text-neutral mt-2 font-inter">
+                Review approved claims and export remuneration
+                information for payment processing.
+              </p>
             </div>
 
-          </section>
+            {/* Filters */}
+            <section className="mb-8">
 
-          {/* Approved Claims */}
-          <section className="mb-8">
-
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
-
-              <h3 className="text-2xl font-poppins font-semibold text-primary">
-                Approved Claims
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                Filter Claims
               </h3>
 >>>>>>> 34d86e6 (Update admin budget pages and styling)
 
-              <span className="text-sm text-neutral font-inter">
-                {selectedClaims.length} selected
-              </span>
+              <Card>
 
+<<<<<<< HEAD
 <<<<<<< HEAD
               <Card>
 =======
             </div>
+=======
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+>>>>>>> 27f538a (Standardize frontend page layouts)
 
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+                  {/* Search */}
+                  <div>
+                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
+                      Search
+                    </label>
 
+<<<<<<< HEAD
               <div className="overflow-x-auto">
 >>>>>>> 34d86e6 (Update admin budget pages and styling)
 
@@ -597,35 +618,72 @@ const ExportPayments = () => {
                           className="w-4 h-4 accent-primary"
                         />
                       </th>
+=======
+                    <input
+                      type="text"
+                      placeholder="Claim, student or module"
+                      value={searchTerm}
+                      onChange={(e) =>
+                        setSearchTerm(e.target.value)
+                      }
+                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
+                    />
+                  </div>
 
-                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                        Claim ID
-                      </th>
+                  {/* Status */}
+                  <div>
+                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
+                      Status
+                    </label>
 
-                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                        Student
-                      </th>
+                    <select
+                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
+                    >
+                      <option>Approved</option>
+                      <option>Paid</option>
+                      <option>All</option>
+                    </select>
+                  </div>
 
-                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                        Module
-                      </th>
+                  {/* Date From */}
+                  <div>
+                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
+                      Date From
+                    </label>
 
-                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                        Hours
-                      </th>
+                    <input
+                      type="date"
+                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
+                    />
+                  </div>
+>>>>>>> 27f538a (Standardize frontend page layouts)
 
-                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                        Rate
-                      </th>
+                  {/* Date To */}
+                  <div>
+                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
+                      Date To
+                    </label>
 
-                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                        Amount
-                      </th>
+                    <input
+                      type="date"
+                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
+                    />
+                  </div>
 
-                      <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                        Status
-                      </th>
+                </div>
 
+              </Card>
+
+            </section>
+
+            {/* Summary Statistics */}
+            <section className="mb-8">
+
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                Payment Summary
+              </h3>
+
+<<<<<<< HEAD
                       <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
                         Date
                       </th>
@@ -892,89 +950,294 @@ const ExportPayments = () => {
 =======
                 <div>
                   <p className="text-sm text-neutral font-inter">
+=======
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                <Card>
+                  <p className="text-neutral font-inter font-medium">
+                    Approved Claims
+                  </p>
+
+                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
+                    {claims.length}
+                  </p>
+                </Card>
+
+                <Card>
+                  <p className="text-neutral font-inter font-medium">
+>>>>>>> 27f538a (Standardize frontend page layouts)
                     Selected Claims
                   </p>
 
-                  <p className="text-xl font-poppins font-semibold text-dark mt-1">
+                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
                     {selectedClaims.length}
                   </p>
-                </div>
+                </Card>
 
-                <div>
-                  <p className="text-sm text-neutral font-inter">
+                <Card>
+                  <p className="text-neutral font-inter font-medium">
                     Total Hours
                   </p>
 
-                  <p className="text-xl font-poppins font-semibold text-dark mt-1">
+                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
                     {totalHours}
                   </p>
-                </div>
+                </Card>
 
-                <div>
-                  <p className="text-sm text-neutral font-inter">
-                    Total Remuneration
+                <Card>
+                  <p className="text-neutral font-inter font-medium">
+                    Total Payment
                   </p>
 
-                  <p className="text-xl font-poppins font-semibold text-primary mt-1">
+                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
                     {formatCurrency(totalPayment)}
                   </p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-neutral font-inter">
-                    Export Period
-                  </p>
-
-                  <p className="text-xl font-poppins font-semibold text-dark mt-1">
-                    August 2026
-                  </p>
-                </div>
+                </Card>
 
               </div>
 
-              <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+            </section>
 
-                <button
-                  onClick={exportPDF}
-                  className="
-                    px-6
-                    py-3
-                    border-2
-                    border-primary
-                    text-primary
-                    rounded-xl
-                    font-semibold
-                    hover:bg-primary-lightest
-                    transition
-                    font-inter
-                  "
-                >
-                  Export PDF
-                </button>
+            {/* Approved Claims */}
+            <section className="mb-8">
 
-                <button
-                  onClick={exportExcel}
-                  className="
-                    px-6
-                    py-3
-                    bg-primary
-                    text-white
-                    rounded-xl
-                    font-semibold
-                    hover:bg-primary-dark
-                    transition
-                    font-inter
-                  "
-                >
-                  Export Excel
-                </button>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+
+                <h3 className="text-2xl font-poppins font-semibold text-primary">
+                  Approved Claims
+                </h3>
+
+                <span className="text-sm text-neutral font-inter">
+                  {selectedClaims.length} selected
+                </span>
 
               </div>
 
+<<<<<<< HEAD
             </Card>
 >>>>>>> 34d86e6 (Update admin budget pages and styling)
+=======
+              <Card>
+>>>>>>> 27f538a (Standardize frontend page layouts)
 
-          </section>
+                <div className="overflow-x-auto">
+
+                  <table className="w-full">
+
+                    <thead className="bg-primary-lightest">
+
+                      <tr>
+
+                        <th className="px-5 py-4 text-left">
+                          <input
+                            type="checkbox"
+                            checked={
+                              selectedClaims.length ===
+                                filteredClaims.length &&
+                              filteredClaims.length > 0
+                            }
+                            onChange={toggleAll}
+                            className="w-4 h-4 accent-primary"
+                          />
+                        </th>
+
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Claim ID
+                        </th>
+
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Student
+                        </th>
+
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Module
+                        </th>
+
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Hours
+                        </th>
+
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Rate
+                        </th>
+
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Amount
+                        </th>
+
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Status
+                        </th>
+
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Date
+                        </th>
+
+                      </tr>
+
+                    </thead>
+
+                    <tbody>
+
+                      {filteredClaims.map((claim) => (
+
+                        <tr
+                          key={claim.id}
+                          className="border-t border-neutral/30 hover:bg-primary-lightest/30 transition"
+                        >
+
+                          <td className="px-5 py-5">
+
+                            <input
+                              type="checkbox"
+                              checked={selectedClaims.includes(
+                                claim.id
+                              )}
+                              onChange={() =>
+                                toggleClaim(claim.id)
+                              }
+                              className="w-4 h-4 accent-primary"
+                            />
+
+                          </td>
+
+                          <td className="px-5 py-5 font-semibold text-dark font-inter">
+                            {claim.id}
+                          </td>
+
+                          <td className="px-5 py-5 text-dark font-inter">
+                            {claim.student}
+                          </td>
+
+                          <td className="px-5 py-5 text-dark font-inter">
+                            {claim.module}
+                          </td>
+
+                          <td className="px-5 py-5 text-dark font-inter">
+                            {claim.hours}
+                          </td>
+
+                          <td className="px-5 py-5 text-dark font-inter">
+                            {formatCurrency(claim.rate)}
+                          </td>
+
+                          <td className="px-5 py-5 font-semibold text-dark font-inter">
+                            {formatCurrency(claim.amount)}
+                          </td>
+
+                          <td className="px-5 py-5">
+                            <StatusBadge status={claim.status} />
+                          </td>
+
+                          <td className="px-5 py-5 text-sm text-neutral font-inter">
+                            {claim.date}
+                          </td>
+
+                        </tr>
+
+                      ))}
+
+                      {filteredClaims.length === 0 && (
+
+                        <tr>
+
+                          <td
+                            colSpan="9"
+                            className="px-5 py-10 text-center text-neutral font-inter"
+                          >
+                            No approved claims found matching your search.
+                          </td>
+
+                        </tr>
+
+                      )}
+
+                    </tbody>
+
+                  </table>
+
+                </div>
+
+              </Card>
+
+            </section>
+
+            {/* Payment Export Summary */}
+            <section>
+
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                Payment Export Summary
+              </h3>
+
+              <Card>
+
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+
+                  <div>
+                    <p className="text-sm text-neutral font-inter">
+                      Selected Claims
+                    </p>
+
+                    <p className="text-xl font-poppins font-semibold text-dark mt-1">
+                      {selectedClaims.length}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-neutral font-inter">
+                      Total Hours
+                    </p>
+
+                    <p className="text-xl font-poppins font-semibold text-dark mt-1">
+                      {totalHours}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-neutral font-inter">
+                      Total Remuneration
+                    </p>
+
+                    <p className="text-xl font-poppins font-semibold text-primary mt-1">
+                      {formatCurrency(totalPayment)}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-neutral font-inter">
+                      Export Period
+                    </p>
+
+                    <p className="text-xl font-poppins font-semibold text-dark mt-1">
+                      August 2026
+                    </p>
+                  </div>
+
+                </div>
+
+                <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
+
+                  <button
+                    onClick={exportPDF}
+                    className="px-6 py-3 border-2 border-primary text-primary rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
+                  >
+                    Export PDF
+                  </button>
+
+                  <button
+                    onClick={exportExcel}
+                    className="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
+                  >
+                    Export Excel
+                  </button>
+
+                </div>
+
+              </Card>
+
+            </section>
+
+          </div>
 
         </main>
 
