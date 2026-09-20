@@ -345,7 +345,7 @@ const BudgetManagement = () => {
                             <button
                               onClick={() =>
                                 navigate(
-                                  `/budget-management/details/${budget.id}`
+                                  `/budget-details/${budget.id}`
                                 )
                               }
                               className="text-[#6C3D91] font-semibold hover:underline"
@@ -356,7 +356,7 @@ const BudgetManagement = () => {
                             <button
                               onClick={() =>
                                 navigate(
-                                  `/budget-management/edit/${budget.id}`
+                                  `/edit-budget/${budget.id}`
                                 )
                               }
                               className="text-[#78848E] font-semibold hover:underline"
