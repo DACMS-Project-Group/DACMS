@@ -2,6 +2,17 @@ import demiApplicationService from '../services/DemiApplicationService.js';
 import { getAuthUserId } from '../utils/getAuthUserId.js';
 
 class DemiApplicationController {
+
+    async lecturerFetchApplications(req, res) {
+        try {
+            const lecturerId = getAuthUserId(req);
+            const apps = await demiApplicationService.lecturerFetchApplications(lecturerId);
+            res.status(200).json(apps);
+        } catch (error) {
+            res.status(500).json( { error : error.message } );
+        }
+    }
+
     async getOpenListings(req, res, next) {
         try {
             const listings = await demiApplicationService.listOpenListings();

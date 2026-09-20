@@ -5,6 +5,10 @@ class DemiApplicationService {
         this.demiApplicationRepository = new DemiApplicationRepository();
     }
 
+    async lecturerFetchApplications(lecturerId) {
+        return this.demiApplicationRepository.lecturerFetchApplications(lecturerId);
+    }
+
     async listOpenListings() {
         return this.demiApplicationRepository.findOpenListings();
     }
