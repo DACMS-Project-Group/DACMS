@@ -56,25 +56,19 @@ const CreateBudget = () => {
   };
 
   return (
-    <div className="min-h-screen bg-off-white">
-
+    <div className="min-h-screen bg-[#F8F9FA]">
       <Navbar />
 
       <Navbar />
 
-        <main className="flex-1">
-
-          {/* Page Header */}
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white font-poppins">
+        <main className="flex-1 p-8">
+          <div className="bg-[#6C3D91] text-white px-8 py-5 rounded-t-lg">
+            <h1 className="text-3xl font-bold">
               Create Budget
             </h1>
           </div>
 
-          {/* Page Content */}
-          <div className="p-8">
-
-            {/* Page Introduction */}
+          <div className="bg-white p-8">
             <div className="mb-8">
               <h2 className="text-3xl font-poppins font-semibold text-primary">
                 Budget Information
@@ -86,192 +80,156 @@ const CreateBudget = () => {
             </div>
 
             <form onSubmit={handleSubmit}>
-
-              {/* Budget Details */}
-              <section className="mb-8">
-
-                <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              <div className="border border-[#78848E] rounded-xl p-6 mb-8">
+                <h3 className="text-lg font-semibold text-[#6C3D91] mb-6">
                   Budget Details
                 </h3>
 
                 <Card>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Module */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                      Module
+                    </label>
 
-                    {/* Module */}
-                    <div>
-                      <label
-                        htmlFor="module"
-                        className="block text-sm font-medium text-neutral mb-2 font-inter"
-                      >
-                        Module
-                      </label>
+                    <select
+                      name="module"
+                      value={formData.module}
+                      onChange={handleChange}
+                      required
+                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl focus:outline-none focus:border-[#6C3D91]"
+                    >
+                      <option value="">
+                        Select Module
+                      </option>
 
-                      <select
-                        id="module"
-                        name="module"
-                        value={formData.module}
-                        onChange={handleChange}
-                        required
-                        className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
-                      >
-                        <option value="">
-                          Select Module
+                      {modules.map((module) => (
+                        <option
+                          key={module.code}
+                          value={module.code}
+                        >
+                          {module.code} - {module.name}
                         </option>
+                      ))}
+                    </select>
+                  </div>
 
-                        {modules.map((module) => (
-                          <option
-                            key={module.code}
-                            value={module.code}
-                          >
-                            {module.code} - {module.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  {/* Lecturer */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                      Lecturer
+                    </label>
 
-                    {/* Lecturer */}
-                    <div>
-                      <label
-                        htmlFor="lecturer"
-                        className="block text-sm font-medium text-neutral mb-2 font-inter"
-                      >
-                        Lecturer
-                      </label>
+                    <select
+                      name="lecturer"
+                      value={formData.lecturer}
+                      onChange={handleChange}
+                      required
+                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl focus:outline-none focus:border-[#6C3D91]"
+                    >
+                      <option value="">
+                        Select Lecturer
+                      </option>
 
-                      <select
-                        id="lecturer"
-                        name="lecturer"
-                        value={formData.lecturer}
-                        onChange={handleChange}
-                        required
-                        className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
-                      >
-                        <option value="">
-                          Select Lecturer
+                      {lecturerList.map((lecturer) => (
+                        <option
+                          key={lecturer}
+                          value={lecturer}
+                        >
+                          {lecturer}
                         </option>
+                      ))}
+                    </select>
+                  </div>
 
-                        {lecturerList.map((lecturer) => (
-                          <option
-                            key={lecturer}
-                            value={lecturer}
-                          >
-                            {lecturer}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                  {/* Academic Year */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                      Academic Year
+                    </label>
 
-                    {/* Academic Year */}
-                    <div>
-                      <label
-                        htmlFor="academicYear"
-                        className="block text-sm font-medium text-neutral mb-2 font-inter"
-                      >
-                        Academic Year
-                      </label>
+                    <select
+                      name="academicYear"
+                      value={formData.academicYear}
+                      onChange={handleChange}
+                      required
+                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl focus:outline-none focus:border-[#6C3D91]"
+                    >
+                      <option value="2026">2026</option>
+                      <option value="2027">2027</option>
+                      <option value="2028">2028</option>
+                    </select>
+                  </div>
 
-                      <select
-                        id="academicYear"
-                        name="academicYear"
-                        value={formData.academicYear}
-                        onChange={handleChange}
-                        required
-                        className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
-                      >
-                        <option value="2026">2026</option>
-                        <option value="2027">2027</option>
-                        <option value="2028">2028</option>
-                      </select>
-                    </div>
+                  {/* Allocated Amount */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                      Allocated Amount
+                    </label>
 
-                    {/* Allocated Amount */}
-                    <div>
-                      <label
-                        htmlFor="allocatedAmount"
-                        className="block text-sm font-medium text-neutral mb-2 font-inter"
-                      >
-                        Allocated Amount
-                      </label>
-
-                      <div className="flex">
-
-                        <span className="flex items-center px-4 bg-primary-lightest border border-r-0 border-neutral rounded-l-xl font-inter text-primary font-semibold">
-                          R
-                        </span>
-
-                        <input
-                          id="allocatedAmount"
-                          type="number"
-                          name="allocatedAmount"
-                          value={formData.allocatedAmount}
-                          onChange={handleChange}
-                          min="0"
-                          step="0.01"
-                          required
-                          className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
-                        />
-
-                      </div>
-                    </div>
-
-                    {/* Current Usage */}
-                    <div>
-                      <label
-                        htmlFor="currentUsage"
-                        className="block text-sm font-medium text-neutral mb-2 font-inter"
-                      >
-                        Current Usage
-                      </label>
-
-                      <div className="flex">
-
-                        <span className="flex items-center px-4 bg-primary-lightest border border-r-0 border-neutral rounded-l-xl font-inter text-primary font-semibold">
-                          R
-                        </span>
-
-                        <input
-                          id="currentUsage"
-                          type="number"
-                          name="currentUsage"
-                          value={formData.currentUsage}
-                          onChange={handleChange}
-                          min="0"
-                          step="0.01"
-                          required
-                          className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
-                        />
-
-                      </div>
-                    </div>
-
-                    {/* Max Hours */}
-                    <div>
-                      <label
-                        htmlFor="maxHours"
-                        className="block text-sm font-medium text-neutral mb-2 font-inter"
-                      >
-                        Max Hours
-                      </label>
+                    <div className="flex">
+                      <span className="flex items-center px-4 bg-[#F3F4F6] border border-r-0 border-[#78848E] rounded-l-xl">
+                        R
+                      </span>
 
                       <input
-                        id="maxHours"
                         type="number"
-                        name="maxHours"
-                        value={formData.maxHours}
+                        name="allocatedAmount"
+                        value={formData.allocatedAmount}
                         onChange={handleChange}
                         min="0"
-                        step="0.5"
+                        step="0.01"
                         required
-                        className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
+                        className="w-full h-12 px-4 border border-[#78848E] rounded-r-xl focus:outline-none focus:border-[#6C3D91]"
                       />
                     </div>
+                  </div>
 
+                  {/* Current Usage */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                      Current Usage
+                    </label>
+
+                    <div className="flex">
+                      <span className="flex items-center px-4 bg-[#F3F4F6] border border-r-0 border-[#78848E] rounded-l-xl">
+                        R
+                      </span>
+
+                      <input
+                        type="number"
+                        name="currentUsage"
+                        value={formData.currentUsage}
+                        onChange={handleChange}
+                        min="0"
+                        step="0.01"
+                        required
+                        className="w-full h-12 px-4 border border-[#78848E] rounded-r-xl focus:outline-none focus:border-[#6C3D91]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Max Hours */}
+                  <div>
+                    <label className="block text-sm font-medium text-[#78848E] mb-2">
+                      Max Hours
+                    </label>
+
+                    <input
+                      type="number"
+                      name="maxHours"
+                      value={formData.maxHours}
+                      onChange={handleChange}
+                      min="0"
+                      step="0.5"
+                      required
+                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl focus:outline-none focus:border-[#6C3D91]"
+                    />
                   </div>
 
                 </Card>
-
-              </section>
+              </div>
 
               {/* Form Actions */}
               <div className="flex justify-end gap-4">
@@ -279,7 +237,7 @@ const CreateBudget = () => {
                 <button
                   type="button"
                   onClick={() => navigate('/budget-management')}
-                  className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
+                  className="h-11 px-6 border border-[#78848E] rounded-xl font-semibold hover:bg-[#F3F4F6]"
                 >
                   Cancel
                 </button>
@@ -295,9 +253,7 @@ const CreateBudget = () => {
             </form>
           </div>
         </main>
-
       </div>
-
   );
 };
 
