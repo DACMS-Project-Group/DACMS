@@ -147,7 +147,7 @@ const BudgetManagement = () => {
               </div>
 
               <button
-                onClick={() => navigate('/budget-management/create')}
+                onClick={() => navigate('/create-budget')}
                 className="
                   h-11
                   px-6
