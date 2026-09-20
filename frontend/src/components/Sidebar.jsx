@@ -7,7 +7,7 @@ const Sidebar = ({ userRole = 'student' }) => {
 
   // Student Navigation
   const studentNavItems = [
-    { name: 'Dashboard', href: '/dashboard' },
+   { name: 'Dashboard', href: '/student-dashboard' },
     { name: 'Applications', href: '/applications' },
     { name: 'Work Tracking', href: '/work-tracking' },
     { name: 'Claims', href: '/claims' },
