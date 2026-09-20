@@ -334,22 +334,22 @@ INSERT INTO "NWU_MODULE" ("ModuleCode", "ModuleName", "Description", "MinAcademi
 
 -- 5. Insert App Users (10 Students [RoleID=1], 4 Lecturers [RoleID=2], 2 Admins [RoleID=3])
 INSERT INTO "APP_USER" ("FName", "LName", "Email", "PasswordHash", "RoleID") VALUES 
-('Sipho', 'Ndlovu', 'sipho.ndlovu@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X1', 1),   -- UserID: 1
+('Sipho', 'Ndlovu', 'sipho.ndlovu@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 1),   -- UserID: 1
 ('Pieter', 'Botha', 'pieter.botha@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 1),  -- UserID: 2
-('Lerato', 'Mokoena', 'lerato.mokoena@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X3', 1),-- UserID: 3
-('Sanele', 'Khumalo', 'sanele.khumalo@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X4', 1),-- UserID: 4
-('Fatima', 'Patel', 'fatima.patel@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X5', 1),   -- UserID: 5
-('Johan', 'Coetzee', 'johan.coetzee@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X6', 1), -- UserID: 6
-('Zola', 'Dlamini', 'zola.dlamini@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X7', 1),   -- UserID: 7
-('Chen', 'Wei', 'chen.wei@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X8', 1),        -- UserID: 8
-('Ananya', 'Naidoo', 'ananya.naidoo@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X9', 1), -- UserID: 9
-('David', 'Miller', 'david.miller@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X10', 1), -- UserID: 10
-('Alan', 'Smith', 'alan.smith@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X11', 2),    -- UserID: 11
-('Beatrice', 'Jones', 'beatrice.jones@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X12', 2),-- UserID: 12
-('Charles', 'Brown', 'charles.brown@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X13', 2),  -- UserID: 13
-('Diane', 'Taylor', 'diane.taylor@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X14', 2),  -- UserID: 14
-('Eric', 'Johnson', 'eric.johnson@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X15', 3),  -- UserID: 15
-('Fiona', 'Carter', 'fiona.carter@nwu.ac.za', '$2a$12$eImiTXuWVxfM37uY4JANjOL.8848q3bF.R9fWbVz7u2p.X.X16', 3);  -- UserID: 16
+('Lerato', 'Mokoena', 'lerato.mokoena@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 1),-- UserID: 3
+('Sanele', 'Khumalo', 'sanele.khumalo@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 1),-- UserID: 4
+('Fatima', 'Patel', 'fatima.patel@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 1),   -- UserID: 5
+('Johan', 'Coetzee', 'johan.coetzee@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 1), -- UserID: 6
+('Zola', 'Dlamini', 'zola.dlamini@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 1),   -- UserID: 7
+('Chen', 'Wei', 'chen.wei@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 1),        -- UserID: 8
+('Ananya', 'Naidoo', 'ananya.naidoo@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 1), -- UserID: 9
+('David', 'Miller', 'david.miller@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 1), -- UserID: 10
+('Alan', 'Smith', 'alan.smith@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 2),    -- UserID: 11
+('Beatrice', 'Jones', 'beatrice.jones@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 2),-- UserID: 12
+('Charles', 'Brown', 'charles.brown@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 2),  -- UserID: 13
+('Diane', 'Taylor', 'diane.taylor@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 2),  -- UserID: 14
+('Eric', 'Johnson', 'eric.johnson@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 3),  -- UserID: 15
+('Fiona', 'Carter', 'fiona.carter@nwu.ac.za', '$2a$12$nXX6SA.o/DsXSzbN7i.6IuZyhv9U.WxXUUnr7OIOcqIYIZiprIj.C', 3);  -- UserID: 16
 
 -- 6. Insert Subtype Entities (1:1 with APP_USER PKs)
 INSERT INTO "STUDENT" ("StudentID", "StudentNumber", "StudyLevel", "ID_PassportNumber", "Title", "Gender", "DateOfBirth", "IncomeTaxNumber", "SACitizen", "ResidentialAddress", "PostalAddress", "NextOfKinName", "NextOfKinMobile", "HighestQualification", "ContactDetails", "BankName", "AccountNumber", "AccountType", "BranchCode", "AccountHolderName") VALUES 

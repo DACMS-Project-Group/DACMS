@@ -13,6 +13,41 @@ class AdminService {
             pendingAppointments
         };
     }
+
+    static async getBudgetsSummary() {
+        const stats = await AdminRepository.getBudgetsMetrics();
+        const module_budgets = await AdminRepository.getBudgetsSummary();
+        
+        return {
+            stats,
+            module_budgets
+        };
+    }
+
+    static async getBudgetById(budget_id) {
+        const data = await AdminRepository.getBudgetById(budget_id);
+        return { data }
+    }
+
+    static async createBudget(Budget) {
+        const data = await AdminRepository.createBudget(Budget);
+        return { data };
+    }
+
+    static async editBudget(budget_id, updateData) {
+        const data = await AdminRepository.editBudget(budget_id, updateData);
+        return { data };
+    }
+
+    static async getClaimsSummary() {
+        const stats = await AdminRepository.getClaimsMetrics();
+        const claims = await AdminRepository.getClaims();
+
+        return {
+            stats,
+            claims
+        };
+    }
 }
 
 export default AdminService;
