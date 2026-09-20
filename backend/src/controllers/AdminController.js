@@ -18,6 +18,17 @@ class AdminController {
             return res.status(500).json({ error: error.message})
         }
     }
+
+    static async getBudgetById(req, res) {
+        const { budget_id } = req.params;
+
+        try {
+            const data = await AdminService.getBudgetById(budget_id);
+            return res.status(200).json(data);
+        } catch (error) {
+            return res.status(500).json({ error: error.message})
+        }
+    }
 }
 
 export default AdminController;
