@@ -23,6 +23,11 @@ class AdminService {
             module_budgets
         };
     }
+
+    static async getBudgetById(budget_id) {
+        const data = await AdminRepository.getBudgetById(budget_id);
+        return { data }
+    }
 }
 
 export default AdminService;

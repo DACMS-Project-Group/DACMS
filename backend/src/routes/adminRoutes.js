@@ -15,5 +15,10 @@ router.get('/budgets',
             authorize([3]),
             AdminController.getBudgetsSummary
 );
+router.get('/budgets/fetch/:budget_id',
+            authenticate,
+            authorize([3]),
+            AdminController.getBudgetById
+)
 
 export default router;

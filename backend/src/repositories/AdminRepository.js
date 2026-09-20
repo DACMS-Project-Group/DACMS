@@ -134,6 +134,41 @@ class AdminRepository {
             remaining_budget: Number(row.RemainingBudget ?? 0),
         }));
     }
+
+    static async getBudgetById(budget_id) {
+        const query = `
+            SELECT
+                b."BudgetID",
+                l."LecturerID",
+                u."Title", u."FName", u."LName", u."Email",
+                m."ModuleCode", m."Description",
+                b."AllocatedBudget", b."CurrentBudgetUsage",
+                (b."AllocatedBudget" - b."CurrentBudgetUsage") AS "RemainingBudget"
+            FROM "MODULE_BUDGET" b
+            JOIN "NWU_MODULE" m
+                ON m."ModuleID" = b."ModuleID"
+            JOIN "LECTURER" l
+                ON l."LecturerID" = b."LecturerID"
+            JOIN "APP_USER" u
+                ON u."UserID" = l."LecturerID"
+            WHERE b."BudgetID" = $1
+            ORDER BY m."ModuleCode";
+        `;
+
+        const result = await pool.query(query, [budget_id]);
+
+        return result.rows.map((row) => ({
+            budget_id: row.BudgetID,
+            lecturer_id: row.LecturerID,
+            lecturer: `${row.Title} ${row.FName} ${row.LName} - ${row.Email}`,
+            lecturer_email: row.Email,
+            module_code: row.ModuleCode,
+            module_description: row.Description,
+            allocated_budget: Number(row.AllocatedBudget ?? 0),
+            current_budget_usage: Number(row.CurrentBudgetUsage ?? 0),
+            remaining_budget: Number(row.RemainingBudget ?? 0),
+        }));
+    }
 }
 
 export default AdminRepository;
