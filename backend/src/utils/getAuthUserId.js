@@ -1,4 +1,3 @@
-
 export function getAuthUserId(req) {
     const id =
         req.user?.userId ??

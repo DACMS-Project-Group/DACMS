@@ -4,6 +4,7 @@ import UserController from '../controllers/UserController.js';
 import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import getAuthUserId from '../utils/getAuthUserId.js';
 
 class NotificationService {
     static async sendNotification({ recipientId, title, type, message }) {
@@ -46,7 +47,7 @@ class NotificationService {
 
     //get existing notifications for the authenticated user
     static async getNotifications(req) {
-        const userId = await this.unpackUserID(req);
+        const userId = await getAuthUserId(req);
 
         const { rows } = await pool.query(
              `
@@ -63,7 +64,7 @@ class NotificationService {
 
     //mark a notification as read
     static async markAsRead(req) {
-        const userId = await this.unpackUserID(req);
+        const userId = await getAuthUserId(req);
 
         const { rows } = await pool.query(
             `
@@ -129,17 +130,6 @@ class NotificationService {
         console.log('Preview URL: %s', nodemailer.getTestMessageUrl(mailInfo));
 
         return { message: 'Email notification sent successfully.' };
-    }
-
-    static async unpackUserID(req) {
-        const token = req.cookies.token;
-
-        if (!token) 
-            return 'Access denied.';
-
-        const verifiedData = jwt.verify(token, process.env.JWT_SECRET || 'your_super_secret_key');
-
-        return verifiedData.user_id;
     }
 
 }

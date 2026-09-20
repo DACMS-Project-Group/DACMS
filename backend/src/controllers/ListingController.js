@@ -27,7 +27,7 @@ class ListingController {
     static async createNewListing(req, res) {
         try {
             const listingData = req.body;
-            const newListing = await ListingService.createListing(listingData);
+            const newListing = await ListingService.createListing(req, listingData);
             return res.status(201).json(newListing);
         } catch (error) {
             console.error('Error creating listing:', error);
@@ -39,7 +39,7 @@ class ListingController {
         try {
             const listingId = req.params.Id;
             const listingData = req.body;
-            const updatedListing = await ListingService.editListing(listingId, listingData);
+            const updatedListing = await ListingService.editListing(req, listingId, listingData);
             return res.status(200).json(updatedListing);
         } catch (error) {
             console.error('Error editing listing:', error);
