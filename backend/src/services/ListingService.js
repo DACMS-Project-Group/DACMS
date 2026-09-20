@@ -1,20 +1,21 @@
-import listingRepository from '../repositories/ListingRepository.js';
+import ListingRepository from '../repositories/ListingRepository.js';
 
 class ListingService {
     constructor() {
-        this.listingRepository = new listingRepository();
+        this.listingRepository = new ListingRepository();
     }
 
     async getOpenListings() {
-        return this.listingRepository.getOpenListings();
+        const rows = await this.listingRepository.getOpenListings();
+        return rows;
     }
 
     async getListingById(listingId) {
         if (!listingId) {
             throw new Error('listingId is required.');
         }
-
-        return this.listingRepository.getListingById(listingId);
+        const rows = await this.listingRepository.getListingById(listingId);
+        return rows;
     }
 
     async createListing(listingData) {
@@ -34,7 +35,8 @@ class ListingService {
             throw new Error('minimumGrade is required.');
         }
 
-        return this.listingRepository.createListing(listingData);
+        const rows = await this.listingRepository.createListing(listingData);
+        return rows;
     }
 
     async editListing(listingId, listingData) {
@@ -42,6 +44,9 @@ class ListingService {
             throw new Error('listingId is required.');
         }
 
-        return this.listingRepository.editListing(listingId, listingData);
+        const rows = await this.listingRepository.editListing(listingId, listingData);
+        return rows;
     }
 }
+
+export default new ListingService();
