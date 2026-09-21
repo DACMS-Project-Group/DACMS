@@ -1,217 +1,261 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 
 const LectureDashboard = () => {
-  const navigate = useNavigate();
-
   return (
-    <div className="flex min-h-screen bg-off-white">
-      
-      {/* ===== SIDEBAR ===== */}
-      <Sidebar userRole="lecturer" />
-      
-      {/* ===== MAIN CONTENT ===== */}
-      <div className="flex-1">
-        
-        {/* ===== TOP NAVBAR ===== */}
-        <Navbar />
-        
-        {/* ===== PAGE TITLE BAR ===== */}
-        <div className="bg-primary h-16 flex items-center px-8">
-          <h1 className="text-3xl font-poppins font-bold text-white">
-            Lecturer Dashboard
-          </h1>
-        </div>
+    <div className="min-h-screen bg-off-white">
+      {/* Top Navigation */}
+      <Navbar />
 
-        {/* ===== MAIN CONTENT ===== */}
-        <div className="p-8">
+      {/* Sidebar + Main Content */}
+      <div className="flex">
+        <Sidebar userRole="lecturer" />
 
-          {/* Description */}
-          <div className="mb-8">
-            <p className="text-neutral text-base font-inter">
-              Here's an overview of your assistant applications and activities.
-            </p>
+        {/* Main Content */}
+        <main className="flex-1">
+
+          {/* Page Header */}
+          <div className="bg-primary h-16 flex items-center px-8">
+            <h1 className="text-3xl font-poppins font-bold text-white">
+              Lecturer Dashboard
+            </h1>
           </div>
 
-          {/* ===== OVERVIEW STATS ===== */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
-              Overview
-            </h2>
+          {/* Page Content */}
+          <div className="p-8">
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-              {/* Applicants */}
-              <Card>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
-                    A
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral font-inter">Applicants</p>
-                    <h2 className="text-2xl font-poppins font-bold text-dark">48</h2>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Approved Assistants */}
-              <Card>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
-                    D
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral font-inter">Approved Assistants</p>
-                    <h2 className="text-2xl font-poppins font-bold text-dark">20</h2>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Pending Applications */}
-              <Card>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
-                    P
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral font-inter">Pending Applications</p>
-                    <h2 className="text-2xl font-poppins font-bold text-dark">3</h2>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Hours Allocated */}
-              <Card>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
-                    H
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral font-inter">Hours Allocated</p>
-                    <h2 className="text-2xl font-poppins font-bold text-dark">120h</h2>
-                  </div>
-                </div>
-              </Card>
-
+            {/* Introduction */}
+            <div className="mb-8">
+              <p className="text-neutral text-base font-inter">
+                Here's an overview of your assistant applications and
+                activities.
+              </p>
             </div>
-          </div>
 
-          {/* ===== BUDGET ALLOCATION ===== */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
-              Budget Allocation
-            </h2>
-            <Card>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                  <h3 className="text-2xl font-poppins font-semibold text-dark">
-                    Budget Allocation
+            {/* Overview */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+                Overview
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+                {/* Number of Applicants */}
+                <Card>
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Number of Applicants
+                    </p>
+
+                    <p className="mt-2 text-3xl font-bold text-primary-dark">
+                      48
+                    </p>
+                  </div>
+                </Card>
+
+                {/* Approved Demis */}
+                <Card>
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Approved Demis
+                    </p>
+
+                    <p className="mt-2 text-3xl font-bold text-primary-dark">
+                      20
+                    </p>
+                  </div>
+                </Card>
+
+                {/* Pending Applications */}
+                <Card>
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Pending Applications
+                    </p>
+
+                    <p className="mt-2 text-3xl font-bold text-primary-dark">
+                      3
+                    </p>
+                  </div>
+                </Card>
+
+                {/* Hours Allocated */}
+                <Card>
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Hours Allocated
+                    </p>
+
+                    <p className="mt-2 text-3xl font-bold text-primary-dark">
+                      120h
+                    </p>
+                  </div>
+                </Card>
+
+              </div>
+            </div>
+
+            {/* Budget Utilisation */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+                Budget Utilisation
+              </h2>
+
+              <Card>
+                <div className="mb-5">
+                  <h3 className="text-xl font-poppins font-semibold text-primary-dark">
+                    Current Budget
                   </h3>
-                  <p className="text-neutral mt-1 font-inter">
-                    View the current budget allocated for assistant appointments.
+
+                  <p className="mt-1 text-sm text-neutral">
+                    View the budget allocated for your assistant appointments
+                    and how much has been used.
                   </p>
                 </div>
-                <button 
-                  onClick={() => navigate('/budget-management')}
-                  className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition text-center font-inter"
-                >
-                  View Budget Allocation →
-                </button>
-              </div>
-            </Card>
-          </div>
 
-          {/* ===== NOTIFICATIONS ===== */}
-          <div>
-            <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
-              Notifications
-            </h2>
+                {/* Budget Information */}
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
 
-            <Card>
-              <div className="space-y-5">
+                  {/* Allocated Budget */}
+                  <div className="rounded-lg bg-off-white p-5">
+                    <p className="text-sm text-neutral">
+                      Allocated Budget
+                    </p>
 
-                {/* Application Review */}
-                <div className="border-b border-neutral pb-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 rounded-full bg-warning mt-2"></div>
-                    <div>
-                      <p className="font-semibold text-dark font-inter">
-                        Applications to Review
-                      </p>
-                      <p className="text-dark font-inter">
-                        You have 3 assistant applications waiting for your review.
-                      </p>
-                      <p className="text-sm text-neutral mt-1 font-inter">Today</p>
-                    </div>
+                    <p className="mt-2 text-2xl font-bold text-primary-dark">
+                      R 20,000.00
+                    </p>
                   </div>
-                </div>
 
-                {/* Upcoming Appointment */}
-                <div className="border-b border-neutral pb-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 rounded-full bg-warning mt-2"></div>
-                    <div>
-                      <p className="font-semibold text-dark font-inter">
-                        Upcoming Appointment
-                      </p>
-                      <p className="text-dark font-inter">
-                        You have an appointment scheduled for tomorrow at 10:00.
-                      </p>
-                      <p className="text-sm text-neutral mt-1 font-inter">Today</p>
-                    </div>
+                  {/* Amount Used */}
+                  <div className="rounded-lg bg-off-white p-5">
+                    <p className="text-sm text-neutral">
+                      Amount Used
+                    </p>
+
+                    <p className="mt-2 text-2xl font-bold text-primary-dark">
+                      R 8,000.00
+                    </p>
                   </div>
-                </div>
 
-                {/* Work Session Review */}
-                <div className="border-b border-neutral pb-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 rounded-full bg-primary mt-2"></div>
-                    <div>
-                      <p className="font-semibold text-dark font-inter">
-                        Work Session Review
-                      </p>
-                      <p className="text-dark font-inter">
-                        An assistant work session has been submitted for your review.
-                      </p>
-                      <p className="text-sm text-neutral mt-1 font-inter">Yesterday</p>
-                    </div>
+                  {/* Remaining Budget */}
+                  <div className="rounded-lg bg-off-white p-5">
+                    <p className="text-sm text-neutral">
+                      Remaining Budget
+                    </p>
+
+                    <p className="mt-2 text-2xl font-bold text-primary-dark">
+                      R 12,000.00
+                    </p>
                   </div>
-                </div>
 
-                {/* Claim Submitted */}
-                <div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 rounded-full bg-success mt-2"></div>
-                    <div>
-                      <p className="font-semibold text-dark font-inter">
-                        Claim Submitted
-                      </p>
-                      <p className="text-dark font-inter">
-                        A new claim has been submitted and requires your review.
-                      </p>
-                      <p className="text-sm text-neutral mt-1 font-inter">Yesterday</p>
-                    </div>
+                  {/* Budget Utilisation Percentage */}
+                  <div className="rounded-lg bg-off-white p-5">
+                    <p className="text-sm text-neutral">
+                      Utilisation
+                    </p>
+
+                    <p className="mt-2 text-2xl font-bold text-primary-dark">
+                      40%
+                    </p>
                   </div>
+
                 </div>
 
-                {/* View All */}
-                <div className="text-right pt-2">
-                  <button 
-                    onClick={() => navigate('/notifications')}
-                    className="text-primary font-semibold hover:underline font-inter"
-                  >
-                    View all →
-                  </button>
+                {/* Progress Bar */}
+                <div className="mt-6">
+
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">
+                      Budget Used
+                    </span>
+
+                    <span className="text-sm font-medium text-gray-700">
+                      40%
+                    </span>
+                  </div>
+
+                  <div className="h-3 w-full rounded-full bg-gray-200">
+                    <div
+                      className="h-3 rounded-full bg-primary"
+                      style={{ width: '40%' }}
+                    ></div>
+                  </div>
+
                 </div>
+              </Card>
+            </div>
+
+            {/* Notifications */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+
+                <h2 className="text-3xl font-poppins font-semibold text-primary">
+                  Notifications
+                </h2>
 
               </div>
-            </Card>
-          </div>
 
-        </div>
+              <Card>
+
+                <div className="space-y-4">
+
+                  {/* Notification 1 */}
+                  <div className="border-b border-gray-200 pb-4">
+                    <h3 className="font-semibold text-gray-800">
+                      New Assistant Application
+                    </h3>
+
+                    <p className="mt-1 text-sm text-neutral">
+                      A new student has submitted an application for your
+                      module.
+                    </p>
+
+                    <p className="mt-2 text-xs text-gray-500">
+                      Today
+                    </p>
+                  </div>
+
+                  {/* Notification 2 */}
+                  <div className="border-b border-gray-200 pb-4">
+                    <h3 className="font-semibold text-gray-800">
+                      Work Session Awaiting Verification
+                    </h3>
+
+                    <p className="mt-1 text-sm text-neutral">
+                      A work session has been submitted and is awaiting your
+                      verification.
+                    </p>
+
+                    <p className="mt-2 text-xs text-gray-500">
+                      Yesterday
+                    </p>
+                  </div>
+
+                  {/* Notification 3 */}
+                  <div>
+                    <h3 className="font-semibold text-gray-800">
+                      Appointment Update
+                    </h3>
+
+                    <p className="mt-1 text-sm text-neutral">
+                      An assistant appointment has been updated.
+                    </p>
+
+                    <p className="mt-2 text-xs text-gray-500">
+                      2 days ago
+                    </p>
+                  </div>
+
+                </div>
+
+              </Card>
+            </div>
+
+          </div>
+        </main>
       </div>
     </div>
   );
