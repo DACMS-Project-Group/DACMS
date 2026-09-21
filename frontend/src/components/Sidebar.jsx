@@ -1,13 +1,16 @@
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Sidebar = ({ userRole = 'student' }) => {
   // Normalise the role so that Lecturer, LECTURER, lecturer, etc.
   // are treated the same way.
   const role = userRole?.toLowerCase().trim();
 
+  const { logout } = useAuth();
+
   // Student Navigation
   const studentNavItems = [
-   { name: 'Dashboard', href: '/student-dashboard' },
+    { name: 'Dashboard', href: '/student-dashboard' },
     { name: 'Applications', href: '/applications' },
     { name: 'Work Tracking', href: '/work-tracking' },
     { name: 'Claims', href: '/claims' },
@@ -91,12 +94,13 @@ const Sidebar = ({ userRole = 'student' }) => {
           </NavLink>
         )}
 
-        <a
-          href="/logout"
-          className="block px-4 py-3 rounded-xl hover:bg-primary-light transition-colors duration-200"
+        <button
+          type="button"
+          onClick={logout}
+          className="block w-full text-left px-4 py-3 rounded-xl hover:bg-primary-light transition-colors duration-200"
         >
           Logout
-        </a>
+        </button>
       </div>
 
     </aside>
