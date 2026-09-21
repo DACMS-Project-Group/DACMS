@@ -39,4 +39,10 @@ router.get('/claims',
             AdminController.getClaimsSummary
 );
 
+router.get('/claims/fetch/:claim_id',
+            authenticate,
+            authorize([3]),
+            AdminController.getClaimById
+)
+
 export default router;
