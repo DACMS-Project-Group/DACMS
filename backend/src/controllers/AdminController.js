@@ -108,6 +108,35 @@ class AdminController {
             return res.status(500).json({ error: error.message });
         }
     }
+
+    static async getPositionById(req, res) {
+        const { position_id } = req.params;
+        
+        try {
+            const data = await AdminService.getPositionById(position_id);
+            return res.status(200).json(data);
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    static async reviewPosition(req, res) {
+        const { position_id } = req.params;
+        const { action, comment } = req.body; // Expects action: 'Approved' | 'Rejected' | 'Returned'
+
+        try {
+            const data = await AdminService.reviewPosition(position_id, action, comment);
+            return res.status(200).json({
+                message: `Position decision processed successfully (${action})`,
+                data: data.data
+            });
+        } catch (error) {
+            if (error.message.startsWith('Invalid action') || error.message === 'Position not found') {
+                return res.status(400).json({ error: error.message });
+            }
+            return res.status(500).json({ error: error.message });
+        }
+    }
 }
 
 export default AdminController;
