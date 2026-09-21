@@ -3,6 +3,7 @@ import express from 'express';
 import LecturerController from '../controllers/LecturerController.js';
 import ListingController from '../controllers/ListingController.js';
 import DemiApplicationController from '../controllers/DemiApplicationController.js';
+import WorkSessionController from '../controllers/WorkSessionController.js';
 
 import {
     authenticate,
@@ -51,6 +52,27 @@ router.get(
     authenticate,
     authorize([2]),
     DemiApplicationController.lecturerFetchApplications.bind(DemiApplicationController)  
+);
+
+router.get(
+    '/sessions',
+    authenticate,
+    authorize([2]),
+    WorkSessionController.getLecturerSessions.bind(WorkSessionController)
+);
+
+router.get(
+    '/sessions/fetch/:id',
+    authenticate,
+    authorize([2]),
+    WorkSessionController.getLecturerSessionById.bind(WorkSessionController)
+);
+
+router.patch(
+    '/sessions/review/:id',
+    authenticate,
+    authorize([2]),
+    WorkSessionController.lecturerReviewSession.bind(WorkSessionController)
 );
 
 export default router;

@@ -5,6 +5,34 @@ class WorkSessionService {
         this.workSessionRepository = new WorkSessionRepository();
     }
 
+    async fetchSessionsForLecturer(lecturerId) {
+        const sessions =  await this.workSessionRepository.fetchSessionsForLecturer(lecturerId);
+
+        if(!sessions)
+            return { error : "No Sessions found!" };
+
+        return sessions;
+    }
+
+    async fetchSessionByIdForLecturer(sessionId) {
+        const session = await this.workSessionRepository.fetchSessionByIdForLecturer(sessionId);
+
+        if(!session)
+            return { error : "Session not found" };
+
+        
+        return session;
+    }
+
+    async reviewSessionByLecturer(sessionId, approvalStatus) {
+        const response = await this.workSessionRepository.reviewSessionByLecturer(sessionId, approvalStatus);
+
+        if(!response) 
+            return { error : "Session not found" };
+    
+        return response;
+    }
+
     async listActivePositions(studentId) {
         return this.workSessionRepository.findActivePositionsForStudent(studentId);
     }
