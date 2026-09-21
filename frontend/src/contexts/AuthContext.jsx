@@ -42,14 +42,17 @@ export const AuthProvider = ({ children }) => {
       throw new Error(data.message || 'Login failed');
     }
 
-    // Backend returns flat: { id, email, role_id }
+    // Backend returns { message, user: { id, email, role_id } }
     const data = await response.json();
 
+    // Handle both nested ({ user: {...} }) and flat ({ id, email, role_id }) shapes
+    const u = data.user || data;
+
     const userData = {
-      id: data.id,
-      email: data.email,
-      role_id: data.role_id,
-      role: ROLE_MAP[data.role_id] || 'student',
+      id: u.id,
+      email: u.email,
+      role_id: u.role_id,
+      role: ROLE_MAP[u.role_id] || 'student',
     };
 
     setUser(userData);
