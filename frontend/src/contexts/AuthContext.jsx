@@ -3,6 +3,13 @@ import { useNavigate } from 'react-router-dom';
 
 const AuthContext = createContext(null);
 
+// Backend uses numeric role IDs. Frontend uses string roles.
+const ROLE_MAP = {
+  1: 'student',
+  2: 'lecturer',
+  3: 'admin',
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,84 +28,74 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }, []);
 
-  // Login function
-  const login = async (email, password, selectedRole) => {
-    try {
-      // Replace with your actual API call
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, selectedRole }),
-      });
+  // Login — backend sets an httpOnly cookie named "token"
+  const login = async (email, password) => {
+    const response = await fetch('/api/users/login', {
+      method: 'POST',
+      credentials: 'include', // required: sends/receives the cookie
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-
-      const data = await response.json();
-      
-      // Set user with role from backend (or use selectedRole as fallback)
-      const userData = {
-        ...data.user,
-        role: data.user?.role || selectedRole
-      };
-      
-      setUser(userData);
-      localStorage.setItem('user', JSON.stringify(userData));
-
-      // Redirect based on role
-      redirectUserByRole(userData.role, navigate);
-      
-      return userData;
-    } catch (error) {
-      throw new Error(error.message || 'Login failed. Please try again.');
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Login failed');
     }
+
+    // Backend returns flat: { id, email, role_id }
+    const data = await response.json();
+
+    const userData = {
+      id: data.id,
+      email: data.email,
+      role_id: data.role_id,
+      role: ROLE_MAP[data.role_id] || 'student',
+    };
+
+    setUser(userData);
+    localStorage.setItem('user', JSON.stringify(userData));
+
+    redirectUserByRole(userData.role, navigate);
+
+    return userData;
   };
 
-  // Register function
+  // Register — backend path is /users/create, not /register
   const register = async (userData) => {
-    try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userData),
-      });
+    const response = await fetch('/api/users/create', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+    });
 
-      if (!response.ok) {
-        throw new Error('Registration failed');
-      }
-
-      const data = await response.json();
-      return data;
-    } catch (error) {
-      throw new Error(error.message || 'Registration failed. Please try again.');
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(data.message || 'Registration failed');
     }
+
+    return response.json();
   };
 
-  // Logout function
-  const logout = () => {
+  // Logout — clear the cookie on the backend, then clear local state
+  const logout = async () => {
+    try {
+      await fetch('/api/users/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {
+      // backend might be down — we still want to log out locally
+    }
+
     setUser(null);
     localStorage.removeItem('user');
     navigate('/login', { replace: true });
   };
 
-  // Forgot password function
-  const forgotPassword = async (email) => {
-    try {
-      const response = await fetch('/api/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to send reset link');
-      }
-
-      return await response.json();
-    } catch (error) {
-      throw new Error(error.message || 'Failed to send reset link. Please try again.');
-    }
+  // Forgot password — no backend endpoint documented yet
+  const forgotPassword = async () => {
+    throw new Error('Forgot password is not available yet.');
   };
 
   const value = {
@@ -109,13 +106,12 @@ export const AuthProvider = ({ children }) => {
     register,
     logout,
     forgotPassword,
-    userRole: user?.role || null
+    userRole: user?.role || null,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
-// Custom hook to use auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -124,7 +120,6 @@ export const useAuth = () => {
   return context;
 };
 
-// Helper function to redirect users based on role
 const redirectUserByRole = (role, navigate) => {
   switch (role) {
     case 'student':
