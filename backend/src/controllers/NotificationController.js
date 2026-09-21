@@ -1,15 +1,26 @@
 import NotificationService from '../services/NotificationService.js';
 
 class NotificationController {
-    //fetch notifications for the authenticated user
     static async sendNotification(req, res) {
         try {
-            const { recipientId, title, type, message } = req.body;
-            const notification = await NotificationService.sendNotification({ recipientId, title, type, message });
-            res.status(201).json(notification);
+            const { subject, type, message } = req.body;
+            const recipientId = req.body.recipientId ?? req.user?.user_id;
+
+            if (!recipientId) {
+                return res.status(400).json({ error: 'Recipient user is required' });
+            }
+
+            const notification = await NotificationService.sendNotification({
+                recipientId,
+                subject,
+                type,
+                message
+            });
+
+            return res.status(201).json(notification);
         } catch (error) {
             console.error('Error sending notification:', error);
-            res.status(500).json({ error: 'Failed to send notification' });
+            return res.status(500).json({ error: 'Failed to send notification' });
         }
     }
 
@@ -32,6 +43,6 @@ class NotificationController {
             res.status(500).json({ error: 'Failed to mark notification as read' });
         }
     }
-
 }
+
 export default NotificationController;

@@ -6,14 +6,13 @@ import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 
 class NotificationService {
-    static async sendNotification({ recipientId, title, type, message }) {
-        // 1. Save to PostgreSQL using parameterized query
+    static async sendNotification({ recipientId, subject, type, message }) {
         const insertQuery = await pool.query(
             `
-            INSERT INTO "NOTIFICATION" ("RecipientUserID", "NotificationTitle", "NotificationType", "Message")
+            INSERT INTO "NOTIFICATION" ("RecipientUserID", "Subject", "NotificationType", "Message")
             VALUES ($1, $2, $3, $4)
             RETURNING *
-        `, [recipientId, title, type, message]);
+        `, [recipientId, subject, type, message]);
 
         const { rows } = await pool.query(
             `
@@ -50,7 +49,7 @@ class NotificationService {
 
         const { rows } = await pool.query(
              `
-                SELECT "NotificationID", "NotificationTitle", "NotificationType", "Message", "IsRead", "CreatedTimestamp"
+                SELECT "NotificationID", "Subject", "NotificationType", "Message", "IsRead", "CreatedTimestamp"
                 FROM "NOTIFICATION" 
                 WHERE "RecipientUserID" = $1 
                 ORDER BY "CreatedTimestamp" DESC 
@@ -118,7 +117,7 @@ class NotificationService {
         let mailOptions = {
             from: '"AACMS Notifications" <aacms@noreply.nwu.ac.za>',
             to: userEmailRows[0].Email,
-            subject: notificationRows[0].NotificationTitle,
+            subject: notificationRows[0].Subject,
             text: notificationRows[0].Message
         };
 
