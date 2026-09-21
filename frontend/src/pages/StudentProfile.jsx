@@ -150,11 +150,7 @@ const StudentProfile = () => {
 
   const requiredDocuments = useMemo(() => {
     const baseDocuments = [
-      {
-        key: 'academicTranscript',
-        name: 'Academic Transcript',
-        required: true,
-      },
+      { key: 'academicTranscript', name: 'Academic Transcript', required: true },
       {
         key: 'identityDocument',
         name:
@@ -182,11 +178,7 @@ const StudentProfile = () => {
 
     if (formData.saCitizen === 'No') {
       baseDocuments.push(
-        {
-          key: 'studyPermit',
-          name: 'Valid Study Permit',
-          required: true,
-        },
+        { key: 'studyPermit', name: 'Valid Study Permit', required: true },
         {
           key: 'workPermission',
           name: 'Work Permission Document (P&C101F)',

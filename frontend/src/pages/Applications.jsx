@@ -63,9 +63,14 @@ const Applications = () => {
       app.module_name ??
       app.ModuleName ??
       '—',
+    lecturer:
+      app.lecturer ??
+      app.lecturerName ??
+      app.LecturerName ??
+      '—',
     status:
       app.status ??
-      app.ApplicationStatus ??
+      app.application_status ??
       app.verificationEligibilityStatus ??
       'Pending',
     dateSubmitted:
