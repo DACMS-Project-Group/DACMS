@@ -53,6 +53,11 @@ class AdminService {
         const data = await AdminRepository.getClaimById(claim_id);
         return { data };
     }
+
+    static async approveClaim(claim_id) {
+        const data = await AdminRepository.approveClaim(claim_id);
+        return { data };
+    }
 }
 
 export default AdminService;
