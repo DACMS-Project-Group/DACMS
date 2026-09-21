@@ -4,7 +4,6 @@ import StatusBadge from '../components/StatusBadge';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
-import { apiGet } from '../api';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -207,7 +206,6 @@ const AdminDashboard = () => {
                               <StatusBadge status={appointment.status} />
                             </div>
                           </div>
-                          <StatusBadge status={appointment.status} />
                         </div>
                       ))
                     ) : (
@@ -311,11 +309,7 @@ const AdminDashboard = () => {
             </section>
 
             {/* ================================
-<<<<<<< HEAD
                 Claims Export
-=======
-                PAYMENT INFORMATION
->>>>>>> c09018f (fixed routing for some pages and fixed sidebar sitting on top of the navbar in some pages)
             ================================= */}
             <section>
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
