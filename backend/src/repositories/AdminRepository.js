@@ -290,6 +290,135 @@ class AdminRepository {
             student_name: row.student_name
         }));
     }
+
+    static async getClaimById(claim_id) {
+        const claimQuery = `
+            SELECT
+                c."ClaimID",
+                c."ClaimReferenceNumber" AS "reference",
+                c."SubmissionDate" AS "submittedDate",
+                c."ClaimStatus" AS "status",
+                c."PeriodStartDate" AS "periodStartDate",
+                c."PeriodEndDate" AS "periodEndDate",
+                c."TotalHoursClaimed" AS "hours",
+                c."HourlyRateApplied" AS "hourlyRate",
+                c."TotalClaimAmount" AS "amount",
+                s."StudentNumber" AS "studentNumber",
+                CONCAT(COALESCE(au."Title", ''), ' ', COALESCE(au."FName", ''), ' ', COALESCE(au."LName", '')) AS "studentName",
+                m."ModuleCode" AS "moduleCode",
+                m."ModuleName" AS "moduleName",
+                CONCAT(COALESCE(lect_au."Title", ''), ' ', COALESCE(lect_au."FName", ''), ' ', COALESCE(lect_au."LName", '')) AS "lecturer",
+                s."BankName" AS "bank",
+                s."AccountNumber" AS "accountNumber",
+                s."BranchCode" AS "branchCode",
+                da."ApplicationID"
+            FROM "REMUNERATION_CLAIM" c
+            JOIN "DEMI_APPLICATION" da
+                ON da."ApplicationID" = c."ApplicationID"
+            JOIN "STUDENT" s
+                ON s."StudentID" = da."StudentID"
+            JOIN "APP_USER" au
+                ON au."UserID" = s."StudentID"
+            JOIN "NWU_MODULE" m
+                ON m."ModuleID" = c."ModuleID"
+            JOIN "DEMI_LISTING" dl
+                ON dl."ListingID" = da."ListingID"
+            JOIN "LECTURER" lect
+                ON lect."LecturerID" = dl."LecturerID"
+            JOIN "APP_USER" lect_au
+                ON lect_au."UserID" = lect."LecturerID"
+            WHERE c."ClaimID" = $1;
+        `;
+
+        const claimResult = await pool.query(claimQuery, [claim_id]);
+
+        if (claimResult.rows.length === 0) {
+            return null;
+        }
+
+        const claimRow = claimResult.rows[0];
+
+        const sessionsQuery = `
+            SELECT
+                ws."SessionID" AS "id",
+                ws."StartTime" AS "date",
+                'Work session' AS "activity",
+                TO_CHAR(ws."StartTime", 'HH24:MI') AS "startTime",
+                TO_CHAR(ws."EndTime", 'HH24:MI') AS "endTime",
+                ROUND(
+                    COALESCE(
+                        ws."TotalHoursWorked",
+                        EXTRACT(EPOCH FROM (ws."EndTime" - ws."StartTime")) / 3600.0
+                    ),
+                    2
+                ) AS "hours",
+                CASE
+                    WHEN ws."LecturerApproval" = true THEN 'Verified'
+                    ELSE 'Pending'
+                END AS "status"
+            FROM "WORK_SESSION" ws
+            JOIN "DEMI_POSITION" p
+                ON p."PositionID" = ws."PositionID"
+            WHERE p."ApplicationID" = $1
+              AND ws."StartTime" >= $2
+              AND ws."EndTime" IS NOT NULL
+              AND ws."EndTime" <= $3
+            ORDER BY ws."StartTime" ASC;
+        `;
+
+        const sessionsResult = await pool.query(sessionsQuery, [
+            claimRow.ApplicationID,
+            claimRow.periodStartDate,
+            claimRow.periodEndDate
+        ]);
+
+        const formatDisplayDate = (value) => {
+            if (!value) return '';
+            return new Date(value).toLocaleDateString('en-ZA', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+            });
+        };
+
+        const period = claimRow.periodStartDate && claimRow.periodEndDate
+            ? `${formatDisplayDate(claimRow.periodStartDate)} - ${formatDisplayDate(claimRow.periodEndDate)}`
+            : '';
+
+        return {
+            id: claimRow.ClaimID,
+            reference: claimRow.reference,
+            studentNumber: claimRow.studentNumber,
+            studentName: claimRow.studentName,
+            moduleCode: claimRow.moduleCode,
+            moduleName: claimRow.moduleName,
+            lecturer: claimRow.lecturer,
+            period,
+            submittedDate: formatDisplayDate(claimRow.submittedDate),
+            hours: Number(claimRow.hours ?? 0),
+            hourlyRate: Number(claimRow.hourlyRate ?? 0),
+            amount: Number(claimRow.amount ?? 0),
+            status: claimRow.status,
+            banking: {
+                bank: claimRow.bank || 'Not provided',
+                accountHolder: claimRow.studentName,
+                accountNumber: claimRow.accountNumber
+                    ? `**** **** ${String(claimRow.accountNumber).slice(-4)}`
+                    : 'Not provided',
+                accountType: 'Bank account',
+                status: 'Verified'
+            },
+            sessions: sessionsResult.rows.map((session) => ({
+                id: session.id,
+                date: session.date ? new Date(session.date).toISOString().slice(0, 10) : null,
+                activity: session.activity,
+                startTime: session.startTime,
+                endTime: session.endTime,
+                hours: Number(session.hours ?? 0),
+                status: session.status
+            }))
+        };
+    }
 }
 
 export default AdminRepository;
