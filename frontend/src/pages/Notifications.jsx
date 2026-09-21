@@ -86,17 +86,13 @@ const Notifications = () => {
       setNotifications((current) =>
         current.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
-
-
       try {
         await apiPatch(`/notifications/read/${id}`);
-        await fetchNotifications();
 
       } catch (err) {
-        setNotifications((current) =>
-          current.map((n) => (n.id === id ? { ...n, read: false } : n))
-        );
-        console.error('Failed to mark as read:', err);
+      try {
+        await apiPatch(`/notifications/read/${id}`);
+      } catch (err) {
       }
     }
   };
@@ -374,6 +370,6 @@ const Notifications = () => {
       </div>
     </div>
   );
-};
+};}
 
 export default Notifications;
