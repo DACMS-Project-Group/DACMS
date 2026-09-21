@@ -101,7 +101,6 @@ const Login = () => {
 
       {/* RIGHT: 60% VIDEO SIDE */}
       <div className="w-3/5 h-full relative overflow-hidden">
-
         <video
           autoPlay
           loop
@@ -112,7 +111,6 @@ const Login = () => {
         >
           <source src="/GradientVideo.mp4" type="video/mp4" />
         </video>
-
       </div>
     </div>
   );
