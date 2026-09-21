@@ -419,6 +419,23 @@ class AdminRepository {
             }))
         };
     }
+
+    static async approveClaim(claim_id) {
+        const query = `
+            UPDATE "REMUNERATION_CLAIM"
+            SET "ClaimStatus" = 'Verified'
+            WHERE "ClaimID" = $1
+            RETURNING *;
+        `;
+
+        const result = await pool.query(query, [claim_id]);
+
+        if (result.rows.length === 0) {
+            throw new Error('Claim not found');
+        }
+
+        return result.rows[0];
+    }
 }
 
 export default AdminRepository;

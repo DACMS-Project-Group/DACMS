@@ -82,6 +82,23 @@ class AdminController {
             return res.status(500).json({ error: error.message })
         }
     }
+
+    static async approveClaim(req, res) {
+        const { claim_id } = req.params;
+
+        try {
+            const data = await AdminService.approveClaim(claim_id);
+            return res.status(200).json({
+                message: 'Claim approved successfully',
+                data
+            });
+        } catch (error) {
+            if (error.message === 'Claim not found') {
+                return res.status(404).json({ error: error.message });
+            }
+            return res.status(500).json({ error: error.message });
+        }
+    }
 }
 
 export default AdminController;

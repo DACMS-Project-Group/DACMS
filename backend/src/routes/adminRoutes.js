@@ -45,4 +45,10 @@ router.get('/claims/fetch/:claim_id',
             AdminController.getClaimById
 )
 
+router.patch('/claims/approve/:claim_id',
+            authenticate,
+            authorize([3]),
+            AdminController.approveClaim
+)
+
 export default router;
