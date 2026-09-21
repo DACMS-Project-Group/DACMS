@@ -1,44 +1,82 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
+import { apiGet } from '../api';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
 
-  const statistics = [
-    { title: 'Total Modules', value: '24' },
-    { title: 'Total Lecturers', value: '56' },
-    { title: 'Total Assistants', value: '60' },
-    { title: 'Pending Approvals', value: '18' },
-    { title: 'Pending Claims', value: '12' },
-    { title: 'Budget Usage', value: '78%' },
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  // ---- Fetch dashboard stats on mount ----
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        setLoading(true);
+        const result = await apiGet('/admin/dashboard_statistics');
+        if (!cancelled) {
+          setData(result);
+          setError('');
+        }
+      } catch (err) {
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const stats = data?.stats || {};
+  const monthlyWork = data?.monthlyWork || [];
+  const pendingAppointments = data?.pendingAppointments || [];
+
+  // Stat cards derived from the API response
+  const statisticCards = [
+    { title: 'Total Modules', value: stats.total_modules ?? '—' },
+    { title: 'Total Lecturers', value: stats.total_lecturers ?? '—' },
+    { title: 'Total Assistants', value: stats.total_demis ?? '—' },
+    { title: 'Pending Approvals', value: stats.total_pending_approvals ?? '—' },
+    { title: 'Pending Claims', value: stats.total_pending_claims ?? '—' },
+    { title: 'Budget Usage', value: '—' },
   ];
 
-  const monthlyClaims = [
-    { month: 'August', amount: 'R 45 000' },
-    { month: 'July', amount: 'R 38 500' },
-    { month: 'June', amount: 'R 42 750' },
-  ];
+  // Format ISO date → "08 August 2026"
+  const formatDate = (iso) => {
+    if (!iso) return '—';
+    try {
+      return new Date(iso).toLocaleDateString('en-ZA', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return iso;
+    }
+  };
 
-  const pendingAppointments = [
-    {
-      lecturer: 'Dr Example',
-      assistant: 'Assistant Example',
-      module: 'CMPG xxx',
-      date: '28 August 2026',
-      status: 'Pending',
-    },
-    {
-      lecturer: 'Prof Example',
-      assistant: 'Assistant Example',
-      module: 'CMPG xxx',
-      date: '29 August 2026',
-      status: 'Pending',
-    },
-  ];
+  // Format "2026-08" → "August 2026"
+  const formatMonth = (yyyyMm) => {
+    if (!yyyyMm) return '—';
+    const [year, month] = yyyyMm.split('-');
+    const date = new Date(Number(year), Number(month) - 1, 1);
+    return date.toLocaleDateString('en-ZA', {
+      month: 'long',
+      year: 'numeric',
+    });
+  };
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -54,7 +92,6 @@ const AdminDashboard = () => {
             </h1>
           </div>
 
-          {/* Main Content */}
           <div className="p-8">
             {/* Welcome */}
             <div className="mb-8">
@@ -64,18 +101,22 @@ const AdminDashboard = () => {
               <p className="text-neutral mt-2 font-inter">
                 Monitor and manage the Assistant Applications and Claims Management System.
               </p>
+
+              {error && (
+                <p className="mt-2 text-sm text-error font-inter">
+                  Could not load dashboard data: {error}
+                </p>
+              )}
             </div>
 
-            {/* ================================
-                SYSTEM STATISTICS
-            ================================= */}
+            {/* SYSTEM STATISTICS */}
             <section className="mb-8">
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 System Statistics
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {statistics.map((stat) => (
+                {statisticCards.map((stat) => (
                   <Card key={stat.title}>
                     <div className="flex justify-between items-start">
                       <div>
@@ -83,7 +124,7 @@ const AdminDashboard = () => {
                           {stat.title}
                         </p>
                         <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                          {stat.value}
+                          {loading ? '—' : stat.value}
                         </p>
                       </div>
                     </div>
@@ -92,32 +133,41 @@ const AdminDashboard = () => {
               </div>
             </section>
 
-            {/* ================================
-                MONTHLY CLAIMS + PENDING ITEMS
-            ================================= */}
+            {/* MONTHLY WORK + PENDING ITEMS */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Monthly Claims */}
+              {/* Monthly Work */}
               <section>
                 <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                  Monthly Claims Summary
+                  Monthly Work Summary
                 </h3>
 
                 <Card>
-                  <div className="space-y-4">
-                    {monthlyClaims.map((claim) => (
-                      <div
-                        key={claim.month}
-                        className="flex justify-between items-center border-b border-neutral pb-3 last:border-0"
-                      >
-                        <span className="font-semibold text-dark font-inter">
-                          {claim.month}
-                        </span>
-                        <span className="font-semibold text-primary font-inter">
-                          {claim.amount}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                  {loading ? (
+                    <p className="py-6 text-center text-neutral font-inter">
+                      Loading…
+                    </p>
+                  ) : monthlyWork.length === 0 ? (
+                    <p className="py-6 text-center text-neutral font-inter">
+                      No work sessions recorded yet
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {monthlyWork.map((row) => (
+                        <div
+                          key={row.month}
+                          className="flex justify-between items-center border-b border-neutral pb-3 last:border-0"
+                        >
+                          <span className="font-semibold text-dark font-inter">
+                            {formatMonth(row.month)}
+                          </span>
+                          <span className="font-semibold text-primary font-inter">
+                            {row.total_sessions} session
+                            {row.total_sessions === 1 ? '' : 's'}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   <button
                     onClick={() => navigate('/claims-verification')}
@@ -135,29 +185,39 @@ const AdminDashboard = () => {
                 </h3>
 
                 <Card>
-                  <div className="space-y-4">
-                    {pendingAppointments.map((appointment, index) => (
-                      <div
-                        key={index}
-                        className="border-b border-neutral pb-4 last:border-0"
-                      >
-                        <div className="flex justify-between items-start gap-4">
-                          <div>
-                            <p className="font-semibold text-dark font-inter">
-                              {appointment.module}
-                            </p>
-                            <p className="text-sm text-neutral mt-1 font-inter">
-                              {appointment.lecturer} → {appointment.assistant}
-                            </p>
-                            <p className="text-sm text-neutral mt-1 font-inter">
-                              {appointment.date}
-                            </p>
+                  {loading ? (
+                    <p className="py-6 text-center text-neutral font-inter">
+                      Loading…
+                    </p>
+                  ) : pendingAppointments.length === 0 ? (
+                    <p className="py-6 text-center text-neutral font-inter">
+                      No pending appointments
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {pendingAppointments.map((appointment) => (
+                        <div
+                          key={appointment.application_id}
+                          className="border-b border-neutral pb-4 last:border-0"
+                        >
+                          <div className="flex justify-between items-start gap-4">
+                            <div>
+                              <p className="font-semibold text-dark font-inter">
+                                {appointment.module}
+                              </p>
+                              <p className="text-sm text-neutral mt-1 font-inter">
+                                {appointment.lecturer} → {appointment.student}
+                              </p>
+                              <p className="text-sm text-neutral mt-1 font-inter">
+                                {formatDate(appointment.date_submitted)}
+                              </p>
+                            </div>
+                            <StatusBadge status={appointment.status} />
                           </div>
-                          <StatusBadge status={appointment.status} />
                         </div>
-                      </div>
-                    ))}
-                  </div>
+                      ))}
+                    </div>
+                  )}
 
                   <button
                     onClick={() => navigate('/appointment-approvals')}
@@ -169,9 +229,7 @@ const AdminDashboard = () => {
               </section>
             </div>
 
-            {/* ================================
-                ADMINISTRATOR ACTIONS
-            ================================= */}
+            {/* ADMINISTRATOR ACTIONS */}
             <section className="mb-8">
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 Administrator Actions
@@ -208,9 +266,7 @@ const AdminDashboard = () => {
               </div>
             </section>
 
-            {/* ================================
-                PAYMENT INFORMATION
-            ================================= */}
+            {/* PAYMENT INFORMATION */}
             <section>
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 Payment Information
@@ -239,7 +295,6 @@ const AdminDashboard = () => {
           </div>
         </main>
       </div>
-
     </div>
   );
 };
