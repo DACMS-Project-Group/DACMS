@@ -436,6 +436,132 @@ class AdminRepository {
 
         return result.rows[0];
     }
+
+    static async getAppointmentsMetrics() {
+        const query = `
+            SELECT
+                (SELECT COUNT(*) FROM "DEMI_APPLICATION" WHERE "ApplicationStatus" = 'Pending') AS total_pending,
+                (SELECT COUNT(*) FROM "DEMI_APPLICATION" WHERE "ApplicationStatus" = 'Approved') AS total_approved,
+                (SELECT COUNT(*) FROM "DEMI_APPLICATION" WHERE "ApplicationStatus" = 'Rejected') AS total_rejected,
+                (SELECT COUNT(*) FROM "DEMI_APPLICATION" WHERE "ApplicationStatus" = 'Returned') AS total_returned
+        `;
+        const result = await pool.query(query);
+        const row = result.rows[0] || {};
+        return {
+            total_pending: Number(row.total_pending ?? 0),
+            total_approved: Number(row.total_approved ?? 0),
+            total_rejected: Number(row.total_rejected ?? 0),
+            total_returned: Number(row.total_returned ?? 0)
+        };
+    }
+
+    static async getPendingAppointmentsDetailed() {
+        const query = `
+            SELECT
+                da."ApplicationID" AS application_id,
+                CONCAT(
+                    COALESCE(au_stud."Title", ''),
+                    ' ',
+                    COALESCE(au_stud."FName", ''),
+                    ' ',
+                    COALESCE(au_stud."LName", '')
+                ) AS student,
+                st."StudentNumber" AS student_number,
+                nm."ModuleCode" AS module_code,
+                CONCAT(
+                    COALESCE(au_lect."Title", ''),
+                    ' ',
+                    COALESCE(au_lect."FName", ''),
+                    ' ',
+                    COALESCE(au_lect."LName", '')
+                ) AS lecturer,
+                da."DateSubmitted" AS date_submitted,
+                da."ApplicationStatus" AS status
+            FROM "DEMI_APPLICATION" da
+            JOIN "DEMI_LISTING" dl
+                ON dl."ListingID" = da."ListingID"
+            JOIN "NWU_MODULE" nm
+                ON nm."ModuleID" = dl."ModuleID"
+            JOIN "STUDENT" st
+                ON st."StudentID" = da."StudentID"
+            JOIN "APP_USER" au_stud
+                ON au_stud."UserID" = st."StudentID"
+            JOIN "LECTURER" lect
+                ON lect."LecturerID" = dl."LecturerID"
+            JOIN "APP_USER" au_lect
+                ON au_lect."UserID" = lect."LecturerID"
+            WHERE da."ApplicationStatus" = 'Pending'
+            ORDER BY da."DateSubmitted" DESC;
+        `;
+
+        const result = await pool.query(query);
+
+        return result.rows.map((row) => ({
+            application_id: row.application_id,
+            reference: "!! update data model",
+            student: row.student,
+            student_number: row.student_number,
+            module_code: row.module_code,
+            lecturer: row.lecturer,
+            date_submitted: row.date_submitted,
+            status: row.status,
+        }));
+    }
+
+    static async getApprovalHistory() {
+        const query = `
+            SELECT
+                da."ApplicationID" AS application_id,
+                CONCAT(
+                    COALESCE(au_stud."Title", ''),
+                    ' ',
+                    COALESCE(au_stud."FName", ''),
+                    ' ',
+                    COALESCE(au_stud."LName", '')
+                ) AS student,
+                nm."ModuleCode" AS module,
+                CONCAT(
+                    COALESCE(au_lect."Title", ''),
+                    ' ',
+                    COALESCE(au_lect."FName", ''),
+                    ' ',
+                    COALESCE(au_lect."LName", '')
+                ) AS lecturer,
+                -- dp."PositionName" AS position,
+                da."DateSubmitted" AS date,
+                da."ApplicationStatus" AS status
+            FROM "DEMI_APPLICATION" da
+            JOIN "DEMI_LISTING" dl
+                ON dl."ListingID" = da."ListingID"
+            JOIN "NWU_MODULE" nm
+                ON nm."ModuleID" = dl."ModuleID"
+            JOIN "STUDENT" st
+                ON st."StudentID" = da."StudentID"
+            JOIN "APP_USER" au_stud
+                ON au_stud."UserID" = st."StudentID"
+            JOIN "LECTURER" lect
+                ON lect."LecturerID" = dl."LecturerID"
+            JOIN "APP_USER" au_lect
+                ON au_lect."UserID" = lect."LecturerID"
+            LEFT JOIN "DEMI_POSITION" dp
+                ON dp."ApplicationID" = da."ApplicationID"
+            WHERE da."ApplicationStatus" IN ('Approved', 'Rejected')
+            ORDER BY da."DateSubmitted" DESC;
+        `;
+
+        const result = await pool.query(query);
+
+        return result.rows.map((row) => ({
+            application_id: row.application_id,
+            reference: row.reference || "!! update data model",
+            student: row.student,
+            module: row.module,
+            lecturer: row.lecturer,
+            position: row.position || "!! update data model",
+            date: row.date,
+            status: row.status,
+        }));
+    }
 }
 
 export default AdminRepository;

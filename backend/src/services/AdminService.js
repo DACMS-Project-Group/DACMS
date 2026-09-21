@@ -58,6 +58,18 @@ class AdminService {
         const data = await AdminRepository.approveClaim(claim_id);
         return { data };
     }
+
+    static async getAppointments() {
+        const stats = await AdminRepository.getAppointmentsMetrics();
+        const pending = await AdminRepository.getPendingAppointmentsDetailed();
+        const history = await AdminRepository.getApprovalHistory();
+
+        return {
+            stats,
+            pending,
+            history
+        };
+    }
 }
 
 export default AdminService;

@@ -99,6 +99,15 @@ class AdminController {
             return res.status(500).json({ error: error.message });
         }
     }
+
+    static async getAppointments(req, res) {
+        try {
+            const data = await AdminService.getAppointments();
+            return res.status(200).json(data);
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
 }
 
 export default AdminController;
