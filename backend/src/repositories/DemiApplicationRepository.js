@@ -52,21 +52,27 @@ class DemiApplicationRepository extends BaseRepository {
     }
 
     /** Currently open listings a student could apply to (deadline not passed). */
-    async findOpenListings() {
-        return this.query(`
-            SELECT
-                l."ListingID",
-                l."ModuleID",
-                l."LecturerID",
-                l."Deadline",
-                l."MinimumGrade",
-                m."ModuleCode",
-                m."ModuleName"
+      async findOpenListings(studentId) {
+         return this.query(`
+             SELECT
+               l."ListingID",
+               l."ModuleID",
+               l."LecturerID",
+               l."Deadline",
+               l."MinimumGrade",
+               m."ModuleCode",
+               m."ModuleName",
+               g."GradeAchieved"
             FROM "DEMI_LISTING" l
-            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+            JOIN "NWU_MODULE" m
+                ON m."ModuleID" = l."ModuleID"
+            JOIN "STUDENT_MODULE_GRADE" g
+                ON g."ModuleID" = l."ModuleID"
+                AND g."StudentID" = $1
             WHERE l."Deadline" > NOW()
+                AND g."GradeAchieved" >= l."MinimumGrade"
             ORDER BY l."Deadline" ASC
-        `);
+            `, [studentId]);
     }
 
     /**

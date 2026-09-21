@@ -18,13 +18,20 @@ class StudentController {
     async updateProfile(req, res, next) {
         try {
             const userId = getAuthUserId(req);
-            const { contactDetails, bankName, accountNumber, branchCode } = req.body;
+            const { contactDetails,bankName, accountNumber,branchCode,title,gender,dateOfBirth,residentialAddress,postalAddress,nextOfKinName,nextOfKinMobile} = req.body;
 
             const student = await studentService.updateProfile(userId, {
-                contactDetails,
-                bankName,
-                accountNumber,
-                branchCode,
+                   contactDetails,
+                   bankName,
+                   accountNumber,
+                   branchCode,
+                   title,
+                   gender,
+                   dateOfBirth,
+                  residentialAddress,
+                  postalAddress,
+                  nextOfKinName,
+                  nextOfKinMobile
             });
 
             res.json({ student });

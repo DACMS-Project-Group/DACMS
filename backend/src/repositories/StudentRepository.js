@@ -24,19 +24,39 @@ class StudentRepository extends BaseRepository {
      * Identity fields (name, email, student number) are intentionally excluded —
      * those likely need an admin-facing change process, not a self-service edit.
      */
-    async updateProfile(userId, { contactDetails, bankName, accountNumber, branchCode }) {
+    async updateProfile(userId, { contactDetails, bankName, accountNumber, branchCode,title,gender,dateOfBirth,residentialAddress,postalAddress,nextOfKinName,nextOfKinMobile }) {
         await this.query(
-            `
-            UPDATE "STUDENT"
-            SET
-                "ContactDetails" = COALESCE($2, "ContactDetails"),
-                "BankName" = COALESCE($3, "BankName"),
-                "AccountNumber" = COALESCE($4, "AccountNumber"),
-                "BranchCode" = COALESCE($5, "BranchCode")
-            WHERE "StudentID" = $1
-            `,
-            [userId, contactDetails, bankName, accountNumber, branchCode]
-        );
+          `
+              UPDATE "STUDENT"
+                SET
+                   "ContactDetails" = COALESCE($2, "ContactDetails"),
+                   "BankName" = COALESCE($3, "BankName"),
+                    "AccountNumber" = COALESCE($4, "AccountNumber"),
+                   "BranchCode" = COALESCE($5, "BranchCode"),
+                    "Title" = COALESCE($6, "Title"),
+                    "Gender" = COALESCE($7, "Gender"),
+                   "DateOfBirth" = COALESCE($8, "DateOfBirth"),
+                  "ResidentialAddress" = COALESCE($9, "ResidentialAddress"),
+                 "PostalAddress" = COALESCE($10, "PostalAddress"),
+                 "NextOfKinName" = COALESCE($11, "NextOfKinName"),
+                  "NextOfKinMobile" = COALESCE($12, "NextOfKinMobile")
+                   WHERE "StudentID" = $1
+        `,
+        [
+           userId,
+           contactDetails,
+           bankName,
+           accountNumber,
+           branchCode,
+           title,
+           gender,
+           dateOfBirth,
+           residentialAddress,
+           postalAddress,
+           nextOfKinName,
+           nextOfKinMobile
+         ]
+        ); 
         return this.findByUserId(userId);
     }
 }

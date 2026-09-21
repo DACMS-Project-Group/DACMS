@@ -82,6 +82,11 @@ router.get(
     RemunerationClaimController.getMyClaims.bind(RemunerationClaimController)
 );
 
+router.get(
+    '/claims/:claimId',
+    authenticate,
+    RemunerationClaimController.getClaimById.bind(RemunerationClaimController)
+);
 router.post(
     '/applications/:applicationId/claims',
     authenticate,
