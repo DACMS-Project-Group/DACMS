@@ -461,16 +461,12 @@ class AdminRepository {
                 dp."PositionID" AS position_id,
                 da."ApplicationID" AS application_id,
                 CONCAT(
-                    COALESCE(au_stud."Title", ''), ' ',
-                    COALESCE(au_stud."FName", ''), ' ',
-                    COALESCE(au_stud."LName", '')
+                    COALESCE(au_stud."Title", ''), ' ', COALESCE(au_stud."FName", ''), ' ', COALESCE(au_stud."LName", '')
                 ) AS student,
                 st."StudentNumber" AS student_number,
                 nm."ModuleCode" AS module_code,
                 CONCAT(
-                    COALESCE(au_lect."Title", ''), ' ',
-                    COALESCE(au_lect."FName", ''), ' ',
-                    COALESCE(au_lect."LName", '')
+                    COALESCE(au_lect."Title", ''), ' ', COALESCE(au_lect."FName", ''), ' ', COALESCE(au_lect."LName", '')
                 ) AS lecturer,
                 da."DateSubmitted" AS date_submitted,
                 dp."PositionStatus" AS status
@@ -506,23 +502,14 @@ class AdminRepository {
             SELECT
                 da."ApplicationID" AS application_id,
                 CONCAT(
-                    COALESCE(au_stud."Title", ''),
-                    ' ',
-                    COALESCE(au_stud."FName", ''),
-                    ' ',
-                    COALESCE(au_stud."LName", '')
+                    COALESCE(au_stud."Title", ''), ' ', COALESCE(au_stud."FName", ''), ' ', COALESCE(au_stud."LName", '')
                 ) AS student,
                 nm."ModuleCode" AS module,
                 CONCAT(
-                    COALESCE(au_lect."Title", ''),
-                    ' ',
-                    COALESCE(au_lect."FName", ''),
-                    ' ',
-                    COALESCE(au_lect."LName", '')
+                    COALESCE(au_lect."Title", ''), ' ', COALESCE(au_lect."FName", ''), ' ', COALESCE(au_lect."LName", '')
                 ) AS lecturer,
                 -- dp."PositionName" AS position,
-                da."DateSubmitted" AS date,
-                da."ApplicationStatus" AS status
+                da."DateSubmitted" AS date, da."ApplicationStatus" AS status
             FROM "DEMI_APPLICATION" da
             JOIN "DEMI_LISTING" dl
                 ON dl."ListingID" = da."ListingID"
@@ -642,6 +629,7 @@ class AdminRepository {
             responsibilities: Array.isArray(row.responsibilities) ? row.responsibilities : []
         };
     }
+    
     static async reviewPosition(position_id, action, comment) {
         const client = await pool.connect();
         try {
