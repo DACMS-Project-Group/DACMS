@@ -1,6 +1,5 @@
 import BaseRepository from './BaseRepository.js';
 import DemiApplication from '../models/DemiApplication.js';
-import getAuthUserId  from '../utils/getAuthUserId.js';
 
 class DemiApplicationRepository extends BaseRepository {
     constructor() {
