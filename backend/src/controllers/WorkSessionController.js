@@ -1,4 +1,5 @@
 import workSessionService from '../services/WorkSessionService.js';
+import NotificationService from '../services/NotificationService.js';
 import { getAuthUserId } from '../utils/getAuthUserId.js';
 
 class WorkSessionController {
@@ -6,7 +7,7 @@ class WorkSessionController {
     async getLecturerSessions(req, res) {
         try {
             const lecturerId = getAuthUserId(req);
-            const sessions = await workSessionService.fetchSessionsForLecturer(11);
+            const sessions = await workSessionService.fetchSessionsForLecturer(lecturerId);
             return res.status(200).json(sessions);
         } catch (error) {
             return res.status(500).json(error.message);
@@ -29,6 +30,13 @@ class WorkSessionController {
             const sessionId = req.params.id;
             const { reviewedStatus } = req.body;
             const reviewedSession  = await workSessionService.reviewSessionByLecturer(sessionId, reviewedStatus);
+            const studentId = await workSessionService.getStudentIdBySession(sessionId);
+            const notification = await NotificationService.sendNotification( {
+                recipientId : studentId, 
+                title : "Session Status Updated", 
+                type : reviewedStatus,
+                message : `The status of your session ${sessionId} has been updated to ${reviewedStatus}` 
+            } )
             return res.status(200).json( {reviewedSession} );
         } catch (error) {
             return res.status(500).json(error.message);

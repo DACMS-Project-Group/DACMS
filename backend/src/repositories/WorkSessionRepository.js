@@ -53,6 +53,23 @@ class WorkSessionRepository extends BaseRepository {
         )
     }
 
+    /** Get student ID from session for notification */
+
+    async getStudentIdFromSession(sessionId) {
+        const studentId = await this.query(
+            `
+            SELECT 
+                a."StudentID"
+            FROM "WORK_SESSION" w
+            JOIN "DEMI_POSITION" p ON p."PositionID" = w."PositionID"
+            JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
+            WHERE w."SessionID" = $1;
+            `, [sessionId]
+        )
+
+        return studentId[0].StudentID;
+    }
+
     /** Active Demi positions held by a student (approved application, not yet terminated). */
     async findActivePositionsForStudent(studentId) {
         return this.query(
