@@ -12,12 +12,19 @@ class DemiApplicationRepository extends BaseRepository {
         const rows = await this.query(
             `
             SELECT 
-            a.*, 
-            l."ModuleID",
-            l."Deadline"
+                a."ApplicationID",
+                CONCAT(u."FName", ' ', u."LName") AS "Student",
+                s."StudentNumber",
+                m."ModuleCode",
+                a."DateSubmitted"::DATE,
+                a."ApplicationStatus"
             FROM "DEMI_LISTING" l
             JOIN "DEMI_APPLICATION" a ON a."ListingID" = l."ListingID"
+            JOIN "STUDENT" s ON s."StudentID" = a."StudentID"
+            JOIN "APP_USER" u ON u."UserID" = s."StudentID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
             WHERE l."LecturerID" = $1
+            ORDER BY a."DateSubmitted" DESC
             `
             , [lecturerId]
         )
@@ -26,6 +33,17 @@ class DemiApplicationRepository extends BaseRepository {
             return { output: "No applications found" };
 
         return { output: rows.length, rows };
+    }
+
+    async lecturerFindApplicationById(applicationId) {
+        return await this.query(
+            `
+            SELECT *
+            FROM "DEMI_APPLICATION"
+            WHERE "ApplicationID" = $1
+            `
+            , [applicationId]
+        )
     }
 
     /** All applications submitted by a student, with listing/module context. */
