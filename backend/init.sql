@@ -487,18 +487,18 @@ INSERT INTO "REMUNERATION_CLAIM" ("ClaimReferenceNumber", "ApplicationID", "Modu
 ('CLAIM-2026-08-004', 5, 5, '2026-08-01', '2026-08-26', 4.00, 431.20, 107.80, 'Pending', '2026-08-27 14:00:00+02'),
 ('CLAIM-2026-08-005', 7, 3, '2026-08-01', '2026-08-27', 6.00, 646.80, 107.80, 'Under Review', '2026-08-28 11:45:00+02');
 
--- 15. Insert Audit Notifications
+-- 16. Insert Audit Notifications
 INSERT INTO "NOTIFICATION" ("RecipientUserID", "NotificationTitle", "NotificationType", "Message", "IsRead", "CreatedTimestamp") VALUES 
-(1, 'Application Update', 'Application', 'Your application for CMPG323 has been approved.', TRUE, '2026-08-01 10:05:00+02'),
-(2, 'Application Update', 'Application', 'Your application for CMPG311 has been approved.', TRUE, '2026-08-02 11:35:00+02'),
-(3, 'Application Update', 'Application', 'Your application for CMPG323 has been approved.', TRUE, '2026-08-03 09:20:00+02'),
-(4, 'Application Update', 'Application', 'Your application for EERI124 is under lecturer review.', FALSE, '2026-08-04 14:05:00+02'),
-(5, 'Application Update', 'Application', 'Your application for REES211 has been approved.', TRUE, '2026-08-05 15:50:00+02'),
-(6, 'Application Update', 'Application', 'Your application for CMPG221 was submitted successfully.', FALSE, '2026-08-06 08:35:00+02'),
-(7, 'Application Update', 'Application', 'Your application for INGM311 has been approved.', TRUE, '2026-08-07 12:15:00+02'),
-(8, 'Application Update', 'Application', 'Your application for INGM121 was submitted successfully.', FALSE, '2026-08-08 16:25:00+02'),
-(9, 'Application Update', 'Application', 'Your application for INGM412 has been approved.', TRUE, '2026-08-09 11:05:00+02'),
-(10, 'Application Update', 'Application', 'Your application for INGM222 has been approved.', TRUE, '2026-08-10 13:30:00+02');
+(1, 'Application Update', 'Application Approved: CMPG323', 'Your application for CMPG323 has been approved.', TRUE, '2026-08-01 10:05:00+02'),
+(2, 'Application Update', 'Application Approved: EERI124', 'Your application for EERI124 has been approved.', TRUE, '2026-08-02 11:35:00+02'),
+(3, 'Application Update', 'Application Approved: CMPG323', 'Your application for CMPG323 has been approved.', TRUE, '2026-08-03 09:20:00+02'),
+(4, 'Application Update', 'Application Under Review: EERI124', 'Your application for EERI124 is under lecturer review.', FALSE, '2026-08-04 14:05:00+02'),
+(5, 'Application Update', 'Application Approved: REES211', 'Your application for REES211 has been approved.', TRUE, '2026-08-05 15:50:00+02'),
+(6, 'Application Update', 'Application Submitted: CMPG221', 'Your application for CMPG221 was submitted successfully.', FALSE, '2026-08-06 08:35:00+02'),
+(7, 'Application Update', 'Application Approved: INGM311', 'Your application for INGM311 has been approved.', TRUE, '2026-08-07 12:15:00+02'),
+(8, 'Application Update', 'Application Submitted: INGM121', 'Your application for INGM121 was submitted successfully.', FALSE, '2026-08-08 16:25:00+02'),
+(9, 'Application Update', 'Application Approved: INGM412', 'Your application for INGM412 has been approved.', TRUE, '2026-08-09 11:05:00+02'),
+(10, 'Application Update', 'Application Approved: INGM222', 'Your application for INGM222 has been approved.', TRUE, '2026-08-10 13:30:00+02');
 
 -- 17. Insert Security Session Tokens
 INSERT INTO "SECURITY_TOKEN" ("UserID", "JWT_Token", "IssuedAt", "ExpiresAt") VALUES 
