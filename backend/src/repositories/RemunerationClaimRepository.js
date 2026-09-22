@@ -39,6 +39,10 @@ class RemunerationClaimRepository extends BaseRepository {
      * Sums approved (LecturerApproval = true), completed (EndTime not null) work
      * session hours for a position, optionally only sessions ending after `sinceDate`
      * (used to avoid re-claiming hours already included in a previous claim).
+     *
+     * NOTE: The schema has no "claimed" flag on WORK_SESSION, so this date-cutoff
+     * approach is an assumption, not an enforced constraint. Flagging this as worth
+     * a schema follow-up if precise claim/session linkage matters.
      */
     async sumUnclaimedApprovedHours(positionId, sinceDate) {
         const rows = await this.query(
@@ -103,6 +107,25 @@ class RemunerationClaimRepository extends BaseRepository {
             `,
             [studentId]
         );
+    }
+
+    /** A single claim's detail, including the owning student's ID for an ownership check. */
+    async findById(claimId) {
+        const rows = await this.query(
+            `
+            SELECT
+                c.*,
+                m."ModuleCode",
+                m."ModuleName",
+                a."StudentID"
+            FROM "REMUNERATION_CLAIM" c
+            JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = c."ApplicationID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = c."ModuleID"
+            WHERE c."ClaimID" = $1
+            `,
+            [claimId]
+        );
+        return rows[0] || null;
     }
 }
 

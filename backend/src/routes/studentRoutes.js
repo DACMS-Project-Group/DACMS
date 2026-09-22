@@ -12,91 +12,101 @@ const router = express.Router();
 
 // -- Dashboard ------------------------------------------------------------
 router.get(
-    '/students/dashboard',
+    '/student/dashboard',
     authenticate,
     StudentDashboardController.getDashboard.bind(StudentDashboardController)
 );
 
 // -- Demi Applications ------------------------------------------------------
 router.get(
-    '/students/listings/open',
+    '/student/listings/open',
     authenticate,
     DemiApplicationController.getOpenListings.bind(DemiApplicationController)
 );
 
 router.get(
-    '/students/applications',
+    '/student/applications',
     authenticate,
     DemiApplicationController.getMyApplications.bind(DemiApplicationController)
 );
 
 router.post(
-    '/students/applications',
+    '/student/applications',
     authenticate,
     DemiApplicationController.apply.bind(DemiApplicationController)
 );
 
 // -- Supporting Documents -----------------------------------------------------
+router.get(
+    '/student/documents',
+    authenticate,
+    DemiApplicationController.getMyDocuments.bind(DemiApplicationController)
+);
+
 router.post(
-    '/students/documents',
+    '/student/documents',
     authenticate,
     upload.single('file'),
     DemiApplicationController.uploadDocument.bind(DemiApplicationController)
 );
 
+// -- Working Hours (Positions & Sessions) --------------------------------------
 router.get(
-    '/students/documents',
-    authenticate,
-    DemiApplicationController.getMyDocuments.bind(DemiApplicationController)
-);
-
-// -- Working Hours ------------------------------------------------------------
-router.get(
-    '/students/positions',
+    '/student/positions',
     authenticate,
     WorkSessionController.getMyPositions.bind(WorkSessionController)
 );
 
 router.get(
-    '/students/sessions',
+    '/student/positions/:positionId/sessions',
     authenticate,
-    WorkSessionController.getMySessions.bind(WorkSessionController)
+    WorkSessionController.listSessionsForPosition.bind(WorkSessionController)
+);
+
+router.get(
+    '/student/positions/:positionId/sessions/:sessionId',
+    authenticate,
+    WorkSessionController.getSessionDetail.bind(WorkSessionController)
 );
 
 router.post(
-    '/students/positions/:positionId/sessions/clock-in',
+    '/student/positions/:positionId/sessions/create',
     authenticate,
-    WorkSessionController.clockIn.bind(WorkSessionController)
-);
-
-router.patch(
-    '/students/sessions/:sessionId/clock-out',
-    authenticate,
-    WorkSessionController.clockOut.bind(WorkSessionController)
+    WorkSessionController.createSession.bind(WorkSessionController)
 );
 
 // -- Remuneration Claims --------------------------------------------------------
 router.get(
-    '/students/claims',
+    '/student/claims',
     authenticate,
     RemunerationClaimController.getMyClaims.bind(RemunerationClaimController)
 );
 
+router.get(
+    '/student/claims/:id',
+    authenticate,
+    RemunerationClaimController.getClaimById.bind(RemunerationClaimController)
+);
+
 router.post(
-    '/students/applications/:applicationId/claims',
+    '/student/claims/create',
     authenticate,
     RemunerationClaimController.generateClaim.bind(RemunerationClaimController)
 );
 
-// -- Profile --------------------------------------------------------------------
+// -- Profile ----------------------------------------------------------------
+// NOTE: profile is intentionally left pointing at the existing controller for
+// now - the schema-mapping decision (how to store the ~30 still working on that
+// StudentProfile.jsx fields) is still pending. Only the paths are updated to
+// match the team's contract;so basically StudentController itself is unchanged.
 router.get(
-    '/students/profile',
+    '/student/profile/',
     authenticate,
     StudentController.getProfile.bind(StudentController)
 );
 
 router.patch(
-    '/students/profile',
+    '/student/profile/edit',
     authenticate,
     StudentController.updateProfile.bind(StudentController)
 );

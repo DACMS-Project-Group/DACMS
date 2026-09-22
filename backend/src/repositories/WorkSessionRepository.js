@@ -6,7 +6,11 @@ class WorkSessionRepository extends BaseRepository {
         super('"WORK_SESSION"', WorkSession);
     }
 
-    /** Active Demi positions held by a student (approved application, not yet terminated). */
+    /**
+     * Active Demi positions held by a student (approved application, not yet
+     * terminated), including lecturer name, allocated hours cap, and hours
+     * worked so far (so the frontend can show Worked/Maximum/Remaining).
+     */
     async findActivePositionsForStudent(studentId) {
         return this.query(
             `
@@ -16,14 +20,26 @@ class WorkSessionRepository extends BaseRepository {
                 p."PaymentScaleID",
                 p."StartDate",
                 p."TerminationDate",
+                p."TotalAllocatedHours",
                 ps."StandardHourlyRate",
                 m."ModuleCode",
-                m."ModuleName"
+                m."ModuleName",
+                lu."FName" AS "LecturerFName",
+                lu."LName" AS "LecturerLName",
+                COALESCE(worked."WorkedHours", 0) AS "WorkedHours"
             FROM "DEMI_POSITION" p
             JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
             JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
             JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
             JOIN "PAYMENT_SCALE" ps ON ps."ScaleID" = p."PaymentScaleID"
+            JOIN "LECTURER" lec ON lec."LecturerID" = l."LecturerID"
+            JOIN "APP_USER" lu ON lu."UserID" = lec."LecturerID"
+            LEFT JOIN (
+                SELECT "PositionID", SUM("TotalHoursWorked") AS "WorkedHours"
+                FROM "WORK_SESSION"
+                WHERE "TotalHoursWorked" IS NOT NULL
+                GROUP BY "PositionID"
+            ) worked ON worked."PositionID" = p."PositionID"
             WHERE a."StudentID" = $1
               AND (p."TerminationDate" IS NULL OR p."TerminationDate" > NOW())
             ORDER BY p."StartDate" DESC
@@ -32,14 +48,28 @@ class WorkSessionRepository extends BaseRepository {
         );
     }
 
-    /** Confirms a position belongs to this student, and returns its hourly rate. Null if not. */
+    /**
+     * Confirms a position belongs to this student, and returns its hourly
+     * rate, allocated-hours cap, and hours worked so far (for the
+     * remaining-hours check when recording a new session).
+     */
     async findPositionForStudent(positionId, studentId) {
         const rows = await this.query(
             `
-            SELECT p."PositionID", ps."StandardHourlyRate"
+            SELECT
+                p."PositionID",
+                p."TotalAllocatedHours",
+                ps."StandardHourlyRate",
+                COALESCE(worked."WorkedHours", 0) AS "WorkedHours"
             FROM "DEMI_POSITION" p
             JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
             JOIN "PAYMENT_SCALE" ps ON ps."ScaleID" = p."PaymentScaleID"
+            LEFT JOIN (
+                SELECT "PositionID", SUM("TotalHoursWorked") AS "WorkedHours"
+                FROM "WORK_SESSION"
+                WHERE "TotalHoursWorked" IS NOT NULL
+                GROUP BY "PositionID"
+            ) worked ON worked."PositionID" = p."PositionID"
             WHERE p."PositionID" = $1 AND a."StudentID" = $2
             `,
             [positionId, studentId]
@@ -47,51 +77,60 @@ class WorkSessionRepository extends BaseRepository {
         return rows[0] || null;
     }
 
-    async findOpenSessionForPosition(positionId) {
-        const rows = await this.query(
-            `SELECT * FROM "WORK_SESSION" WHERE "PositionID" = $1 AND "EndTime" IS NULL`,
-            [positionId]
-        );
-        return rows[0] ? WorkSession.fromDb(rows[0]) : null;
-    }
-
-    async clockIn(positionId) {
+    /**
+     * Records a work session retroactively - start and end time are both
+     * known and submitted together (no live clock-in/out). Hours and
+     * remuneration are computed here from the given times, not NOW().
+     */
+    async createSession({ positionId, activityDescription, startTime, endTime, totalHoursWorked, estimatedRemuneration }) {
         const rows = await this.query(
             `
-            INSERT INTO "WORK_SESSION" ("PositionID", "StartTime")
-            VALUES ($1, NOW())
+            INSERT INTO "WORK_SESSION"
+                ("PositionID", "ActivityDescription", "StartTime", "EndTime", "TotalHoursWorked", "EstimatedRemuneration")
+            VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *
             `,
-            [positionId]
+            [positionId, activityDescription, startTime, endTime, totalHoursWorked, estimatedRemuneration]
         );
         return WorkSession.fromDb(rows[0]);
     }
 
-    /** Ends an open session, calculating hours worked and estimated remuneration. */
-    async clockOut(sessionId, hourlyRate) {
+    /** All sessions recorded for one position (a student's own appointment). */
+    async findSessionsForPosition(positionId) {
         const rows = await this.query(
-            `
-            UPDATE "WORK_SESSION"
-            SET
-                "EndTime" = NOW(),
-                "TotalHoursWorked" = ROUND(EXTRACT(EPOCH FROM (NOW() - "StartTime")) / 3600.0, 2),
-                "EstimatedRemuneration" = ROUND(
-                    (EXTRACT(EPOCH FROM (NOW() - "StartTime")) / 3600.0) * $2, 2
-                )
-            WHERE "SessionID" = $1 AND "EndTime" IS NULL
-            RETURNING *
-            `,
-            [sessionId, hourlyRate]
+            `SELECT * FROM "WORK_SESSION" WHERE "PositionID" = $1 ORDER BY "StartTime" DESC`,
+            [positionId]
         );
-        return rows[0] ? WorkSession.fromDb(rows[0]) : null;
+        return rows.map(WorkSession.fromDb);
     }
 
-    async findById(sessionId) {
+    /**
+     * Full detail for a single session - including module, lecturer, and
+     * hourly rate - for the session detail page.
+     */
+    async findSessionDetailById(sessionId) {
         const rows = await this.query(
-            `SELECT * FROM "WORK_SESSION" WHERE "SessionID" = $1`,
+            `
+            SELECT
+                ws.*,
+                m."ModuleCode",
+                m."ModuleName",
+                ps."StandardHourlyRate",
+                lu."FName" AS "LecturerFName",
+                lu."LName" AS "LecturerLName"
+            FROM "WORK_SESSION" ws
+            JOIN "DEMI_POSITION" p ON p."PositionID" = ws."PositionID"
+            JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
+            JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+            JOIN "PAYMENT_SCALE" ps ON ps."ScaleID" = p."PaymentScaleID"
+            JOIN "LECTURER" lec ON lec."LecturerID" = l."LecturerID"
+            JOIN "APP_USER" lu ON lu."UserID" = lec."LecturerID"
+            WHERE ws."SessionID" = $1
+            `,
             [sessionId]
         );
-        return rows[0] ? WorkSession.fromDb(rows[0]) : null;
+        return rows[0] || null;
     }
 
     /** Confirms a session belongs (via its position) to this student. */
@@ -109,7 +148,11 @@ class WorkSessionRepository extends BaseRepository {
         return rows.length > 0;
     }
 
-    /** All sessions across all of a student's positions. */
+    /**
+     * All sessions across all of a student's positions. Not exposed as its
+     * own public route (not part of the team's API contract), but still used
+     * internally by the dashboard aggregation.
+     */
     async findByStudentId(studentId) {
         return this.query(
             `

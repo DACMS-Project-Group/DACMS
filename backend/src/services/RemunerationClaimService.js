@@ -9,6 +9,14 @@ class RemunerationClaimService {
         return this.remunerationClaimRepository.findByStudentId(studentId);
     }
 
+    async getClaimById(studentId, claimId) {
+        const claim = await this.remunerationClaimRepository.findById(claimId);
+        if (!claim || claim.StudentID !== studentId) {
+            throw new Error('Claim not found.');
+        }
+        return claim;
+    }
+
     /**
      * Generates a claim for all approved, unclaimed work session hours on the
      * given application, using the position's payment scale rate.
