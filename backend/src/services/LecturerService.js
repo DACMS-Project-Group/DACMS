@@ -95,45 +95,61 @@ class LecturerService {
         return LecturerRepository.getBudgetById(lecturerId, budgetId);
     }
 
-    static async getClaimsSummary(lecturerId) {
-        const stats = await LecturerRepository.getClaimsMetrics(lecturerId);
-        const claims = await LecturerRepository.getClaims(lecturerId);
+    async lecturerFetchApplications(lecturerId) {
+        const applications = await this.demiApplicationRepository.lecturerFetchApplications(lecturerId);
+        
+        if(!applications)
+            throw new Error('No applications found');
 
-        return {
-            stats,
-            claims
-        };
+        return applications;
     }
 
-    static async getClaimById(lecturerId, claimId) {
-        return await LecturerRepository.getClaimById(lecturerId, claimId);
+    async lecturerFetchApplicationById(applicationId) {
+        const application = await this.demiApplicationRepository.lecturerFindApplicationById(applicationId);
+
+        if(!application)
+            throw new Error('Application not found!');
+
+        return application;
+    }
+  
+    async lecturerReviewApplication(applicationId, lecturerDecision) {
+        const reviewed = await this.demiApplicationRepository.lecturerReviewApplication(applicationId, lecturerDecision);
+
+        if(!reviewed)
+            throw new Error('Application not found!');
+
+        return reviewed;
     }
 
-    static async reviewClaim(lecturerId, claimId, status) {
-        return await LecturerRepository.reviewClaim(
-            lecturerId,
-            claimId,
-            status
-        );
+    async fetchSessionsForLecturer(lecturerId) {
+        const sessions =  await this.workSessionRepository.fetchSessionsForLecturer(lecturerId);
+
+        if(!sessions)
+            throw new Error("No Sessions found!");
+
+        return sessions;
     }
 
-    static async getBudgetsSummary(lecturerId) {
-        const stats = await LecturerRepository.getBudgetsMetrics(lecturerId);
-        const module_budgets =
-            await LecturerRepository.getBudgetsSummary(lecturerId);
+    async fetchSessionByIdForLecturer(sessionId) {
+        const session = await this.workSessionRepository.fetchSessionByIdForLecturer(sessionId);
 
-        return {
-            stats,
-            module_budgets
-        };
+        if(!session)
+            throw new Error("Session not found");
+
+        
+        return session;
     }
 
-    static async getBudgetById(lecturerId, budgetId) {
-        return await LecturerRepository.getBudgetById(
-            lecturerId,
-            budgetId
-        );
+    async reviewSessionByLecturer(sessionId, approvalStatus) {
+        const response = await this.workSessionRepository.reviewSessionByLecturer(sessionId, approvalStatus);
+
+        if(!response) 
+            throw new Error('Session not found!');
+    
+        return response;
     }
+
 }
 
 export default new LecturerService();
