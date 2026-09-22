@@ -44,6 +44,10 @@ class DemiApplicationService {
     async listOpenListings() {
         return this.demiApplicationRepository.findOpenListings();
     }
+    
+    async listOpenListings(studentId) {
+        return this.demiApplicationRepository.findOpenListings(studentId);
+    }
 
     async listApplicationsForStudent(studentId) {
         return this.demiApplicationRepository.findByStudentId(studentId);

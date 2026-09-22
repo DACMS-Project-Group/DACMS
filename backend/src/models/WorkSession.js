@@ -2,6 +2,7 @@ class WorkSession {
     constructor({
         session_id = null,
         position_id,
+        activity_description,
         start_time,
         end_time,
         total_hours = start_time && end_time ? (end_time - start_time) / (1000 * 60 * 60) : null,
@@ -10,6 +11,7 @@ class WorkSession {
     }) {
         this.session_id = session_id;
         this.position_id = position_id;
+        this.activity_description = activity_description;
         this.start_time = start_time;
         this.end_time = end_time;
         this.total_hours = total_hours;
@@ -21,6 +23,7 @@ class WorkSession {
         return new WorkSession({
             session_id: row.SessionID,
             position_id: row.PositionID,
+            activity_description: row.ActivityDescription,
             start_time: row.StartTime,
             end_time: row.EndTime,
             total_hours: row.TotalHoursWorked,
@@ -33,6 +36,7 @@ class WorkSession {
         return {
             SessionID: this.session_id,
             PositionID: this.position_id,
+            ActivityDescription: this.activity_description,
             StartTime: this.start_time,
             EndTime: this.end_time,
             TotalHoursWorked: this.total_hours,
