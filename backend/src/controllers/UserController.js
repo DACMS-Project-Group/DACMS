@@ -1,6 +1,5 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import cookieParser from 'cookie-parser';
 import pool from '../config/db.js';
 import User from '../models/User.js';
 import Student from '../models/Student.js';
