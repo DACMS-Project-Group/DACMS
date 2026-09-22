@@ -5,6 +5,42 @@ class DemiApplicationService {
         this.demiApplicationRepository = new DemiApplicationRepository();
     }
 
+    async lecturerFetchApplications(lecturerId) {
+        const applications = this.demiApplicationRepository.lecturerFetchApplications(lecturerId);
+        
+        if(!applications)
+            throw new Error('No applications found');
+
+        return applications;
+    }
+
+    async lecturerFetchApplicationById(applicationId) {
+        const application =  this.demiApplicationRepository.lecturerFindApplicationById(applicationId);
+
+        if(!application)
+            throw new Error('Application not found!');
+
+        return application;
+    }
+  
+    async lecturerReviewApplication(applicationId, lecturerDecision) {
+        const reviewed =  this.demiApplicationRepository.lecturerReviewApplication(applicationId, lecturerDecision);
+
+        if(!reviewed)
+            throw new Error('Application not found!');
+
+        return reviewed;
+    }
+
+    async getStudentIdFromApplication(applicationId) {
+        const studentId = this.demiApplicationRepository.getStudentIdFromApplication(applicationId);
+
+        if(!studentId)
+            throw new Error("Student not found!");
+
+        return studentId;
+    }
+
     async listOpenListings() {
         return this.demiApplicationRepository.findOpenListings();
     }

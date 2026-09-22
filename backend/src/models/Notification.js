@@ -2,6 +2,7 @@ class Notification {
     constructor({
         notification_id = null,
         user_id,
+        title,
         type,
         message,
         is_read = false,
@@ -9,6 +10,7 @@ class Notification {
     }) {
         this.notification_id = notification_id;
         this.user_id = user_id;
+        this.title = title;
         this.type = type;
         this.message = message;
         this.is_read = is_read;
@@ -21,6 +23,7 @@ class Notification {
             user_id: row.RecipientUserID, 
             type: row.NotificationType,
             message: row.Message,
+            title: row.Title,
             is_read: row.IsRead,
             created_timestamp: row.CreatedTimestamp,
         });
@@ -32,6 +35,7 @@ class Notification {
             RecipientUserID: this.user_id, 
             NotificationType: this.type,
             Message: this.message,
+            Title: this.title,
             IsRead: this.is_read,
             CreatedTimestamp: this.created_timestamp,
         };

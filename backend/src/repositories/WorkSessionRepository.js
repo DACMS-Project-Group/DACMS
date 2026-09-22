@@ -6,6 +6,70 @@ class WorkSessionRepository extends BaseRepository {
         super('"WORK_SESSION"', WorkSession);
     }
 
+    /** Lecturer access to Sessions */
+
+    async fetchSessionsForLecturer(lecturerId) {
+        return await this.query(
+            `
+            SELECT
+                w."StartTime"::DATE AS "SessionDate",
+                m."ModuleCode",
+                w."ActivityDescription",
+                w."StartTime"::TIME AS "StartTime",
+                w."EndTime"::TIME AS "EndTime",
+                w."TotalHoursWorked",
+                w."LecturerApproval"
+            FROM "WORK_SESSION" w
+            JOIN "DEMI_POSITION" p ON p."PositionID" = w."PositionID"
+            JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
+            JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+            WHERE l."LecturerID" = $1
+            `
+            , [lecturerId]
+        )
+    }
+
+    async fetchSessionByIdForLecturer(sessionId){
+        return await this.query(
+            `
+            SELECT *
+            FROM "WORK_SESSION"
+            WHERE "SessionID" = $1
+            `
+            , [sessionId]
+        )
+    }
+
+    async reviewSessionByLecturer(sessionId, approvalStatus) {
+        return await this.query(
+            `
+            UPDATE "WORK_SESSION"
+            SET "LecturerApproval" = $1
+            WHERE "SessionID" = $2
+            RETURNING "SessionID", "LecturerApproval"
+            `
+            , [approvalStatus, sessionId]
+        )
+    }
+
+    /** Get student ID from session for notification */
+
+    async getStudentIdFromSession(sessionId) {
+        const studentId = await this.query(
+            `
+            SELECT 
+                a."StudentID"
+            FROM "WORK_SESSION" w
+            JOIN "DEMI_POSITION" p ON p."PositionID" = w."PositionID"
+            JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
+            WHERE w."SessionID" = $1;
+            `, [sessionId]
+        )
+
+        return studentId[0].StudentID;
+    }
+
     /** Active Demi positions held by a student (approved application, not yet terminated). */
     async findActivePositionsForStudent(studentId) {
         return this.query(

@@ -1,7 +1,50 @@
 import demiApplicationService from '../services/DemiApplicationService.js';
+import NotificationService   from '../services/NotificationService.js';
 import { getAuthUserId } from '../utils/getAuthUserId.js';
 
 class DemiApplicationController {
+
+    async lecturerFetchApplications(req, res) {
+        try {
+            const lecturerId = getAuthUserId(req);
+            const apps = await demiApplicationService.lecturerFetchApplications(lecturerId);
+            res.status(200).json(apps);
+        } catch (error) {
+            res.status(500).json( { error : error.message } );
+        }
+    }
+
+    async lecturerFetchApplicationById(req, res) {
+        try {
+            const application = await demiApplicationService.lecturerFetchApplicationById(req.params.id);
+            res.status(200).json( { application : application } );
+        } catch (error) {
+            res.status(500).json( { error : error.message });
+        }
+    }
+
+    async lecturerReviewApplication(req, res) {
+        try {
+            const applicationId = req.params.id;
+            const decision = req.body.decision;
+            const reviewedApp = await demiApplicationService.lecturerReviewApplication(applicationId, decision);
+            const studentId = await demiApplicationService.getStudentIdFromApplication(applicationId);
+            const notification = await NotificationService.sendNotification( {
+                recipientId : studentId,
+                title : "Application Update",
+                type : decision || "none",
+                message : `Status of application ${applicationId} has been changed to ${decision}`
+            } );
+
+            res.status(200).json( {
+                application : reviewedApp,
+                notification : notification
+            } );
+        } catch (error) {
+            res.status(500).json( {error : error.message });
+        }
+    }
+
     async getOpenListings(req, res, next) {
         try {
             const listings = await demiApplicationService.listOpenListings();
