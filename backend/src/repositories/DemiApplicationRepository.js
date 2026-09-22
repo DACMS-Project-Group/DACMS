@@ -46,6 +46,32 @@ class DemiApplicationRepository extends BaseRepository {
         )
     }
 
+    async getStudentIdFromApplication(applicationId) {
+        const studentId =  await this.query(
+            `
+            SELECT "StudentID"
+            FROM "DEMI_APPLICATION"
+            WHERE "ApplicationID" = $1
+            `
+            , [applicationId]
+        )
+
+        return studentId[0].StudentID;
+    }
+
+    /** Lecturer reviews assistant application */
+
+    async lecturerReviewApplication(applicationId, lecturerDecision) {
+        return await this.query(
+            `
+            UPDATE "DEMI_APPLICATION"
+            SET "ApplicationStatus" = $1
+            WHERE "ApplicationID" = $2
+            `
+            , [lecturerDecision, applicationId]
+        )
+    }
+
     /** All applications submitted by a student, with listing/module context. */
     async findByStudentId(studentId) {
         const sql = `

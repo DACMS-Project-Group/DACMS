@@ -9,7 +9,7 @@ class WorkSessionService {
         const sessions =  await this.workSessionRepository.fetchSessionsForLecturer(lecturerId);
 
         if(!sessions)
-            return { error : "No Sessions found!" };
+            throw new Error("No Sessions found!");
 
         return sessions;
     }
@@ -18,7 +18,7 @@ class WorkSessionService {
         const session = await this.workSessionRepository.fetchSessionByIdForLecturer(sessionId);
 
         if(!session)
-            return { error : "Session not found" };
+            throw new Error("Session not found");
 
         
         return session;
@@ -28,7 +28,7 @@ class WorkSessionService {
         const response = await this.workSessionRepository.reviewSessionByLecturer(sessionId, approvalStatus);
 
         if(!response) 
-            return { error : "Session not found" };
+            throw new Error('Session not found!');
     
         return response;
     }
@@ -37,7 +37,7 @@ class WorkSessionService {
         const response = await this.workSessionRepository.getStudentIdFromSession(sessionId);
 
         if(!response)
-            return { error: "student not found "};
+           throw new Error("Student not found!");
 
         return response;
     }

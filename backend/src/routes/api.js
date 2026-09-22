@@ -5,10 +5,6 @@ import studentRoutes from './studentRoutes.js';
 import lecturerRoutes from './lecturerRoutes.js';
 import adminRoutes from './adminRoutes.js';
 import notificationRoutes from './notificationRoutes.js';
-<<<<<<< HEAD
-import UserController from '../controllers/UserController.js';
-=======
->>>>>>> fb498c160c50690cb45cfd9c0aafb17ef7909ec5
 
 const router = Router();
 

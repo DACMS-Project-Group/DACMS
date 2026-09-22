@@ -488,7 +488,7 @@ INSERT INTO "REMUNERATION_CLAIM" ("ClaimReferenceNumber", "ApplicationID", "Modu
 ('CLAIM-2026-08-005', 7, 3, '2026-08-01', '2026-08-27', 6.00, 646.80, 107.80, 'Under Review', '2026-08-28 11:45:00+02');
 
 -- 16. Insert Audit Notifications
-INSERT INTO "NOTIFICATION" ("RecipientUserID", "NotificationType", "Subject", "Message", "IsRead", "CreatedTimestamp") VALUES 
+INSERT INTO "NOTIFICATION" ("RecipientUserID", "NotificationTitle", "NotificationType", "Message", "IsRead", "CreatedTimestamp") VALUES 
 (1, 'Application Update', 'Application Approved: CMPG323', 'Your application for CMPG323 has been approved.', TRUE, '2026-08-01 10:05:00+02'),
 (2, 'Application Update', 'Application Approved: EERI124', 'Your application for EERI124 has been approved.', TRUE, '2026-08-02 11:35:00+02'),
 (3, 'Application Update', 'Application Approved: CMPG323', 'Your application for CMPG323 has been approved.', TRUE, '2026-08-03 09:20:00+02'),

@@ -55,6 +55,20 @@ router.get(
 );
 
 router.get(
+    '/applications/fetch/:id',
+    authenticate,
+    authorize([2]),
+    DemiApplicationController.lecturerFetchApplicationById.bind(DemiApplicationController)
+)
+
+router.patch(
+    '/applications/review/:id',
+    authenticate,
+    authorize([2]),
+    DemiApplicationController.lecturerReviewApplication.bind(DemiApplicationController)
+)
+
+router.get(
     '/sessions',
     authenticate,
     authorize([2]),
