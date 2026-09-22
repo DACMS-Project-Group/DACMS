@@ -33,6 +33,15 @@ class WorkSessionService {
         return response;
     }
 
+    async getStudentIdBySession(sessionId) {
+        const response = await this.workSessionRepository.getStudentIdFromSession(sessionId);
+
+        if(!response)
+            return { error: "student not found "};
+
+        return response;
+    }
+
     async listActivePositions(studentId) {
         return this.workSessionRepository.findActivePositionsForStudent(studentId);
     }

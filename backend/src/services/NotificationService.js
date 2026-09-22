@@ -11,7 +11,7 @@ class NotificationService {
         // 1. Save to PostgreSQL using parameterized query
         const insertQuery = await pool.query(
             `
-            INSERT INTO "NOTIFICATION" ("RecipientUserID", "NotificationTitle", "NotificationType", "Message")
+            INSERT INTO "NOTIFICATION" ("RecipientUserID", "Subject", "NotificationType", "Message")
             VALUES ($1, $2, $3, $4)
             RETURNING *
         `, [recipientId, title, type, message]);
