@@ -551,7 +551,9 @@ class AdminRepository {
         const query = `
             SELECT
                 dp."PositionID" AS position_id, dp."PositionStatus" AS position_status, dp."AdminComment" AS admin_comment,
-                da."ApplicationID" AS application_id, da."ApplicationID" AS reference, da."ApplicationStatus" AS status, da."DateSubmitted" AS submitted_date,
+                da."ApplicationID" AS application_id, 
+                -- da."ReferenceNumber" AS reference, 
+                da."ApplicationStatus" AS status, da."DateSubmitted" AS submitted_date,
                 s."StudentNumber" AS student_number,
                 CONCAT(
                     COALESCE(au."Title", ''), CASE WHEN COALESCE(au."Title", '') = '' THEN '' ELSE ' ' END,
@@ -613,8 +615,8 @@ class AdminRepository {
             positionId: row.position_id,
             positionStatus: row.position_status,
             position: row.position || 'Student Assistant',
-            application_id: Number(row.id),
-            reference: String(row.reference || '!! update data model: add ReferenceNumber to DEMI_APPLICATION'),
+            application_id: Number(row.application_id),
+            reference: String('!! update data model: add ReferenceNumber to DEMI_APPLICATION'),
             status: row.status,
             submittedDate: row.submitted_date
                 ? new Date(row.submitted_date).toLocaleDateString('en-ZA', {
