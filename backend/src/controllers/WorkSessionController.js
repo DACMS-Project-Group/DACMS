@@ -4,6 +4,7 @@ import { getAuthUserId } from '../utils/getAuthUserId.js';
 
 class WorkSessionController {
 
+<<<<<<< HEAD
     async getLecturerSessions(req, res) {
         try {
             const lecturerId = getAuthUserId(req);
@@ -43,6 +44,8 @@ class WorkSessionController {
         }
     }
 
+=======
+>>>>>>> fb51e5e (Neil refactoring)
     async getMyPositions(req, res, next) {
         try {
             const studentId = getAuthUserId(req);

@@ -5,34 +5,6 @@ class WorkSessionService {
         this.workSessionRepository = new WorkSessionRepository();
     }
 
-    async fetchSessionsForLecturer(lecturerId) {
-        const sessions =  await this.workSessionRepository.fetchSessionsForLecturer(lecturerId);
-
-        if(!sessions)
-            throw new Error("No Sessions found!");
-
-        return sessions;
-    }
-
-    async fetchSessionByIdForLecturer(sessionId) {
-        const session = await this.workSessionRepository.fetchSessionByIdForLecturer(sessionId);
-
-        if(!session)
-            throw new Error("Session not found");
-
-        
-        return session;
-    }
-
-    async reviewSessionByLecturer(sessionId, approvalStatus) {
-        const response = await this.workSessionRepository.reviewSessionByLecturer(sessionId, approvalStatus);
-
-        if(!response) 
-            throw new Error('Session not found!');
-    
-        return response;
-    }
-
     async getStudentIdBySession(sessionId) {
         const response = await this.workSessionRepository.getStudentIdFromSession(sessionId);
 
