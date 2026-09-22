@@ -21,7 +21,7 @@ import ClaimDetail from './pages/ClaimDetail';
 import LectureDashboard from './pages/LectureDashboard';
 import ReviewApplications from './pages/ReviewApplications';
 import ApplicationReview from './pages/ApplicationReview';
-import AssignAssistantResponsibilities from './pages/AssignAssistantResponsibilities'; 
+import AssignAssistantResponsibilities from './pages/AssignAssistantResponsibilities';
 
 // ===== ADMIN PAGES =====
 import AdminDashboard from './pages/AdminDashboard';
