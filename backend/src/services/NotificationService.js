@@ -1,8 +1,5 @@
 import pool from '../config/db.js';
 import { io, userSockets } from '../server.js';
-import UserController from '../controllers/UserController.js';
-import cookieParser from 'cookie-parser';
-import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import getAuthUserId from '../utils/getAuthUserId.js';
 
