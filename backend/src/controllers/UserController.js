@@ -278,6 +278,7 @@ class UserController {
                 `
                     SELECT 
                         u."UserID",
+                        u."Title",
                         u."Email",
                         u."PasswordHash",
                         u."RoleID"
