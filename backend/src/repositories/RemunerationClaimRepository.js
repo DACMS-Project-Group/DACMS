@@ -104,6 +104,26 @@ class RemunerationClaimRepository extends BaseRepository {
             [studentId]
         );
     }
+    async findByIdForStudent(claimId, studentId) {
+    const rows = await this.query(
+        `
+        SELECT
+            c.*,
+            m."ModuleCode",
+            m."ModuleName"
+        FROM "REMUNERATION_CLAIM" c
+        JOIN "DEMI_APPLICATION" a
+            ON a."ApplicationID" = c."ApplicationID"
+        JOIN "NWU_MODULE" m
+            ON m."ModuleID" = c."ModuleID"
+        WHERE c."ClaimID" = $1
+          AND a."StudentID" = $2
+        `,
+        [claimId, studentId]
+    );
+
+    return rows[0] || null;
+}
 }
 
 export default RemunerationClaimRepository;

@@ -11,6 +11,7 @@ class Lecturer extends User {
         created_at = new Date(),
         lecturer_id = user_id,
         department,
+        oe_id = null,
     }) {
         super({
             user_id,
@@ -24,6 +25,7 @@ class Lecturer extends User {
 
         this.lecturer_id = lecturer_id ?? user_id;
         this.department = department;
+        this.oe_id = oe_id;
     }
 
     static fromDb(row) {
@@ -37,6 +39,7 @@ class Lecturer extends User {
             role_id: row.RoleID,
             created_at: row.CreatedAt ?? row.created_at,
             department: row.Department,
+            oe_id: row.OE_ID,
         });
     }
 
@@ -45,6 +48,7 @@ class Lecturer extends User {
             ...super.toDb(),
             LecturerID: this.lecturer_id ?? this.user_id,
             Department: this.department,
+            OE_ID: this.oe_id,
         };
     }
 
