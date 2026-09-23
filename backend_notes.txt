@@ -22,7 +22,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 		}
 	}
 }
-	
+
 =======================METRICS=======================
 
 /api {
@@ -55,74 +55,95 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 		/create {
 			type: POST
 			auth: false
-			desc: Creates a new User account of any type
+			desc: Creates a new user account of any supported role
+
 			request body {
-				"first_name" : "user_fname",
-				"last_name" : "userser_lname",
-				"email" : "user_email",
-				"password" : "user password",
-				"role_id" : 1 - student, 2 - lecturer, 3 - admin,
-				"student_number" : "user_student_number",
-				"study_level": "Undergrad/postgrad/staff",
-				"contact_details": "user_primary_contact",
-				"bank_name": "user_bank_name",
-				"account_number": "user_bank_acc",
-				"branch_code": "user_branch_code"
+				"title" : "Mx/Mr/Ms/etc. - optional, defaults to Mx",
+				"first_name" : "user first name",
+				"last_name" : "user last name",
+				"email" : "user email",
+				"password" : "minimum 8 characters",
+				"role_id" : 1 - student, 2 - lecturer, 3 - admin
+
+				student role fields {
+					"student_number" :
+					"study_level" : "Undergraduate/Postgraduate",
+					"contact_details" :
+					"bank_name" :
+					"account_number" :
+					"branch_code" :
+				}
+
+				lecturer role fields {
+					"department" :
+				}
+
+				admin role fields {
+					"mfa_enabled" : true/false,
+					"budget_allocation_rights" : true/false
+				}
 			}
+
 			response body {
-				"message" : "status message",
-				"user_id" : user_id,
-				"email" : "account email address",
+				"message" : "User created successfully.",
+				"user_id" : user id,
+				"email" : "account email",
 				"role_id" : account role
 			}
 		}
-		
+
 		/login {
 			type: POST
 			auth: false
 			desc: Logs into user account based on email
+
 			request body {
 				"email" : "account email",
 				"password" : "user password"
 			}
+
 			response body {
-				"id" : "user id",
+				"id" : user id,
 				"email" : "account email",
 				"role_id" : account role
+
 				cookie params {
-					"user_id" : "user id",
-					"role_id" : "account role"
+					"user_id" : user id,
+					"role_id" : account role
 				}
 			}
 		}
-		
+
 		/logout {
 			type: POST
 			auth: false
 			desc: Logs user out
+
 			response body {
 				"message" : "Process status"
 			}
 		}
-		
+
 		/fetch/:id {
 			param: user id
-			type: GET 
+			type: GET
 			auth: true
-			desc: responses user information based in ID
+			desc: Fetches user information based on user ID
+
 			response body {
-				"user_id": 17,
-				"first_name": "user fname",
-				"last_name": "user lname",
-				"full_name": "user fullname",
-				"email": "account email",
-				"role_name": "user role name",
-				"created_at": "user created timestamp"
+				"user_id" :
+				"title" :
+				"first_name" :
+				"last_name" :
+				"full_name" :
+				"email" :
+				"role_name" :
+				"created_at" :
 			}
 		}
-	}			
+	}
 }
-			
+
 
 =======================ADMIN=======================
 
@@ -132,36 +153,199 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 			type: GET
 			auth: true, admin
 			desc: Fetches data to populate admin dashboard
+
 			response body {
 				"stats": {
-					"total_modules": modules in system,
-					"total_lecturers": lectures in system,
-					"total_demis": assistants appointed,
-					"total_pending_approvals": applications pending approval,
-					"total_pending_claims": claims pending approval
+					"total_modules" :
+					"total_lecturers" :
+					"total_demis" :
+					"total_pending_approvals" :
+					"total_pending_claims" :
 				},
+
 				"monthlyWork": [
 					{
-						"month": "month work was done{yyyy-mm)",
-						"total_sessions": sessions done
+						"month" : "yyyy-mm",
+						"total_sessions" :
 					}
 				],
+
 				"pendingAppointments": [
 					{
-						"application_id": application id 1,
-						"status": "Pending/Approved/Rejected",
-						"date_submitted": "<yyyy-mm-dd> T<hh:mm:ss:ms>Z",
-						"module": "relevant module code",
-						"lecturer": "lecturer title + name",
-						"student": "student title + name"
-					},
-					{
-					...
+						"application_id" :
+						"status" :
+						"date_submitted" :
+						"module" :
+						"lecturer" :
+						"student" :
 					}
 				]
 			}
 		}
-	}	
+
+		/budgets {
+			type: GET
+			auth: true, admin
+			desc: Fetches current-year budget metrics and module budgets
+
+			response body {
+				"stats": {
+					"total_allocated" :
+					"total_used" :
+					"total_remaining" :
+					"count_near_limit" :
+				},
+
+				"module_budgets": [
+					{
+						"budget_id" :
+						"module_code" :
+						"module_description" :
+						"allocated_budget" :
+						"current_budget_usage" :
+						"remaining_budget" :
+					}
+				]
+			}
+		}
+
+		/budgets/fetch/:budget_id {
+			param: budget_id
+			type: GET
+			auth: true, admin
+			desc: Fetches budget details by budget ID
+
+			response body {
+				"data": [
+					{
+						"budget_id" :
+						"lecturer_id" :
+						"lecturer" :
+						"lecturer_email" :
+						"module_code" :
+						"module_description" :
+						"allocated_budget" :
+						"current_budget_usage" :
+						"remaining_budget" :
+					}
+				]
+			}
+		}
+
+		/budgets/create {
+			type: POST
+			auth: true, admin
+			desc: Creates a new module budget
+
+			request body {
+				"module_id" :
+				"lecturer_id" :
+				"allocated_budget" :
+				"current_budget_usage" :
+				"max_allowable_work_hours" :
+				"academic_year" :
+			}
+
+			response body {
+				"message" : "Budget creation Successful",
+				"budget_id" :
+			}
+		}
+
+		/budgets/edit/:id {
+			param: budget id
+			type: PUT
+			auth: true, admin
+			desc: Updates fields on an existing module budget
+
+			request body {
+				"module_id" : optional,
+				"lecturer_id" : optional,
+				"allocated_budget" : optional,
+				"current_budget_usage" : optional,
+				"max_allowable_work_hours" : optional,
+				"academic_year" : optional
+			}
+
+			response body {
+				"message" : "Budget updated successfully",
+				"data" : updated budget
+			}
+		}
+
+		/claims {
+			type: GET
+			auth: true, admin
+			desc: Fetches claim statistics and all remuneration claims
+
+			response body {
+				"stats": {
+					"total_claims" :
+					"total_pending" :
+					"total_under_review" :
+					"total_verified" :
+				},
+
+				"claims": [
+					{
+						"claim_id" :
+						"reference_number" :
+						"total_hours_claimed" :
+						"total_claim_amount" :
+						"claim_status" :
+						"submission_date" :
+						"module_code" :
+						"student_name" :
+					}
+				]
+			}
+		}
+
+		/claims/fetch/:claim_id {
+			param: claim_id
+			type: GET
+			auth: true, admin
+			desc: Fetches detailed information for a remuneration claim
+
+			response body {
+				"data": {
+					"id" :
+					"reference" :
+					"studentNumber" :
+					"studentName" :
+					"moduleCode" :
+					"moduleName" :
+					"lecturer" :
+					"period" :
+					"submittedDate" :
+					"hours" :
+					"hourlyRate" :
+					"amount" :
+					"status" :
+
+					"banking": {
+						"bank" :
+						"accountHolder" :
+						"accountNumber" :
+						"accountType" :
+						"status" :
+					},
+
+					"sessions": [
+						{
+							"id" :
+							"date" :
+							"activity" :
+							"startTime" :
+							"endTime" :
+							"hours" :
+							"status" :
+						}
+					]
+				}
+			}
+		}
+	}
 }
 
 =======================LECTURER=======================
@@ -172,11 +356,158 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 			type: GET
 			auth: true, lecturer
 			desc: Fetches data to populate lecturer dashboard
+
 			response body {
-				"total_appicants" : total # applicants to lecturer's positions
-				"approvied_demis" : total # approved demis in a lecturer's appointment
-				"pending_applications" : total # pending applications
-				"hours_allocated" : total # of hours allocated to demis by lecturer
+				"stats": {
+					"total_applicants" :
+					"approved_demis" :
+					"pending_applications" :
+					"hours_allocated" :
+				}
+			}
+		}
+
+		/claims {
+			type: GET
+			auth: true, lecturer
+			desc: Fetches claim statistics and claims belonging to the signed-in lecturer
+
+			response body {
+				"stats": {
+					"total_claims" :
+					"total_pending" :
+					"total_under_review" :
+					"total_verified" :
+				},
+
+				"claims": [
+					{
+						"claim_id" :
+						"reference_number" :
+						"total_hours_claimed" :
+						"total_claim_amount" :
+						"claim_status" :
+						"submission_date" :
+						"module_code" :
+						"student_name" :
+					}
+				]
+			}
+		}
+
+		/claims/fetch/:claim_id {
+			param: claim_id
+			type: GET
+			auth: true, lecturer
+			desc: Fetches a claim belonging to the signed-in lecturer
+
+			response body {
+				"data": {
+					"id" :
+					"reference" :
+					"studentNumber" :
+					"studentName" :
+					"moduleCode" :
+					"moduleName" :
+					"lecturer" :
+					"period" :
+					"submittedDate" :
+					"hours" :
+					"hourlyRate" :
+					"amount" :
+					"status" :
+
+					"banking": {
+						"bank" :
+						"accountHolder" :
+						"accountNumber" :
+						"accountType" :
+						"status" :
+					},
+
+					"sessions": [
+						{
+							"id" :
+							"date" :
+							"activity" :
+							"startTime" :
+							"endTime" :
+							"hours" :
+							"status" :
+						}
+					]
+				}
+			}
+		}
+
+		/claims/review {
+			type: PATCH
+			auth: true, lecturer
+			desc: Reviews a claim belonging to the signed-in lecturer
+
+			request body {
+				"claim_id" :
+				"status" : "Under Review" or "Verified"
+			}
+
+			response body {
+				"message" : "Claim reviewed successfully.",
+				"data": {
+					"ClaimID" :
+					"ClaimReferenceNumber" :
+					"ClaimStatus" :
+					"SubmissionDate" :
+				}
+			}
+		}
+
+		/budgets {
+			type: GET
+			auth: true, lecturer
+			desc: Fetches current-year budget information belonging to the signed-in lecturer
+
+			response body {
+				"stats": {
+					"total_allocated" :
+					"total_used" :
+					"total_remaining" :
+					"count_near_limit" :
+				},
+
+				"module_budgets": [
+					{
+						"budget_id" :
+						"module_code" :
+						"module_description" :
+						"allocated_budget" :
+						"current_budget_usage" :
+						"remaining_budget" :
+						"max_allowable_work_hours" :
+						"academic_year" :
+					}
+				]
+			}
+		}
+
+		/budgets/fetch/:budget_id {
+			param: budget_id
+			type: GET
+			auth: true, lecturer
+			desc: Fetches a specific budget belonging to the signed-in lecturer
+
+			response body {
+				"data": {
+					"budget_id" :
+					"lecturer_id" :
+					"module_code" :
+					"module_name" :
+					"module_description" :
+					"allocated_budget" :
+					"current_budget_usage" :
+					"remaining_budget" :
+					"max_allowable_work_hours" :
+					"academic_year" :
+				}
 			}
 		}
 	}
@@ -207,7 +538,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				"pendingApplications": [list of current app;ications]
 		    }
 		}
-		
+
 		/listings {
 			/open {
 				type: GET
@@ -227,7 +558,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				}
 			}
 		}
-		
+
 		/applications {
 			type: GET
 			auth: true
@@ -238,7 +569,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				"verificationEligibilityStatus" : true/pending/false
 			}
 		}
-		
+
 		/applications {
 			type: POST
 			auth: true
@@ -253,7 +584,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				"verificationEligibilityStatus" : true/pending/false
 			}
 		}
-		
+
 		/applications {
 			/:applicationId/claims {
 				params : applicationId
@@ -275,7 +606,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				}
 			}
 		}
-		
+
 		/claims {
 			type: GET
 			auth: true
@@ -298,12 +629,12 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				[ ... ]
 			}
 		}
-		
+
 		/profile {
 			type: GET
 			auth: true
 			desc: Fetches student profile information
-			response body { 
+			response body {
 				"UserId" :
 				"Title" :
 				"FName" :
@@ -322,8 +653,8 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				"SACitizen" : true/false
 				"ResidentialAddress" :
 				"PostalAddress" :
-				"NextOfKinName" : 
-				"NextOfKinMobile" : 
+				"NextOfKinName" :
+				"NextOfKinMobile" :
 				"HighestQualification" :
 				"ContactDetails" :
 				"BankName" :
@@ -333,19 +664,19 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				"AccountHolderName" :
 			}
 		}
-		
+
 		/profile {
 			type: PATCH
 			auth: true
 			desc: Allows student to change profile details
 			request body {
 				"userId" : User to be updated
-				"contactDetails" : 
+				"contactDetails" :
 				"bankName" :
 				"accountNumber" :
 				"BranchCode" :
 			}
-			response body { 
+			response body {
 				"UserId" :
 				"Title" :
 				"FName" :
@@ -364,8 +695,8 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 				"SACitizen" : true/false
 				"ResidentialAddress" :
 				"PostalAddress" :
-				"NextOfKinName" : 
-				"NextOfKinMobile" : 
+				"NextOfKinName" :
+				"NextOfKinMobile" :
 				"HighestQualification" :
 				"ContactDetails" :
 				"BankName" :
@@ -378,7 +709,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 	}
 }
 
-=======================NOTIFICATION=======================	
+=======================NOTIFICATION=======================
 
 NOTE: seperate connection to user socket using socket-client.io required for in-app notifications
 
@@ -404,7 +735,7 @@ NOTE: seperate connection to user socket using socket-client.io required for in-
 				"CreatedTimestamp" :
 			}
 		}
-		
+
 		/fetch {
 			type: GET
 			auth: true
@@ -422,7 +753,7 @@ NOTE: seperate connection to user socket using socket-client.io required for in-
 				[ ... ]
 			}
 		}
-		
+
 		/read/:id {
 		    params: id = notification id
 			type: PATCH
@@ -440,8 +771,7 @@ NOTE: seperate connection to user socket using socket-client.io required for in-
 		}
 	}
 }
-			
-			
-			
-			
-			
+
+
+
+
