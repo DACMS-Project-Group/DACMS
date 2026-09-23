@@ -1,133 +1,123 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import { useAuth } from '../contexts/AuthContext';
+import { apiGet, apiPatch } from '../api';
 
 const Notifications = () => {
   const { user } = useAuth();
   const userRole = user?.role || 'student';
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      title: 'Application Approved',
-      message:
-        'Your application for CMPG 323 Assistant position has been approved. You will receive your appointment letter shortly.',
-      timestamp: '2026-09-06 14:30',
-      read: false,
-      type: 'success',
-      category: 'Application',
-    },
-    {
-      id: 2,
-      title: 'Claim Submitted',
-      message:
-        'Your claim for R 1,500.00 has been submitted and is pending review by the administrator.',
-      timestamp: '2026-09-05 10:15',
-      read: false,
-      type: 'info',
-      category: 'Claim',
-    },
-    {
-      id: 3,
-      title: 'Work Session Verified',
-      message:
-        'Your work session for CMPG 323 (4 hours) has been verified by your lecturer.',
-      timestamp: '2026-09-04 16:45',
-      read: true,
-      type: 'success',
-      category: 'Work',
-    },
-    {
-      id: 4,
-      title: 'Application Rejected',
-      message:
-        'Your application for XXXX 211 has been rejected. Reason: Insufficient qualifications. Please review the requirements and reapply if eligible.',
-      timestamp: '2026-09-03 09:20',
-      read: true,
-      type: 'error',
-      category: 'Application',
-    },
-    {
-      id: 5,
-      title: 'Budget Update',
-      message:
-        'The budget for CMPG 323 has been updated. New allocation: R 45,000.00',
-      timestamp: '2026-09-02 11:00',
-      read: true,
-      type: 'warning',
-      category: 'Budget',
-    },
-    {
-      id: 6,
-      title: 'New Application Received',
-      message:
-        'A new Assistant application has been submitted for CMPG 323. Please review it.',
-      timestamp: '2026-09-01 08:30',
-      read: false,
-      type: 'info',
-      category: 'Application',
-    },
-  ]);
-
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [expandedId, setExpandedId] = useState(null);
 
-  const toggleExpand = (id) => {
-    setExpandedId(expandedId === id ? null : id);
+  // ---- Load notifications on mount ----
+  useEffect(() => {
+    let cancelled = false;
 
-    if (expandedId !== id) {
+    const load = async () => {
+      try {
+        setLoading(true);
+        const data = await apiGet('/notifications/fetch');
+
+        // Backend wraps in { notification: [...] } (singular!)
+        const list = Array.isArray(data)
+          ? data
+          : data?.notification || data?.notifications || [];
+
+        if (!cancelled) {
+          setNotifications(
+            list.map((n) => ({
+              id: n.NotificationId ?? n.notification_id ?? n.id,
+              title: n.title,
+              message: n.message,
+              timestamp: n.CreatedTimestamp ?? n.created_at ?? n.timestamp,
+              read: Boolean(n.IsRead ?? n.is_read ?? n.read),
+              type: n.type || 'info',
+              category: n.category || 'General',
+            }))
+          );
+          setError('');
+        }
+      } catch (err) {
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // ---- Toggle expand + mark as read ----
+  const toggleExpand = async (id) => {
+    const opening = expandedId !== id;
+    setExpandedId(opening ? id : null);
+
+    const target = notifications.find((n) => n.id === id);
+    if (opening && target && !target.read) {
+      // Optimistic update
       setNotifications((current) =>
-        current.map((notification) =>
-          notification.id === id
-            ? { ...notification, read: true }
-            : notification
-        )
+        current.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
+
+      try {
+        await apiPatch(`/notifications/read/${id}`);
+      } catch (err) {
+        // Roll back on failure
+        setNotifications((current) =>
+          current.map((n) => (n.id === id ? { ...n, read: false } : n))
+        );
+        console.error('Failed to mark as read:', err);
+      }
     }
   };
 
-  const markAllAsRead = () => {
+  // ---- Mark all as read ----
+  const markAllAsRead = async () => {
+    const unread = notifications.filter((n) => !n.read);
+    if (unread.length === 0) return;
+
+    // Optimistic update
     setNotifications((current) =>
-      current.map((notification) => ({
-        ...notification,
-        read: true,
-      }))
+      current.map((n) => ({ ...n, read: true }))
     );
+
+    try {
+      await Promise.all(
+        unread.map((n) => apiPatch(`/notifications/read/${n.id}`))
+      );
+    } catch (err) {
+      console.error('Some notifications failed to mark as read:', err);
+    }
   };
 
-  const deleteNotification = (id) => {
-    setNotifications((current) =>
-      current.filter((notification) => notification.id !== id)
-    );
-  };
+  // ---- Delete is not supported by the backend yet ----
 
-  const unreadCount = notifications.filter(
-    (notification) => !notification.read
-  ).length;
-
-  const readCount = notifications.filter(
-    (notification) => notification.read
-  ).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
+  const readCount = notifications.filter((n) => n.read).length;
 
   const categoryCount = [
-    ...new Set(notifications.map((notification) => notification.category)),
+    ...new Set(notifications.map((n) => n.category)),
   ].length;
 
   const getTypeColor = (type) => {
     switch (type) {
       case 'success':
         return 'bg-success';
-
       case 'error':
         return 'bg-error';
-
       case 'warning':
         return 'bg-warning';
-
       case 'info':
         return 'bg-primary';
-
       default:
         return 'bg-neutral';
     }
@@ -175,42 +165,30 @@ const Notifications = () => {
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
-                  <p className="font-medium text-neutral font-inter">
-                    Total
-                  </p>
-
+                  <p className="font-medium text-neutral font-inter">Total</p>
                   <p className="mt-3 text-3xl font-bold text-primary font-poppins">
                     {notifications.length}
                   </p>
-
                   <p className="mt-1 text-sm text-neutral font-inter">
                     All notifications
                   </p>
                 </Card>
 
                 <Card>
-                  <p className="font-medium text-neutral font-inter">
-                    Unread
-                  </p>
-
+                  <p className="font-medium text-neutral font-inter">Unread</p>
                   <p className="mt-3 text-3xl font-bold text-primary font-poppins">
                     {unreadCount}
                   </p>
-
                   <p className="mt-1 text-sm text-neutral font-inter">
                     Notifications requiring attention
                   </p>
                 </Card>
 
                 <Card>
-                  <p className="font-medium text-neutral font-inter">
-                    Read
-                  </p>
-
+                  <p className="font-medium text-neutral font-inter">Read</p>
                   <p className="mt-3 text-3xl font-bold text-primary font-poppins">
                     {readCount}
                   </p>
-
                   <p className="mt-1 text-sm text-neutral font-inter">
                     Previously viewed
                   </p>
@@ -220,11 +198,9 @@ const Notifications = () => {
                   <p className="font-medium text-neutral font-inter">
                     Categories
                   </p>
-
                   <p className="mt-3 text-3xl font-bold text-primary font-poppins">
                     {categoryCount}
                   </p>
-
                   <p className="mt-1 text-sm text-neutral font-inter">
                     Notification categories
                   </p>
@@ -239,14 +215,27 @@ const Notifications = () => {
               </h2>
 
               <Card>
-                {notifications.length === 0 ? (
+                {loading ? (
+                  <div className="py-12 text-center">
+                    <p className="text-neutral font-inter">
+                      Loading notifications…
+                    </p>
+                  </div>
+                ) : error ? (
+                  <div className="py-12 text-center">
+                    <p className="font-semibold text-error font-inter">
+                      Could not load notifications
+                    </p>
+                    <p className="mt-1 text-sm text-neutral font-inter">
+                      {error}
+                    </p>
+                  </div>
+                ) : notifications.length === 0 ? (
                   <div className="py-12 text-center">
                     <p className="mb-2 text-2xl">📭</p>
-
                     <p className="text-neutral font-inter">
                       No notifications yet
                     </p>
-
                     <p className="text-sm text-neutral/60 font-inter">
                       Check back later for updates
                     </p>
@@ -272,7 +261,6 @@ const Notifications = () => {
                           onClick={() => toggleExpand(notification.id)}
                         >
                           <div className="flex min-w-0 flex-1 items-center gap-4">
-                            {/* Status Dot */}
                             <div
                               className={`h-2 w-2 flex-shrink-0 rounded-full ${
                                 !notification.read
@@ -303,15 +291,17 @@ const Notifications = () => {
                               </div>
 
                               <p className="mt-0.5 text-xs text-neutral font-inter">
-                                {new Date(
-                                  notification.timestamp
-                                ).toLocaleDateString('en-ZA', {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
+                                {notification.timestamp
+                                  ? new Date(
+                                      notification.timestamp
+                                    ).toLocaleString('en-ZA', {
+                                      day: '2-digit',
+                                      month: '2-digit',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })
+                                  : ''}
                               </p>
                             </div>
                           </div>
@@ -326,18 +316,6 @@ const Notifications = () => {
                             <span className="text-sm text-neutral/50">
                               {expandedId === notification.id ? '▲' : '▼'}
                             </span>
-
-                            <button
-                              type="button"
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                deleteNotification(notification.id);
-                              }}
-                              className="p-1 text-sm text-neutral/30 transition hover:text-error"
-                              aria-label={`Delete ${notification.title}`}
-                            >
-                              ✕
-                            </button>
                           </div>
                         </div>
 
@@ -359,15 +337,6 @@ const Notifications = () => {
 
                               <span className="text-xs text-neutral/50 font-inter">
                                 ID: #{notification.id}
-                              </span>
-
-                              <span className="text-xs text-neutral/50 font-inter">
-                                {new Date(
-                                  notification.timestamp
-                                ).toLocaleTimeString('en-ZA', {
-                                  hour: '2-digit',
-                                  minute: '2-digit',
-                                })}
                               </span>
                             </div>
                           </div>
