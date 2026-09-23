@@ -269,19 +269,166 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 =======================LECTURER=======================
 
 /api {
-    /lecturer {
-        /dashboard_statistics {
-            type: GET
-            auth: true, lecturer
-            desc: Fetches data to populate lecturer dashboard
-            response body {
-                "total_appicants" : total # applicants to lecturer's positions
-                "approvied_demis" : total # approved demis in a lecturer's appointment
-                "pending_applications" : total # pending applications
-                "hours_allocated" : total # of hours allocated to demis by lecturer
-            }
-        }
-    }
+	/lecturer {
+		/dashboard_statistics {
+			type: GET
+			auth: true, lecturer
+			desc: Fetches data to populate lecturer dashboard
+
+			response body {
+				"stats": {
+					"total_applicants" :
+					"approved_demis" :
+					"pending_applications" :
+					"hours_allocated" :
+				}
+			}
+		}
+
+		/claims {
+			type: GET
+			auth: true, lecturer
+			desc: Fetches claim statistics and claims belonging to the signed-in lecturer
+
+			response body {
+				"stats": {
+					"total_claims" :
+					"total_pending" :
+					"total_under_review" :
+					"total_verified" :
+				},
+
+				"claims": [
+					{
+						"claim_id" :
+						"reference_number" :
+						"total_hours_claimed" :
+						"total_claim_amount" :
+						"claim_status" :
+						"submission_date" :
+						"module_code" :
+						"student_name" :
+					}
+				]
+			}
+		}
+
+		/claims/fetch/:claim_id {
+			param: claim_id
+			type: GET
+			auth: true, lecturer
+			desc: Fetches a claim belonging to the signed-in lecturer
+
+			response body {
+				"data": {
+					"id" :
+					"reference" :
+					"studentNumber" :
+					"studentName" :
+					"moduleCode" :
+					"moduleName" :
+					"lecturer" :
+					"period" :
+					"submittedDate" :
+					"hours" :
+					"hourlyRate" :
+					"amount" :
+					"status" :
+
+					"banking": {
+						"bank" :
+						"accountHolder" :
+						"accountNumber" :
+						"accountType" :
+						"status" :
+					},
+
+					"sessions": [
+						{
+							"id" :
+							"date" :
+							"activity" :
+							"startTime" :
+							"endTime" :
+							"hours" :
+							"status" :
+						}
+					]
+				}
+			}
+		}
+
+		/claims/review {
+			type: PATCH
+			auth: true, lecturer
+			desc: Reviews a claim belonging to the signed-in lecturer
+
+			request body {
+				"claim_id" :
+				"status" : "Under Review" or "Verified"
+			}
+
+			response body {
+				"message" : "Claim reviewed successfully.",
+				"data": {
+					"ClaimID" :
+					"ClaimReferenceNumber" :
+					"ClaimStatus" :
+					"SubmissionDate" :
+				}
+			}
+		}
+
+		/budgets {
+			type: GET
+			auth: true, lecturer
+			desc: Fetches current-year budget information belonging to the signed-in lecturer
+
+			response body {
+				"stats": {
+					"total_allocated" :
+					"total_used" :
+					"total_remaining" :
+					"count_near_limit" :
+				},
+
+				"module_budgets": [
+					{
+						"budget_id" :
+						"module_code" :
+						"module_description" :
+						"allocated_budget" :
+						"current_budget_usage" :
+						"remaining_budget" :
+						"max_allowable_work_hours" :
+						"academic_year" :
+					}
+				]
+			}
+		}
+
+		/budgets/fetch/:budget_id {
+			param: budget_id
+			type: GET
+			auth: true, lecturer
+			desc: Fetches a specific budget belonging to the signed-in lecturer
+
+			response body {
+				"data": {
+					"budget_id" :
+					"lecturer_id" :
+					"module_code" :
+					"module_name" :
+					"module_description" :
+					"allocated_budget" :
+					"current_budget_usage" :
+					"remaining_budget" :
+					"max_allowable_work_hours" :
+					"academic_year" :
+				}
+			}
+		}
+	}
 }
 
 =======================STUDENT=======================
@@ -553,7 +700,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
     }
 }
 
-=======================NOTIFICATION=======================	
+=======================NOTIFICATION=======================
 
 NOTE: seperate connection to user socket using socket-client.io required for in-app notifications
 
@@ -616,3 +763,7 @@ NOTE: seperate connection to user socket using socket-client.io required for in-
         }
     }
 }
+
+
+
+

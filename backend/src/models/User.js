@@ -1,6 +1,7 @@
 class User {
     constructor({
         user_id = null,
+        title = 'Mx',
         first_name,
         last_name,
         email,
@@ -9,6 +10,7 @@ class User {
         created_at = new Date()
     }) {
         this.user_id = user_id;
+        this.title = title;
         this.first_name = first_name;
         this.last_name = last_name;
         this.email = email;
@@ -24,27 +26,33 @@ class User {
     static fromDb(row) {
         return new User({
             user_id: row.UserID,
+            title: row.Title,
             first_name: row.FName,
             last_name: row.LName,
             email: row.Email,
             password_hash: row.PasswordHash,
             role_id: row.RoleID,
-            created_at: row.created_at
+            created_at: row.CreatedAt ?? row.created_at
         });
     }
 
     toDb() {
         return {
             UserID: this.user_id,
+            Title: this.title,
             FName: this.first_name,
             LName: this.last_name,
             Email: this.email,
             PasswordHash: this.password_hash,
             RoleID: this.role_id
-        }
+        };
     }
 
     validate() {
+        if (!this.title || this.title.trim() === "") {
+            throw new Error("Title is required.");
+        }
+
         if (!this.first_name || this.first_name.trim() === "") {
             throw new Error("First name is required.");
         }
