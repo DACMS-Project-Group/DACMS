@@ -2,6 +2,9 @@ import app from './app.js';
 import { Server } from "socket.io";
 import http from 'http';
 import { createServer } from "node:http";
+import env from 'dotenv';
+
+env.config();
 
 const PORT = process.env.PORT || 5000;
 

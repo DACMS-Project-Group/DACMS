@@ -2,34 +2,37 @@ import User from "./User.js";
 
 class Lecturer extends User {
     constructor({
-        user_id = null,
+    user_id = null,
+    title = 'Mx',
+    first_name,
+    last_name,
+    email,
+    password_hash,
+    role_id,
+    created_at = new Date(),
+    lecturer_id = user_id,
+    department,
+}) {
+    super({
+        user_id,
+        title,
         first_name,
         last_name,
         email,
         password_hash,
         role_id,
-        created_at = new Date(),
-        lecturer_id = user_id,
-        department,
-    }) {
-        super({
-            user_id,
-            first_name,
-            last_name,
-            email,
-            password_hash,
-            role_id,
-            created_at
-        });
+        created_at
+    });
 
-        this.lecturer_id = lecturer_id ?? user_id;
-        this.department = department;
-    }
+    this.lecturer_id = lecturer_id ?? user_id;
+    this.department = department;
+}
 
     static fromDb(row) {
         return new Lecturer({
             user_id: row.UserID ?? row.LecturerID,
             lecturer_id: row.LecturerID ?? row.UserID,
+            title: row.Title,
             first_name: row.FName,
             last_name: row.LName,
             email: row.Email,

@@ -1,19 +1,16 @@
 import pool from '../config/db.js';
 import { io, userSockets } from '../server.js';
-import UserController from '../controllers/UserController.js';
-import cookieParser from 'cookie-parser';
-import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
+import getAuthUserId from '../utils/getAuthUserId.js';
 
 class NotificationService {
-    static async sendNotification({ recipientId, title, type, message }) {
-        // 1. Save to PostgreSQL using parameterized query
+    static async sendNotification({ recipientId, subject, type, message }) {
         const insertQuery = await pool.query(
             `
-            INSERT INTO "NOTIFICATION" ("RecipientUserID", "NotificationTitle", "NotificationType", "Message")
+            INSERT INTO "NOTIFICATION" ("RecipientUserID", "Subject", "NotificationType", "Message")
             VALUES ($1, $2, $3, $4)
             RETURNING *
-        `, [recipientId, title, type, message]);
+        `, [recipientId, subject, type, message]);
 
         const { rows } = await pool.query(
             `
@@ -46,11 +43,11 @@ class NotificationService {
 
     //get existing notifications for the authenticated user
     static async getNotifications(req) {
-        const userId = await this.unpackUserID(req);
+        const userId = await getAuthUserId(req);
 
         const { rows } = await pool.query(
              `
-                SELECT "NotificationID", "NotificationTitle", "NotificationType", "Message", "IsRead", "CreatedTimestamp"
+                SELECT "NotificationID", "Subject", "NotificationType", "Message", "IsRead", "CreatedTimestamp"
                 FROM "NOTIFICATION" 
                 WHERE "RecipientUserID" = $1 
                 ORDER BY "CreatedTimestamp" DESC 
@@ -63,7 +60,7 @@ class NotificationService {
 
     //mark a notification as read
     static async markAsRead(req) {
-        const userId = await this.unpackUserID(req);
+        const userId = await getAuthUserId(req);
 
         const { rows } = await pool.query(
             `
@@ -118,7 +115,7 @@ class NotificationService {
         let mailOptions = {
             from: '"AACMS Notifications" <aacms@noreply.nwu.ac.za>',
             to: userEmailRows[0].Email,
-            subject: notificationRows[0].NotificationTitle,
+            subject: notificationRows[0].Subject,
             text: notificationRows[0].Message
         };
 
@@ -129,17 +126,6 @@ class NotificationService {
         console.log('Preview URL: %s', nodemailer.getTestMessageUrl(mailInfo));
 
         return { message: 'Email notification sent successfully.' };
-    }
-
-    static async unpackUserID(req) {
-        const token = req.cookies.token;
-
-        if (!token) 
-            return 'Access denied.';
-
-        const verifiedData = jwt.verify(token, process.env.JWT_SECRET || 'your_super_secret_key');
-
-        return verifiedData.user_id;
     }
 
 }

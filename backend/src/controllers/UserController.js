@@ -54,6 +54,7 @@ class UserController {
     async createUser(req, res) {
         const body = req.body ?? {};
 
+        const title = readRequiredString(body.title) ?? 'Mx';
         const firstName = readRequiredString(body.first_name);
         const lastName = readRequiredString(body.last_name);
         const email = readRequiredString(body.email)?.toLowerCase();
@@ -80,6 +81,7 @@ class UserController {
                 }
 
                 userModel = new Student({
+                    title,
                     first_name: firstName,
                     last_name: lastName,
                     email,
@@ -94,6 +96,7 @@ class UserController {
                 });
             } else if (roleId === ROLE_IDS.LECTURER) {
                 userModel = new Lecturer({
+                    title,
                     first_name: firstName,
                     last_name: lastName,
                     email,
@@ -103,6 +106,7 @@ class UserController {
                 });
             } else if (roleId === ROLE_IDS.ADMINISTRATOR) {
                 userModel = new Administrator({
+                    title,
                     first_name: firstName,
                     last_name: lastName,
                     email,
@@ -133,12 +137,12 @@ class UserController {
             // Insert base user
             const userResult = await databaseClient.query(
                 `
-                    INSERT INTO "APP_USER"
-                        ("FName", "LName", "Email", "PasswordHash", "RoleID")
-                    VALUES ($1, $2, $3, $4, $5)
-                    RETURNING "UserID";
-                `,
-                [dbData.FName, dbData.LName, dbData.Email, dbData.PasswordHash, dbData.RoleID]
+                INSERT INTO "APP_USER"
+                    ("Title", "FName", "LName", "Email", "PasswordHash", "RoleID")
+                VALUES ($1, $2, $3, $4, $5, $6)
+                RETURNING "UserID";
+            `,
+                [dbData.Title, dbData.FName, dbData.LName, dbData.Email, dbData.PasswordHash, dbData.RoleID]
             );
 
             const userId = userResult.rows[0].UserID;
@@ -219,6 +223,7 @@ class UserController {
                 `
                     SELECT
                         u."UserID",
+                        u."Title",
                         u."FName",
                         u."LName",
                         u."Email",
@@ -245,6 +250,7 @@ class UserController {
 
             return res.status(200).json({
                 user_id: user.user_id,
+                title: user.title,
                 first_name: user.first_name,
                 last_name: user.last_name,
                 full_name: user.fullName,
@@ -272,6 +278,7 @@ class UserController {
                 `
                     SELECT 
                         u."UserID",
+                        u."Title",
                         u."Email",
                         u."PasswordHash",
                         u."RoleID"

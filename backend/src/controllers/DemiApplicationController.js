@@ -1,7 +1,9 @@
 import demiApplicationService from '../services/DemiApplicationService.js';
+import NotificationService   from '../services/NotificationService.js';
 import { getAuthUserId } from '../utils/getAuthUserId.js';
 
 class DemiApplicationController {
+
     async getOpenListings(req, res, next) {
         try {
             const studentId = getAuthUserId(req);

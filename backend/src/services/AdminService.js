@@ -13,6 +13,78 @@ class AdminService {
             pendingAppointments
         };
     }
+
+    static async getBudgetsSummary() {
+        const stats = await AdminRepository.getBudgetsMetrics();
+        const module_budgets = await AdminRepository.getBudgetsSummary();
+        
+        return {
+            stats,
+            module_budgets
+        };
+    }
+
+    static async getBudgetById(budget_id) {
+        const data = await AdminRepository.getBudgetById(budget_id);
+        return { data }
+    }
+
+    static async createBudget(Budget) {
+        const data = await AdminRepository.createBudget(Budget);
+        return { data };
+    }
+
+    static async editBudget(budget_id, updateData) {
+        const data = await AdminRepository.editBudget(budget_id, updateData);
+        return { data };
+    }
+
+    static async getClaimsSummary() {
+        const stats = await AdminRepository.getClaimsMetrics();
+        const claims = await AdminRepository.getClaims();
+
+        return {
+            stats,
+            claims
+        };
+    }
+
+    static async getClaimById(claim_id) {
+        const data = await AdminRepository.getClaimById(claim_id);
+        return { data };
+    }
+
+    static async approveClaim(claim_id) {
+        const data = await AdminRepository.approveClaim(claim_id);
+        return { data };
+    }
+
+    static async getAppointments() {
+        const stats = await AdminRepository.getAppointmentsMetrics();
+        const pending = await AdminRepository.getPendingAppointmentsDetailed();
+        const history = await AdminRepository.getApprovalHistory();
+
+        return {
+            stats,
+            pending,
+            history
+        };
+    }
+
+    static async getPositionById(position_id) {
+        const position = await AdminRepository.getPositionById(position_id);
+        return { position };
+    }
+
+    static async reviewPosition(position_id, action, comment) {
+        const validActions = ['Approved', 'Rejected', 'Returned'];
+        if (!validActions.includes(action)) {
+            throw new Error(`Invalid action. Must be one of: ${validActions.join(', ')}`);
+        }
+
+        const data = await AdminRepository.reviewPosition(position_id, action, comment);
+        return { data };
+    }
 }
 
 export default AdminService;
