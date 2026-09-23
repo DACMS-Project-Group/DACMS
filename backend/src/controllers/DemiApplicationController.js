@@ -6,7 +6,8 @@ class DemiApplicationController {
 
     async getOpenListings(req, res, next) {
         try {
-            const listings = await demiApplicationService.listOpenListings();
+            const studentId = getAuthUserId(req);
+            const listings = await demiApplicationService.listOpenListings(studentId);
             res.json({ listings });
         } catch (err) {
             next(err);

@@ -116,9 +116,15 @@ class DemiApplicationRepository extends BaseRepository {
         return rows[0] ? DemiApplication.fromDb(rows[0]) : null;
     }
 
-    /** Currently open listings a student could apply to (deadline not passed). */
-    async findOpenListings() {
-        return this.query(`
+    /**
+     * Currently open listings a student actually qualifies for: deadline not
+     * passed, AND the student has a recorded grade for that module meeting
+     * the listing's minimum requirement. A listing with no grade on record
+     * for the student is excluded (not shown as "maybe eligible").
+     */
+    async findOpenListings(studentId) {
+        return this.query(
+            `
             SELECT
                 l."ListingID",
                 l."ModuleID",
@@ -129,9 +135,14 @@ class DemiApplicationRepository extends BaseRepository {
                 m."ModuleName"
             FROM "DEMI_LISTING" l
             JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+            JOIN "STUDENT_MODULE_GRADE" g
+                ON g."ModuleID" = l."ModuleID" AND g."StudentID" = $1
             WHERE l."Deadline" > NOW()
+              AND g."GradeAchieved" >= l."MinimumGrade"
             ORDER BY l."Deadline" ASC
-        `);
+            `,
+            [studentId]
+        );
     }
 
     /**
