@@ -2,8 +2,6 @@ import express from 'express';
 
 import LecturerController from '../controllers/LecturerController.js';
 import ListingController from '../controllers/ListingController.js';
-import DemiApplicationController from '../controllers/DemiApplicationController.js';
-import WorkSessionController from '../controllers/WorkSessionController.js';
 
 import {
     authenticate,
@@ -51,42 +49,42 @@ router.get(
     '/applications',
     authenticate,
     authorize([2]),
-    DemiApplicationController.lecturerFetchApplications.bind(DemiApplicationController)  
+    LecturerController.lecturerFetchApplications.bind(LecturerController)  
 );
 
 router.get(
     '/applications/fetch/:id',
     authenticate,
     authorize([2]),
-    DemiApplicationController.lecturerFetchApplicationById.bind(DemiApplicationController)
+    LecturerController.lecturerFetchApplicationById.bind(LecturerController)
 )
 
 router.patch(
     '/applications/review/:id',
     authenticate,
     authorize([2]),
-    DemiApplicationController.lecturerReviewApplication.bind(DemiApplicationController)
+    LecturerController.lecturerReviewApplication.bind(LecturerController)
 )
 
 router.get(
     '/sessions',
     authenticate,
     authorize([2]),
-    WorkSessionController.getLecturerSessions.bind(WorkSessionController)
+    LecturerController.getLecturerSessions.bind(LecturerController)
 );
 
 router.get(
     '/sessions/fetch/:id',
     authenticate,
     authorize([2]),
-    WorkSessionController.getLecturerSessionById.bind(WorkSessionController)
+    LecturerController.getLecturerSessionById.bind(LecturerController)
 );
 
 router.patch(
     '/sessions/review/:id',
     authenticate,
     authorize([2]),
-    WorkSessionController.lecturerReviewSession.bind(WorkSessionController)
+    LecturerController.lecturerReviewSession.bind(LecturerController)
 );
 
 export default router;

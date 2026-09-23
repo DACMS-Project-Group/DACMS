@@ -28,7 +28,7 @@ class WorkSessionController {
     async lecturerReviewSession(req, res) {
         try {
             const sessionId = req.params.id;
-            const { reviewedStatus } = req.body;
+            const reviewedStatus = req.body.decision;
             const reviewedSession  = await workSessionService.reviewSessionByLecturer(sessionId, reviewedStatus);
             const studentId = await workSessionService.getStudentIdBySession(sessionId);
             const notification = await NotificationService.sendNotification( {
