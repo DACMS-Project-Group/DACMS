@@ -95,9 +95,6 @@ router.post(
 );
 
 // -- Profile ----------------------------------------------------------------
-// NOTE: profile is intentionally left pointing at the existing controller for
-// now - the schema-mapping decision (how to store the ~30 unmapped
-// StudentProfile.jsx fields) is still pending. Only the paths are updated to
 // match the team's contract; StudentController itself is unchanged.
 router.get(
     '/student/profile/',
