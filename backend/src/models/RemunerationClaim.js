@@ -9,6 +9,8 @@ class RemunerationClaim {
         hourly_rate_applied,
         claim_status,
         submission_date = new Date(),
+        period_start_date = null,
+        period_end_date = null,
     }) {
         this.claim_id = claim_id;
         this.reference_number = reference_number;
@@ -19,6 +21,8 @@ class RemunerationClaim {
         this.hourly_rate_applied = hourly_rate_applied;
         this.claim_status = claim_status;
         this.submission_date = submission_date;
+        this.period_start_date = period_start_date;
+        this.period_end_date = period_end_date;
     }
 
     static fromDb(row) {
@@ -32,6 +36,8 @@ class RemunerationClaim {
             hourly_rate_applied: row.HourlyRateApplied,
             claim_status: row.ClaimStatus,
             submission_date: row.SubmissionDate,
+            period_start_date: row.PeriodStartDate,
+            period_end_date: row.PeriodEndDate,
         });
     }
 
@@ -46,6 +52,8 @@ class RemunerationClaim {
             HourlyRateApplied: this.hourly_rate_applied,
             ClaimStatus: this.claim_status,
             SubmissionDate: this.submission_date,
+            PeriodStartDate: this.period_start_date,
+            PeriodEndDate: this.period_end_date,
         };
     }
 
@@ -53,15 +61,19 @@ class RemunerationClaim {
         if (!this.reference_number) throw new Error("Reference number is required.");
         if (!this.application_id) throw new Error("Application ID is required.");
         if (!this.module_id) throw new Error("Module ID is required.");
+
         if (this.total_hours_claimed == null || isNaN(this.total_hours_claimed)) {
             throw new Error("Total hours claimed must be a valid number.");
         }
+
         if (this.total_claim_amount == null || isNaN(this.total_claim_amount)) {
             throw new Error("Total claim amount must be a valid number.");
         }
+
         if (this.hourly_rate_applied == null || isNaN(this.hourly_rate_applied)) {
             throw new Error("Hourly rate applied must be a valid number.");
         }
+
         if (!this.claim_status) throw new Error("Claim status is required.");
     }
 }

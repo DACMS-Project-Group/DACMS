@@ -16,6 +16,19 @@ class Student extends User {
         bank_name = null,
         account_number,
         branch_code,
+        id_passport_number = null,
+        title = null,
+        gender = null,
+        date_of_birth = null,
+        income_tax_number = null,
+        sa_citizen = null,
+        residential_address = null,
+        postal_address = null,
+        next_of_kin_name = null,
+        next_of_kin_mobile = null,
+        highest_qualification = null,
+        account_type = null,
+        account_holder_name = null,
     }) {
         super({
             user_id,
@@ -34,6 +47,20 @@ class Student extends User {
         this.bank_name = bank_name;
         this.account_number = account_number;
         this.branch_code = branch_code;
+
+        this.id_passport_number = id_passport_number;
+        this.title = title;
+        this.gender = gender;
+        this.date_of_birth = date_of_birth;
+        this.income_tax_number = income_tax_number;
+        this.sa_citizen = sa_citizen;
+        this.residential_address = residential_address;
+        this.postal_address = postal_address;
+        this.next_of_kin_name = next_of_kin_name;
+        this.next_of_kin_mobile = next_of_kin_mobile;
+        this.highest_qualification = highest_qualification;
+        this.account_type = account_type;
+        this.account_holder_name = account_holder_name;
     }
 
     static fromDb(row) {
@@ -52,6 +79,19 @@ class Student extends User {
             bank_name: row.BankName,
             account_number: row.AccountNumber,
             branch_code: row.BranchCode,
+            id_passport_number: row.ID_PassportNumber,
+            title: row.Title,
+            gender: row.Gender,
+            date_of_birth: row.DateOfBirth,
+            income_tax_number: row.IncomeTaxNumber,
+            sa_citizen: row.SACitizen,
+            residential_address: row.ResidentialAddress,
+            postal_address: row.PostalAddress,
+            next_of_kin_name: row.NextOfKinName,
+            next_of_kin_mobile: row.NextOfKinMobile,
+            highest_qualification: row.HighestQualification,
+            account_type: row.AccountType,
+            account_holder_name: row.AccountHolderName,
         });
     }
 
@@ -65,6 +105,19 @@ class Student extends User {
             BankName: this.bank_name,
             AccountNumber: this.account_number,
             BranchCode: this.branch_code,
+            ID_PassportNumber: this.id_passport_number,
+            Title: this.title,
+            Gender: this.gender,
+            DateOfBirth: this.date_of_birth,
+            IncomeTaxNumber: this.income_tax_number,
+            SACitizen: this.sa_citizen,
+            ResidentialAddress: this.residential_address,
+            PostalAddress: this.postal_address,
+            NextOfKinName: this.next_of_kin_name,
+            NextOfKinMobile: this.next_of_kin_mobile,
+            HighestQualification: this.highest_qualification,
+            AccountType: this.account_type,
+            AccountHolderName: this.account_holder_name,
         };
     }
 

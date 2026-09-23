@@ -4,13 +4,15 @@ class Module {
         module_code,
         module_name,
         description,
-        min_academic_requirement
+        min_academic_requirement,
+        oe_id
     }) {
         this.module_id = module_id;
         this.module_code = module_code;
         this.module_name = module_name;
         this.description = description;
         this.min_academic_requirement = min_academic_requirement;
+        this.oe_id = oe_id;
     }
 
     static fromDb(row) {
@@ -20,6 +22,7 @@ class Module {
             module_name: row.ModuleName,
             description: row.Description,
             min_academic_requirement: row.MinAcademicRequirement,
+            oe_id: row.OE_ID,
         });
     }
 
@@ -30,6 +33,7 @@ class Module {
             ModuleName: this.module_name,
             Description: this.description,
             MinAcademicRequirement: this.min_academic_requirement,
+            OE_ID: this.oe_id,
         };
     }
 
@@ -49,7 +53,11 @@ class Module {
         if (!this.min_academic_requirement) {
             throw new Error("Minimum academic requirement is required.");
         }
-    }   
+
+        if (!this.oe_id) {
+            throw new Error("Organisational entity is required.");
+        }
+    }
 }
 
 export default Module;

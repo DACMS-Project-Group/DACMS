@@ -5,12 +5,19 @@ class DemiPosition {
         payment_scale_id,
         start_date = new Date(),
         termination_date,
+        temp_budget_position_no = null,
+        accounting_combination = null,
+        total_allocated_hours = null,
     }) {
         this.position_id = position_id;
         this.application_id = application_id;
         this.payment_scale_id = payment_scale_id;
         this.start_date = start_date;
         this.termination_date = termination_date;
+
+        this.temp_budget_position_no = temp_budget_position_no;
+        this.accounting_combination = accounting_combination;
+        this.total_allocated_hours = total_allocated_hours;
     }
 
     static fromDb(row) {
@@ -20,6 +27,9 @@ class DemiPosition {
             payment_scale_id: row.PaymentScaleID,
             start_date: row.StartDate,
             termination_date: row.TerminationDate,
+            temp_budget_position_no: row.TempBudgetPositionNo,
+            accounting_combination: row.AccountingCombination,
+            total_allocated_hours: row.TotalAllocatedHours,
         });
     }
 
@@ -30,15 +40,20 @@ class DemiPosition {
             PaymentScaleID: this.payment_scale_id,
             StartDate: this.start_date,
             TerminationDate: this.termination_date,
+            TempBudgetPositionNo: this.temp_budget_position_no,
+            AccountingCombination: this.accounting_combination,
+            TotalAllocatedHours: this.total_allocated_hours,
         };
     }
 
     validate() {
         if (!this.application_id) throw new Error("Application ID is required.");
         if (!this.payment_scale_id) throw new Error("Payment Scale ID is required.");
+
         if (!this.start_date || !(this.start_date instanceof Date)) {
             throw new Error("Start date must be a valid date.");
         }
+
         if (this.termination_date && !(this.termination_date instanceof Date)) {
             throw new Error("Termination date must be a valid date.");
         }
