@@ -11,6 +11,27 @@ class RemunerationClaimController {
             next(err);
         }
     }
+    async getClaimById(req, res, next) {
+    try {
+        const studentId = getAuthUserId(req);
+        const { claimId } = req.params;
+
+        const claim = await remunerationClaimService.getClaimForStudent(
+            claimId,
+            studentId
+        );
+
+        if (!claim) {
+            return res.status(404).json({
+                message: 'Claim not found.'
+            });
+        }
+
+        res.json({ claim });
+    } catch (err) {
+        next(err);
+    }
+}
 
     async generateClaim(req, res, next) {
         try {

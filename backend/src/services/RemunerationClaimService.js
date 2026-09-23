@@ -8,6 +8,12 @@ class RemunerationClaimService {
     async listClaimsForStudent(studentId) {
         return this.remunerationClaimRepository.findByStudentId(studentId);
     }
+    async getClaimForStudent(claimId, studentId) {
+    return this.remunerationClaimRepository.findByIdForStudent(
+        claimId,
+        studentId
+    );
+}
 
     /**
      * Generates a claim for all approved, unclaimed work session hours on the
