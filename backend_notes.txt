@@ -7,345 +7,263 @@ BACKEND API RELEASE: Here follows the first set of functional API functions impl
 EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 
 /api/<root> {
-	/<call>/:<param> {
-		<param>	 :	call parameter
-		type	:	call type
-		auth	:	true/false
-		desc	:	<description>
-		request body {
-			"request_1" : "<value 1>",
-			"request_2" : "<value 2>"
-		}
-		response body {
-			"response_1" : "<result 1>",
-			"response_2" : "<result_2>"
-		}
-	}
+    /<call>/:<param> {
+        <param>	 :	call parameter
+        type	:	call type
+        auth	:	true/false
+        desc	:	<description>
+        request body {
+            "request_1" : "<value 1>",
+            "request_2" : "<value 2>"
+        }
+        response body {
+            "response_1" : "<result 1>",
+            "response_2" : "<result_2>"
+        }
+    }
 }
-
+    
 =======================METRICS=======================
 
 /api {
-	/health {
-		type: GET
-		auth: false
-		desc: responses status of backend and DB server
-	}
+    /health {
+        type: GET
+        auth: false
+        desc: responses status of backend and DB server
+    }
 
-	/metrics {
-		/tables {
-			type: GET
-			auth: false
-			desc: responses all DB entries
-			response body {
-				"<table1>" :
-					"<attribute1>" : "<value1>"
-				"<table2>" :
-					...
-			}
-		}
-	}
+    /metrics {
+        /tables {
+            type: GET
+            auth: false
+            desc: responses all DB entries
+            response body {
+                "<table1>" :
+                    "<attribute1>" : "<value1>"
+                "<table2>" :
+                    ...
+            }
+        }
+    }
 }
 
 
 =======================USER=======================
 
 /api {
-	/users {
-		/create {
-			type: POST
-			auth: false
-			desc: Creates a new user account of any supported role
+    /users {
+        /create {
+            type: POST
+            auth: false
+            desc: Creates a new User account of any type
+            request body {
+                "first_name" : "user_fname",
+                "last_name" : "userser_lname",
+                "email" : "user_email",
+                "password" : "user password",
+                "role_id" : 1 - student, 2 - lecturer, 3 - admin,
+                "student_number" : "user_student_number",
+                "study_level": "Undergrad/postgrad/staff",
+                "contact_details": "user_primary_contact",
+                "bank_name": "user_bank_name",
+                "account_number": "user_bank_acc",
+                "branch_code": "user_branch_code"
+            }
+            response body {
+                "message" : "status message",
+                "user_id" : user_id,
+                "email" : "account email address",
+                "role_id" : account role
+            }
+        }
+        
+        /login {
+            type: POST
+            auth: false
+            desc: Logs into user account based on email
+            request body {
+                "email" : "account email",
+                "password" : "user password"
+            }
+            response body {
+                "id" : "user id",
+                "email" : "account email",
+                "role_id" : account role
+                cookie params {
+                    "user_id" : "user id",
+                    "role_id" : "account role"
+                }
+            }
+        }
+        
+        /logout {
+            type: POST
+            auth: false
+            desc: Logs user out
+            response body {
+                "message" : "Process status"
+            }
+        }
+        
+        /fetch/:id {
+            param: user id
+            type: GET 
+            auth: true
+            desc: responses user information based in ID
+            response body {
+                "user_id": 17,
+                "first_name": "user fname",
+                "last_name": "user lname",
+                "full_name": "user fullname",
+                "email": "account email",
+                "role_name": "user role name",
+                "created_at": "user created timestamp"
+            }
+        }
 
-			request body {
-				"title" : "Mx/Mr/Ms/etc. - optional, defaults to Mx",
-				"first_name" : "user first name",
-				"last_name" : "user last name",
-				"email" : "user email",
-				"password" : "minimum 8 characters",
-				"role_id" : 1 - student, 2 - lecturer, 3 - admin
-
-				student role fields {
-					"student_number" :
-					"study_level" : "Undergraduate/Postgraduate",
-					"contact_details" :
-					"bank_name" :
-					"account_number" :
-					"branch_code" :
-				}
-
-				lecturer role fields {
-					"department" :
-				}
-
-				admin role fields {
-					"mfa_enabled" : true/false,
-					"budget_allocation_rights" : true/false
-				}
-			}
-
-			response body {
-				"message" : "User created successfully.",
-				"user_id" : user id,
-				"email" : "account email",
-				"role_id" : account role
-			}
-		}
-
-		/login {
-			type: POST
-			auth: false
-			desc: Logs into user account based on email
-
-			request body {
-				"email" : "account email",
-				"password" : "user password"
-			}
-
-			response body {
-				"id" : user id,
-				"email" : "account email",
-				"role_id" : account role
-
-				cookie params {
-					"user_id" : user id,
-					"role_id" : account role
-				}
-			}
-		}
-
-		/logout {
-			type: POST
-			auth: false
-			desc: Logs user out
-
-			response body {
-				"message" : "Process status"
-			}
-		}
-
-		/fetch/:id {
-			param: user id
-			type: GET
-			auth: true
-			desc: Fetches user information based on user ID
-
-			response body {
-				"user_id" :
-				"title" :
-				"first_name" :
-				"last_name" :
-				"full_name" :
-				"email" :
-				"role_name" :
-				"created_at" :
-			}
-		}
-	}
+        /perms {
+            type: GET
+            auth: true
+            desc: Returns current user permissions / role access info
+            response body {
+                "user_id" : user_id,
+                "role_id" : account role,
+                "permissions" : [ "allowed action(s)" ]
+            }
+        }
+    }			
 }
-
+            
 
 =======================ADMIN=======================
 
 /api {
-	/admin {
-		/dashboard_statistics {
-			type: GET
-			auth: true, admin
-			desc: Fetches data to populate admin dashboard
+    /admin {
+        /dashboard_statistics {
+            type: GET
+            auth: true, admin
+            desc: Fetches data to populate admin dashboard
+            response body {
+                "stats": {
+                    "total_modules": modules in system,
+                    "total_lecturers": lectures in system,
+                    "total_demis": assistants appointed,
+                    "total_pending_approvals": applications pending approval,
+                    "total_pending_claims": claims pending approval
+                },
+                "monthlyWork": [
+                    {
+                        "month": "month work was done{yyyy-mm)",
+                        "total_sessions": sessions done
+                    }
+                ],
+                "pendingAppointments": [
+                    {
+                        "application_id": application id 1,
+                        "status": "Pending/Approved/Rejected",
+                        "date_submitted": "<yyyy-mm-dd> T<hh:mm:ss:ms>Z",
+                        "module": "relevant module code",
+                        "lecturer": "lecturer title + name",
+                        "student": "student title + name"
+                    },
+                    {
+                    ...
+                    }
+                ]
+            }
+        }
 
-			response body {
-				"stats": {
-					"total_modules" :
-					"total_lecturers" :
-					"total_demis" :
-					"total_pending_approvals" :
-					"total_pending_claims" :
-				},
+        /budgets {
+            type: GET
+            auth: true, admin
+            desc: Returns all budgets
+            response body {
+                "budgets" : [
+                    {
+                        "budget_id" : budget id,
+                        "module_id" : module id,
+                        "title" : "budget title",
+                        "amount" : amount,
+                        "status" : "status",
+                        "created_at" : "timestamp"
+                    }
+                ]
+            }
+        }
 
-				"monthlyWork": [
-					{
-						"month" : "yyyy-mm",
-						"total_sessions" :
-					}
-				],
+        /budgets/fetch/:budget_id {
+            param: budget_id
+            type: GET
+            auth: true, admin
+            desc: Fetches a single budget record by id
+            response body {
+                "budget_id" : budget id,
+                "module_id" : module id,
+                "name" : "budget name",
+                "amount" : amount,
+                "status" : "status"
+            }
+        }
 
-				"pendingAppointments": [
-					{
-						"application_id" :
-						"status" :
-						"date_submitted" :
-						"module" :
-						"lecturer" :
-						"student" :
-					}
-				]
-			}
-		}
+        /budgets/create {
+            type: POST
+            auth: true, admin
+            desc: Creates a new budget
+            request body {
+                "title" : "Budget title",
+                "module_id" : module id,
+                "amount" : 5000,
+                "status" : "draft/approved"
+            }
+            response body {
+                "message" : "Budget creation Successful",
+                "budget_id" : created_budget_id
+            }
+        }
 
-		/budgets {
-			type: GET
-			auth: true, admin
-			desc: Fetches current-year budget metrics and module budgets
+        /budgets/edit/:id {
+            param: id
+            type: PUT
+            auth: true, admin
+            desc: Updates a budget by id
+            request body {
+                "title" : "Updated title",
+                "amount" : 6000
+            }
+            response body {
+                "message" : "Budget updated successfully",
+                "data" : updated_budget_object
+            }
+        }
 
-			response body {
-				"stats": {
-					"total_allocated" :
-					"total_used" :
-					"total_remaining" :
-					"count_near_limit" :
-				},
+        /claims {
+            type: GET
+            auth: true, admin
+            desc: Fetches all claim records for admin review
+            response body {
+                "claims" : [
+                    {
+                        "claim_id" : claim id,
+                        "status" : "Pending/Approved/Rejected",
+                        "amount" : claim amount
+                    }
+                ]
+            }
+        }
 
-				"module_budgets": [
-					{
-						"budget_id" :
-						"module_code" :
-						"module_description" :
-						"allocated_budget" :
-						"current_budget_usage" :
-						"remaining_budget" :
-					}
-				]
-			}
-		}
-
-		/budgets/fetch/:budget_id {
-			param: budget_id
-			type: GET
-			auth: true, admin
-			desc: Fetches budget details by budget ID
-
-			response body {
-				"data": [
-					{
-						"budget_id" :
-						"lecturer_id" :
-						"lecturer" :
-						"lecturer_email" :
-						"module_code" :
-						"module_description" :
-						"allocated_budget" :
-						"current_budget_usage" :
-						"remaining_budget" :
-					}
-				]
-			}
-		}
-
-		/budgets/create {
-			type: POST
-			auth: true, admin
-			desc: Creates a new module budget
-
-			request body {
-				"module_id" :
-				"lecturer_id" :
-				"allocated_budget" :
-				"current_budget_usage" :
-				"max_allowable_work_hours" :
-				"academic_year" :
-			}
-
-			response body {
-				"message" : "Budget creation Successful",
-				"budget_id" :
-			}
-		}
-
-		/budgets/edit/:id {
-			param: budget id
-			type: PUT
-			auth: true, admin
-			desc: Updates fields on an existing module budget
-
-			request body {
-				"module_id" : optional,
-				"lecturer_id" : optional,
-				"allocated_budget" : optional,
-				"current_budget_usage" : optional,
-				"max_allowable_work_hours" : optional,
-				"academic_year" : optional
-			}
-
-			response body {
-				"message" : "Budget updated successfully",
-				"data" : updated budget
-			}
-		}
-
-		/claims {
-			type: GET
-			auth: true, admin
-			desc: Fetches claim statistics and all remuneration claims
-
-			response body {
-				"stats": {
-					"total_claims" :
-					"total_pending" :
-					"total_under_review" :
-					"total_verified" :
-				},
-
-				"claims": [
-					{
-						"claim_id" :
-						"reference_number" :
-						"total_hours_claimed" :
-						"total_claim_amount" :
-						"claim_status" :
-						"submission_date" :
-						"module_code" :
-						"student_name" :
-					}
-				]
-			}
-		}
-
-		/claims/fetch/:claim_id {
-			param: claim_id
-			type: GET
-			auth: true, admin
-			desc: Fetches detailed information for a remuneration claim
-
-			response body {
-				"data": {
-					"id" :
-					"reference" :
-					"studentNumber" :
-					"studentName" :
-					"moduleCode" :
-					"moduleName" :
-					"lecturer" :
-					"period" :
-					"submittedDate" :
-					"hours" :
-					"hourlyRate" :
-					"amount" :
-					"status" :
-
-					"banking": {
-						"bank" :
-						"accountHolder" :
-						"accountNumber" :
-						"accountType" :
-						"status" :
-					},
-
-					"sessions": [
-						{
-							"id" :
-							"date" :
-							"activity" :
-							"startTime" :
-							"endTime" :
-							"hours" :
-							"status" :
-						}
-					]
-				}
-			}
-		}
-	}
+        /claims/fetch/:claim_id {
+            param: claim_id
+            type: GET
+            auth: true, admin
+            desc: Fetches a single claim by id
+            response body {
+                "claim_id" : claim id,
+                "status" : "status",
+                "amount" : amount,
+                "student_id" : student id
+            }
+        }
+    }	
 }
 
 =======================LECTURER=======================
@@ -516,197 +434,270 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 =======================STUDENT=======================
 
 /api {
-	/student {
-		/dashboard {
-			type: GET
-			auth: true
-			desc: Fetches data to populate student dashboard
-			response body {
-				"profile": {
-					"student_id": user id,
-					"name": "student full name",
-					"student_number": "university number",
-					"study_level": "postgraduate/pregraduate"
-				},
-				"stats": {
-					"active_positions": # of active positions,
-					"pending_applications": # of pending applications,
-					"hours_this_month": # of hours worked in calendar month,
-					"pending_claims": # of pending claims
-				},
-				"monthlyHours": [monthly hours per module],
-				"pendingApplications": [list of current app;ications]
-		    }
-		}
+    /student {
+        /dashboard {
+            type: GET
+            auth: true
+            desc: Fetches data to populate student dashboard
+            response body {
+                "profile": {
+                    "student_id": user id,
+                    "name": "student full name",
+                    "student_number": "university number",
+                    "study_level": "postgraduate/pregraduate"
+                },
+                "stats": {
+                    "active_positions": # of active positions,
+                    "pending_applications": # of pending applications,
+                    "hours_this_month": # of hours worked in calendar month,
+                    "pending_claims": # of pending claims
+                },
+                "monthlyHours": [monthly hours per module],
+                "pendingApplications": [list of current app;ications]
+            }
+        }
+        
+        /listings {
+            /open {
+                type: GET
+                auth: true
+                desc: Fetches available positions
+                response body {
+                    "listings" : [
+                        {
+                            "listing_id" : listing id,
+                            "module_id" : module id,
+                            "lecturer_id" : lecturer id,
+                            "deadline" : "date",
+                            "minimum_grade" : "minimum grade"
+                        }
+                    ]
+                }
+            }
+        }
 
-		/listings {
-			/open {
-				type: GET
-				auth: true
-				desc: Fetches available positions
-				response body {
-					"listings" : [
-						"ListingID" :
-						"ModuleID" :
-						"LecturerID" :
-						"Deadline" :
-						"MinimumGrade" :
-						"ModuleCode" :
-						"ModuleName" :
-					],
-					[ ... ]
-				}
-			}
-		}
+        /applications {
+            type: GET
+            auth: true
+            desc: Fetches student applications
+            response body {
+                "applications" : [
+                    {
+                        "application_id" : application id,
+                        "listing_id" : listing id,
+                        "status" : "Pending/Approved/Rejected"
+                    }
+                ]
+            }
+        }
+        
+        /applications {
+            type: POST
+            auth: true
+            desc: Submits response to open application
+            request body {
+                "listingId" : listing id
+            }
+            response body {
+                "application" : {
+                    "application_id" : application id,
+                    "student_id" : student id,
+                    "listing_id" : listing id,
+                    "status" : "Pending"
+                }
+            }
+        }
 
-		/applications {
-			type: GET
-			auth: true
-			desc: Fetches student applications
-			response body {
-				"studentId" :
-				"listingId" :
-				"verificationEligibilityStatus" : true/pending/false
-			}
-		}
+        /documents {
+            type: POST
+            auth: true
+            desc: Uploads a supporting document for student application
+            request body {
+                "documentType" : "ID or transcript",
+                "file" : uploaded file
+            }
+            response body {
+                "document" : {
+                    "document_id" : document id,
+                    "document_type" : "document type",
+                    "file_path" : "stored file path"
+                }
+            }
+        }
 
-		/applications {
-			type: POST
-			auth: true
-			desc: Submits response to open application
-			request body {
-				"StudentID" :
-				"ListingID" :
-			}
-			response body {
-				"studentId" :
-				"listingId" :
-				"verificationEligibilityStatus" : true/pending/false
-			}
-		}
+        /documents {
+            type: GET
+            auth: true
+            desc: Lists student uploaded supporting documents
+            response body {
+                "documents" : [
+                    {
+                        "document_id" : document id,
+                        "document_type" : "document type",
+                        "file_path" : "stored file path"
+                    }
+                ]
+            }
+        }
 
-		/applications {
-			/:applicationId/claims {
-				params : applicationId
-				type: POST
-				auth: true
-				request body {
-					"applicationId" :
-					"studentId" :
-				}
-				response body {
-					"referenceNumber" :
-					"applicationId" :
-					"moduleId" :
-					"periodStartDate" :
-					"periodEndDate" :
-					"totalHoursClaimed" :
-					"totalClaimAmount" :
-					"hourlyRateApplied" :
-				}
-			}
-		}
+        /positions {
+            type: GET
+            auth: true
+            desc: Lists positions currently assigned to the student
+            response body {
+                "positions" : [
+                    {
+                        "position_id" : position id,
+                        "module_id" : module id,
+                        "status" : "active"
+                    }
+                ]
+            }
+        }
 
-		/claims {
-			type: GET
-			auth: true
-			desc: Fetches all renumerations claims related to student
-			response body {
-				"claim" [
-					"ClaimID" :
-					"ClaimReferenceNumber" :
-					"ApplicationID" :
-					"ModuleID" :
-					"PeriodStartDate" :
-					"TotalHoursClaimed" :
-					"TotalClaimAmount" :
-					"HourlyRateApplied" :
-					"ClaimStatus" : "Approved/Pending/Denied"
-					"SubmissionDate" :
-					"ModuleCode" :
-					"ModuleName" :
-				],
-				[ ... ]
-			}
-		}
+        /sessions {
+            type: GET
+            auth: true
+            desc: Lists work sessions for the student
+            response body {
+                "sessions" : [
+                    {
+                        "session_id" : session id,
+                        "position_id" : position id,
+                        "clock_in" : "timestamp",
+                        "clock_out" : "timestamp",
+                        "hours_worked" : hours
+                    }
+                ]
+            }
+        }
 
-		/profile {
-			type: GET
-			auth: true
-			desc: Fetches student profile information
-			response body {
-				"UserId" :
-				"Title" :
-				"FName" :
-				"LName" :
-				"Email" :
-				"PasswordHash" :
-				"RoleID" :
-				"CreatedAt" :
-				"StudentID" :
-				"StudentNumber" :
-				"StudyLevel" :
-				"ID_PassportNumber" :
-				"Gender" :
-				"DateOfBirth" :
-				"IncomeTaxNumber" :
-				"SACitizen" : true/false
-				"ResidentialAddress" :
-				"PostalAddress" :
-				"NextOfKinName" :
-				"NextOfKinMobile" :
-				"HighestQualification" :
-				"ContactDetails" :
-				"BankName" :
-				"AccountNumber" :
-				"AccountType" :
-				"BranchCode" :
-				"AccountHolderName" :
-			}
-		}
+        /positions/:positionId/sessions/clock-in {
+            params : positionId
+            type: POST
+            auth: true
+            desc: Starts a work session for a student position
+            response body {
+                "session" : {
+                    "session_id" : session id,
+                    "position_id" : position id,
+                    "clock_in" : "timestamp",
+                    "status" : "open"
+                }
+            }
+        }
 
-		/profile {
-			type: PATCH
-			auth: true
-			desc: Allows student to change profile details
-			request body {
-				"userId" : User to be updated
-				"contactDetails" :
-				"bankName" :
-				"accountNumber" :
-				"BranchCode" :
-			}
-			response body {
-				"UserId" :
-				"Title" :
-				"FName" :
-				"LName" :
-				"Email" :
-				"PasswordHash" :
-				"RoleID" :
-				"CreatedAt" :
-				"StudentID" :
-				"StudentNumber" :
-				"StudyLevel" :
-				"ID_PassportNumber" :
-				"Gender" :
-				"DateOfBirth" :
-				"IncomeTaxNumber" :
-				"SACitizen" : true/false
-				"ResidentialAddress" :
-				"PostalAddress" :
-				"NextOfKinName" :
-				"NextOfKinMobile" :
-				"HighestQualification" :
-				"ContactDetails" :
-				"BankName" :
-				"AccountNumber" :
-				"AccountType" :
-				"BranchCode" :
-				"AccountHolderName" :
-			}
-		}
-	}
+        /sessions/:sessionId/clock-out {
+            params : sessionId
+            type: PATCH
+            auth: true
+            desc: Closes a work session
+            response body {
+                "session" : {
+                    "session_id" : session id,
+                    "clock_out" : "timestamp",
+                    "status" : "closed"
+                }
+            }
+        }
+
+        /applications {
+            /:applicationId/claims {
+                params : applicationId
+                type: POST
+                auth: true
+                request body {
+                    "applicationId" :
+                    "studentId" :
+                }
+                response body {
+                    "referenceNumber" :
+                    "applicationId" :
+                    "moduleId" :
+                    "periodStartDate" :
+                    "periodEndDate" :
+                    "totalHoursClaimed" :
+                    "totalClaimAmount" :
+                    "hourlyRateApplied" :
+                }
+            }
+        }
+
+        /claims {
+            type: GET
+            auth: true
+            desc: Fetches all remuneration claims related to the student
+            response body {
+                "claims" : [
+                    {
+                        "claim_id" : claim id,
+                        "reference_number" : "claim reference",
+                        "application_id" : application id,
+                        "module_id" : module id,
+                        "period_start_date" : "date",
+                        "total_hours_claimed" : hours,
+                        "total_claim_amount" : amount,
+                        "hourly_rate_applied" : rate,
+                        "claim_status" : "Approved/Pending/Denied",
+                        "submission_date" : "timestamp"
+                    }
+                ]
+            }
+        }
+
+        /applications/:applicationId/claims {
+            param: applicationId
+            type: POST
+            auth: true
+            desc: Generates a remuneration claim against a submitted application
+            response body {
+                "claim" : {
+                    "claim_id" : claim id,
+                    "application_id" : application id,
+                    "reference_number" : "claim ref",
+                    "total_hours_claimed" : hours,
+                    "total_claim_amount" : amount
+                }
+            }
+        }
+
+        /profile {
+            type: GET
+            auth: true
+            desc: Fetches student profile information
+            response body { 
+                "student" : {
+                    "user_id" : user id,
+                    "email" : "account email",
+                    "contact_details" : "contact details",
+                    "bank_name" : "bank name",
+                    "account_number" : "bank account number",
+                    "branch_code" : "branch code"
+                }
+            }
+        }
+        
+        /profile {
+            type: PATCH
+            auth: true
+            desc: Allows student to change profile details
+            request body {
+                "contactDetails" : "user contact",
+                "bankName" : "bank name",
+                "accountNumber" : "bank account number",
+                "branchCode" : "branch code"
+            }
+            response body { 
+                "student" : {
+                    "user_id" : user id,
+                    "contact_details" : "updated contact",
+                    "bank_name" : "updated bank",
+                    "account_number" : "updated account number",
+                    "branch_code" : "updated branch code"
+                }
+            }
+        }
+    }
 }
 
 =======================NOTIFICATION=======================
@@ -714,62 +705,63 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 NOTE: seperate connection to user socket using socket-client.io required for in-app notifications
 
 /api {
-	/notifications {
-		/send {
-			type: POST
-			auth: true
-			desc: Sends notification to db, email and user socket
-			request body {
-				"RecipientId" :
-				"title" :
-				"type" :
-				"message" :
-			}
-			response body {
-				"NotificationId" :
-				"RecipientId" :
-				"title" :
-				"type" :
-				"message" :
-				"IsRead" :
-				"CreatedTimestamp" :
-			}
-		}
-
-		/fetch {
-			type: GET
-			auth: true
-			desc: Gets all notifications for signed-in user based on cookie
-			response body {
-				"notification" [
-					"NotificationId" :
-					"RecipientId" :
-					"title" :
-					"type" :
-					"message" :
-					"IsRead" :
-					"CreatedTimestamp"
-				],
-				[ ... ]
-			}
-		}
-
-		/read/:id {
-		    params: id = notification id
-			type: PATCH
-			auth: true
-			desc: Marks given notification as read/
-			response body {
-				"NotificationId" :
-				"RecipientId" :
-				"title" :
-				"type" :
-				"message" :
-				"IsRead" :
-				"CreatedTimestamp" :
-			}
-		}
-	}
+    /notifications {
+        /send {
+            type: POST
+            auth: true
+            desc: Sends notification to db, email and user socket
+            request body {
+                "RecipientId" :
+                "title" :
+                "type" :
+                "message" :
+            }
+            response body {
+                "NotificationId" :
+                "RecipientId" :
+                "title" :
+                "type" :
+                "message" :
+                "IsRead" :
+                "CreatedTimestamp" :
+            }
+        }
+        
+        /fetch {
+            type: GET
+            auth: true
+            desc: Gets all notifications for signed-in user based on cookie
+            response body {
+                "notifications" : [
+                    {
+                        "NotificationId" :
+                        "RecipientId" :
+                        "title" :
+                        "type" :
+                        "message" :
+                        "IsRead" :
+                        "CreatedTimestamp"
+                    }
+                ]
+            }
+        }
+        
+        /read/:id {
+            params: id = notification id
+            type: PATCH
+            auth: true
+            desc: Marks given notification as read
+            response body {
+                "NotificationId" :
+                "RecipientId" :
+                "title" :
+                "type" :
+                "message" :
+                "IsRead" :
+                "CreatedTimestamp" :
+            }
+        }
+    }
 }
 
 
