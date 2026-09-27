@@ -1,5 +1,6 @@
 import AdminService from '../services/AdminService.js';
-import Budget from '../models/ModuleBudget.js';
+import ExportedClaim from '../templates/ExportedClaim.js';
+import AdmZip from 'adm-zip';
 
 class AdminController {
     static async getDashboardSummary(req, res) {
@@ -16,7 +17,7 @@ class AdminController {
             const data = await AdminService.getBudgetsSummary();
             return res.status(200).json(data);
         } catch (error) {
-            return res.status(500).json({ error: error.message})
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -27,7 +28,7 @@ class AdminController {
             const data = await AdminService.getBudgetById(budget_id);
             return res.status(200).json(data);
         } catch (error) {
-            return res.status(500).json({ error: error.message})
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -79,7 +80,7 @@ class AdminController {
             const data = await AdminService.getClaimById(claim_id);
             return res.status(200).json(data);
         } catch (error) {
-            return res.status(500).json({ error: error.message })
+            return res.status(500).json({ error: error.message });
         }
     }
 
@@ -111,7 +112,7 @@ class AdminController {
 
     static async getPositionById(req, res) {
         const { position_id } = req.params;
-        
+
         try {
             const data = await AdminService.getPositionById(position_id);
             return res.status(200).json(data);
@@ -122,7 +123,7 @@ class AdminController {
 
     static async reviewPosition(req, res) {
         const { position_id } = req.params;
-        const { action, comment } = req.body; // Expects action: 'Approved' | 'Rejected' | 'Returned'
+        const { action, comment } = req.body;
 
         try {
             const data = await AdminService.reviewPosition(position_id, action, comment);
@@ -134,6 +135,39 @@ class AdminController {
             if (error.message.startsWith('Invalid action') || error.message === 'Position not found') {
                 return res.status(400).json({ error: error.message });
             }
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    static async exportClaims(req, res) {
+        const claims = Array.isArray(req.body?.claims) ? req.body.claims : [];
+
+        if (!claims.length) {
+            return res.status(400).json({ error: 'No claim IDs provided.' });
+        }
+
+        try {
+            const exportData = await AdminService.exportClaims(claims);
+            const zip = new AdmZip();
+
+            for (const item of exportData.data) {
+                const pdfBuffer = await ExportedClaim.buildClaimPdfBuffer(item);
+                const safeName = (item.claim?.reference_number || `claim-${item.claim?.id || 'export'}`)
+                    .replace(/[^a-zA-Z0-9_-]/g, '_');
+
+                zip.addFile(`${safeName}.pdf`, pdfBuffer);
+            }
+
+            const zipBuffer = zip.toBuffer();
+
+            res.setHeader('Content-Type', 'application/zip');
+            res.setHeader(
+                'Content-Disposition',
+                `attachment; filename="claims-export-${Date.now()}.zip"`
+            );
+
+            return res.send(zipBuffer);
+        } catch (error) {
             return res.status(500).json({ error: error.message });
         }
     }

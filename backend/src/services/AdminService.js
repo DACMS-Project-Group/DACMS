@@ -85,6 +85,11 @@ class AdminService {
         const data = await AdminRepository.reviewPosition(position_id, action, comment);
         return { data };
     }
+
+    static async exportClaims(claims) {
+        const data = await AdminRepository.exportClaims(claims);
+        return { data };
+    }
 }
 
 export default AdminService;
