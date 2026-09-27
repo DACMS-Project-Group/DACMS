@@ -69,4 +69,10 @@ router.patch('/appointments/review/:position_id',
     AdminController.reviewPosition
 );
 
+router.post('/claims/export',
+             authenticate,
+             authorize([3]),
+             AdminController.exportClaims
+)
+
 export default router;
