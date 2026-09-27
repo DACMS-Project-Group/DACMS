@@ -286,7 +286,7 @@ async function main() {
     { label: 'Lecturer dashboard', method: 'GET', path: '/lecturer/dashboard_statistics', expectedStatus: 200 },
     { label: 'Open listings', method: 'GET', path: '/lecturer/listings', expectedStatus: 200 },
     { label: 'Fetch listing by id', method: 'GET', path: '/lecturer/listings/fetch/1', expectedStatus: 200 },
-    { label: 'Create listing', method: 'POST', path: '/lecturer/listings/create', body: { moduleId: 1, deadline: '2026-12-31T23:59:59.000Z', minimumGrade: '70' }, expectedStatus: 200 },
+    { label: 'Create listing', method: 'POST', path: '/lecturer/listings/create', body: { moduleId: 1, deadline: '2026-12-31T23:59:59.000Z', minimumGrade: 70 }, expectedStatus: 201 },
     { label: 'Edit listing', method: 'PATCH', path: '/lecturer/listings/edit/1', body: { moduleId: 1, deadline: '2026-12-31T23:59:59.000Z', minimumGrade: 65 }, expectedStatus: 200 },
     { label: 'Applications', method: 'GET', path: '/lecturer/applications', expectedStatus: 200 },
     { label: 'Application by id', method: 'GET', path: '/lecturer/applications/fetch/1', expectedStatus: 200 },
