@@ -79,19 +79,26 @@ const GenerateNewClaim = () => {
 
   const [claimSubmitted, setClaimSubmitted] = useState(false);
 
+  // Calculate total approved hours.
   const totalHours = approvedSessions.reduce(
     (total, session) => total + session.hours,
     0
   );
 
+  // Calculate total claim amount using each appointment's hourly rate.
   const totalClaimAmount = approvedSessions.reduce((total, session) => {
     const appointment = appointments.find(
       (item) => item.id === session.appointmentId
     );
 
+    if (!appointment) {
+      return total;
+    }
+
     return total + session.hours * appointment.hourlyRate;
   }, 0);
 
+  // Format dates for display.
   const formatDate = (date) => {
     return new Date(`${date}T00:00:00`).toLocaleDateString('en-ZA', {
       day: '2-digit',
@@ -100,6 +107,7 @@ const GenerateNewClaim = () => {
     });
   };
 
+  // Format currency amounts.
   const formatAmount = (amount) => {
     return `R ${amount.toLocaleString('en-ZA', {
       minimumFractionDigits: 2,
@@ -107,40 +115,41 @@ const GenerateNewClaim = () => {
     })}`;
   };
 
+  // Get total hours for a specific module.
   const getModuleTotalHours = (moduleCode) => {
     return approvedSessions
       .filter((session) => session.moduleCode === moduleCode)
       .reduce((total, session) => total + session.hours, 0);
   };
 
+  // Get total claim amount for a specific module.
   const getModuleAmount = (moduleCode) => {
     const appointment = appointments.find(
       (item) => item.moduleCode === moduleCode
     );
+
+    if (!appointment) {
+      return 0;
+    }
 
     const hours = getModuleTotalHours(moduleCode);
 
     return hours * appointment.hourlyRate;
   };
 
+  // Get the unique modules included in the claim.
   const getUniqueModules = () => {
-    return [
-      ...new Set(
-        approvedSessions.map((session) => session.moduleCode)
-      ),
-    ];
+    return [...new Set(approvedSessions.map((session) => session.moduleCode))];
   };
 
+  // Submit the remuneration claim.
   const handleSubmitClaim = () => {
     setClaimSubmitted(true);
   };
 
+  // Return to the Claims page.
   const handleBackToClaims = () => {
     navigate('/claims');
-  };
-
-  const handleExportPdf = () => {
-    window.print();
   };
 
   return (
@@ -202,7 +211,6 @@ const GenerateNewClaim = () => {
 
             {/* Student Information */}
             <Card className="mb-6">
-
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-primary-dark">
                   Student Information
@@ -250,7 +258,6 @@ const GenerateNewClaim = () => {
 
             {/* Claim Period */}
             <Card className="mb-6">
-
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-primary-dark">
                   Claim Period
@@ -289,7 +296,6 @@ const GenerateNewClaim = () => {
 
             {/* Assistant Appointments */}
             <Card className="mb-6">
-
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-primary-dark">
                   Assistant Appointments
@@ -302,7 +308,6 @@ const GenerateNewClaim = () => {
               </div>
 
               <div className="overflow-x-auto">
-
                 <table className="w-full min-w-[750px]">
 
                   <thead>
@@ -332,11 +337,14 @@ const GenerateNewClaim = () => {
                   </thead>
 
                   <tbody>
-
                     {getUniqueModules().map((moduleCode) => {
                       const appointment = appointments.find(
                         (item) => item.moduleCode === moduleCode
                       );
+
+                      if (!appointment) {
+                        return null;
+                      }
 
                       return (
                         <tr
@@ -368,17 +376,14 @@ const GenerateNewClaim = () => {
                         </tr>
                       );
                     })}
-
                   </tbody>
 
                 </table>
-
               </div>
             </Card>
 
             {/* Approved Work Sessions */}
             <Card className="mb-6">
-
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-primary-dark">
                   Approved Work Sessions
@@ -416,7 +421,6 @@ const GenerateNewClaim = () => {
               ) : (
 
                 <div className="overflow-x-auto">
-
                   <table className="w-full min-w-[850px]">
 
                     <thead>
@@ -450,7 +454,6 @@ const GenerateNewClaim = () => {
                     </thead>
 
                     <tbody>
-
                       {approvedSessions.map((session) => (
                         <tr
                           key={session.id}
@@ -479,26 +482,22 @@ const GenerateNewClaim = () => {
 
                           <td className="px-4 py-4">
                             <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                              Verified
+                              {session.status}
                             </span>
                           </td>
 
                         </tr>
                       ))}
-
                     </tbody>
 
                   </table>
-
                 </div>
 
               )}
-
             </Card>
 
             {/* Claim Calculation */}
             <Card className="mb-6">
-
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-primary-dark">
                   Claim Calculation
@@ -544,7 +543,7 @@ const GenerateNewClaim = () => {
 
               </div>
 
-              {/* Module Breakdown */}
+              {/* Claim Breakdown */}
               <div className="mt-5 rounded-lg border border-gray-200 bg-white p-5">
 
                 <p className="mb-4 text-sm font-semibold text-primary-dark">
@@ -577,7 +576,6 @@ const GenerateNewClaim = () => {
                   ))}
 
                 </div>
-
               </div>
 
               {/* Total Calculation */}
@@ -597,7 +595,6 @@ const GenerateNewClaim = () => {
                 </p>
 
               </div>
-
             </Card>
 
             {/* Submit Claim */}
@@ -617,25 +614,13 @@ const GenerateNewClaim = () => {
                     </p>
                   </div>
 
-                  <div className="flex flex-col gap-3 sm:flex-row">
-
-                    <button
-                      type="button"
-                      onClick={handleExportPdf}
-                      className="rounded-lg border border-primary px-6 py-3 font-medium text-primary transition hover:bg-purple-50"
-                    >
-                      Export Claim as PDF
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleSubmitClaim}
-                      className="rounded-lg bg-primary px-6 py-3 font-medium text-white transition hover:bg-primary-dark"
-                    >
-                      Submit Claim
-                    </button>
-
-                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSubmitClaim}
+                    className="rounded-lg bg-primary px-6 py-3 font-medium text-white transition hover:bg-primary-dark"
+                  >
+                    Submit Claim
+                  </button>
 
                 </div>
 

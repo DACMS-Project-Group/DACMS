@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
+import Card from '../components/Card';
+import StatusBadge from '../components/StatusBadge';
 
 const ExportPayments = () => {
-
   const [searchTerm, setSearchTerm] = useState('');
-
-  const [selectedClaims, setSelectedClaims] =
-    useState([]);
+  const [selectedClaims, setSelectedClaims] = useState([]);
 
   const claims = [
     {
@@ -76,12 +75,9 @@ const ExportPayments = () => {
   );
 
   const toggleClaim = (id) => {
-
     if (selectedClaims.includes(id)) {
       setSelectedClaims(
-        selectedClaims.filter(
-          (claimId) => claimId !== id
-        )
+        selectedClaims.filter((claimId) => claimId !== id)
       );
     } else {
       setSelectedClaims([
@@ -92,11 +88,7 @@ const ExportPayments = () => {
   };
 
   const toggleAll = () => {
-
-    if (
-      selectedClaims.length ===
-      filteredClaims.length
-    ) {
+    if (selectedClaims.length === filteredClaims.length) {
       setSelectedClaims([]);
     } else {
       setSelectedClaims(
@@ -105,20 +97,17 @@ const ExportPayments = () => {
     }
   };
 
-  const selectedClaimData = claims.filter(
-    (claim) =>
-      selectedClaims.includes(claim.id)
+  const selectedClaimData = claims.filter((claim) =>
+    selectedClaims.includes(claim.id)
   );
 
   const totalHours = selectedClaimData.reduce(
-    (total, claim) =>
-      total + claim.hours,
+    (total, claim) => total + claim.hours,
     0
   );
 
   const totalPayment = selectedClaimData.reduce(
-    (total, claim) =>
-      total + claim.amount,
+    (total, claim) => total + claim.amount,
     0
   );
 
@@ -126,7 +115,6 @@ const ExportPayments = () => {
     `R ${amount.toLocaleString('en-ZA')}`;
 
   const exportExcel = () => {
-
     if (selectedClaims.length === 0) {
       alert('Please select at least one claim.');
       return;
@@ -138,7 +126,6 @@ const ExportPayments = () => {
   };
 
   const exportPDF = () => {
-
     if (selectedClaims.length === 0) {
       alert('Please select at least one claim.');
       return;
@@ -150,7 +137,7 @@ const ExportPayments = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA]">
+    <div className="min-h-screen bg-off-white">
 
       <Navbar />
 
@@ -158,243 +145,240 @@ const ExportPayments = () => {
 
         <Sidebar userRole="admin" />
 
-        <main className="flex-1 p-8">
+        <main className="flex-1">
 
-          {/* Page header */}
-          <div className="bg-[#6C3D91] text-white px-8 py-5 rounded-t-lg">
-
-            <h1 className="text-3xl font-bold">
+          {/* Page Header */}
+          <div className="bg-primary px-8 py-4">
+            <h1 className="text-2xl font-semibold text-white font-poppins">
               Export Payments
             </h1>
-
           </div>
 
-          <div className="bg-white p-8">
+          {/* Page Content */}
+          <div className="p-8">
 
+            {/* Introduction */}
             <div className="mb-8">
-
-              <h2 className="text-2xl font-semibold text-[#6C3D91]">
+              <h2 className="text-3xl font-poppins font-semibold text-primary">
                 Payment Export
               </h2>
 
-              <p className="text-[#78848E] mt-1">
+              <p className="text-neutral mt-2 font-inter">
                 Review approved claims and export remuneration
                 information for payment processing.
               </p>
-
             </div>
 
             {/* Filters */}
-            <div className="border border-[#78848E] rounded-xl p-6 mb-8">
+            <section className="mb-8">
 
-              <h3 className="text-lg font-semibold text-[#6C3D91] mb-5">
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 Filter Claims
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <Card>
 
-                <div>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
-                  <label className="block text-sm text-[#78848E] mb-2">
-                    Search
-                  </label>
+                  {/* Search */}
+                  <div>
+                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
+                      Search
+                    </label>
 
-                  <input
-                    type="text"
-                    placeholder="Claim, student or module"
-                    value={searchTerm}
-                    onChange={(e) =>
-                      setSearchTerm(
-                        e.target.value
-                      )
-                    }
-                    className="w-full h-11 px-4 border border-[#78848E] rounded-xl focus:outline-none focus:border-[#6C3D91]"
-                  />
+                    <input
+                      type="text"
+                      placeholder="Claim, student or module"
+                      value={searchTerm}
+                      onChange={(e) =>
+                        setSearchTerm(e.target.value)
+                      }
+                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
+                    />
+                  </div>
+
+                  {/* Status */}
+                  <div>
+                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
+                      Status
+                    </label>
+
+                    <select
+                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
+                    >
+                      <option>Approved</option>
+                      <option>Paid</option>
+                      <option>All</option>
+                    </select>
+                  </div>
+
+                  {/* Date From */}
+                  <div>
+                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
+                      Date From
+                    </label>
+
+                    <input
+                      type="date"
+                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
+                    />
+                  </div>
+
+                  {/* Date To */}
+                  <div>
+                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
+                      Date To
+                    </label>
+
+                    <input
+                      type="date"
+                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
+                    />
+                  </div>
 
                 </div>
 
-                <div>
+              </Card>
 
-                  <label className="block text-sm text-[#78848E] mb-2">
-                    Status
-                  </label>
+            </section>
 
-                  <select className="w-full h-11 px-4 border border-[#78848E] rounded-xl">
-                    <option>Approved</option>
-                    <option>Paid</option>
-                    <option>All</option>
-                  </select>
+            {/* Summary Statistics */}
+            <section className="mb-8">
 
-                </div>
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                Payment Summary
+              </h3>
 
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
 
-                  <label className="block text-sm text-[#78848E] mb-2">
-                    Date From
-                  </label>
+                <Card>
+                  <p className="text-neutral font-inter font-medium">
+                    Approved Claims
+                  </p>
 
-                  <input
-                    type="date"
-                    className="w-full h-11 px-4 border border-[#78848E] rounded-xl"
-                  />
+                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
+                    {claims.length}
+                  </p>
+                </Card>
 
-                </div>
+                <Card>
+                  <p className="text-neutral font-inter font-medium">
+                    Selected Claims
+                  </p>
 
-                <div>
+                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
+                    {selectedClaims.length}
+                  </p>
+                </Card>
 
-                  <label className="block text-sm text-[#78848E] mb-2">
-                    Date To
-                  </label>
+                <Card>
+                  <p className="text-neutral font-inter font-medium">
+                    Total Hours
+                  </p>
 
-                  <input
-                    type="date"
-                    className="w-full h-11 px-4 border border-[#78848E] rounded-xl"
-                  />
+                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
+                    {totalHours}
+                  </p>
+                </Card>
 
-                </div>
+                <Card>
+                  <p className="text-neutral font-inter font-medium">
+                    Total Payment
+                  </p>
 
-              </div>
-
-            </div>
-
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-8">
-
-              <div className="border border-[#78848E] rounded-xl p-6">
-
-                <p className="text-sm text-[#78848E]">
-                  Approved Claims
-                </p>
-
-                <p className="text-2xl font-bold text-[#6C3D91] mt-2">
-                  {claims.length}
-                </p>
+                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
+                    {formatCurrency(totalPayment)}
+                  </p>
+                </Card>
 
               </div>
 
-              <div className="border border-[#78848E] rounded-xl p-6">
+            </section>
 
-                <p className="text-sm text-[#78848E]">
-                  Selected Claims
-                </p>
+            {/* Approved Claims */}
+            <section className="mb-8">
 
-                <p className="text-2xl font-bold text-[#6C3D91] mt-2">
-                  {selectedClaims.length}
-                </p>
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
 
-              </div>
-
-              <div className="border border-[#78848E] rounded-xl p-6">
-
-                <p className="text-sm text-[#78848E]">
-                  Total Hours
-                </p>
-
-                <p className="text-2xl font-bold text-[#6C3D91] mt-2">
-                  {totalHours}
-                </p>
-
-              </div>
-
-              <div className="border border-[#78848E] rounded-xl p-6">
-
-                <p className="text-sm text-[#78848E]">
-                  Total Payment
-                </p>
-
-                <p className="text-2xl font-bold text-[#6C3D91] mt-2">
-                  {formatCurrency(totalPayment)}
-                </p>
-
-              </div>
-
-            </div>
-
-            {/* Claims table */}
-            <div className="mb-8">
-
-              <div className="flex justify-between items-center mb-4">
-
-                <h3 className="text-xl font-semibold text-[#6C3D91]">
+                <h3 className="text-2xl font-poppins font-semibold text-primary">
                   Approved Claims
                 </h3>
 
-                <span className="text-sm text-[#78848E]">
+                <span className="text-sm text-neutral font-inter">
                   {selectedClaims.length} selected
                 </span>
 
               </div>
 
-              <div className="border border-[#78848E] rounded-xl overflow-x-auto">
+              <Card>
 
-                <table className="w-full">
+                <div className="overflow-x-auto">
 
-                  <thead className="bg-[#F3F4F6]">
+                  <table className="w-full">
 
-                    <tr>
+                    <thead className="bg-primary-lightest">
 
-                      <th className="p-4 text-left">
+                      <tr>
 
-                        <input
-                          type="checkbox"
-                          checked={
-                            selectedClaims.length ===
-                              filteredClaims.length &&
-                            filteredClaims.length > 0
-                          }
-                          onChange={toggleAll}
-                          className="w-4 h-4 accent-[#6C3D91]"
-                        />
+                        <th className="px-5 py-4 text-left">
+                          <input
+                            type="checkbox"
+                            checked={
+                              selectedClaims.length ===
+                                filteredClaims.length &&
+                              filteredClaims.length > 0
+                            }
+                            onChange={toggleAll}
+                            className="w-4 h-4 accent-primary"
+                          />
+                        </th>
 
-                      </th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Claim ID
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Claim ID
-                      </th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Student
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Student
-                      </th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Module
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Module
-                      </th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Hours
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Hours
-                      </th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Rate
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Rate
-                      </th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Amount
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Amount
-                      </th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Status
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Status
-                      </th>
+                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
+                          Date
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Date
-                      </th>
+                      </tr>
 
-                    </tr>
+                    </thead>
 
-                  </thead>
+                    <tbody>
 
-                  <tbody>
-
-                    {filteredClaims.map(
-                      (claim) => (
+                      {filteredClaims.map((claim) => (
 
                         <tr
                           key={claim.id}
-                          className="border-t border-[#78848E]/40 hover:bg-[#E8DDF0]/30"
+                          className="border-t border-neutral/30 hover:bg-primary-lightest/30 transition"
                         >
 
-                          <td className="p-4">
+                          <td className="px-5 py-5">
 
                             <input
                               type="checkbox"
@@ -402,138 +386,148 @@ const ExportPayments = () => {
                                 claim.id
                               )}
                               onChange={() =>
-                                toggleClaim(
-                                  claim.id
-                                )
+                                toggleClaim(claim.id)
                               }
-                              className="w-4 h-4 accent-[#6C3D91]"
+                              className="w-4 h-4 accent-primary"
                             />
 
                           </td>
 
-                          <td className="p-4 font-semibold">
+                          <td className="px-5 py-5 font-semibold text-dark font-inter">
                             {claim.id}
                           </td>
 
-                          <td className="p-4">
+                          <td className="px-5 py-5 text-dark font-inter">
                             {claim.student}
                           </td>
 
-                          <td className="p-4">
+                          <td className="px-5 py-5 text-dark font-inter">
                             {claim.module}
                           </td>
 
-                          <td className="p-4">
+                          <td className="px-5 py-5 text-dark font-inter">
                             {claim.hours}
                           </td>
 
-                          <td className="p-4">
-                            {formatCurrency(
-                              claim.rate
-                            )}
+                          <td className="px-5 py-5 text-dark font-inter">
+                            {formatCurrency(claim.rate)}
                           </td>
 
-                          <td className="p-4 font-semibold">
-                            {formatCurrency(
-                              claim.amount
-                            )}
+                          <td className="px-5 py-5 font-semibold text-dark font-inter">
+                            {formatCurrency(claim.amount)}
                           </td>
 
-                          <td className="p-4">
-
-                            <span className="px-3 py-1 rounded-full bg-green-100 text-green-700 text-xs font-semibold">
-                              {claim.status}
-                            </span>
-
+                          <td className="px-5 py-5">
+                            <StatusBadge status={claim.status} />
                           </td>
 
-                          <td className="p-4 text-sm text-[#78848E]">
+                          <td className="px-5 py-5 text-sm text-neutral font-inter">
                             {claim.date}
                           </td>
 
                         </tr>
 
-                      )
-                    )}
+                      ))}
 
-                  </tbody>
+                      {filteredClaims.length === 0 && (
 
-                </table>
+                        <tr>
 
-              </div>
+                          <td
+                            colSpan="9"
+                            className="px-5 py-10 text-center text-neutral font-inter"
+                          >
+                            No approved claims found matching your search.
+                          </td>
 
-            </div>
+                        </tr>
 
-            {/* Export summary */}
-            <div className="border border-[#78848E] rounded-xl p-6 bg-[#F8F9FA]">
+                      )}
 
-              <h3 className="text-lg font-semibold text-[#6C3D91] mb-5">
+                    </tbody>
+
+                  </table>
+
+                </div>
+
+              </Card>
+
+            </section>
+
+            {/* Payment Export Summary */}
+            <section>
+
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 Payment Export Summary
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card>
 
-                <div>
-                  <p className="text-sm text-[#78848E]">
-                    Selected Claims
-                  </p>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
 
-                  <p className="font-semibold mt-1">
-                    {selectedClaims.length}
-                  </p>
+                  <div>
+                    <p className="text-sm text-neutral font-inter">
+                      Selected Claims
+                    </p>
+
+                    <p className="text-xl font-poppins font-semibold text-dark mt-1">
+                      {selectedClaims.length}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-neutral font-inter">
+                      Total Hours
+                    </p>
+
+                    <p className="text-xl font-poppins font-semibold text-dark mt-1">
+                      {totalHours}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-neutral font-inter">
+                      Total Remuneration
+                    </p>
+
+                    <p className="text-xl font-poppins font-semibold text-primary mt-1">
+                      {formatCurrency(totalPayment)}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-neutral font-inter">
+                      Export Period
+                    </p>
+
+                    <p className="text-xl font-poppins font-semibold text-dark mt-1">
+                      August 2026
+                    </p>
+                  </div>
+
                 </div>
 
-                <div>
-                  <p className="text-sm text-[#78848E]">
-                    Total Hours
-                  </p>
+                <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
 
-                  <p className="font-semibold mt-1">
-                    {totalHours}
-                  </p>
+                  <button
+                    onClick={exportPDF}
+                    className="px-6 py-3 border-2 border-primary text-primary rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
+                  >
+                    Export PDF
+                  </button>
+
+                  <button
+                    onClick={exportExcel}
+                    className="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
+                  >
+                    Export Excel
+                  </button>
+
                 </div>
 
-                <div>
-                  <p className="text-sm text-[#78848E]">
-                    Total Remuneration
-                  </p>
+              </Card>
 
-                  <p className="font-semibold mt-1">
-                    {formatCurrency(totalPayment)}
-                  </p>
-                </div>
-
-                <div>
-                  <p className="text-sm text-[#78848E]">
-                    Export Period
-                  </p>
-
-                  <p className="font-semibold mt-1">
-                    August 2026
-                  </p>
-                </div>
-
-              </div>
-
-              <div className="flex justify-end gap-4 mt-8">
-
-                <button
-                  onClick={exportPDF}
-                  className="h-11 px-6 border-2 border-[#6C3D91] text-[#6C3D91] rounded-xl font-semibold hover:bg-[#E8DDF0]"
-                >
-                  Export PDF
-                </button>
-
-                <button
-                  onClick={exportExcel}
-                  className="h-11 px-6 bg-[#6C3D91] text-white rounded-xl font-semibold hover:bg-[#5A3280]"
-                >
-                  Export Excel
-                </button>
-
-              </div>
-
-            </div>
+            </section>
 
           </div>
 

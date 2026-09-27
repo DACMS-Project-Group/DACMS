@@ -1,57 +1,67 @@
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
+import Card from '../components/Card';
+import StatusBadge from '../components/StatusBadge';
 
 const AppointmentApprovals = () => {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const appointments = [
     {
       id: 1,
       reference: 'APP-2026-001',
       studentNumber: '12345678',
-      student: 'Student Example',
-      module: 'CMPG323',
+      studentName: 'Student Example',
+      email: 'student@nwu.ac.za',
+      moduleCode: 'CMPG323',
+      moduleName: 'Software Engineering',
       lecturer: 'Lecturer Example',
       position: 'Student Assistant',
-      hours: 10,
-      date: '13 Sep 2026',
+      hoursLimit: 10,
+      submittedDate: '13 September 2026',
       status: 'Pending',
     },
     {
       id: 2,
       reference: 'APP-2026-002',
       studentNumber: '23456789',
-      student: 'Student Example',
-      module: 'CMPG321',
+      studentName: 'Student Example',
+      email: 'student@nwu.ac.za',
+      moduleCode: 'CMPG321',
+      moduleName: 'Advanced Databases',
       lecturer: 'Lecturer Example',
       position: 'Student Assistant',
-      hours: 12,
-      date: '12 Sep 2026',
+      hoursLimit: 12,
+      submittedDate: '12 September 2026',
       status: 'Pending',
     },
     {
       id: 3,
       reference: 'APP-2026-003',
       studentNumber: '34567890',
-      student: 'Student Example',
-      module: 'CMPG315',
+      studentName: 'Student Example',
+      email: 'student@nwu.ac.za',
+      moduleCode: 'CMPG315',
+      moduleName: 'Programming',
       lecturer: 'Lecturer Example',
       position: 'Student Assistant',
-      hours: 8,
-      date: '10 Sep 2026',
+      hoursLimit: 8,
+      submittedDate: '10 September 2026',
       status: 'Approved',
     },
     {
       id: 4,
       reference: 'APP-2026-004',
       studentNumber: '45678901',
-      student: 'Student Example',
-      module: 'CMPG323',
+      studentName: 'Student Example',
+      email: 'student@nwu.ac.za',
+      moduleCode: 'CMPG323',
+      moduleName: 'Software Engineering',
       lecturer: 'Lecturer Example',
       position: 'Student Assistant',
-      hours: 10,
-      date: '08 Sep 2026',
+      hoursLimit: 10,
+      submittedDate: '08 September 2026',
       status: 'Rejected',
     },
   ];
@@ -64,484 +74,376 @@ const AppointmentApprovals = () => {
     (appointment) => appointment.status !== 'Pending'
   );
 
-  const getStatusStyle = (status) => {
+  const approvedAppointments = appointments.filter(
+    (appointment) => appointment.status === 'Approved'
+  );
 
-    if (status === 'Approved') {
-      return 'bg-green-100 text-green-700';
-    }
+  const rejectedAppointments = appointments.filter(
+    (appointment) => appointment.status === 'Rejected'
+  );
 
-    if (status === 'Rejected') {
-      return 'bg-red-100 text-red-700';
-    }
-
-    if (status === 'Returned') {
-      return 'bg-yellow-100 text-yellow-700';
-    }
-
-    return 'bg-[#E8DDF0] text-[#6C3D91]';
-  };
+  const returnedAppointments = appointments.filter(
+    (appointment) => appointment.status === 'Returned'
+  );
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA]">
-
+    <div className="min-h-screen bg-off-white">
       <Navbar />
 
       <div className="flex">
-
         <Sidebar userRole="admin" />
 
-        <main className="flex-1 p-8">
-
-          {/* Page header */}
-          <div className="bg-[#6C3D91] text-white px-8 py-5 rounded-t-lg">
-
-            <h1 className="text-3xl font-bold">
+        <main className="flex-1">
+          <div className="bg-primary px-8 py-4">
+            <h1 className="text-2xl font-semibold text-white font-poppins">
               Appointment Approvals
             </h1>
-
           </div>
 
-          <div className="bg-white p-8">
-
-            {/* Page introduction */}
+          <div className="p-8">
+            {/* Page Introduction */}
             <div className="mb-8">
-
-              <h2 className="text-2xl font-semibold text-[#6C3D91]">
+              <h2 className="text-2xl font-poppins font-semibold text-primary">
                 Appointment Approval
               </h2>
 
-              <p className="text-[#78848E] mt-1">
+              <p className="mt-2 text-neutral font-inter">
                 Review lecturer recommendations and approve, reject, or return
                 assistant appointments for revision.
               </p>
-
             </div>
 
             {/* Appointment Summary */}
-            <div className="border border-[#78848E] rounded-xl p-6 mb-8">
-
-              <h3 className="text-lg font-semibold text-[#6C3D91] mb-5">
+            <section className="mb-8">
+              <h3 className="mb-4 text-2xl font-poppins font-semibold text-primary">
                 Appointment Summary
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
-
-                <div className="border border-[#78848E] rounded-xl p-6">
-
-                  <p className="text-sm text-[#78848E]">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                  <p className="font-inter font-medium text-neutral">
                     Pending Approvals
                   </p>
 
-                  <p className="text-2xl font-bold text-[#6C3D91] mt-2">
+                  <p className="mt-3 text-3xl font-poppins font-bold text-primary">
                     {pendingAppointments.length}
                   </p>
 
-                  <p className="text-sm text-[#78848E] mt-1">
+                  <p className="mt-1 text-sm font-inter text-neutral">
                     Awaiting review
                   </p>
+                </Card>
 
-                </div>
-
-                <div className="border border-[#78848E] rounded-xl p-6">
-
-                  <p className="text-sm text-[#78848E]">
+                <Card>
+                  <p className="font-inter font-medium text-neutral">
                     Approved
                   </p>
 
-                  <p className="text-2xl font-bold text-[#6C3D91] mt-2">
-                    {
-                      appointments.filter(
-                        (appointment) =>
-                          appointment.status === 'Approved'
-                      ).length
-                    }
+                  <p className="mt-3 text-3xl font-poppins font-bold text-primary">
+                    {approvedAppointments.length}
                   </p>
 
-                  <p className="text-sm text-[#78848E] mt-1">
+                  <p className="mt-1 text-sm font-inter text-neutral">
                     Appointments approved
                   </p>
+                </Card>
 
-                </div>
-
-                <div className="border border-[#78848E] rounded-xl p-6">
-
-                  <p className="text-sm text-[#78848E]">
+                <Card>
+                  <p className="font-inter font-medium text-neutral">
                     Rejected
                   </p>
 
-                  <p className="text-2xl font-bold text-[#6C3D91] mt-2">
-                    {
-                      appointments.filter(
-                        (appointment) =>
-                          appointment.status === 'Rejected'
-                      ).length
-                    }
+                  <p className="mt-3 text-3xl font-poppins font-bold text-primary">
+                    {rejectedAppointments.length}
                   </p>
 
-                  <p className="text-sm text-[#78848E] mt-1">
+                  <p className="mt-1 text-sm font-inter text-neutral">
                     Appointments rejected
                   </p>
+                </Card>
 
-                </div>
-
-                <div className="border border-[#78848E] rounded-xl p-6">
-
-                  <p className="text-sm text-[#78848E]">
+                <Card>
+                  <p className="font-inter font-medium text-neutral">
                     Returned
                   </p>
 
-                  <p className="text-2xl font-bold text-[#6C3D91] mt-2">
-                    {
-                      appointments.filter(
-                        (appointment) =>
-                          appointment.status === 'Returned'
-                      ).length
-                    }
+                  <p className="mt-3 text-3xl font-poppins font-bold text-primary">
+                    {returnedAppointments.length}
                   </p>
 
-                  <p className="text-sm text-[#78848E] mt-1">
+                  <p className="mt-1 text-sm font-inter text-neutral">
                     Requiring revision
                   </p>
-
-                </div>
-
+                </Card>
               </div>
+            </section>
 
-            </div>
-
-            {/* Pending appointments */}
-            <div className="mb-8">
-
-              <div className="flex justify-between items-center mb-4">
-
-                <h3 className="text-xl font-semibold text-[#6C3D91]">
+            {/* Pending Appointments */}
+            <section className="mb-8">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-2xl font-poppins font-semibold text-primary">
                   Pending Appointment Approvals
                 </h3>
 
-                <span className="text-sm text-[#78848E]">
+                <span className="text-sm font-inter text-neutral">
                   {pendingAppointments.length} pending
                 </span>
-
               </div>
 
-              <div className="border border-[#78848E] rounded-xl overflow-x-auto">
+              <Card>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[1100px]">
+                    <thead className="bg-primary-lightest">
+                      <tr>
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Reference
+                        </th>
 
-                <table className="w-full">
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Student
+                        </th>
 
-                  <thead className="bg-[#F3F4F6]">
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Module
+                        </th>
 
-                    <tr>
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Lecturer
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Reference
-                      </th>
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Position
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Student
-                      </th>
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Hours
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Module
-                      </th>
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Date
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Lecturer
-                      </th>
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Status
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Position
-                      </th>
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Action
+                        </th>
+                      </tr>
+                    </thead>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Hours
-                      </th>
-
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Date
-                      </th>
-
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Status
-                      </th>
-
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Action
-                      </th>
-
-                    </tr>
-
-                  </thead>
-
-                  <tbody>
-
-                    {pendingAppointments.map(
-                      (appointment) => (
-
+                    <tbody>
+                      {pendingAppointments.map((appointment) => (
                         <tr
                           key={appointment.id}
-                          className="border-t border-[#78848E]/40 hover:bg-[#E8DDF0]/30"
+                          className="border-t border-neutral/30 transition hover:bg-primary-lightest/30"
                         >
-
-                          <td className="p-4 font-semibold">
+                          <td className="p-4 font-inter font-semibold text-dark">
                             {appointment.reference}
                           </td>
 
-                          <td className="p-4">
-
-                            <p>
-                              {appointment.student}
+                          <td className="p-4 font-inter">
+                            <p className="text-dark">
+                              {appointment.studentName}
                             </p>
 
-                            <p className="text-sm text-[#78848E]">
+                            <p className="mt-1 text-sm text-neutral">
                               {appointment.studentNumber}
                             </p>
-
                           </td>
 
-                          <td className="p-4">
-                            {appointment.module}
+                          <td className="p-4 font-inter text-dark">
+                            {appointment.moduleCode}
                           </td>
 
-                          <td className="p-4">
+                          <td className="p-4 font-inter text-dark">
                             {appointment.lecturer}
                           </td>
 
-                          <td className="p-4">
+                          <td className="p-4 font-inter text-dark">
                             {appointment.position}
                           </td>
 
-                          <td className="p-4">
-                            {appointment.hours}
+                          <td className="p-4 font-inter text-dark">
+                            {appointment.hoursLimit}
                           </td>
 
-                          <td className="p-4 text-sm text-[#78848E]">
-                            {appointment.date}
-                          </td>
-
-                          <td className="p-4">
-
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(
-                                appointment.status
-                              )}`}
-                            >
-                              {appointment.status}
-                            </span>
-
+                          <td className="p-4 text-sm font-inter text-neutral">
+                            {appointment.submittedDate}
                           </td>
 
                           <td className="p-4">
+                            <StatusBadge status={appointment.status} />
+                          </td>
 
+                          <td className="p-4">
                             <button
                               type="button"
                               onClick={() =>
-                                navigate(`/appointment-review/${appointment.id}`, {
+                                navigate(
+                                  `/appointment-review/${appointment.id}`,
+                                  {
                                     state: {
-                                    appointment,
+                                      appointment,
                                     },
-                                })
-                                }
-                              className="px-4 py-2 bg-[#6C3D91] text-white rounded-xl font-semibold hover:bg-[#5A3280]"
+                                  }
+                                )
+                              }
+                              className="rounded-xl bg-primary px-4 py-2 font-inter font-semibold text-white transition hover:bg-primary-dark"
                             >
                               Review
                             </button>
-
                           </td>
-
                         </tr>
-
-                      )
-                    )}
-
-                  </tbody>
-
-                </table>
-
-              </div>
-
-            </div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </section>
 
             {/* Approval History */}
-            <div className="mb-8">
-
-              <div className="flex justify-between items-center mb-4">
-
-                <h3 className="text-xl font-semibold text-[#6C3D91]">
+            <section className="mb-8">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-2xl font-poppins font-semibold text-primary">
                   Approval History
                 </h3>
 
-                <span className="text-sm text-[#78848E]">
+                <span className="text-sm font-inter text-neutral">
                   {historyAppointments.length} reviewed
                 </span>
-
               </div>
 
-              <div className="border border-[#78848E] rounded-xl overflow-x-auto">
+              <Card>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[1000px]">
+                    <thead className="bg-primary-lightest">
+                      <tr>
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Reference
+                        </th>
 
-                <table className="w-full">
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Student
+                        </th>
 
-                  <thead className="bg-[#F3F4F6]">
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Module
+                        </th>
 
-                    <tr>
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Lecturer
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Reference
-                      </th>
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Position
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Student
-                      </th>
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Date
+                        </th>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Module
-                      </th>
+                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                          Status
+                        </th>
+                      </tr>
+                    </thead>
 
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Lecturer
-                      </th>
-
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Position
-                      </th>
-
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Date
-                      </th>
-
-                      <th className="p-4 text-left text-sm text-[#78848E]">
-                        Status
-                      </th>
-
-                    </tr>
-
-                  </thead>
-
-                  <tbody>
-
-                    {historyAppointments.map(
-                      (appointment) => (
-
+                    <tbody>
+                      {historyAppointments.map((appointment) => (
                         <tr
                           key={appointment.id}
-                          className="border-t border-[#78848E]/40 hover:bg-[#E8DDF0]/30"
+                          className="border-t border-neutral/30 transition hover:bg-primary-lightest/30"
                         >
-
-                          <td className="p-4 font-semibold">
+                          <td className="p-4 font-inter font-semibold text-dark">
                             {appointment.reference}
                           </td>
 
-                          <td className="p-4">
-                            {appointment.student}
+                          <td className="p-4 font-inter text-dark">
+                            {appointment.studentName}
                           </td>
 
-                          <td className="p-4">
-                            {appointment.module}
+                          <td className="p-4 font-inter text-dark">
+                            {appointment.moduleCode}
                           </td>
 
-                          <td className="p-4">
+                          <td className="p-4 font-inter text-dark">
                             {appointment.lecturer}
                           </td>
 
-                          <td className="p-4">
+                          <td className="p-4 font-inter text-dark">
                             {appointment.position}
                           </td>
 
-                          <td className="p-4 text-sm text-[#78848E]">
-                            {appointment.date}
+                          <td className="p-4 text-sm font-inter text-neutral">
+                            {appointment.submittedDate}
                           </td>
 
                           <td className="p-4">
-
-                            <span
-                              className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(
-                                appointment.status
-                              )}`}
-                            >
-                              {appointment.status}
-                            </span>
-
+                            <StatusBadge status={appointment.status} />
                           </td>
-
                         </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </Card>
+            </section>
 
-                      )
-                    )}
-
-                  </tbody>
-
-                </table>
-
-              </div>
-
-            </div>
-
-            {/* Appointment Management Information */}
-            <div className="border border-[#78848E] rounded-xl p-6 bg-[#F8F9FA]">
-
-              <h3 className="text-lg font-semibold text-[#6C3D91] mb-5">
+            {/* Appointment Management */}
+            <section>
+              <h3 className="mb-4 text-2xl font-poppins font-semibold text-primary">
                 Appointment Management
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+              <Card>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                  <div>
+                    <p className="text-sm font-inter text-neutral">
+                      Student Linking
+                    </p>
 
-                <div>
+                    <p className="mt-1 font-inter font-semibold text-dark">
+                      Approved Positions
+                    </p>
+                  </div>
 
-                  <p className="text-sm text-[#78848E]">
-                    Student Linking
-                  </p>
+                  <div>
+                    <p className="text-sm font-inter text-neutral">
+                      Responsibilities
+                    </p>
 
-                  <p className="font-semibold mt-1">
-                    Approved Positions
-                  </p>
+                    <p className="mt-1 font-inter font-semibold text-dark">
+                      Assigned by Lecturer
+                    </p>
+                  </div>
 
+                  <div>
+                    <p className="text-sm font-inter text-neutral">
+                      Working-Hour Limit
+                    </p>
+
+                    <p className="mt-1 font-inter font-semibold text-dark">
+                      Administrator Controlled
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-inter text-neutral">
+                      Appointment Status
+                    </p>
+
+                    <p className="mt-1 font-inter font-semibold text-dark">
+                      Updated on Decision
+                    </p>
+                  </div>
                 </div>
-
-                <div>
-
-                  <p className="text-sm text-[#78848E]">
-                    Responsibilities
-                  </p>
-
-                  <p className="font-semibold mt-1">
-                    Assigned by Lecturer
-                  </p>
-
-                </div>
-
-                <div>
-
-                  <p className="text-sm text-[#78848E]">
-                    Working-Hour Limit
-                  </p>
-
-                  <p className="font-semibold mt-1">
-                    Administrator Controlled
-                  </p>
-
-                </div>
-
-                <div>
-
-                  <p className="text-sm text-[#78848E]">
-                    Appointment Status
-                  </p>
-
-                  <p className="font-semibold mt-1">
-                    Updated on Decision
-                  </p>
-
-                </div>
-
-              </div>
-
-            </div>
-
+              </Card>
+            </section>
           </div>
-
         </main>
-
       </div>
-
     </div>
   );
 };
