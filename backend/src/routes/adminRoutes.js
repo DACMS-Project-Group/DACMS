@@ -43,6 +43,30 @@ router.get('/claims/fetch/:claim_id',
             authenticate,
             authorize([3]),
             AdminController.getClaimById
-)
+);
+
+router.patch('/claims/approve/:claim_id',
+            authenticate,
+            authorize([3]),
+            AdminController.approveClaim
+);
+
+router.get('/appointments',
+            authenticate,
+            authorize([3]),
+            AdminController.getAppointments
+);
+
+router.get('/appointments/fetch/:position_id',
+            authenticate,
+            authorize([3]),
+            AdminController.getPositionById
+);
+
+router.patch('/appointments/review/:position_id',
+    authenticate,
+    authorize([3]),
+    AdminController.reviewPosition
+);
 
 export default router;

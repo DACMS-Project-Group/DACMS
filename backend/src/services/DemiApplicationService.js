@@ -5,8 +5,17 @@ class DemiApplicationService {
         this.demiApplicationRepository = new DemiApplicationRepository();
     }
 
-    async listOpenListings() {
-        return this.demiApplicationRepository.findOpenListings();
+    async getStudentIdFromApplication(applicationId) {
+        const studentId = this.demiApplicationRepository.getStudentIdFromApplication(applicationId);
+
+        if(!studentId)
+            throw new Error("Student not found!");
+
+        return studentId;
+    }
+
+    async listOpenListings(studentId) {
+        return this.demiApplicationRepository.findOpenListings(studentId);
     }
 
     async listApplicationsForStudent(studentId) {

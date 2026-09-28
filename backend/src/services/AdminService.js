@@ -53,6 +53,38 @@ class AdminService {
         const data = await AdminRepository.getClaimById(claim_id);
         return { data };
     }
+
+    static async approveClaim(claim_id) {
+        const data = await AdminRepository.approveClaim(claim_id);
+        return { data };
+    }
+
+    static async getAppointments() {
+        const stats = await AdminRepository.getAppointmentsMetrics();
+        const pending = await AdminRepository.getPendingAppointmentsDetailed();
+        const history = await AdminRepository.getApprovalHistory();
+
+        return {
+            stats,
+            pending,
+            history
+        };
+    }
+
+    static async getPositionById(position_id) {
+        const position = await AdminRepository.getPositionById(position_id);
+        return { position };
+    }
+
+    static async reviewPosition(position_id, action, comment) {
+        const validActions = ['Approved', 'Rejected', 'Returned'];
+        if (!validActions.includes(action)) {
+            throw new Error(`Invalid action. Must be one of: ${validActions.join(', ')}`);
+        }
+
+        const data = await AdminRepository.reviewPosition(position_id, action, comment);
+        return { data };
+    }
 }
 
 export default AdminService;

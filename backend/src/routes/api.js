@@ -5,7 +5,6 @@ import studentRoutes from './studentRoutes.js';
 import lecturerRoutes from './lecturerRoutes.js';
 import adminRoutes from './adminRoutes.js';
 import notificationRoutes from './notificationRoutes.js';
-import UserController from '../controllers/UserController.js';
 
 const router = Router();
 

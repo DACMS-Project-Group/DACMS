@@ -3,6 +3,7 @@ import User from "./User.js";
 class Administrator extends User {
     constructor({
         user_id = null,
+        title = 'Mx',
         first_name,
         last_name,
         email,
@@ -15,6 +16,7 @@ class Administrator extends User {
     }) {
         super({
             user_id,
+            title,
             first_name,
             last_name,
             email,
@@ -32,6 +34,7 @@ class Administrator extends User {
         return new Administrator({
             user_id: row.UserID ?? row.AdminID,
             admin_id: row.AdminID ?? row.UserID,
+            title: row.Title,
             first_name: row.FName,
             last_name: row.LName,
             email: row.Email,

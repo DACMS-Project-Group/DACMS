@@ -85,6 +85,7 @@ function App() {
             />
             <Route path="/verify-hours" element={<VerifyWorkHours />} />
             <Route path="/notifications" element={<Notifications />} />
+             <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
           </Route>
 
           {/* ===== ADMIN ROUTES ===== */}

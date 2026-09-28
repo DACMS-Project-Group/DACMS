@@ -51,3 +51,5 @@ class DemiListing {
         }
     }
 }
+
+export default DemiListing
