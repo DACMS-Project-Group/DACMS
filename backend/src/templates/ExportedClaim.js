@@ -13,12 +13,11 @@ class ExportedClaim {
                 <style>
                     :root {
                         --nwu-purple: #1d1d1d;
-                        --nwu-navy: #0B1F3A;
-                        --nwu-gold: #D4AF37;
+                        --nwu-navy: #303131;
                         --nwu-light: #F4F4F6;
                         --nwu-border: #E5E7EB;
-                        --nwu-text: #1F2937;
-                        --nwu-muted: #6B7280;
+                        --nwu-text: #353535;
+                        --nwu-muted: #7e7f81;
                     }
 
                     * { box-sizing: border-box; }
@@ -346,6 +345,7 @@ class ExportedClaim {
         const { default: puppeteer } = await import('puppeteer');
 
         const browser = await puppeteer.launch({
+            executablePath: process.env.CHROME_BIN || '/usr/bin/chromium',
             headless: 'new',
             args: ['--no-sandbox', '--disable-setuid-sandbox']
         });
