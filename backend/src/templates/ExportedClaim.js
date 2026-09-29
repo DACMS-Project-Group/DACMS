@@ -29,7 +29,13 @@ class ExportedClaim {
                         background: #ffffff;
                     }
 
-                    .page { width: 100%; padding: 0; }
+                    .page {
+                        width: 100%;
+                        min-height: 297mm;
+                        padding: 0;
+                        display: flex;
+                        flex-direction: column;
+                    }
                     .header {
                         background: var(--nwu-purple);
                         color: white;
@@ -54,11 +60,8 @@ class ExportedClaim {
                         position: absolute;
                         right: 36px;
                         top: 22px;
-                        background: rgba(255,255,255,0.16);
-                        border: 1px solid rgba(255,255,255,0.3);
                         color: #fff;
                         padding: 8px 12px;
-                        border-radius: 999px;
                         font-size: 11px;
                         font-weight: bold;
                         letter-spacing: 0.5px;
@@ -68,15 +71,18 @@ class ExportedClaim {
                         position: absolute;
                         right: 36px;
                         top: 56px;
-                        color: var(--nwu-purple);
-                        background: #fff;
+                        color: #fff;
                         padding: 6px 10px;
-                        border-radius: 999px;
                         font-size: 11px;
                         font-weight: 700;
                     }
 
-                    .content { padding: 22px 36px 36px; }
+                    .content {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        padding: 5px 20px 20px 20px;
+                    }
 
                     .summary-grid {
                         display: grid;
@@ -87,7 +93,7 @@ class ExportedClaim {
 
                     .panel {
                         border: 1px solid var(--nwu-border);
-                        border-radius: 10px;
+                        border-radius: 5px;
                         overflow: hidden;
                     }
 
@@ -111,7 +117,7 @@ class ExportedClaim {
                     }
 
                     .key-value td:first-child {
-                        width: 40%;
+                        width: 200px;
                         font-weight: 700;
                         color: var(--nwu-navy);
                     }
@@ -119,7 +125,7 @@ class ExportedClaim {
                     .totals {
                         background: var(--nwu-light);
                         border: 1px solid var(--nwu-border);
-                        border-radius: 10px;
+                        border-radius: 5px;
                         padding: 18px 16px;
                         min-height: 124px;
                     }
@@ -142,14 +148,18 @@ class ExportedClaim {
 
                     .total-row strong { color: var(--nwu-navy); }
 
-                    .claim-section { margin-top: 26px; }
+                    .claim-section {
+                        border: 1px solid var(--nwu-border);
+                        border-radius: 5px;
+                        margin-top: 26px;
+                    }
 
                     .info-table {
                         width: 100%;
                         border-collapse: collapse;
                         margin-top: 10px;
                         border: 1px solid var(--nwu-border);
-                        border-radius: 8px;
+                        border-radius: 5px;
                         overflow: hidden;
                     }
 
@@ -198,7 +208,7 @@ class ExportedClaim {
                         margin-top: 12px;
                         border: 1px solid var(--nwu-border);
                         background: var(--nwu-light);
-                        border-radius: 8px;
+                        border-radius: 5px;
                         padding: 18px;
                         text-align: center;
                         color: var(--nwu-muted);
@@ -206,7 +216,7 @@ class ExportedClaim {
                     }
 
                     .footer {
-                        margin-top: 22px;
+                        margin-top: auto;
                         padding-top: 12px;
                         border-top: 1px solid var(--nwu-border);
                         font-size: 10px;
@@ -263,8 +273,8 @@ class ExportedClaim {
                         </div>
 
                         <div class="claim-section">
-                            <div class="panel-header" style="border-radius: 10px 10px 0 0;">Claim Details</div>
-                            <table class="info-table">
+                            <div class="panel-header" style="border-radius: 5px 5px 0 0;">Claim Details</div>
+                            <table class="key-value">
                                 <tr>
                                     <td>Reference number</td>
                                     <td>${this.escapeHtml(claim.reference_number || 'N/A')}</td>
@@ -297,7 +307,7 @@ class ExportedClaim {
                         </div>
 
                         <div class="claim-section">
-                            <div class="panel-header" style="border-radius: 10px 10px 0 0;">Sessions</div>
+                            <div class="panel-header" style="border-radius: 5px 5px 0 0;">Sessions</div>
                             ${
                                 sessions.length
                                     ? `
@@ -357,10 +367,10 @@ class ExportedClaim {
             format: 'A4',
             printBackground: true,
             margin: {
-                top: '0.5in',
-                right: '0.5in',
-                bottom: '0.5in',
-                left: '0.5in',
+                top: '0',
+                right: '0',
+                bottom: '0',
+                left: '0',
             }
         });
 
