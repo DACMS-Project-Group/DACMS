@@ -12,10 +12,11 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('api/admin/dashboard_statistics', {
+        const response = await fetch('/api/admin/dashboard_statistics', {
           method: 'GET',
+          credentials: 'include',
           headers: {
-            'Content-Type': 'application.json',
+            'Content-Type': 'application/json',
           },
         });
 
@@ -44,22 +45,7 @@ const AdminDashboard = () => {
     { month: 'June', amount: 'R 42 750' },
   ];
 
-  const pendingAppointments = [
-    {
-      lecturer: 'Dr Example',
-      assistant: 'Assistant Example',
-      module: 'CMPG xxx',
-      date: '28 August 2026',
-      status: 'Pending',
-    },
-    {
-      lecturer: 'Prof Example',
-      assistant: 'Assistant Example',
-      module: 'CMPG xxx',
-      date: '29 August 2026',
-      status: 'Pending',
-    },
-  ];
+  const pendingAppointments = data?.pendingAppointments || [];
 
   return (
     <div className="min-h-screen bg-off-white">
