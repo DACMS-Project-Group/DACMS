@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { useNavigate } from 'react-router-dom';
@@ -7,14 +7,35 @@ import Navbar from '../components/Navbar';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [data, setData] = useState(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('api/admin/dashboard_statistics', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application.json',
+          },
+        });
+
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        console.error('Error fecthing dashboard data: ', error);
+      }
+    }
+
+    fetchData();
+  }, []);
 
   const statistics = [
-    { title: 'Total Modules', value: '24' },
-    { title: 'Total Lecturers', value: '56' },
-    { title: 'Total Assistants', value: '60' },
-    { title: 'Pending Approvals', value: '18' },
-    { title: 'Pending Claims', value: '12' },
-    { title: 'Budget Usage', value: '78%' },
+    { title: "Total", value: data?.stats?.total_modules ?? 'null' },
+    { title: 'Total Lecturers', value: data?.stats?.total_lecturers ?? 'null' },
+    { title: 'Total Assistants', value: data?.stats?.total_demis ?? 'null' },
+    { title: 'Pending Approvals', value: data?.stats?.total_pending_approvals ?? 'null' },
+    { title: 'Pending Claims', value: data?.stats?.total_pending_claims ?? 'null' },
+    { title: 'Budget Usage', value: '--' },
   ];
 
   const monthlyClaims = [
