@@ -47,6 +47,35 @@ class AdminRepository {
         }));
     }
 
+    static async getMonthlyClaims() {
+        const query = `
+            SELECT
+                TO_CHAR(m.month_date, 'FMMonth') AS month,
+                COALESCE(SUM(c."TotalClaimAmount"), 0) AS total_amount
+            FROM generate_series(
+                DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '5 months',
+                DATE_TRUNC('month', CURRENT_DATE),
+                INTERVAL '1 month'
+            ) AS m(month_date)
+            LEFT JOIN "REMUNERATION_CLAIM" c
+                ON DATE_TRUNC('month', COALESCE(c."SubmissionDate", c."PeriodStartDate"::timestamptz)) = m.month_date
+                AND (c."ClaimStatus" IS NULL OR c."ClaimStatus" != 'Rejected')
+            GROUP BY m.month_date
+            ORDER BY m.month_date DESC;
+        `;
+
+        const result = await pool.query(query);
+
+        return result.rows.map((row) => {
+            const num = Math.round(Number(row.total_amount ?? 0));
+            const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            return {
+                month: row.month || null,
+                amount: `R ${formatted}`,
+            };
+        });
+    }
+
     static async getPendingAppointments() {
         const query = `
             SELECT
@@ -320,7 +349,7 @@ class AdminRepository {
             WHERE "BudgetID" = $${index}
             RETURNING *;
         `;
-        
+
         const result = await pool.query(query, values);
         if (result.rows.length === 0) {
             throw new Error("Budget not found");
@@ -635,7 +664,7 @@ class AdminRepository {
             responsibilities: Array.isArray(row.responsibilities) ? row.responsibilities : []
         };
     }
-    
+
     static async reviewPosition(position_id, action, comment) {
         const client = await pool.connect();
         try {
@@ -675,7 +704,7 @@ class AdminRepository {
                 VALUES ($1, 'Position Review', $2, $3);
             `;
             const message = `Your position request for Application #${ApplicationID} has been ${action.toLowerCase()}. Comment: ${comment || 'None'}`;
-            
+
             await client.query(notifQuery, [StudentID, 'Position Decision', message]);
             await client.query(notifQuery, [lecturerId, 'Position Decision', message]);
 
