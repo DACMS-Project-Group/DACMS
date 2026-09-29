@@ -2,13 +2,13 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+RUN sed -i 's/v3\.\([0-9]*\) main/v3.\1 community/' /etc/apk/repositories \
+    && echo "@edge https://dl-cdn.alpinelinux.org/alpine/edge/community" >> /etc/apk/repositories \
+    && apk update \
+    && apk add --no-cache chromium nss freetype harfbuzz ca-certificates ttf-freefont
+
 COPY package*.json ./
 RUN npm install
-RUN npm install jsonwebtoken
-RUN npm install cookie-parser
-RUN npm install socket.io
-RUN npm install http-server
-RUN npm install nodemailer
 
 COPY . .
 
