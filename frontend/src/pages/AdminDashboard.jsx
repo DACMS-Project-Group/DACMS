@@ -4,79 +4,59 @@ import StatusBadge from '../components/StatusBadge';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
-import { apiGet } from '../api';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [appointmentPage, setAppointmentPage] = useState(1);
+  const APPOINTMENTS_PER_PAGE = 4;
 
-  // ---- Fetch dashboard stats on mount ----
   useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
+    const fetchData = async () => {
       try {
-        setLoading(true);
-        const result = await apiGet('/admin/dashboard_statistics');
-        if (!cancelled) {
-          setData(result);
-          setError('');
-        }
-      } catch (err) {
-        if (!cancelled) setError(err.message);
-      } finally {
-        if (!cancelled) setLoading(false);
+        const response = await fetch('/api/admin/dashboard_statistics', {
+          method: 'GET',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        const result = await response.json();
+        setData(result);
+      } catch (error) {
+        console.error('Error fecthing dashboard data: ', error);
       }
-    };
+    }
 
-    load();
-
-    return () => {
-      cancelled = true;
-    };
+    fetchData();
   }, []);
 
-  const stats = data?.stats || {};
-  const monthlyWork = data?.monthlyWork || [];
-  const pendingAppointments = data?.pendingAppointments || [];
-
-  // Stat cards derived from the API response
-  const statisticCards = [
-    { title: 'Total Modules', value: stats.total_modules ?? '—' },
-    { title: 'Total Lecturers', value: stats.total_lecturers ?? '—' },
-    { title: 'Total Assistants', value: stats.total_demis ?? '—' },
-    { title: 'Pending Approvals', value: stats.total_pending_approvals ?? '—' },
-    { title: 'Pending Claims', value: stats.total_pending_claims ?? '—' },
-    { title: 'Budget Usage', value: '—' },
+  const statistics = [
+    { title: "Total", value: data?.stats?.total_modules ?? 'null' },
+    { title: 'Total Lecturers', value: data?.stats?.total_lecturers ?? 'null' },
+    { title: 'Total Assistants', value: data?.stats?.total_demis ?? 'null' },
+    { title: 'Pending Approvals', value: data?.stats?.total_pending_approvals ?? 'null' },
+    { title: 'Pending Claims', value: data?.stats?.total_pending_claims ?? 'null' },
+    { title: 'Budget Usage', value: '--' },
   ];
 
-  // Format ISO date → "08 August 2026"
-  const formatDate = (iso) => {
-    if (!iso) return '—';
-    try {
-      return new Date(iso).toLocaleDateString('en-ZA', {
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric',
-      });
-    } catch {
-      return iso;
-    }
-  };
+  const monthlyClaims = data?.monthlyClaims || [];
 
-  // Format "2026-08" → "August 2026"
-  const formatMonth = (yyyyMm) => {
-    if (!yyyyMm) return '—';
-    const [year, month] = yyyyMm.split('-');
-    const date = new Date(Number(year), Number(month) - 1, 1);
-    return date.toLocaleDateString('en-ZA', {
-      month: 'long',
-      year: 'numeric',
-    });
-  };
+  const pendingAppointments = data?.pendingAppointments || [];
+  const totalAppointmentPages = Math.max(
+    Math.ceil(pendingAppointments.length / APPOINTMENTS_PER_PAGE),
+    1
+  );
+
+  useEffect(() => {
+    setAppointmentPage((currentPage) => Math.min(currentPage, totalAppointmentPages));
+  }, [totalAppointmentPages]);
+
+  const currentAppointments = pendingAppointments.slice(
+    (appointmentPage - 1) * APPOINTMENTS_PER_PAGE,
+    appointmentPage * APPOINTMENTS_PER_PAGE
+  );
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -92,6 +72,7 @@ const AdminDashboard = () => {
             </h1>
           </div>
 
+          {/* Main Content */}
           <div className="p-8">
             {/* Welcome */}
             <div className="mb-8">
@@ -101,22 +82,18 @@ const AdminDashboard = () => {
               <p className="text-neutral mt-2 font-inter">
                 Monitor and manage the Assistant Applications and Claims Management System.
               </p>
-
-              {error && (
-                <p className="mt-2 text-sm text-error font-inter">
-                  Could not load dashboard data: {error}
-                </p>
-              )}
             </div>
 
-            {/* SYSTEM STATISTICS */}
+            {/* ================================
+                SYSTEM STATISTICS
+            ================================= */}
             <section className="mb-8">
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 System Statistics
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {statisticCards.map((stat) => (
+                {statistics.map((stat) => (
                   <Card key={stat.title}>
                     <div className="flex justify-between items-start">
                       <div>
@@ -124,7 +101,7 @@ const AdminDashboard = () => {
                           {stat.title}
                         </p>
                         <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                          {loading ? '—' : stat.value}
+                          {stat.value}
                         </p>
                       </div>
                     </div>
@@ -133,41 +110,32 @@ const AdminDashboard = () => {
               </div>
             </section>
 
-            {/* MONTHLY WORK + PENDING ITEMS */}
+            {/* ================================
+                MONTHLY CLAIMS + PENDING ITEMS
+            ================================= */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Monthly Work */}
+              {/* Monthly Claims */}
               <section>
                 <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                  Monthly Work Summary
+                  Monthly Claims Summary
                 </h3>
 
                 <Card>
-                  {loading ? (
-                    <p className="py-6 text-center text-neutral font-inter">
-                      Loading…
-                    </p>
-                  ) : monthlyWork.length === 0 ? (
-                    <p className="py-6 text-center text-neutral font-inter">
-                      No work sessions recorded yet
-                    </p>
-                  ) : (
-                    <div className="space-y-4">
-                      {monthlyWork.map((row) => (
-                        <div
-                          key={row.month}
-                          className="flex justify-between items-center border-b border-neutral pb-3 last:border-0"
-                        >
-                          <span className="font-semibold text-dark font-inter">
-                            {formatMonth(row.month)}
-                          </span>
-                          <span className="font-semibold text-primary font-inter">
-                            {row.total_sessions} session
-                            {row.total_sessions === 1 ? '' : 's'}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <div className="space-y-4">
+                    {monthlyClaims.map((claim) => (
+                      <div
+                        key={claim.month}
+                        className="flex justify-between items-center border-b border-neutral pb-3 last:border-0"
+                      >
+                        <span className="font-semibold text-dark font-inter">
+                          {claim.month}
+                        </span>
+                        <span className="font-semibold text-primary font-inter">
+                          {claim.amount}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
 
                   <button
                     onClick={() => navigate('/claims-verification')}
@@ -185,39 +153,81 @@ const AdminDashboard = () => {
                 </h3>
 
                 <Card>
-                  {loading ? (
-                    <p className="py-6 text-center text-neutral font-inter">
-                      Loading…
-                    </p>
-                  ) : pendingAppointments.length === 0 ? (
-                    <p className="py-6 text-center text-neutral font-inter">
-                      No pending appointments
-                    </p>
-                  ) : (
-                    <div className="space-y-4">
-                      {pendingAppointments.map((appointment) => (
+                  <div className="space-y-3">
+                    {currentAppointments.length > 0 ? (
+                      currentAppointments.map((appointment, index) => (
                         <div
-                          key={appointment.application_id}
-                          className="border-b border-neutral pb-4 last:border-0"
+                          key={`${appointment.module}-${appointment.date}-${index}`}
+                          className="border-b border-neutral/60 pb-3 last:border-0"
                         >
-                          <div className="flex justify-between items-start gap-4">
-                            <div>
-                              <p className="font-semibold text-dark font-inter">
+                          <div className="flex justify-between items-start gap-3">
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-dark font-inter truncate">
                                 {appointment.module}
                               </p>
-                              <p className="text-sm text-neutral mt-1 font-inter">
-                                {appointment.lecturer} → {appointment.student}
+                              <p className="text-xs text-neutral mt-1 font-inter truncate">
+                                {appointment.lecturer} → {appointment.assistant}
                               </p>
-                              <p className="text-sm text-neutral mt-1 font-inter">
-                                {formatDate(appointment.date_submitted)}
+                              <p className="text-xs text-neutral mt-1 font-inter">
+                                {appointment.date}
                               </p>
                             </div>
-                            <StatusBadge status={appointment.status} />
+                            <div className="shrink-0">
+                              <StatusBadge status={appointment.status} />
+                            </div>
                           </div>
                         </div>
-                      ))}
+                      ))
+                    ) : (
+                      <p className="text-sm text-neutral font-inter">No pending appointments.</p>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-xs font-inter text-neutral">
+                      Showing {currentAppointments.length > 0 ? (appointmentPage - 1) * APPOINTMENTS_PER_PAGE + 1 : 0}
+                      {pendingAppointments.length > 0 ? `-${Math.min(appointmentPage * APPOINTMENTS_PER_PAGE, pendingAppointments.length)}` : ''}
+                      {pendingAppointments.length > 0 ? ` of ${pendingAppointments.length}` : ''}
+                    </span>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setAppointmentPage((page) => Math.max(page - 1, 1))}
+                        disabled={appointmentPage === 1}
+                        aria-label="Previous page"
+                        className="text-2xl leading-none text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:text-primary-dark"
+                      >
+                        ‹
+                      </button>
+
+                      <div className="flex items-center gap-2">
+                        {Array.from({ length: totalAppointmentPages }, (_, index) => index + 1).map((page) => (
+                          <button
+                            key={page}
+                            type="button"
+                            aria-label={`Go to page ${page}`}
+                            onClick={() => setAppointmentPage(page)}
+                            className={`h-2 w-2 rounded-full transition ${
+                              page === appointmentPage
+                                ? 'bg-primary'
+                                : 'bg-primary/30 hover:bg-primary/60'
+                            }`}
+                          />
+                        ))}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => setAppointmentPage((page) => Math.min(page + 1, totalAppointmentPages))}
+                        disabled={appointmentPage === totalAppointmentPages}
+                        aria-label="Next page"
+                        className="text-2xl leading-none text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:text-primary-dark"
+                      >
+                        ›
+                      </button>
                     </div>
-                  )}
+                  </div>
 
                   <button
                     onClick={() => navigate('/appointment-approvals')}
@@ -229,7 +239,9 @@ const AdminDashboard = () => {
               </section>
             </div>
 
-            {/* ADMINISTRATOR ACTIONS */}
+            {/* ================================
+                ADMINISTRATOR ACTIONS
+            ================================= */}
             <section className="mb-8">
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 Administrator Actions
@@ -266,7 +278,9 @@ const AdminDashboard = () => {
               </div>
             </section>
 
-            {/* PAYMENT INFORMATION */}
+            {/* ================================
+                PAYMENT INFORMATION
+            ================================= */}
             <section>
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 Payment Information
@@ -295,6 +309,7 @@ const AdminDashboard = () => {
           </div>
         </main>
       </div>
+
     </div>
   );
 };
