@@ -31,11 +31,11 @@ class AdminRepository {
     static async getMonthlyWorkSessions() {
         const query = `
             SELECT
-                TO_CHAR("StartTime", 'YYYY-MM') AS month,
+                TO_CHAR("StartTime", 'FMMonth') AS month,
                 COUNT(*) AS total_sessions
             FROM "WORK_SESSION"
             WHERE "StartTime" >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months'
-            GROUP BY TO_CHAR("StartTime", 'YYYY-MM')
+            GROUP BY TO_CHAR("StartTime", 'FMMonth')
             ORDER BY month;
         `;
 
