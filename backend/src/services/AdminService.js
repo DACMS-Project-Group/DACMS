@@ -5,11 +5,13 @@ class AdminService {
     static async getDashboardSummary() {
         const stats = await AdminRepository.getDashboardMetrics();
         const monthlyWork = await AdminRepository.getMonthlyWorkSessions();
+        const monthlyClaims = await AdminRepository.getMonthlyClaims();
         const pendingAppointments = await AdminRepository.getPendingAppointments();
 
         return {
             stats,
             monthlyWork,
+            monthlyClaims,
             pendingAppointments
         };
     }

@@ -8,6 +8,8 @@ import Navbar from '../components/Navbar';
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [appointmentPage, setAppointmentPage] = useState(1);
+  const APPOINTMENTS_PER_PAGE = 4;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -39,13 +41,22 @@ const AdminDashboard = () => {
     { title: 'Budget Usage', value: '--' },
   ];
 
-  const monthlyClaims = [
-    { month: 'August', amount: 'R 45 000' },
-    { month: 'July', amount: 'R 38 500' },
-    { month: 'June', amount: 'R 42 750' },
-  ];
+  const monthlyClaims = data?.monthlyClaims || [];
 
   const pendingAppointments = data?.pendingAppointments || [];
+  const totalAppointmentPages = Math.max(
+    Math.ceil(pendingAppointments.length / APPOINTMENTS_PER_PAGE),
+    1
+  );
+
+  useEffect(() => {
+    setAppointmentPage((currentPage) => Math.min(currentPage, totalAppointmentPages));
+  }, [totalAppointmentPages]);
+
+  const currentAppointments = pendingAppointments.slice(
+    (appointmentPage - 1) * APPOINTMENTS_PER_PAGE,
+    appointmentPage * APPOINTMENTS_PER_PAGE
+  );
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -142,28 +153,80 @@ const AdminDashboard = () => {
                 </h3>
 
                 <Card>
-                  <div className="space-y-4">
-                    {pendingAppointments.map((appointment, index) => (
-                      <div
-                        key={index}
-                        className="border-b border-neutral pb-4 last:border-0"
-                      >
-                        <div className="flex justify-between items-start gap-4">
-                          <div>
-                            <p className="font-semibold text-dark font-inter">
-                              {appointment.module}
-                            </p>
-                            <p className="text-sm text-neutral mt-1 font-inter">
-                              {appointment.lecturer} → {appointment.assistant}
-                            </p>
-                            <p className="text-sm text-neutral mt-1 font-inter">
-                              {appointment.date}
-                            </p>
+                  <div className="space-y-3">
+                    {currentAppointments.length > 0 ? (
+                      currentAppointments.map((appointment, index) => (
+                        <div
+                          key={`${appointment.module}-${appointment.date}-${index}`}
+                          className="border-b border-neutral/60 pb-3 last:border-0"
+                        >
+                          <div className="flex justify-between items-start gap-3">
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-dark font-inter truncate">
+                                {appointment.module}
+                              </p>
+                              <p className="text-xs text-neutral mt-1 font-inter truncate">
+                                {appointment.lecturer} → {appointment.assistant}
+                              </p>
+                              <p className="text-xs text-neutral mt-1 font-inter">
+                                {appointment.date}
+                              </p>
+                            </div>
+                            <div className="shrink-0">
+                              <StatusBadge status={appointment.status} />
+                            </div>
                           </div>
-                          <StatusBadge status={appointment.status} />
                         </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-neutral font-inter">No pending appointments.</p>
+                    )}
+                  </div>
+
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <span className="text-xs font-inter text-neutral">
+                      Showing {currentAppointments.length > 0 ? (appointmentPage - 1) * APPOINTMENTS_PER_PAGE + 1 : 0}
+                      {pendingAppointments.length > 0 ? `-${Math.min(appointmentPage * APPOINTMENTS_PER_PAGE, pendingAppointments.length)}` : ''}
+                      {pendingAppointments.length > 0 ? ` of ${pendingAppointments.length}` : ''}
+                    </span>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setAppointmentPage((page) => Math.max(page - 1, 1))}
+                        disabled={appointmentPage === 1}
+                        aria-label="Previous page"
+                        className="text-2xl leading-none text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:text-primary-dark"
+                      >
+                        ‹
+                      </button>
+
+                      <div className="flex items-center gap-2">
+                        {Array.from({ length: totalAppointmentPages }, (_, index) => index + 1).map((page) => (
+                          <button
+                            key={page}
+                            type="button"
+                            aria-label={`Go to page ${page}`}
+                            onClick={() => setAppointmentPage(page)}
+                            className={`h-2 w-2 rounded-full transition ${
+                              page === appointmentPage
+                                ? 'bg-primary'
+                                : 'bg-primary/30 hover:bg-primary/60'
+                            }`}
+                          />
+                        ))}
                       </div>
-                    ))}
+
+                      <button
+                        type="button"
+                        onClick={() => setAppointmentPage((page) => Math.min(page + 1, totalAppointmentPages))}
+                        disabled={appointmentPage === totalAppointmentPages}
+                        aria-label="Next page"
+                        className="text-2xl leading-none text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:text-primary-dark"
+                      >
+                        ›
+                      </button>
+                    </div>
                   </div>
 
                   <button
