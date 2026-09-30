@@ -1,9 +1,13 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { liveNotifs } from '../contexts/NotificationContext'
 =======
 >>>>>>> 3b63ca8 (Started implementing api's)
+=======
+import { liveNotifs } from '../contexts/NotificationContext'
+>>>>>>> 0292282 (Added unread notification badge)
 
 const Sidebar = ({ userRole = 'student' }) => {
   // Normalise the role so that Lecturer, LECTURER, lecturer, etc.
@@ -12,9 +16,13 @@ const Sidebar = ({ userRole = 'student' }) => {
 
   const { logout } = useAuth();
 <<<<<<< HEAD
+<<<<<<< HEAD
   const { unreadCount } = liveNotifs();
 =======
 >>>>>>> 3b63ca8 (Started implementing api's)
+=======
+  const { unreadCount } = liveNotifs();
+>>>>>>> 0292282 (Added unread notification badge)
 
   // Student Navigation
   const studentNavItems = [
