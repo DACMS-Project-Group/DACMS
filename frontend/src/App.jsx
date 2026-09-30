@@ -57,47 +57,34 @@ function App() {
         <NotificationProvider>
           <Routes>
 
-            {/* ===== PUBLIC ROUTES ===== */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<Login />} />
+          {/* ===== PUBLIC ROUTES ===== */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
 
-            {/* ===== STUDENT ROUTES ===== */}  
-            <Route element={<ProtectedRoute requiredRoles={['student']} />}>
-              <Route path="/student-dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<StudentProfile />} />
-              <Route path="/applications" element={<Applications />} />
-              <Route path="/apply-for-assistant" element={<ApplyForAssistant />} />
-              <Route path="/application-detail/:id" element={<ApplicationDetail />} />
-              <Route path="/notifications" element={<Notifications />} />
-              <Route path="/work-tracking" element={<WorkTracking />} />
-              <Route path="/session-detail/:id" element={<SessionDetail />} />
-              <Route path="/claims" element={<Claims />} />
-              <Route path="/generate-new-claim" element={<GenerateNewClaim />} />
-              <Route path="/claim-detail/:id" element={<ClaimDetail />} />
-            </Route>
+          {/* ===== STUDENT ROUTES ===== */}
+          <Route element={<ProtectedRoute requiredRoles={['student']} />}>
+            <Route path="/student-dashboard" element={<Dashboard />} />
+            <Route path="/profile" element={<StudentProfile />} />
+            <Route path="/applications" element={<Applications />} />
+            <Route path="/apply-for-assistant" element={<ApplyForAssistant />} />
+            <Route path="/application-detail/:id" element={<ApplicationDetail />} />
+            <Route path="/notifications" element={<Notifications />} />
+            <Route path="/work-tracking" element={<WorkTracking />} />
+            <Route path="/session-detail/:id" element={<SessionDetail />} />
+            <Route path="/claims" element={<Claims />} />
+            <Route path="/generate-new-claim" element={<GenerateNewClaim />} />
+            <Route path="/claim-detail/:id" element={<ClaimDetail />} />
+          </Route>
 
-            {/* ===== LECTURER ROUTES ===== */}
-            <Route element={<ProtectedRoute requiredRoles={['lecturer']} />}>
-              <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
-              <Route path="/review-applications" element={<ReviewApplications />} />
-              <Route path="/application-review/:id" element={<ApplicationReview />} />
-              <Route path="/assistant-positions" element={<AssistantPositions />} />
-            </Route>
+          {/* ===== LECTURER ROUTES ===== */}
+          <Route element={<ProtectedRoute requiredRoles={['lecturer']} />}>
+            <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
+            <Route path="/review-applications" element={<ReviewApplications />} />
+            <Route path="/application-review/:id" element={<ApplicationReview />} />
             <Route
               path="/assign-responsibilities"
               element={<AssignAssistantResponsibilities />}
-              
             />
-           <Route path="/verify-hours" element={<VerifyWorkHours />} />
-            {/* ===== LECTURER ROUTES ===== */}
-            <Route element={<ProtectedRoute requiredRoles={['lecturer']} />}>
-              <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
-              <Route path="/review-applications" element={<ReviewApplications />} />
-              <Route path="/application-review/:id" element={<ApplicationReview />} />
-              <Route
-                path="/assign-responsibilities"
-                element={<AssignAssistantResponsibilities />}
-              />
             <Route path="/review-claims" element={<ReviewClaims />} />
             <Route
               path="/assistant-positions"
@@ -106,27 +93,7 @@ function App() {
             <Route path="/verify-hours" element={<VerifyWorkHours />} />
             <Route path="/notifications" element={<Notifications />} />
              <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
-            </Route>
-
-          {/* ===== LECTURER ROUTES ===== */}
-          <Route element={<ProtectedRoute requiredRoles={['lecturer']} />}>
-            <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
-            <Route path="/review-applications" element={<ReviewApplications />} />
-            <Route path="/application-review/:id" element={<ApplicationReview />} />
-              <Route path="/assistant-positions" element={<AssistantPositions />} />
-            <Route
-              path="/assign-responsibilities"
-              element={<AssignAssistantResponsibilities />}
-              
-            />
-           <Route path="/verify-hours" element={<VerifyWorkHours />} />
-            <Route path="/notifications" element={<Notifications />} />
           </Route>
-
-          
-
-            {/* ===== FALLBACK ===== */}
-            <Route path="*" element={<Navigate to="/" replace />} />
 
           {/* ===== ADMIN ROUTES ===== */}
           <Route element={<ProtectedRoute requiredRoles={['admin']} />}>
@@ -135,6 +102,14 @@ function App() {
             <Route path="/create-budget" element={<CreateBudget />} />
             <Route path="/edit-budget/:id" element={<EditBudget />} />
             <Route path="/budget-details/:id" element={<BudgetDetails />} />
+            <Route
+              path="/claims-verification"
+              element={<ClaimsVerification />}
+            />
+            <Route
+              path="/claim-review/:id"
+              element={<ClaimReview />}
+            />
             <Route path="/export-payments" element={<ExportPayments />} />
             <Route
               path="/appointment-approvals"
@@ -152,7 +127,7 @@ function App() {
           {/* ===== FALLBACK ===== */}
           <Route path="*" element={<Navigate to="/" replace />} />
 
-        </Routes>
+          </Routes>
         </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>
