@@ -92,6 +92,8 @@ const Notifications = () => {
       } catch (err) {
       try {
         await apiPatch(`/notifications/read/${id}`);
+        await fetchNotifications();
+
       } catch (err) {
       }
     }

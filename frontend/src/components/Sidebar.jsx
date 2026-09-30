@@ -9,7 +9,7 @@ const Sidebar = ({ userRole = 'student' }) => {
 
   const { logout } = useAuth();
   const { unreadCount } = liveNotifs();
-
+  
   // Student Navigation
   const studentNavItems = [
     { name: 'Dashboard', href: '/student-dashboard' },
