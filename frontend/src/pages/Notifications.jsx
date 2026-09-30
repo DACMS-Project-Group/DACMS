@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import { useAuth } from '../contexts/AuthContext';
 import { apiGet, apiPatch } from '../api';
+import { liveNotifs } from '../contexts/NotificationContext';
 
 const Notifications = () => {
   const { user } = useAuth();
@@ -13,6 +14,8 @@ const Notifications = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [expandedId, setExpandedId] = useState(null);
+
+  const { fetchNotifications } = liveNotifs();
 
   // ---- Load notifications on mount ----
   useEffect(() => {
@@ -31,9 +34,10 @@ const Notifications = () => {
         if (!cancelled) {
           setNotifications(
             list.map((n) => ({
-              id: n.NotificationId ?? n.notification_id ?? n.id,
-              title: n.title,
-              message: n.message,
+              id: n.NotificationID ?? n.notification_id ?? n.id, 
+              title: n.Subject,
+              type: n.NotificationType,
+              message: n.Message,
               timestamp: n.CreatedTimestamp ?? n.created_at ?? n.timestamp,
               read: Boolean(n.IsRead ?? n.is_read ?? n.read),
               type: n.type || 'info',
@@ -68,8 +72,11 @@ const Notifications = () => {
         current.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
 
+
       try {
         await apiPatch(`/notifications/read/${id}`);
+        await fetchNotifications();
+
       } catch (err) {
         // Roll back on failure
         setNotifications((current) =>
@@ -94,9 +101,10 @@ const Notifications = () => {
       await Promise.all(
         unread.map((n) => apiPatch(`/notifications/read/${n.id}`))
       );
+      await fetchNotifications();
     } catch (err) {
       console.error('Some notifications failed to mark as read:', err);
-    }
+    }   
   };
 
   // ---- Delete is not supported by the backend yet ----

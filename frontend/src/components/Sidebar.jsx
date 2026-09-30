@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { liveNotifs } from '../contexts/NotificationContext'
 
 const Sidebar = ({ userRole = 'student' }) => {
   // Normalise the role so that Lecturer, LECTURER, lecturer, etc.
@@ -7,6 +8,7 @@ const Sidebar = ({ userRole = 'student' }) => {
   const role = userRole?.toLowerCase().trim();
 
   const { logout } = useAuth();
+  const { unreadCount } = liveNotifs();
 
   // Student Navigation
   const studentNavItems = [
@@ -66,7 +68,13 @@ const Sidebar = ({ userRole = 'student' }) => {
               `
             }
           >
-            {item.name}
+            <span>{item.name}</span>
+
+            {item.name === 'Notifications'  && (
+              <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full ml-2">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>
