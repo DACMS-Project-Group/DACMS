@@ -2,6 +2,7 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { liveNotifs } from '../contexts/NotificationContext'
 
+
 const Sidebar = ({ userRole = 'student' }) => {
   // Normalise the role so that Lecturer, LECTURER, lecturer, etc.
   // are treated the same way.
