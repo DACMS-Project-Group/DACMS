@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import { useAuth } from '../contexts/AuthContext';
 import { apiGet, apiPatch } from '../api';
+import { liveNotifs } from '../contexts/NotificationContext';
 
 const Notifications = () => {
   const { user } = useAuth();
@@ -64,8 +65,11 @@ const Notifications = () => {
         current.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
 
+
       try {
         await apiPatch(`/notifications/read/${id}`);
+        await fetchNotifications();
+
       } catch (err) {
         setNotifications((current) =>
           current.map((n) => (n.id === id ? { ...n, read: false } : n))
@@ -87,9 +91,10 @@ const Notifications = () => {
       await Promise.all(
         unread.map((n) => apiPatch(`/notifications/read/${n.id}`))
       );
+      await fetchNotifications();
     } catch (err) {
       console.error('Some notifications failed to mark as read:', err);
-    }
+    }   
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
