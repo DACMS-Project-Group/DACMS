@@ -1,5 +1,6 @@
 import LecturerService from '../services/LecturerService.js';
 import getAuthUserId from '../utils/getAuthUserId.js';
+import { writeAuditLog } from '../utils/auditLogger.js';
 
 class LecturerController {
     static async getDashboardSummary(req, res) {
@@ -40,6 +41,19 @@ class LecturerController {
             const decision = req.body.decision;
 
             const data = await LecturerService.reviewApplication(lecturerId, applicationId, decision);
+
+            if (data) {
+                await writeAuditLog({
+                    userId: lecturerId,
+                    role: 'lecturer',
+                    action: 'LECTURER_APPOINTMENT_RECOMMENDATION',
+                    recordType: 'application',
+                    recordId: applicationId,
+                    event: {
+                        decision
+                    }
+                });
+            }
             return res.status(200).json(data);
         } catch (error) {
             return res.status(500).json({ error: error.message });
@@ -108,6 +122,19 @@ class LecturerController {
             const status = req.body.status;
 
             const data = await LecturerService.reviewClaim(lecturerId, claimId, status);
+
+            if (data) {
+                await writeAuditLog({
+                    userId: lecturerId,
+                    role: 'lecturer',
+                    action: 'LECTURER_CLAIM_REVIEW',
+                    recordType: 'claim',
+                    recordId: claimId,
+                    event: {
+                        new_status: status
+                    }
+                });
+            }
             return res.status(200).json(data);
         } catch (error) {
             return res.status(500).json({ error: error.message });

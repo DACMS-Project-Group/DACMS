@@ -10,3 +10,5 @@
 
 # Docker persistent volume local backups
 .docker/
+
+backend/logs/*.log
