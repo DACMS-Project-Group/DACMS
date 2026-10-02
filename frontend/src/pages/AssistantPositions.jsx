@@ -1,55 +1,34 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { apiGet } from '../api';
 
 const AssistantPositions = () => {
-  const navigate = useNavigate();
+  // Assistant positions start empty.
 
-  const [positions, setPositions] = useState([
-    {
-      id: 1,
-      moduleCode: 'CMPG311',
-      moduleName: 'Databases',
-      title: 'Assistant Marker',
-      responsibilities: 'Marking / assessment assistance',
-      maxHours: 40,
-      hourlyRate: 45,
-      status: 'Open',
-      dateCreated: '2026-09-01',
-    },
-    {
-      id: 2,
-      moduleCode: 'CMPG312',
-      moduleName: 'Operating Systems',
-      title: 'Tutorial Assistant',
-      responsibilities: 'Tutorial assistance',
-      maxHours: 30,
-      hourlyRate: 45,
-      status: 'Open',
-      dateCreated: '2026-09-03',
-    },
-    {
-      id: 3,
-      moduleCode: 'CMPG311',
-      moduleName: 'Databases',
-      title: 'Lab Assistant',
-      responsibilities: 'Laboratory assistance',
-      maxHours: 20,
-      hourlyRate: 45,
-      status: 'Closed',
-      dateCreated: '2026-08-20',
-    },
-  ]);
+  const [positions, setPositions] = useState([]);
 
-  const modules = [
-    { code: 'CMPG311', name: 'Databases' },
-    { code: 'CMPG312', name: 'Operating Systems' },
-    { code: 'CMPG313', name: 'Computer Networks' },
-    { code: 'CMPG314', name: 'Software Engineering' },
-  ];
+  // Real budget information from the backend.
+  const [budgets, setBudgets] = useState([]);
+  const [loadingBudgets, setLoadingBudgets] = useState(true);
+  const [budgetError, setBudgetError] = useState('');
+
+  const emptyForm = {
+    moduleId: '',
+    moduleCode: '',
+    moduleName: '',
+    title: '',
+    responsibilities: '',
+    maxHours: '',
+    hourlyRate: '',
+  };
+
+  const [formData, setFormData] = useState(emptyForm);
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [error, setError] = useState('');
 
   const responsibilityOptions = [
     'Tutorial assistance',
@@ -62,35 +41,90 @@ const AssistantPositions = () => {
     'Other',
   ];
 
-  const emptyForm = {
-    moduleCode: '',
-    title: '',
-    responsibilities: '',
-    maxHours: '',
-    hourlyRate: '',
-  };
+  /*
+   * Fetch the lecturer's budget information.
+   *
+   * Existing backend endpoint:
+   * GET /api/lecturer/budgets
+   */
+  useEffect(() => {
+    const loadBudgets = async () => {
+      try {
+        setLoadingBudgets(true);
+        setBudgetError('');
 
-  const [formData, setFormData] = useState(emptyForm);
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [error, setError] = useState('');
+        const data = await apiGet('/lecturer/budgets');
 
-  const formatDate = (date) =>
-    new Date(`${date}T00:00:00`).toLocaleDateString('en-ZA', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    });
+        setBudgets(data?.budgets || []);
+      } catch (err) {
+        console.error('Error loading lecturer budgets:', err);
+
+        setBudgetError(
+          err.message ||
+            'Unable to load your module budget information.'
+        );
+      } finally {
+        setLoadingBudgets(false);
+      }
+    };
+
+    loadBudgets();
+  }, []);
+
+  /*
+   * Convert the backend budget information into
+   * module information used by the form.
+   *
+   * The backend should provide:
+   * module_id
+   * module_code
+   * module_name
+   * max_allowable_work_hours
+   */
+  const modules = budgets.map((budget) => ({
+    id: budget.module_id,
+    code: budget.module_code,
+    name:
+      budget.module_name ||
+      budget.module_description ||
+      budget.module_code,
+    maxHours: Number(budget.max_allowable_work_hours || 0),
+    allocatedBudget: Number(budget.allocated_budget || 0),
+    currentUsage: Number(budget.current_budget_usage || 0),
+    remainingBudget: Number(budget.remaining_budget || 0),
+  }));
 
   const formatAmount = (amount) =>
-    `R ${Number(amount).toLocaleString('en-ZA', {
+    `R ${Number(amount || 0).toLocaleString('en-ZA', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((previous) => ({ ...previous, [name]: value }));
+
+    if (name === 'moduleId') {
+      const selectedModule = modules.find(
+        (module) => String(module.id) === String(value)
+      );
+
+      setFormData((previous) => ({
+        ...previous,
+        moduleId: value,
+        moduleCode: selectedModule?.code || '',
+        moduleName: selectedModule?.name || '',
+        maxHours: selectedModule?.maxHours || '',
+      }));
+
+      setError('');
+      return;
+    }
+
+    setFormData((previous) => ({
+      ...previous,
+      [name]: value,
+    }));
+
     setError('');
   };
 
@@ -103,12 +137,15 @@ const AssistantPositions = () => {
 
   const handleOpenEdit = (position) => {
     setFormData({
+      moduleId: position.moduleId,
       moduleCode: position.moduleCode,
+      moduleName: position.moduleName,
       title: position.title,
       responsibilities: position.responsibilities,
       maxHours: position.maxHours,
-      hourlyRate: position.hourlyRate,
+      hourlyRate: position.hourlyRate || '',
     });
+
     setEditingId(position.id);
     setError('');
     setShowForm(true);
@@ -126,27 +163,48 @@ const AssistantPositions = () => {
     setError('');
 
     if (
-      !formData.moduleCode ||
+      !formData.moduleId ||
       !formData.title.trim() ||
       !formData.responsibilities ||
-      !formData.maxHours ||
-      !formData.hourlyRate
+      !formData.maxHours
     ) {
-      setError('Please complete all fields before saving the Assistant position.');
+      setError(
+        'Please complete all required fields before saving the Assistant position.'
+      );
       return;
     }
 
-    if (Number(formData.maxHours) <= 0) {
+    const selectedModule = modules.find(
+      (module) =>
+        String(module.id) === String(formData.moduleId)
+    );
+
+    if (!selectedModule) {
+      setError('Please select a valid module.');
+      return;
+    }
+
+    const requestedHours = Number(formData.maxHours);
+    const availableHours = Number(selectedModule.maxHours);
+
+    if (requestedHours <= 0) {
       setError('Maximum hours must be greater than zero.');
       return;
     }
 
-    if (Number(formData.hourlyRate) <= 0) {
-      setError('Hourly rate must be greater than zero.');
+    if (availableHours <= 0) {
+      setError(
+        'This module does not currently have available work hours in its budget.'
+      );
       return;
     }
 
-    const module = modules.find((m) => m.code === formData.moduleCode);
+    if (requestedHours > availableHours) {
+      setError(
+        `Maximum hours cannot exceed the ${availableHours} hours allocated to this module.`
+      );
+      return;
+    }
 
     if (editingId) {
       setPositions((current) =>
@@ -154,12 +212,13 @@ const AssistantPositions = () => {
           position.id === editingId
             ? {
                 ...position,
-                moduleCode: formData.moduleCode,
-                moduleName: module?.name || '',
+                moduleId: selectedModule.id,
+                moduleCode: selectedModule.code,
+                moduleName: selectedModule.name,
                 title: formData.title.trim(),
                 responsibilities: formData.responsibilities,
-                maxHours: Number(formData.maxHours),
-                hourlyRate: Number(formData.hourlyRate),
+                maxHours: requestedHours,
+                hourlyRate: formData.hourlyRate,
               }
             : position
         )
@@ -167,17 +226,21 @@ const AssistantPositions = () => {
     } else {
       const newPosition = {
         id: Date.now(),
-        moduleCode: formData.moduleCode,
-        moduleName: module?.name || '',
+        moduleId: selectedModule.id,
+        moduleCode: selectedModule.code,
+        moduleName: selectedModule.name,
         title: formData.title.trim(),
         responsibilities: formData.responsibilities,
-        maxHours: Number(formData.maxHours),
-        hourlyRate: Number(formData.hourlyRate),
+        maxHours: requestedHours,
+        hourlyRate: formData.hourlyRate,
         status: 'Open',
         dateCreated: new Date().toISOString().slice(0, 10),
       };
 
-      setPositions((current) => [newPosition, ...current]);
+      setPositions((current) => [
+        ...current,
+        newPosition,
+      ]);
     }
 
     handleCancel();
@@ -189,7 +252,10 @@ const AssistantPositions = () => {
         position.id === id
           ? {
               ...position,
-              status: position.status === 'Open' ? 'Closed' : 'Open',
+              status:
+                position.status === 'Open'
+                  ? 'Closed'
+                  : 'Open',
             }
           : position
       )
@@ -197,8 +263,19 @@ const AssistantPositions = () => {
   };
 
   const handleDelete = (id) => {
-    if (!window.confirm('Delete this Assistant position?')) return;
-    setPositions((current) => current.filter((p) => p.id !== id));
+    if (
+      !window.confirm(
+        'Delete this Assistant position?'
+      )
+    ) {
+      return;
+    }
+
+    setPositions((current) =>
+      current.filter(
+        (position) => position.id !== id
+      )
+    );
   };
 
   return (
@@ -223,7 +300,8 @@ const AssistantPositions = () => {
                 </h2>
 
                 <p className="mt-2 text-neutral">
-                  Create and manage Assistant opportunities for your modules.
+                  Create and manage Assistant opportunities
+                  for your modules.
                 </p>
               </div>
 
@@ -242,14 +320,22 @@ const AssistantPositions = () => {
               <Card className="mb-6">
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold text-primary-dark">
-                    {editingId ? 'Edit Assistant Position' : 'Create Assistant Position'}
+                    {editingId
+                      ? 'Edit Assistant Position'
+                      : 'Create Assistant Position'}
                   </h2>
 
                   <p className="mt-1 text-sm text-neutral">
-                    Define the position details, hour allocation and rate for
-                    this Assistant opportunity.
+                    Define the position details and hour
+                    allocation for this Assistant opportunity.
                   </p>
                 </div>
+
+                {budgetError && (
+                  <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                    {budgetError}
+                  </div>
+                )}
 
                 {error && (
                   <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -261,22 +347,31 @@ const AssistantPositions = () => {
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                     <div>
                       <label
-                        htmlFor="moduleCode"
+                        htmlFor="moduleId"
                         className="mb-2 block text-sm font-medium text-gray-700"
                       >
                         Module
                       </label>
 
                       <select
-                        id="moduleCode"
-                        name="moduleCode"
-                        value={formData.moduleCode}
+                        id="moduleId"
+                        name="moduleId"
+                        value={formData.moduleId}
                         onChange={handleChange}
-                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                        disabled={loadingBudgets}
+                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary disabled:bg-gray-100"
                       >
-                        <option value="">Select a module</option>
+                        <option value="">
+                          {loadingBudgets
+                            ? 'Loading modules...'
+                            : 'Select a module'}
+                        </option>
+
                         {modules.map((module) => (
-                          <option key={module.code} value={module.code}>
+                          <option
+                            key={module.id}
+                            value={module.id}
+                          >
                             {module.code} - {module.name}
                           </option>
                         ))}
@@ -317,12 +412,20 @@ const AssistantPositions = () => {
                         onChange={handleChange}
                         className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                       >
-                        <option value="">Select responsibilities</option>
-                        {responsibilityOptions.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
+                        <option value="">
+                          Select responsibilities
+                        </option>
+
+                        {responsibilityOptions.map(
+                          (option) => (
+                            <option
+                              key={option}
+                              value={option}
+                            >
+                              {option}
+                            </option>
+                          )
+                        )}
                       </select>
                     </div>
 
@@ -339,11 +442,32 @@ const AssistantPositions = () => {
                         name="maxHours"
                         type="number"
                         min="1"
+                        max={
+                          formData.moduleId
+                            ? modules.find(
+                                (module) =>
+                                  String(module.id) ===
+                                  String(
+                                    formData.moduleId
+                                  )
+                              )?.maxHours
+                            : undefined
+                        }
                         value={formData.maxHours}
                         onChange={handleChange}
-                        placeholder="e.g. 40"
+                        placeholder="Select a module first"
                         className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                       />
+
+                      {formData.moduleId && (
+                        <p className="mt-2 text-xs text-neutral">
+                          Maximum available hours:{' '}
+                          {selectedModuleMaxHours(
+                            modules,
+                            formData.moduleId
+                          )}
+                        </p>
+                      )}
                     </div>
 
                     <div>
@@ -358,12 +482,18 @@ const AssistantPositions = () => {
                         id="hourlyRate"
                         name="hourlyRate"
                         type="number"
-                        min="1"
+                        min="0"
+                        step="0.01"
                         value={formData.hourlyRate}
                         onChange={handleChange}
-                        placeholder="e.g. 45"
+                        placeholder="Payment scale rate"
                         className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                       />
+
+                      <p className="mt-2 text-xs text-neutral">
+                        The hourly rate should come from the
+                        applicable payment scale.
+                      </p>
                     </div>
                   </div>
 
@@ -372,7 +502,9 @@ const AssistantPositions = () => {
                       type="submit"
                       className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark"
                     >
-                      {editingId ? 'Save Changes' : 'Create Position'}
+                      {editingId
+                        ? 'Save Changes'
+                        : 'Create Position'}
                     </button>
 
                     <button
@@ -405,8 +537,8 @@ const AssistantPositions = () => {
                   </p>
 
                   <p className="mt-1 text-sm text-neutral">
-                    Create your first Assistant position to make it available to
-                    students.
+                    Create your first Assistant position to
+                    make it available to students.
                   </p>
                 </div>
               ) : (
@@ -417,24 +549,27 @@ const AssistantPositions = () => {
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Module
                         </th>
+
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Position
                         </th>
+
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Responsibilities
                         </th>
+
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Max Hours
                         </th>
+
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Rate
                         </th>
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                          Created
-                        </th>
+
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Status
                         </th>
+
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Actions
                         </th>
@@ -449,6 +584,9 @@ const AssistantPositions = () => {
                         >
                           <td className="px-4 py-4 text-sm font-medium text-primary-dark">
                             {position.moduleCode}
+                            <span className="block text-xs font-normal text-neutral">
+                              {position.moduleName}
+                            </span>
                           </td>
 
                           <td className="px-4 py-4 text-sm text-gray-700">
@@ -464,22 +602,28 @@ const AssistantPositions = () => {
                           </td>
 
                           <td className="px-4 py-4 text-sm text-gray-700">
-                            {formatAmount(position.hourlyRate)}
-                          </td>
-
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {formatDate(position.dateCreated)}
+                            {position.hourlyRate
+                              ? formatAmount(
+                                  position.hourlyRate
+                                )
+                              : 'Not set'}
                           </td>
 
                           <td className="px-4 py-4">
-                            <StatusBadge status={position.status} />
+                            <StatusBadge
+                              status={position.status}
+                            />
                           </td>
 
                           <td className="px-4 py-4">
                             <div className="flex flex-wrap gap-3">
                               <button
                                 type="button"
-                                onClick={() => handleOpenEdit(position)}
+                                onClick={() =>
+                                  handleOpenEdit(
+                                    position
+                                  )
+                                }
                                 className="font-medium text-primary transition hover:text-primary-dark"
                               >
                                 Edit
@@ -487,15 +631,26 @@ const AssistantPositions = () => {
 
                               <button
                                 type="button"
-                                onClick={() => handleToggleStatus(position.id)}
+                                onClick={() =>
+                                  handleToggleStatus(
+                                    position.id
+                                  )
+                                }
                                 className="font-medium text-primary transition hover:text-primary-dark"
                               >
-                                {position.status === 'Open' ? 'Close' : 'Reopen'}
+                                {position.status ===
+                                'Open'
+                                  ? 'Close'
+                                  : 'Reopen'}
                               </button>
 
                               <button
                                 type="button"
-                                onClick={() => handleDelete(position.id)}
+                                onClick={() =>
+                                  handleDelete(
+                                    position.id
+                                  )
+                                }
                                 className="font-medium text-red-600 transition hover:text-red-700"
                               >
                                 Delete
@@ -514,6 +669,15 @@ const AssistantPositions = () => {
       </div>
     </div>
   );
+};
+
+const selectedModuleMaxHours = (modules, moduleId) => {
+  const selectedModule = modules.find(
+    (module) =>
+      String(module.id) === String(moduleId)
+  );
+
+  return selectedModule?.maxHours ?? 0;
 };
 
 export default AssistantPositions;

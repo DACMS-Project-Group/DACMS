@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
+import { apiGet, apiPost } from '../api';
 
 const CreateBudget = () => {
   const navigate = useNavigate();
@@ -10,37 +11,50 @@ const CreateBudget = () => {
   const [formData, setFormData] = useState({
     module: '',
     lecturer: '',
-    academicYear: '2026',
+    academicYear: '',
     allocatedAmount: '',
-    currentUsage: '',
+    currentUsage: '0',
     maxHours: '',
   });
 
-  const modules = [
-    {
-      code: 'CMPG321',
-      name: 'Advanced Databases',
-    },
-    {
-      code: 'CMPG323',
-      name: 'Software Engineering',
-    },
-    {
-      code: 'CMPG315',
-      name: 'Programming',
-    },
-    {
-      code: 'CMPG311',
-      name: 'Systems Analysis',
-    },
-  ];
+  const [modules, setModules] = useState([]);
+  const [lecturerList, setLecturerList] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [submitting, setSubmitting] = useState(false);
 
-  const lecturerList = [
-    'Dr John Example',
-    'Prof Jane Example',
-    'Dr Michael Example',
-    'Ms Sarah Example',
-  ];
+  useEffect(() => {
+    const loadBudgetOptions = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const [modulesResponse, lecturersResponse] = await Promise.all([
+          apiGet('/admin/modules'),
+          apiGet('/admin/lecturers'),
+        ]);
+
+        setModules(
+          Array.isArray(modulesResponse)
+            ? modulesResponse
+            : modulesResponse?.data || []
+        );
+
+        setLecturerList(
+          Array.isArray(lecturersResponse)
+            ? lecturersResponse
+            : lecturersResponse?.data || []
+        );
+      } catch (err) {
+        console.error('Failed to load budget options:', err);
+        setError(err.message || 'Failed to load modules and lecturers.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadBudgetOptions();
+  }, []);
 
   const handleChange = (e) => {
     setFormData({
@@ -49,10 +63,51 @@ const CreateBudget = () => {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log('New Budget:', formData);
+    try {
+      setSubmitting(true);
+      setError('');
+
+      if (!formData.module) {
+        throw new Error('Module is required.');
+      }
+
+      if (!formData.lecturer) {
+        throw new Error('Lecturer is required.');
+      }
+
+      if (!formData.academicYear) {
+        throw new Error('Academic year is required.');
+      }
+
+      if (!formData.allocatedAmount) {
+        throw new Error('Allocated amount is required.');
+      }
+
+      if (!formData.maxHours) {
+        throw new Error('Max hours is required.');
+      }
+
+      const budgetData = {
+        module_id: Number(formData.module),
+        lecturer_id: Number(formData.lecturer),
+        allocated_budget: Number(formData.allocatedAmount),
+        current_budget_usage: Number(formData.currentUsage || 0),
+        max_allowable_work_hours: Number(formData.maxHours),
+        academic_year: Number(formData.academicYear),
+      };
+
+      await apiPost('/admin/budgets/create', budgetData);
+
+      navigate('/budget-management');
+    } catch (err) {
+      console.error('Failed to create budget:', err);
+      setError(err.message || 'Failed to create budget.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -87,6 +142,12 @@ const CreateBudget = () => {
               </p>
             </div>
 
+            {error && (
+              <div className="mb-6 p-4 border border-red-300 bg-red-50 text-red-700 rounded-xl font-inter">
+                {error}
+              </div>
+            )}
+
             <form onSubmit={handleSubmit}>
 
               {/* Budget Details */}
@@ -115,18 +176,19 @@ const CreateBudget = () => {
                         value={formData.module}
                         onChange={handleChange}
                         required
+                        disabled={loading || submitting}
                         className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
                       >
                         <option value="">
-                          Select Module
+                          {loading ? 'Loading Modules...' : 'Select Module'}
                         </option>
 
                         {modules.map((module) => (
                           <option
-                            key={module.code}
-                            value={module.code}
+                            key={module.module_id}
+                            value={module.module_id}
                           >
-                            {module.code} - {module.name}
+                            {module.module_code} - {module.module_name}
                           </option>
                         ))}
                       </select>
@@ -147,18 +209,19 @@ const CreateBudget = () => {
                         value={formData.lecturer}
                         onChange={handleChange}
                         required
+                        disabled={loading || submitting}
                         className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
                       >
                         <option value="">
-                          Select Lecturer
+                          {loading ? 'Loading Lecturers...' : 'Select Lecturer'}
                         </option>
 
                         {lecturerList.map((lecturer) => (
                           <option
-                            key={lecturer}
-                            value={lecturer}
+                            key={lecturer.lecturer_id}
+                            value={lecturer.lecturer_id}
                           >
-                            {lecturer}
+                            {lecturer.name} - {lecturer.email}
                           </option>
                         ))}
                       </select>
@@ -173,18 +236,19 @@ const CreateBudget = () => {
                         Academic Year
                       </label>
 
-                      <select
+                      <input
                         id="academicYear"
+                        type="number"
                         name="academicYear"
                         value={formData.academicYear}
                         onChange={handleChange}
+                        min="0"
+                        step="1"
                         required
+                        disabled={loading || submitting}
+                        placeholder="Enter academic year"
                         className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
-                      >
-                        <option value="2026">2026</option>
-                        <option value="2027">2027</option>
-                        <option value="2028">2028</option>
-                      </select>
+                      />
                     </div>
 
                     {/* Allocated Amount */}
@@ -211,6 +275,7 @@ const CreateBudget = () => {
                           min="0"
                           step="0.01"
                           required
+                          disabled={loading || submitting}
                           className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
                         />
 
@@ -241,6 +306,7 @@ const CreateBudget = () => {
                           min="0"
                           step="0.01"
                           required
+                          disabled={loading || submitting}
                           className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
                         />
 
@@ -265,6 +331,7 @@ const CreateBudget = () => {
                         min="0"
                         step="0.5"
                         required
+                        disabled={loading || submitting}
                         className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
                       />
                     </div>
@@ -288,9 +355,10 @@ const CreateBudget = () => {
 
                 <button
                   type="submit"
+                  disabled={submitting || loading}
                   className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
                 >
-                  Create Budget
+                  {submitting ? 'Creating...' : 'Create Budget'}
                 </button>
 
               </div>
