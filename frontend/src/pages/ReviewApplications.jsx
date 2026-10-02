@@ -1,113 +1,110 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { apiGet, apiPatch } from '../api';
+import { useNavigate } from 'react-router-dom';
 
 const ReviewApplications = () => {
-  const [applications, setApplications] = useState([
-    {
-      id: 1,
-      studentName: 'John Smith',
-      studentNumber: '12345678',
-      email: 'john.smith@nwu.ac.za',
-      phone: '071 234 5678',
-      module: 'CMPG323',
-      applicationDate: '01 September 2026',
-      status: 'Pending Review',
-      reason: 'Application to become an Assistant for CMPG323.',
-      documents: [
-        { name: 'Academic Transcript', status: 'Submitted' },
-        { name: 'Certified Identity Document', status: 'Submitted' },
-        { name: 'Certified Highest Qualification', status: 'Submitted' },
-        { name: 'Bank Confirmation Letter', status: 'Submitted' },
-        { name: 'NWU Registration Proof', status: 'Submitted' },
-      ],
-      comment: '',
-    },
-    {
-      id: 2,
-      studentName: 'Sarah Molefe',
-      studentNumber: '23456789',
-      email: 'sarah.molefe@nwu.ac.za',
-      phone: '072 345 6789',
-      module: 'CMPG315',
-      applicationDate: '30 August 2026',
-      status: 'Pending Review',
-      reason: 'Application to become an Assistant for CMPG315.',
-      documents: [
-        { name: 'Academic Transcript', status: 'Submitted' },
-        { name: 'Certified Identity Document', status: 'Submitted' },
-        { name: 'Certified Highest Qualification', status: 'Submitted' },
-        { name: 'Bank Confirmation Letter', status: 'Submitted' },
-        { name: 'NWU Registration Proof', status: 'Submitted' },
-      ],
-      comment: '',
-    },
-    {
-      id: 3,
-      studentName: 'Thabo Mokoena',
-      studentNumber: '34567890',
-      email: 'thabo.mokoena@nwu.ac.za',
-      phone: '073 456 7890',
-      module: 'CMPG321',
-      applicationDate: '28 August 2026',
-      status: 'Approved',
-      reason: 'Application to become an Assistant for CMPG321.',
-      documents: [
-        { name: 'Academic Transcript', status: 'Submitted' },
-        { name: 'Certified Identity Document', status: 'Submitted' },
-        { name: 'Certified Highest Qualification', status: 'Submitted' },
-        { name: 'Bank Confirmation Letter', status: 'Submitted' },
-        { name: 'NWU Registration Proof', status: 'Submitted' },
-      ],
-      comment: 'Application approved. All required documents were verified.',
-    },
-    {
-      id: 4,
-      studentName: 'Lerato Dlamini',
-      studentNumber: '45678901',
-      email: 'lerato.dlamini@nwu.ac.za',
-      phone: '074 567 8901',
-      module: 'CMPG313',
-      applicationDate: '27 August 2026',
-      status: 'Pending Review',
-      reason: 'Application to become an Assistant for CMPG313.',
-      documents: [
-        { name: 'Academic Transcript', status: 'Submitted' },
-        { name: 'Certified Identity Document', status: 'Submitted' },
-        { name: 'Certified Highest Qualification', status: 'Submitted' },
-        { name: 'Bank Confirmation Letter', status: 'Submitted' },
-        { name: 'NWU Registration Proof', status: 'Submitted' },
-      ],
-      comment: '',
-    },
-  ]);
+  
+  const navigate = useNavigate();
+  
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
+  const mapApplication = (app) => ({
+    id:
+      app.application_id ??
+      app.ApplicationID ??
+      app.listingId ??
+      app.id ??
+      Math.random(),
+    moduleCode:
+      app.moduleCode ??
+      app.module_code ??
+      app.ModuleCode ??
+      '—',
+    moduleName:
+      app.moduleName ??
+      app.module_name ??
+      app.ModuleName ??
+      '—',
+    status:
+      app.status ??
+      app.ApplicationStatus ??
+      app.verificationEligibilityStatus ??
+      'Pending',
+    dateSubmitted:
+      app.date_submitted ??
+      app.dateSubmitted ??
+      app.submission_date ??
+      '',
+  });
+
+    // ---- Fetch applications on mount ----
+  useEffect(() => {
+    let cancelled = false;
+  
+    const load = async () => {
+      try {
+        setLoading(true);
+        const data = await apiGet('/lecturer/applications');
+  
+        console.log('Fetched applications:', data);
+
+        const payload = data?.data ?? data;
+        const list = Array.isArray(payload)
+          ? payload
+          : payload?.rows ??
+            payload?.Applications ??
+            payload?.results ??
+            payload?.items ??
+            [];
+  
+        if (!cancelled) {
+          const mappedList = list.map(mapApplication); 
+          setApplications(mappedList);
+          setError('');
+        }
+      } catch (err) {
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+  
+    load();
+  
+  return () => {
+    cancelled = true;
+  };
+  }, []);
+
+  const [application, setApplication] = useState(null);
   const [selectedApplication, setSelectedApplication] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
   const [comment, setComment] = useState('');
 
   // Filter applications
-  const filteredApplications = applications.filter((application) => {
-    const matchesSearch =
-      application.studentName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      application.studentNumber
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      application.module
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+const filteredApplications = applications.filter((application) => {
+  const query = searchTerm.toLowerCase();
 
-    const matchesStatus =
-      statusFilter === 'All' ||
-      application.status === statusFilter;
+  const matchesSearch = !query || [
+    application.studentName,
+    application.studentNumber,
+    application.module,
+    application.moduleCode,
+  ].some((value) => String(value ?? '').toLowerCase().includes(query));
 
-    return matchesSearch && matchesStatus;
-  });
+  // If filter is 'All', this returns true. Otherwise, it checks the status.
+  const matchesStatus = statusFilter === 'All' || application.status === statusFilter;
+
+  // Only keep the application if it matches BOTH the search and the status
+  return matchesSearch && matchesStatus;
+});
 
   // Open application for review
   const handleReview = (application) => {
@@ -341,7 +338,7 @@ const ReviewApplications = () => {
 
                   <div className="space-y-3">
 
-                    {selectedApplication.documents.map(
+                    {(selectedApplication.documents || []).map(
                       (document, index) => (
                         <div
                           key={index}
@@ -629,15 +626,27 @@ const ReviewApplications = () => {
                     </thead>
 
                     <tbody>
+                      {loading ? (
+                        <tr>
+                          <td colSpan="6" className="px-4 py-10 text-center text-gray-500">
+                            Loading applications...
+                          </td>
+                        </tr>
+                      ) : error ? (
+                        <tr>
+                          <td colSpan="6" className="px-4 py-10 text-center text-red-600">
+                            {error}
+                          </td>
+                        </tr>
+                      ) : filteredApplications.length > 0 ? (
+                        filteredApplications.map((raw) => {
+                          const application = mapApplication(raw);
 
-                      {filteredApplications.length > 0 ? (
-                        filteredApplications.map(
-                          (application) => (
+                          return (
                             <tr
                               key={application.id}
                               className="border-b border-gray-100 hover:bg-gray-50 transition"
                             >
-
                               <td className="px-4 py-4 font-semibold text-primary-dark">
                                 {application.studentName}
                               </td>
@@ -655,30 +664,23 @@ const ReviewApplications = () => {
                               </td>
 
                               <td className="px-4 py-4">
-                                <StatusBadge
-                                  status={application.status}
-                                />
+                                <StatusBadge status={application.status} />
                               </td>
 
                               <td className="px-4 py-4">
-
                                 <button
                                   type="button"
-                                  onClick={() =>
-                                    handleReview(application)
-                                  }
+                                  onClick={() => handleReview(application)}
                                   className="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-primary-dark transition"
                                 >
                                   {application.status === 'Pending Review'
                                     ? 'Review'
                                     : 'View'}
                                 </button>
-
                               </td>
-
                             </tr>
-                          )
-                        )
+                          );
+                        })
                       ) : (
                         <tr>
                           <td
@@ -689,7 +691,6 @@ const ReviewApplications = () => {
                           </td>
                         </tr>
                       )}
-
                     </tbody>
 
                   </table>

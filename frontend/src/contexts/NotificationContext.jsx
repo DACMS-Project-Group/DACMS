@@ -1,6 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, useCallback } from 'react';
 import { apiGet } from '../api';
-import { useAuth } from './AuthContext'; // 1. Import AuthContext
+import { useAuth } from './AuthContext'; 
 
 const NotificationContext = createContext(null);
 
@@ -20,14 +20,12 @@ export const NotificationProvider = ({ children }) => {
     try {
       const res = await apiGet('/notifications/fetch');
       
-      // 2. Safely extract array whether API returns [...] or { notifications: [...] } or { data: [...] }
       const rawList = Array.isArray(res)
         ? res
         : (res?.notifications || res?.data || []);
 
       setNotifications(
         rawList.map((n) => {
-          // 3. Handle property casing (IsRead vs isRead vs is_read) & type differences (1/0 or true/false)
           const readVal = n.IsRead ?? n.isRead ?? n.is_read;
           return {
             ...n,

@@ -66,6 +66,8 @@ class DemiApplicationRepository extends BaseRepository {
             UPDATE "DEMI_APPLICATION"
             SET "ApplicationStatus" = $1
             WHERE "ApplicationID" = $2
+            RETURNING *
+            COMMIT
             `
             , [lecturerDecision, applicationId]
         )
