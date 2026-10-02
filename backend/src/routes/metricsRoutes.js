@@ -9,7 +9,7 @@ router.get(
 );
 
 router.get(
-    '/metrics/tables',
+    '/tables',
      metricsController.getTableMetrics
     );
 

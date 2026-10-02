@@ -14,7 +14,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/admin/dashboard_statistics', {
+        const response = await fetch('/api/admin/dashboard', {
           method: 'GET',
           credentials: 'include',
           headers: {
@@ -42,7 +42,7 @@ const AdminDashboard = () => {
   ];
 
   const monthlyClaims = data?.monthlyClaims || [];
-
+  const monthlyWork = data?.monthlyWork || [];
   const pendingAppointments = data?.pendingAppointments || [];
   const totalAppointmentPages = Math.max(
     Math.ceil(pendingAppointments.length / APPOINTMENTS_PER_PAGE),
@@ -113,15 +113,15 @@ const AdminDashboard = () => {
             {/* ================================
                 MONTHLY CLAIMS + PENDING ITEMS
             ================================= */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 items-stretch">
               {/* Monthly Claims */}
-              <section>
+              <section className="min-w-0 h-full flex flex-col">
                 <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                   Monthly Claims Summary
                 </h3>
 
-                <Card>
-                  <div className="space-y-4">
+                <Card className="h-full flex flex-col justify-between">
+                  <div className="space-y-4 flex-1">
                     {monthlyClaims.map((claim) => (
                       <div
                         key={claim.month}
@@ -146,14 +146,45 @@ const AdminDashboard = () => {
                 </Card>
               </section>
 
+              <section className="min-w-0 h-full flex flex-col">
+                <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                  Work Sessions
+                </h3>
+
+                <Card className="h-full flex flex-col justify-between">
+                  <div className="space-y-4 flex-1">
+                    {monthlyWork.map((month) => (
+                      <div
+                        key={month.month}
+                        className="flex justify-between items-center border-b border-neutral pb-3 last:border-0"
+                      >
+                        <span className="font-semibold text-dark font-inter">
+                          {month.month}
+                        </span>
+                        <span className="font-semibold text-primary font-inter">
+                          {month.total_sessions}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => navigate('/claims-verification')}
+                    className="text-primary font-semibold hover:underline mt-4 font-inter"
+                  >
+                    View claims →
+                  </button>
+                </Card>
+              </section>
+
               {/* Pending Appointments */}
-              <section>
+              <section className="min-w-0 h-full flex flex-col">
                 <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                   Pending Appointments
                 </h3>
 
-                <Card>
-                  <div className="space-y-3">
+                <Card className="h-full flex flex-col justify-between">
+                  <div className="space-y-3 flex-1">
                     {currentAppointments.length > 0 ? (
                       currentAppointments.map((appointment, index) => (
                         <div
@@ -247,7 +278,7 @@ const AdminDashboard = () => {
                 Administrator Actions
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <button
                   onClick={() => navigate('/budget-management')}
                   className="bg-primary text-white px-6 py-4 rounded-xl font-semibold hover:bg-primary-dark transition font-inter"

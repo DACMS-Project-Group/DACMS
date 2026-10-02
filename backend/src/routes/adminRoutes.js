@@ -4,7 +4,7 @@ import {authenticate, authorize} from '../middlewares/authMiddleware.js'
 
 const router = express.Router();
 
-router.get('/dashboard_statistics', 
+router.get('/dashboard', 
            authenticate, 
            authorize([3]), 
            AdminController.getDashboardSummary

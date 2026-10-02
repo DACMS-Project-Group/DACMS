@@ -8,7 +8,6 @@ A dockerized full-stack application featuring a React (Vite) frontend, a Node.js
 
 Before running this project, ensure your machine has the following installed and running:
 
-* **[Git](https://git-scm.com/)**
 * **[Docker Desktop](https://www.docker.com/products/docker-desktop/)**
   * **Windows Users:** Requires **WSL 2** enabled. Ensure Docker Desktop shows **"Engine running"** in green before proceeding.
 
@@ -20,5 +19,5 @@ Once you have pulled the image from the repository, the following can be done to
   - run "docker compose up --build"
 ### The site should be available at:
 - http://localhost:5173/
-### Database:
+### Backend:
 - Runs on port 5000
