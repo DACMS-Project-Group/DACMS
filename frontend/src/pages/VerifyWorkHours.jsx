@@ -1,13 +1,10 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 
 const VerifyWorkHours = () => {
-  const navigate = useNavigate();
-
   const [sessions, setSessions] = useState([
     {
       id: 1,
@@ -62,6 +59,7 @@ const VerifyWorkHours = () => {
   const [rejectingId, setRejectingId] = useState(null);
   const [rejectionReasons, setRejectionReasons] = useState({});
   const [error, setError] = useState('');
+  const [savedMessage, setSavedMessage] = useState('');
 
   const formatDate = (date) =>
     new Date(`${date}T00:00:00`).toLocaleDateString('en-ZA', {
@@ -70,26 +68,40 @@ const VerifyWorkHours = () => {
       year: 'numeric',
     });
 
-  // ---- Set a single session's status ----
-  const setSessionStatus = (id, status) => {
+  const flashSaved = (text) => {
+    setSavedMessage(text);
+    window.setTimeout(() => setSavedMessage(''), 2500);
+  };
+
+  // ---- Set a single session's status and "save" it ----
+  const setSessionStatus = (id, status, extra = {}) => {
     setSessions((current) =>
       current.map((session) =>
-        session.id === id ? { ...session, status } : session
+        session.id === id ? { ...session, status, ...extra } : session
       )
     );
     setError('');
+    flashSaved(`Session #${id} saved as ${status}.`);
   };
 
   // ---- Verify all pending sessions ----
   const verifyAllSessions = () => {
+    const pendingCount = sessions.filter((s) => s.status === 'Pending').length;
+
+    if (pendingCount === 0) {
+      setError('No pending sessions to verify.');
+      return;
+    }
+
     setSessions((current) =>
       current.map((session) =>
-        session.status === 'Rejected'
-          ? session
-          : { ...session, status: 'Verified' }
+        session.status === 'Pending'
+          ? { ...session, status: 'Verified' }
+          : session
       )
     );
     setError('');
+    flashSaved(`Verified ${pendingCount} session${pendingCount === 1 ? '' : 's'}.`);
   };
 
   // ---- Per-row actions ----
@@ -113,51 +125,13 @@ const VerifyWorkHours = () => {
       return;
     }
 
-    setSessions((current) =>
-      current.map((session) =>
-        session.id === id
-          ? { ...session, status: 'Rejected', rejectionReason: reason }
-          : session
-      )
-    );
+    setSessionStatus(id, 'Rejected', { rejectionReason: reason });
     setRejectingId(null);
-    setError('');
   };
 
   const handleReasonChange = (id, value) => {
     setRejectionReasons((current) => ({ ...current, [id]: value }));
     setError('');
-  };
-
-  // ---- Bulk actions ----
-  const anyVerified = sessions.some((s) => s.status === 'Verified');
-
-  const handleApprove = () => {
-    setError('');
-
-    if (!anyVerified) {
-      setError('Please verify at least one work session before approving.');
-      return;
-    }
-
-    console.log('Approved sessions:', sessions);
-    navigate('/lecturer-dashboard', { state: { updatedSessions: sessions } });
-  };
-
-  const handleReject = () => {
-    setError('');
-
-    const anyRejected = sessions.some((s) => s.status === 'Rejected');
-
-    if (!anyRejected) {
-      setError(
-        'Please reject at least one session individually before confirming the rejection.'
-      );
-      return;
-    }
-
-    console.log('Rejected sessions:', sessions);
-    navigate('/lecturer-dashboard', { state: { updatedSessions: sessions } });
   };
 
   return (
@@ -182,12 +156,19 @@ const VerifyWorkHours = () => {
 
               <p className="mt-2 text-neutral">
                 Review and verify the working hours recorded by your
-                Assistant.
+                Assistant. Changes are saved immediately.
               </p>
             </div>
 
+            {/* Save confirmation banner */}
+            {savedMessage && (
+              <div className="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800">
+                {savedMessage}
+              </div>
+            )}
+
             {/* Sessions */}
-            <Card className="mb-6">
+            <Card>
               <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
                   <h2 className="text-lg font-semibold text-primary-dark">
@@ -288,7 +269,10 @@ const VerifyWorkHours = () => {
                                 placeholder="Reason for rejection..."
                                 value={rejectionReasons[session.id] || ''}
                                 onChange={(e) =>
-                                  handleReasonChange(session.id, e.target.value)
+                                  handleReasonChange(
+                                    session.id,
+                                    e.target.value
+                                  )
                                 }
                                 className="w-48 rounded-lg border border-gray-300 px-3 py-2 text-xs outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                               />
@@ -363,38 +347,6 @@ const VerifyWorkHours = () => {
                     ))}
                   </tbody>
                 </table>
-              </div>
-            </Card>
-
-            {/* Decision */}
-            <Card>
-              <div className="mb-5">
-                <h2 className="text-lg font-semibold text-primary-dark">
-                  Verification Decision
-                </h2>
-
-                <p className="mt-1 text-sm text-neutral">
-                  Finalise the review once you have verified or rejected the
-                  sessions above.
-                </p>
-              </div>
-
-              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  onClick={handleReject}
-                  className="rounded-lg border border-red-500 px-5 py-3 font-semibold text-red-600 transition hover:bg-red-50"
-                >
-                  Confirm Rejection
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleApprove}
-                  className="rounded-lg bg-primary px-5 py-3 font-semibold text-white transition hover:bg-primary-dark"
-                >
-                  Approve Hours
-                </button>
               </div>
             </Card>
           </div>
