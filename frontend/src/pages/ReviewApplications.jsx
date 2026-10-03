@@ -21,26 +21,33 @@ const ReviewApplications = () => {
       app.listingId ??
       app.id ??
       Math.random(),
+    studentName:
+      app.Student ??
+      app.studentName ??
+      app.student_name ??
+      app.StudentName ??
+      '—',
+    studentNumber:
+      app.studentNumber ??
+      app.student_number ??
+      app.StudentNumber ??
+      '—',
     moduleCode:
       app.moduleCode ??
       app.module_code ??
       app.ModuleCode ??
       '—',
-    moduleName:
-      app.moduleName ??
-      app.module_name ??
-      app.ModuleName ??
-      '—',
     status:
       app.status ??
       app.ApplicationStatus ??
-      app.verificationEligibilityStatus ??
       'Pending',
-    dateSubmitted:
-      app.date_submitted ??
+    dateSubmitted: String(
+      app.DateSubmitted ??
       app.dateSubmitted ??
-      app.submission_date ??
-      '',
+      app.ApplicationDate ??
+      app.applicationDate ??
+      '00-00-00'
+    ).split('T')[0],
   });
 
     // ---- Fetch applications on mount ----
@@ -58,7 +65,7 @@ const ReviewApplications = () => {
         const list = Array.isArray(payload)
           ? payload
           : payload?.rows ??
-            payload?.Applications ??
+            payload?.application ??
             payload?.results ??
             payload?.items ??
             [];
@@ -656,11 +663,11 @@ const filteredApplications = applications.filter((application) => {
                               </td>
 
                               <td className="px-4 py-4 text-gray-600">
-                                {application.module}
+                                {application.moduleCode}
                               </td>
 
                               <td className="px-4 py-4 text-gray-600">
-                                {application.applicationDate}
+                                {application.dateSubmitted}
                               </td>
 
                               <td className="px-4 py-4">

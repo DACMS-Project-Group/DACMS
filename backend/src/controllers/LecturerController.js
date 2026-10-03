@@ -135,7 +135,6 @@ class LecturerController {
         }
     }
 
-<<<<<<< HEAD
     static async getClaimsSummary(req, res) {
         try {
             const lecturerId = req.user.user_id;
@@ -263,7 +262,6 @@ class LecturerController {
         }
     }
 
-=======
     static async lecturerFetchApplications(req, res) {
         try {
             const lecturerId = getAuthUserId(req);
@@ -343,7 +341,6 @@ class LecturerController {
             return res.status(500).json(error.message);
         }
     }
->>>>>>> cfb9a08 (Neil refactoring)
 }
 
 

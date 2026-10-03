@@ -37,8 +37,21 @@ class DemiApplicationRepository extends BaseRepository {
     async lecturerFindApplicationById(applicationId) {
         return await this.query(
             `
-            SELECT *
-            FROM "DEMI_APPLICATION"
+            SELECT 
+                a.*,
+                CONCAT(u."FName", ' ', u."LName") AS "StudentName",
+                u."Email",
+                s."StudentNumber",
+                s."ContactDetails",
+                d."FilePath" AS "Documents",
+                m."ModuleCode",
+                m."ModuleName"
+            FROM "DEMI_APPLICATION" a
+            JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+            JOIN "STUDENT" s ON s."StudentID" = a."StudentID"
+            JOIN "APP_USER" u ON u."UserID" = s."StudentID"
+            JOIN "SUPPORTING_DOCUMENT" d ON d."StudentID" = s."StudentID"
             WHERE "ApplicationID" = $1
             `
             , [applicationId]
