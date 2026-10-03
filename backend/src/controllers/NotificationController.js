@@ -4,7 +4,7 @@ class NotificationController {
     static async sendNotification(req, res) {
         try {
             const { subject, type, message } = req.body;
-            const recipientId = req.body.recipientId ?? req.user?.user_id;
+            const recipientId = req.body.recipientId; /*?? req.user?.user_id; --causes notification to loop back to sender--**/
 
             if (!recipientId) {
                 return res.status(400).json({ error: 'Recipient user is required' });

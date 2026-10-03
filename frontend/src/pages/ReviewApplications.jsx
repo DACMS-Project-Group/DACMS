@@ -3,7 +3,7 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
-import { apiGet, apiPatch } from '../api';
+import { apiGet, apiPost, apiPatch } from '../api';
 import { useNavigate } from 'react-router-dom';
 
 const ReviewApplications = () => {
@@ -52,6 +52,10 @@ const ReviewApplications = () => {
 
   const mapApplicationDetail = (app) => ({
     ...mapApplicationOverview(app),
+    studentId:
+      app.StudentID ??
+      app.studentID ??
+      0,
     email: 
       app.Email ?? 
       app.email ?? 
@@ -199,33 +203,48 @@ const filteredApplications = applications.filter((application) => {
   };
 
   // Update application status
-  const handleStatusUpdate = (newStatus) => {
+  const handleStatusUpdate = async (newStatus) => {
     if (!selectedApplication) {
+      error.log("No application selected for status update.");
       return;
     }
 
-    const updatedApplications = applications.map((application) =>
-      application.id === selectedApplication.id
-        ? {
-            ...application,
-            status: newStatus,
-            comment: comment,
-          }
-        : application
-    );
+    try {
+      await apiPatch(`/lecturer/applications/review/${selectedApplication.id}`, {
+        decision: newStatus,
+        comment,
+      });
 
-    setApplications(updatedApplications);
+      setApplications((currentApplications) =>
+        currentApplications.map((application) =>
+          application.id === selectedApplication.id
+            ? { 
+              ...application, 
+              status: newStatus, 
+              comment 
+            } : application
+        )
+      );
+      setSelectedApplication((currentApplication) =>
+        currentApplication
+          ? { 
+            ...currentApplication, 
+            status: newStatus, 
+            comment 
+          } : currentApplication
+      );
 
-    const updatedApplication = updatedApplications.find(
-      (application) => application.id === selectedApplication.id
-    );
+      await apiPost('/notifications/send', {
+        recipientId: selectedApplication.studentId,
+        subject: `Application ${newStatus}`,
+        type: 'application_status',
+        message: `Your application has been ${newStatus.toLowerCase()}. Lecturer's comment: ${comment || 'No comment provided.'}`,
+      });
 
-    setSelectedApplication(updatedApplication);
-
-    apiPatch(`/lecturer/applications/review/${selectedApplication.id}`, {
-      decision: newStatus,
-      comment: selectedApplication.comment,
-    });
+      setError('');
+    } catch (err) {
+      setError(err.message || 'Unable to update the application.');
+    }
   };
 
   // Save comment

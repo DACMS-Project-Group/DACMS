@@ -34,12 +34,33 @@ const Notifications = () => {
         if (!cancelled) {
           setNotifications(
             list.map((n) => ({
-              id: n.NotificationID ?? n.notification_id ?? n.id, 
-              title: n.Subject,
-              type: n.NotificationType,
-              message: n.Message,
-              timestamp: n.CreatedTimestamp ?? n.created_at ?? n.timestamp,
-              read: Boolean(n.IsRead ?? n.is_read ?? n.read),
+              id: n.NotificationID ?? 
+                  n.notificationID ?? 
+                  n.id, 
+              title: 
+                n.Subject ?? 
+                n.subject ?? 
+                n.title ?? 
+                'No Subject',
+              type: 
+                n.NotificationType ?? 
+                n.notificationType ?? 
+                n.type ?? 
+                'info',
+              message: 
+                n.Message ??
+                n.message ??
+                'No message',
+              timestamp: 
+                n.CreatedTimestamp ?? 
+                n.createdTimestamp ??
+                n.created_at ?? 
+                n.timestamp,
+              read: Boolean(
+                n.IsRead ?? 
+                n.is_read ?? 
+                n.read
+              ),
               type: n.type || 'info',
               category: n.category || 'General',
             }))

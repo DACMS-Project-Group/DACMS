@@ -25,13 +25,13 @@ class NotificationService {
 
         const newNotification = rows[0];
 
-        // 2. Push via Socket if the recipient is online
+        //Push via Socket if the recipient is online
         const recipientSocketId = userSockets.get(recipientId);
         if (recipientSocketId) {
             io.to(recipientSocketId).emit('newNotification', newNotification);
         }
         
-        // 3. Send email notification
+        //Send email notification
         try {
             console.log((await this.sendEmailNotification({ recipientUserId: recipientId, notificationID: newNotification.NotificationID })).message);
         } catch (error) {
