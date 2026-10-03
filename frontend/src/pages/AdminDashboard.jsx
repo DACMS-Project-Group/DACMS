@@ -33,12 +33,11 @@ const AdminDashboard = () => {
   }, []);
 
   const statistics = [
-    { title: "Total", value: data?.stats?.total_modules ?? 'null' },
+    { title: "Total Modules", value: data?.stats?.total_modules ?? 'null' },
     { title: 'Total Lecturers', value: data?.stats?.total_lecturers ?? 'null' },
     { title: 'Total Assistants', value: data?.stats?.total_demis ?? 'null' },
     { title: 'Pending Approvals', value: data?.stats?.total_pending_approvals ?? 'null' },
     { title: 'Pending Claims', value: data?.stats?.total_pending_claims ?? 'null' },
-    { title: 'Budget Usage', value: '--' },
   ];
 
   const monthlyClaims = data?.monthlyClaims || [];
@@ -111,7 +110,7 @@ const AdminDashboard = () => {
             </section>
 
             {/* ================================
-                MONTHLY CLAIMS + PENDING ITEMS
+                MONTHLY CLAIMS, MONTHLY WORK SESSIONS, AND PENDING CLAIMS
             ================================= */}
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 items-stretch">
               {/* Monthly Claims */}
@@ -310,18 +309,18 @@ const AdminDashboard = () => {
             </section>
 
             {/* ================================
-                PAYMENT INFORMATION
+                Claims Export
             ================================= */}
             <section>
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                Payment Information
+                Claims Export
               </h3>
 
               <Card>
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div>
                     <p className="font-semibold text-dark font-inter">
-                      Export payment information
+                      Export approved claims
                     </p>
                     <p className="text-sm text-neutral mt-1 font-inter">
                       Generate payment information for HR and Remuneration departments.
@@ -332,7 +331,7 @@ const AdminDashboard = () => {
                     onClick={() => navigate('/export-payments')}
                     className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
                   >
-                    Export Payment Information
+                    Export Claims
                   </button>
                 </div>
               </Card>

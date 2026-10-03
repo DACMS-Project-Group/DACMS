@@ -2,6 +2,7 @@ import express from 'express';
 
 import LecturerController from '../controllers/LecturerController.js';
 import ListingController from '../controllers/ListingController.js';
+import ModuleController from '../controllers/ModuleController.js';
 
 import {
     authenticate,
@@ -30,6 +31,13 @@ router.get(
     authorize([2]),
     ListingController.fetchListingById.bind(ListingController)
 );
+
+router.get(
+    '/modules',
+    authenticate,
+    authorize([2]),
+    ModuleController.getModulesByLecturer
+)
 
 router.post(
     '/listings/create',
