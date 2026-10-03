@@ -1,204 +1,158 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
-import StatusBadge from '../components/StatusBadge';
+import { apiGet, apiPost, apiPatch } from '../api';
 
 const AssistantPositions = () => {
-  const navigate = useNavigate();
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
-  const [positions, setPositions] = useState([
-    {
-      id: 1,
-      moduleCode: 'CMPG311',
-      moduleName: 'Databases',
-      title: 'Assistant Marker',
-      responsibilities: 'Marking / assessment assistance',
-      maxHours: 40,
-      hourlyRate: 45,
-      status: 'Open',
-      dateCreated: '2026-09-01',
-    },
-    {
-      id: 2,
-      moduleCode: 'CMPG312',
-      moduleName: 'Operating Systems',
-      title: 'Tutorial Assistant',
-      responsibilities: 'Tutorial assistance',
-      maxHours: 30,
-      hourlyRate: 45,
-      status: 'Open',
-      dateCreated: '2026-09-03',
-    },
-    {
-      id: 3,
-      moduleCode: 'CMPG311',
-      moduleName: 'Databases',
-      title: 'Lab Assistant',
-      responsibilities: 'Laboratory assistance',
-      maxHours: 20,
-      hourlyRate: 45,
-      status: 'Closed',
-      dateCreated: '2026-08-20',
-    },
-  ]);
-
-  const modules = [
-    { code: 'CMPG311', name: 'Databases' },
-    { code: 'CMPG312', name: 'Operating Systems' },
-    { code: 'CMPG313', name: 'Computer Networks' },
-    { code: 'CMPG314', name: 'Software Engineering' },
-  ];
-
-  const responsibilityOptions = [
-    'Tutorial assistance',
-    'Student consultation',
-    'Practical assistance',
-    'Assignment assistance',
-    'Laboratory assistance',
-    'Marking / assessment assistance',
-    'Administrative assistance',
-    'Other',
-  ];
-
-  const emptyForm = {
-    moduleCode: '',
-    title: '',
-    responsibilities: '',
-    maxHours: '',
-    hourlyRate: '',
-  };
-
-  const [formData, setFormData] = useState(emptyForm);
+  const [formData, setFormData] = useState({
+    moduleId: '',
+    deadline: '',
+    minimumGrade: '',
+  });
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState('');
 
-  const formatDate = (date) =>
-    new Date(`${date}T00:00:00`).toLocaleDateString('en-ZA', {
-      day: '2-digit',
-      month: 'long',
-      year: 'numeric',
-    });
+  // ---- Load listings on mount ----
+  useEffect(() => {
+    let cancelled = false;
 
-  const formatAmount = (amount) =>
-    `R ${Number(amount).toLocaleString('en-ZA', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
+    const load = async () => {
+      try {
+        setLoading(true);
+        const data = await apiGet('/lecturer/listings');
+
+        const list = Array.isArray(data) ? data : data?.listings || [];
+
+        if (!cancelled) {
+          setListings(list);
+          setLoadError('');
+        }
+      } catch (err) {
+        if (!cancelled) setLoadError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // ---- Field mapping (defensive: backend may use PascalCase or snake_case) ----
+  const mapListing = (raw) => ({
+    id: raw.ListingID ?? raw.listing_id ?? raw.id,
+    moduleId: raw.ModuleID ?? raw.module_id ?? raw.moduleId,
+    moduleCode:
+      raw.ModuleCode ?? raw.module_code ?? raw.moduleCode ?? null,
+    moduleName:
+      raw.ModuleName ?? raw.module_name ?? raw.moduleName ?? null,
+    lecturerId: raw.LecturerID ?? raw.lecturer_id ?? raw.lecturerId,
+    deadline: raw.Deadline ?? raw.deadline,
+    minimumGrade: raw.MinimumGrade ?? raw.minimum_grade ?? raw.minimumGrade,
+  });
+
+  const formatDate = (iso) => {
+    if (!iso) return '—';
+    try {
+      return new Date(iso).toLocaleDateString('en-ZA', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return iso;
+    }
+  };
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((previous) => ({ ...previous, [name]: value }));
-    setError('');
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormError('');
   };
 
   const handleOpenCreate = () => {
-    setFormData(emptyForm);
+    setFormData({ moduleId: '', deadline: '', minimumGrade: '' });
     setEditingId(null);
-    setError('');
+    setFormError('');
     setShowForm(true);
   };
 
-  const handleOpenEdit = (position) => {
+  const handleOpenEdit = (listing) => {
     setFormData({
-      moduleCode: position.moduleCode,
-      title: position.title,
-      responsibilities: position.responsibilities,
-      maxHours: position.maxHours,
-      hourlyRate: position.hourlyRate,
+      moduleId: listing.moduleId ?? '',
+      deadline: listing.deadline
+        ? new Date(listing.deadline).toISOString().slice(0, 10)
+        : '',
+      minimumGrade: listing.minimumGrade ?? '',
     });
-    setEditingId(position.id);
-    setError('');
+    setEditingId(listing.id);
+    setFormError('');
     setShowForm(true);
   };
 
   const handleCancel = () => {
-    setFormData(emptyForm);
+    setFormData({ moduleId: '', deadline: '', minimumGrade: '' });
     setEditingId(null);
-    setError('');
+    setFormError('');
     setShowForm(false);
   };
 
-  const handleSave = (event) => {
+  const handleSave = async (event) => {
     event.preventDefault();
-    setError('');
+    setFormError('');
 
-    if (
-      !formData.moduleCode ||
-      !formData.title.trim() ||
-      !formData.responsibilities ||
-      !formData.maxHours ||
-      !formData.hourlyRate
-    ) {
-      setError('Please complete all fields before saving the Assistant position.');
+    if (!formData.moduleId || !formData.deadline || !formData.minimumGrade) {
+      setFormError('Please complete all fields before saving the listing.');
       return;
     }
 
-    if (Number(formData.maxHours) <= 0) {
-      setError('Maximum hours must be greater than zero.');
+    if (Number(formData.minimumGrade) < 0 || Number(formData.minimumGrade) > 100) {
+      setFormError('Minimum grade must be between 0 and 100.');
       return;
     }
 
-    if (Number(formData.hourlyRate) <= 0) {
-      setError('Hourly rate must be greater than zero.');
-      return;
+    const payload = {
+      moduleId: Number(formData.moduleId),
+      deadline: formData.deadline,
+      minimumGrade: Number(formData.minimumGrade),
+    };
+
+    try {
+      setSaving(true);
+
+      if (editingId) {
+        const updated = await apiPatch(
+          `/lecturer/listings/edit/${editingId}`,
+          payload
+        );
+        const mapped = mapListing(updated || payload);
+
+        setListings((current) =>
+          current.map((l) => (l.id === editingId ? { ...l, ...mapped } : l))
+        );
+      } else {
+        const created = await apiPost('/lecturer/listings/create', payload);
+        const mapped = mapListing(created || payload);
+
+        setListings((current) => [mapped, ...current]);
+      }
+
+      handleCancel();
+    } catch (err) {
+      setFormError(`Failed to save: ${err.message}`);
+    } finally {
+      setSaving(false);
     }
-
-    const module = modules.find((m) => m.code === formData.moduleCode);
-
-    if (editingId) {
-      setPositions((current) =>
-        current.map((position) =>
-          position.id === editingId
-            ? {
-                ...position,
-                moduleCode: formData.moduleCode,
-                moduleName: module?.name || '',
-                title: formData.title.trim(),
-                responsibilities: formData.responsibilities,
-                maxHours: Number(formData.maxHours),
-                hourlyRate: Number(formData.hourlyRate),
-              }
-            : position
-        )
-      );
-    } else {
-      const newPosition = {
-        id: Date.now(),
-        moduleCode: formData.moduleCode,
-        moduleName: module?.name || '',
-        title: formData.title.trim(),
-        responsibilities: formData.responsibilities,
-        maxHours: Number(formData.maxHours),
-        hourlyRate: Number(formData.hourlyRate),
-        status: 'Open',
-        dateCreated: new Date().toISOString().slice(0, 10),
-      };
-
-      setPositions((current) => [newPosition, ...current]);
-    }
-
-    handleCancel();
-  };
-
-  const handleToggleStatus = (id) => {
-    setPositions((current) =>
-      current.map((position) =>
-        position.id === id
-          ? {
-              ...position,
-              status: position.status === 'Open' ? 'Closed' : 'Open',
-            }
-          : position
-      )
-    );
-  };
-
-  const handleDelete = (id) => {
-    if (!window.confirm('Delete this Assistant position?')) return;
-    setPositions((current) => current.filter((p) => p.id !== id));
   };
 
   return (
@@ -211,7 +165,7 @@ const AssistantPositions = () => {
         <main className="flex-1">
           <div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-semibold text-white">
-              Assistant Position Management
+              Assistant Listings
             </h1>
           </div>
 
@@ -219,12 +173,18 @@ const AssistantPositions = () => {
             <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <h2 className="text-2xl font-semibold text-primary-dark">
-                  Assistant Positions
+                  Assistant Listings
                 </h2>
 
                 <p className="mt-2 text-neutral">
-                  Create and manage Assistant opportunities for your modules.
+                  Create and manage Assistant openings for your modules.
                 </p>
+
+                {loadError && (
+                  <p className="mt-2 text-sm text-error font-inter">
+                    Could not load listings: {loadError}
+                  </p>
+                )}
               </div>
 
               {!showForm && (
@@ -233,7 +193,7 @@ const AssistantPositions = () => {
                   onClick={handleOpenCreate}
                   className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark"
                 >
-                  Create Position
+                  Create Listing
                 </button>
               )}
             </div>
@@ -242,126 +202,78 @@ const AssistantPositions = () => {
               <Card className="mb-6">
                 <div className="mb-6">
                   <h2 className="text-lg font-semibold text-primary-dark">
-                    {editingId ? 'Edit Assistant Position' : 'Create Assistant Position'}
+                    {editingId ? 'Edit Listing' : 'Create Listing'}
                   </h2>
 
                   <p className="mt-1 text-sm text-neutral">
-                    Define the position details, hour allocation and rate for
-                    this Assistant opportunity.
+                    Define the module, application deadline and minimum grade
+                    for this Assistant opening.
                   </p>
                 </div>
 
-                {error && (
+                {formError && (
                   <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                    {error}
+                    {formError}
                   </div>
                 )}
 
                 <form onSubmit={handleSave}>
-                  <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
                     <div>
                       <label
-                        htmlFor="moduleCode"
+                        htmlFor="moduleId"
                         className="mb-2 block text-sm font-medium text-gray-700"
                       >
-                        Module
-                      </label>
-
-                      <select
-                        id="moduleCode"
-                        name="moduleCode"
-                        value={formData.moduleCode}
-                        onChange={handleChange}
-                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                      >
-                        <option value="">Select a module</option>
-                        {modules.map((module) => (
-                          <option key={module.code} value={module.code}>
-                            {module.code} - {module.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="title"
-                        className="mb-2 block text-sm font-medium text-gray-700"
-                      >
-                        Position Title
+                        Module ID
                       </label>
 
                       <input
-                        id="title"
-                        name="title"
-                        type="text"
-                        value={formData.title}
+                        id="moduleId"
+                        name="moduleId"
+                        type="number"
+                        min="1"
+                        value={formData.moduleId}
                         onChange={handleChange}
-                        placeholder="e.g. Tutorial Assistant"
+                        placeholder="e.g. 2"
                         className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                       />
                     </div>
 
                     <div>
                       <label
-                        htmlFor="responsibilities"
+                        htmlFor="deadline"
                         className="mb-2 block text-sm font-medium text-gray-700"
                       >
-                        Responsibilities
-                      </label>
-
-                      <select
-                        id="responsibilities"
-                        name="responsibilities"
-                        value={formData.responsibilities}
-                        onChange={handleChange}
-                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                      >
-                        <option value="">Select responsibilities</option>
-                        {responsibilityOptions.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label
-                        htmlFor="maxHours"
-                        className="mb-2 block text-sm font-medium text-gray-700"
-                      >
-                        Maximum Hours
+                        Application Deadline
                       </label>
 
                       <input
-                        id="maxHours"
-                        name="maxHours"
-                        type="number"
-                        min="1"
-                        value={formData.maxHours}
+                        id="deadline"
+                        name="deadline"
+                        type="date"
+                        value={formData.deadline}
                         onChange={handleChange}
-                        placeholder="e.g. 40"
                         className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                       />
                     </div>
 
                     <div>
                       <label
-                        htmlFor="hourlyRate"
+                        htmlFor="minimumGrade"
                         className="mb-2 block text-sm font-medium text-gray-700"
                       >
-                        Hourly Rate (R)
+                        Minimum Grade (%)
                       </label>
 
                       <input
-                        id="hourlyRate"
-                        name="hourlyRate"
+                        id="minimumGrade"
+                        name="minimumGrade"
                         type="number"
-                        min="1"
-                        value={formData.hourlyRate}
+                        min="0"
+                        max="100"
+                        value={formData.minimumGrade}
                         onChange={handleChange}
-                        placeholder="e.g. 45"
+                        placeholder="e.g. 60"
                         className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                       />
                     </div>
@@ -370,9 +282,14 @@ const AssistantPositions = () => {
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                     <button
                       type="submit"
-                      className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark"
+                      disabled={saving}
+                      className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {editingId ? 'Save Changes' : 'Create Position'}
+                      {saving
+                        ? 'Saving…'
+                        : editingId
+                          ? 'Save Changes'
+                          : 'Create Listing'}
                     </button>
 
                     <button
@@ -390,50 +307,44 @@ const AssistantPositions = () => {
             <Card>
               <div className="mb-6">
                 <h2 className="text-lg font-semibold text-primary-dark">
-                  Your Assistant Positions
+                  Your Listings
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral">
-                  Positions you have created for your modules.
+                  Openings you have created for your modules.
                 </p>
               </div>
 
-              {positions.length === 0 ? (
+              {loading ? (
+                <p className="py-10 text-center text-neutral font-inter">
+                  Loading listings…
+                </p>
+              ) : listings.length === 0 ? (
                 <div className="py-10 text-center">
                   <p className="font-medium text-gray-700">
-                    No Assistant Positions Yet
+                    No Listings Yet
                   </p>
 
                   <p className="mt-1 text-sm text-neutral">
-                    Create your first Assistant position to make it available to
-                    students.
+                    Create your first listing to make it available to students.
                   </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[950px]">
+                  <table className="w-full min-w-[750px]">
                     <thead>
                       <tr className="border-b border-gray-200 bg-light-grey text-left">
+                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                          Listing ID
+                        </th>
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Module
                         </th>
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                          Position
+                          Deadline
                         </th>
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                          Responsibilities
-                        </th>
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                          Max Hours
-                        </th>
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                          Rate
-                        </th>
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                          Created
-                        </th>
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                          Status
+                          Minimum Grade
                         </th>
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Actions
@@ -442,68 +353,46 @@ const AssistantPositions = () => {
                     </thead>
 
                     <tbody>
-                      {positions.map((position) => (
-                        <tr
-                          key={position.id}
-                          className="border-b border-gray-100 last:border-b-0"
-                        >
-                          <td className="px-4 py-4 text-sm font-medium text-primary-dark">
-                            {position.moduleCode}
-                          </td>
+                      {listings.map((raw) => {
+                        const listing = mapListing(raw);
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {position.title}
-                          </td>
+                        return (
+                          <tr
+                            key={listing.id}
+                            className="border-b border-gray-100 last:border-b-0"
+                          >
+                            <td className="px-4 py-4 text-sm font-medium text-primary-dark">
+                              #{listing.id}
+                            </td>
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {position.responsibilities}
-                          </td>
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {listing.moduleCode
+                                ? `${listing.moduleCode}${listing.moduleName ? ` — ${listing.moduleName}` : ''}`
+                                : `Module #${listing.moduleId ?? '—'}`}
+                            </td>
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {position.maxHours} hrs
-                          </td>
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {formatDate(listing.deadline)}
+                            </td>
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {formatAmount(position.hourlyRate)}
-                          </td>
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {listing.minimumGrade != null
+                                ? `${listing.minimumGrade}%`
+                                : '—'}
+                            </td>
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {formatDate(position.dateCreated)}
-                          </td>
-
-                          <td className="px-4 py-4">
-                            <StatusBadge status={position.status} />
-                          </td>
-
-                          <td className="px-4 py-4">
-                            <div className="flex flex-wrap gap-3">
+                            <td className="px-4 py-4">
                               <button
                                 type="button"
-                                onClick={() => handleOpenEdit(position)}
+                                onClick={() => handleOpenEdit(listing)}
                                 className="font-medium text-primary transition hover:text-primary-dark"
                               >
                                 Edit
                               </button>
-
-                              <button
-                                type="button"
-                                onClick={() => handleToggleStatus(position.id)}
-                                className="font-medium text-primary transition hover:text-primary-dark"
-                              >
-                                {position.status === 'Open' ? 'Close' : 'Reopen'}
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(position.id)}
-                                className="font-medium text-red-600 transition hover:text-red-700"
-                              >
-                                Delete
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>

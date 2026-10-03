@@ -14,7 +14,6 @@ const Notifications = () => {
   const [error, setError] = useState('');
   const [expandedId, setExpandedId] = useState(null);
 
-  // ---- Load notifications on mount ----
   useEffect(() => {
     let cancelled = false;
 
@@ -23,7 +22,6 @@ const Notifications = () => {
         setLoading(true);
         const data = await apiGet('/notifications/fetch');
 
-        // Backend wraps in { notification: [...] } (singular!)
         const list = Array.isArray(data)
           ? data
           : data?.notification || data?.notifications || [];
@@ -31,13 +29,13 @@ const Notifications = () => {
         if (!cancelled) {
           setNotifications(
             list.map((n) => ({
-              id: n.NotificationId ?? n.notification_id ?? n.id,
-              title: n.title,
-              message: n.message,
+              id: n.NotificationID ?? n.NotificationId ?? n.id,
+              title: n.Subject ?? n.title ?? '(No subject)',
+              message: n.Message ?? n.message ?? '',
               timestamp: n.CreatedTimestamp ?? n.created_at ?? n.timestamp,
               read: Boolean(n.IsRead ?? n.is_read ?? n.read),
-              type: n.type || 'info',
-              category: n.category || 'General',
+              type: n.NotificationType ?? n.type ?? 'info',
+              category: n.NotificationType ?? 'General',
             }))
           );
           setError('');
@@ -56,14 +54,12 @@ const Notifications = () => {
     };
   }, []);
 
-  // ---- Toggle expand + mark as read ----
   const toggleExpand = async (id) => {
     const opening = expandedId !== id;
     setExpandedId(opening ? id : null);
 
     const target = notifications.find((n) => n.id === id);
     if (opening && target && !target.read) {
-      // Optimistic update
       setNotifications((current) =>
         current.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
@@ -71,7 +67,6 @@ const Notifications = () => {
       try {
         await apiPatch(`/notifications/read/${id}`);
       } catch (err) {
-        // Roll back on failure
         setNotifications((current) =>
           current.map((n) => (n.id === id ? { ...n, read: false } : n))
         );
@@ -80,12 +75,10 @@ const Notifications = () => {
     }
   };
 
-  // ---- Mark all as read ----
   const markAllAsRead = async () => {
     const unread = notifications.filter((n) => !n.read);
     if (unread.length === 0) return;
 
-    // Optimistic update
     setNotifications((current) =>
       current.map((n) => ({ ...n, read: true }))
     );
@@ -99,8 +92,6 @@ const Notifications = () => {
     }
   };
 
-  // ---- Delete is not supported by the backend yet ----
-
   const unreadCount = notifications.filter((n) => !n.read).length;
   const readCount = notifications.filter((n) => n.read).length;
 
@@ -109,18 +100,27 @@ const Notifications = () => {
   ].length;
 
   const getTypeColor = (type) => {
-    switch (type) {
-      case 'success':
-        return 'bg-success';
-      case 'error':
-        return 'bg-error';
-      case 'warning':
-        return 'bg-warning';
-      case 'info':
-        return 'bg-primary';
-      default:
-        return 'bg-neutral';
+    const t = (type || '').toLowerCase();
+
+    if (t.includes('success') || t.includes('approved') || t.includes('verified')) {
+      return 'bg-success';
     }
+    if (t.includes('error') || t.includes('reject') || t.includes('denied')) {
+      return 'bg-error';
+    }
+    if (t.includes('warning') || t.includes('pending') || t.includes('review')) {
+      return 'bg-warning';
+    }
+    if (t.includes('application')) {
+      return 'bg-primary';
+    }
+    if (t.includes('claim')) {
+      return 'bg-warning';
+    }
+    if (t.includes('work') || t.includes('session')) {
+      return 'bg-success';
+    }
+    return 'bg-neutral';
   };
 
   return (
@@ -131,7 +131,6 @@ const Notifications = () => {
         <Sidebar userRole={userRole} />
 
         <main className="flex-1">
-          {/* Page Header */}
           <div className="bg-primary px-8 py-4">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <h1 className="text-2xl font-semibold text-white font-poppins">
@@ -157,7 +156,6 @@ const Notifications = () => {
           </div>
 
           <div className="p-8">
-            {/* Summary Cards */}
             <section className="mb-8">
               <h2 className="mb-4 text-xl font-semibold text-primary font-poppins">
                 Notification Summary
@@ -208,7 +206,6 @@ const Notifications = () => {
               </div>
             </section>
 
-            {/* Notifications List */}
             <section>
               <h2 className="mb-4 text-xl font-semibold text-primary font-poppins">
                 All Notifications
@@ -255,7 +252,6 @@ const Notifications = () => {
                             : 'bg-white'
                         }`}
                       >
-                        {/* Notification Header */}
                         <div
                           className="flex cursor-pointer items-center justify-between p-4"
                           onClick={() => toggleExpand(notification.id)}
@@ -319,7 +315,6 @@ const Notifications = () => {
                           </div>
                         </div>
 
-                        {/* Expanded Content */}
                         {expandedId === notification.id && (
                           <div className="border-t border-neutral/20 px-4 pb-4 pt-3">
                             <p className="text-sm leading-relaxed text-dark font-inter">
