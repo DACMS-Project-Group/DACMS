@@ -107,9 +107,9 @@ const filteredApplications = applications.filter((application) => {
 });
 
   // Open application for review
-  const handleReview = (application) => {
-    setSelectedApplication(application);
-    setComment(application.comment || '');
+  const handleReview = (applicationId) => {
+    setSelectedApplication(apiGet(`/lecturer/applications/fetch/${applicationId}`));
+    //setComment(application.comment || '');
   };
 
   // Return to application list
