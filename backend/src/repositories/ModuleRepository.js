@@ -1,6 +1,24 @@
 import pool from '../config/db.js';
 
 class ModuleRepository {
+    static async getModules() {
+        const sql = `
+            SELECT
+                "ModuleID" AS module_id,
+                "ModuleCode" AS module_code,
+                "ModuleName" AS module_name
+            FROM "NWU_MODULE"
+        `;
+        const { rows } = await pool.query(sql);
+        return {
+            modules: rows.map((row) => ({
+                module_id: row.module_id,
+                module_code: row.module_code,
+                module_name: row.module_name
+            }))
+        };
+    }
+
     static async getModulesByLecturer(lecturer_id) {
         const sql = `
             SELECT

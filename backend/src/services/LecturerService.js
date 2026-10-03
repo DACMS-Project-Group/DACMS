@@ -8,6 +8,14 @@ class LecturerService {
         this.workSessionRepository = new WorkSessionRepository();
     }
 
+    async getLecturerByModule(moduleId) {
+        if (!moduleId) {
+            throw new Error('moduleId is required');
+        }
+
+        return LecturerRepository.getLecturersByModule(moduleId);
+    }
+
     async getDashboardSummary(lecturerId) {
         const stats = await LecturerRepository.getDashboardMetrics(lecturerId);
         return { stats };
