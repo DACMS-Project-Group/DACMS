@@ -2,6 +2,21 @@ import LecturerService from '../services/LecturerService.js';
 import getAuthUserId from '../utils/getAuthUserId.js';
 
 class LecturerController {
+    static async getLecturersByModule(req, res) {
+        try {
+            const { moduleId } = req.params;
+
+            if (!moduleId) {
+                return res.status(400).json({ error: 'moduleId is required.' });
+            }
+
+            const lecturers = await LecturerService.getLecturerByModule(moduleId);
+            return res.status(200).json(lecturers);
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
     static async getDashboardSummary(req, res) {
         try {
             const lecturerId = getAuthUserId(req);

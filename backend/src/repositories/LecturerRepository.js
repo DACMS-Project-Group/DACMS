@@ -2,6 +2,28 @@ import pool from '../config/db.js';
 const BUDGET_WARNING = 0.8;
 
 class LecturerRepository {
+    static async getLecturersByModule(moduleId) {
+        const query = `
+            SELECT
+                l."LecturerID" AS lecturer_id,
+                CONCAT(lu."Title", ' ', lu."FName", ' ', lu."LName", ' - ', lu."Email") AS lecturer
+            FROM "LECTURER_MODULE" lm
+            JOIN "LECTURER" l
+                ON l."LecturerID" = lm."LecturerID"
+            JOIN "APP_USER" lu
+                ON lu."UserID" = l."LecturerID"
+            WHERE lm."ModuleID" = $1
+        `;
+
+        const { rows } = await pool.query(query, [moduleId]);
+
+        return {
+            lecturers: rows.map((row) => ({
+                lecturer_id: row.lecturer_id,
+                lecturer: row.lecturer
+            }))
+        };
+    }
 
     static async getDashboardMetrics(lecturerId) {
         const query = `
