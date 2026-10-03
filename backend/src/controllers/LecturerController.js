@@ -50,19 +50,10 @@ class LecturerController {
         try {
             const applicationId = req.params.id;
             const decision = req.body.decision;
-            const reviewedApp = await LecturerService.lecturerReviewApplication(applicationId, decision);
-            const studentId = await LecturerService.getStudentIdFromApplication(applicationId);
-            const notification = await NotificationService.sendNotification( {
-                recipientId : studentId,
-                title : "Application Update",
-                type : decision || "none",
-                message : `Status of application ${applicationId} has been changed to ${decision}`
-            } );
+            const comment = req.body.comment;
 
-            res.status(200).json( {
-                application : reviewedApp,
-                notification : notification
-            } );
+            const data = await LecturerService.reviewApplication(lecturerId, applicationId, decision, comment);
+            return res.status(200).json(data);
         } catch (error) {
             res.status(500).json( {error : error.message });
         }

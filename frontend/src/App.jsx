@@ -44,9 +44,6 @@ import { NotificationProvider } from './contexts/NotificationContext';
 // ===== SHARED PAGES =====
 import Notifications from './pages/Notifications';
 
-// ===== SHARED PAGES =====
-import Notifications from './pages/Notifications';
-
 import ProtectedRoute from './routes/ProtectedRoute';
 import './index.css';
 

@@ -15,6 +15,9 @@ const Notifications = () => {
   const [error, setError] = useState('');
   const [expandedId, setExpandedId] = useState(null);
 
+  const { fetchNotifications } = liveNotifs();
+
+  // ---- Load notifications on mount ----
   useEffect(() => {
     let cancelled = false;
 
@@ -86,10 +89,8 @@ const Notifications = () => {
       setNotifications((current) =>
         current.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
-      try {
-        await apiPatch(`/notifications/read/${id}`);
 
-      } catch (err) {
+
       try {
         await apiPatch(`/notifications/read/${id}`);
         await fetchNotifications();
@@ -372,6 +373,6 @@ const Notifications = () => {
       </div>
     </div>
   );
-};}
+};
 
 export default Notifications;
