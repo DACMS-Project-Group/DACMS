@@ -19,7 +19,6 @@ class StudentController {
         try {
             const userId = getAuthUserId(req);
             const { contactDetails, bankName, accountNumber, branchCode } = req.body;
-
             const student = await studentService.updateProfile(userId, {
                 contactDetails,
                 bankName,

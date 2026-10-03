@@ -12,8 +12,17 @@ class WorkSessionRepository extends BaseRepository {
         return await this.query(
             `
             SELECT
+                w."SessionID",
                 w."StartTime"::DATE AS "SessionDate",
                 m."ModuleCode",
+                CONCAT(
+                    COALESCE(s."Title", ''),
+                    CASE WHEN COALESCE(s."Title", '') = '' THEN '' ELSE ' ' END,
+                    s."FName",
+                    ' ',
+                    s."LName"
+                ) AS "StudentName",
+                s."StudentNumber" AS "StudentNumber",
                 w."ActivityDescription",
                 w."StartTime"::TIME AS "StartTime",
                 w."EndTime"::TIME AS "EndTime",
@@ -24,6 +33,7 @@ class WorkSessionRepository extends BaseRepository {
             JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
             JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
             JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+            JOIN "STUDENT" s ON s."StudentID" = a."StudentID"
             WHERE l."LecturerID" = $1
             `
             , [lecturerId]
