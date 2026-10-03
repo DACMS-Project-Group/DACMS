@@ -83,14 +83,12 @@ class DemiApplicationRepository extends BaseRepository {
         return await this.query(
             `
             UPDATE "DEMI_APPLICATION"
-            SET 
-                "ApplicationStatus" = $1
+            SET "ApplicationStatus" = $1,
                 "ReviewComment" = $3
             WHERE "ApplicationID" = $2
             RETURNING *
-            COMMIT
             `
-            , [lecturerDecision, applicationId, decisionReason, reviewComment]
+            , [lecturerDecision, applicationId, reviewComment]
         )
     }
 
