@@ -358,14 +358,16 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 			}
 		}
 
-		/claims/review {
+		/claims/review/:id {
 			type: PATCH
 			auth: true, lecturer
 			desc: Reviews a claim belonging to the signed-in lecturer
 
 			request body {
 				"claim_id" :
-				"status" : "Under Review" or "Verified"
+				"status" : "Approved" or "Declined" or "Changes Requested"
+				"reason" : reason for decision
+				"comment" : lecturer comment
 			}
 
 			response body {
