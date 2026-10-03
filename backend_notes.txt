@@ -764,6 +764,291 @@ NOTE: seperate connection to user socket using socket-client.io required for in-
     }
 }
 
+=======================ADDITIONAL CURRENT API ROUTES=======================
+
+These routes are registered in the backend API router. All use the /api prefix.
+
+=======================ADMIN=======================
+
+/api {
+    /admin {
+        /dashboard {
+            type: GET
+            auth: true, admin
+            desc: Fetches dashboard statistics, monthly work, monthly claims,
+                  and pending appointments
+            response body {
+                "stats": dashboard statistics,
+                "monthlyWork": monthly work sessions,
+                "monthlyClaims": monthly claims,
+                "pendingAppointments": pending appointments
+            }
+        }
+
+        /claims/approve/:claim_id {
+            param: claim_id
+            type: PATCH
+            auth: true, admin
+            desc: Approves a claim
+            response body {
+                "message": "Claim approved successfully",
+                "data": updated claim
+            }
+        }
+
+        /appointments {
+            type: GET
+            auth: true, admin
+            desc: Fetches appointment statistics, pending appointments,
+                  and approval history
+            response body {
+                "stats": appointment statistics,
+                "pending": pending appointments,
+                "history": approval history
+            }
+        }
+
+        /appointments/fetch/:position_id {
+            param: position_id
+            type: GET
+            auth: true, admin
+            desc: Fetches an appointment position
+            response body {
+                "position": appointment position
+            }
+        }
+
+        /appointments/review/:position_id {
+            param: position_id
+            type: PATCH
+            auth: true, admin
+            desc: Reviews an appointment position
+            request body {
+                "action": "Approved/Rejected/Returned",
+                "comment": "optional review comment"
+            }
+            response body {
+                "message": "Position decision processed successfully (<action>)",
+                "data": updated position
+            }
+        }
+
+        /claims/export {
+            type: POST
+            auth: true, admin
+            desc: Exports the specified claims as PDF files in a ZIP archive
+            request body {
+                "claims": [claim IDs]
+            }
+            response: ZIP file download
+        }
+    }
+}
+
+=======================LECTURER=======================
+
+/api {
+    /lecturer {
+        /listings {
+            type: GET
+            auth: true, lecturer
+            desc: Fetches open listings
+            response: Listing data returned by the listing service
+        }
+
+        /listings/fetch/:Id {
+            param: Id
+            type: GET
+            auth: true, lecturer
+            desc: Fetches a listing by ID
+            response: Listing data returned by the listing service
+        }
+
+        /modules {
+            type: GET
+            auth: true, lecturer
+            desc: Fetches modules belonging to the signed-in lecturer
+            response: Module data returned by the module service
+        }
+
+        /listings/create {
+            type: POST
+            auth: true, lecturer
+            desc: Creates a listing for the signed-in lecturer
+            request body {
+                "moduleId": module ID,
+                "deadline": "date",
+                "minimumGrade": "minimum grade"
+            }
+            response: Created listing
+        }
+
+        /listings/edit/:Id {
+            param: Id
+            type: PATCH
+            auth: true, lecturer
+            desc: Updates a listing belonging to the signed-in lecturer
+            request body: Listing fields to update
+            response: Updated listing
+        }
+
+        /applications {
+            type: GET
+            auth: true, lecturer
+            desc: Fetches applications for the signed-in lecturer
+            response: Application data returned by the application service
+        }
+
+        /applications/fetch/:id {
+            param: id
+            type: GET
+            auth: true, lecturer
+            desc: Fetches an application by ID
+            response: Application data returned by the application service
+        }
+
+        /applications/review/:id {
+            param: id
+            type: PATCH
+            auth: true, lecturer
+            desc: Reviews an application
+            request body {
+                "decision": "review decision"
+            }
+            response: Review result returned by the application service
+        }
+
+        /sessions {
+            type: GET
+            auth: true, lecturer
+            desc: Fetches sessions for the signed-in lecturer
+            response: Session data returned by the session service
+        }
+
+        /sessions/fetch/:id {
+            param: id
+            type: GET
+            auth: true, lecturer
+            desc: Fetches a session by ID
+            response: Session data returned by the session service
+        }
+
+        /sessions/review/:id {
+            param: id
+            type: PATCH
+            auth: true, lecturer
+            desc: Reviews a session
+            request body {
+                "decision": "review decision"
+            }
+            response: Review result returned by the session service
+        }
+    }
+}
+
+=======================STUDENT=======================
+
+/api {
+    /student {
+        /positions {
+            type: GET
+            auth: true
+            desc: Lists active positions assigned to the student
+            response body {
+                "positions": [position records]
+            }
+        }
+
+        /positions/:positionId/sessions {
+            param: positionId
+            type: GET
+            auth: true
+            desc: Lists sessions for a position belonging to the student
+            response body {
+                "sessions": [session records]
+            }
+        }
+
+        /positions/:positionId/sessions/:sessionId {
+            params: positionId, sessionId
+            type: GET
+            auth: true
+            desc: Fetches session details belonging to the student
+            response body {
+                "session": {
+                    "session_id": session ID,
+                    "position_id": position ID,
+                    "activity": "activity description",
+                    "start_time": "timestamp",
+                    "end_time": "timestamp",
+                    "total_hours_worked": hours,
+                    "estimated_remuneration": amount,
+                    "status": "Verified/Pending",
+                    "verification_date": null,
+                    "lecturer_comment": null,
+                    "module_code": "module code",
+                    "module_name": "module name",
+                    "hourly_rate": rate,
+                    "lecturer_name": "lecturer name"
+                }
+            }
+        }
+
+        /positions/:positionId/sessions/create {
+            param: positionId
+            type: POST
+            auth: true
+            desc: Records a work session for a student position
+            request body {
+                "date": "date",
+                "activity": "activity description",
+                "startTime": "HH:mm",
+                "endTime": "HH:mm"
+            }
+            response body {
+                "session": created session
+            }
+        }
+
+        /claims/:id {
+            param: id
+            type: GET
+            auth: true
+            desc: Fetches a claim belonging to the student
+            response body {
+                "claim": claim record
+            }
+        }
+
+        /claims/create {
+            type: POST
+            auth: true
+            desc: Generates a claim for an application belonging to the student
+            request body {
+                "applicationId": application ID
+            }
+            response body {
+                "claim": created claim
+            }
+        }
+
+        /profile/edit {
+            type: PATCH
+            auth: true
+            desc: Updates student profile details
+            request body {
+                "contactDetails": "user contact",
+                "bankName": "bank name",
+                "accountNumber": "bank account number",
+                "branchCode": "branch code"
+            }
+            response body {
+                "student": updated student profile
+            }
+        }
+    }
+}
+
 
 
 
