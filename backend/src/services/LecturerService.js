@@ -6,8 +6,6 @@ class LecturerService {
     constructor() {
         this.demiApplicationRepository = new DemiApplicationRepository();
         this.workSessionRepository = new WorkSessionRepository();
-<<<<<<< HEAD
-=======
     }
 
     async getDashboardSummary(lecturerId) {
@@ -29,12 +27,12 @@ class LecturerService {
         return application;
     }
 
-    async reviewApplication(lecturerId, applicationId, decision) {
+    async reviewApplication(lecturerId, applicationId, decision, reason, comment) {
         if (!decision) {
             throw new Error('Decision is required');
         }
 
-        return this.demiApplicationRepository.lecturerReviewApplication(applicationId, decision);
+        return this.demiApplicationRepository.lecturerReviewApplication(applicationId, decision, reason, comment);
     }
 
     async getSessionsForLecturer(lecturerId) {
@@ -87,7 +85,6 @@ class LecturerService {
 
     async getBudgetById(lecturerId, budgetId) {
         return LecturerRepository.getBudgetById(lecturerId, budgetId);
->>>>>>> e4a0beabef60119eaa9ca18e02fa5837c3e14ad2
     }
 
     async getDashboardSummary(lecturerId) {
@@ -109,12 +106,12 @@ class LecturerService {
         return application;
     }
 
-    async reviewApplication(lecturerId, applicationId, decision) {
+    async reviewApplication(lecturerId, applicationId, decision, comment) {
         if (!decision) {
             throw new Error('Decision is required');
         }
 
-        return this.demiApplicationRepository.lecturerReviewApplication(applicationId, decision);
+        return this.demiApplicationRepository.lecturerReviewApplication(applicationId, decision, comment);
     }
 
     async getSessionsForLecturer(lecturerId) {

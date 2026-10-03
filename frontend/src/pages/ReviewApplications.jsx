@@ -14,7 +14,7 @@ const ReviewApplications = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const mapApplication = (app) => ({
+  const mapApplicationOverview = (app) => ({
     id:
       app.application_id ??
       app.ApplicationID ??
@@ -50,6 +50,41 @@ const ReviewApplications = () => {
     ).split('T')[0],
   });
 
+  const mapApplicationDetail = (app) => ({
+    ...mapApplicationOverview(app),
+    email: 
+      app.Email ?? 
+      app.email ?? 
+      '—',
+    phone: 
+      app.ContactDetails ?? 
+      app.phone ?? 
+      '—',
+    moduleName:
+      app.ModuleName ??
+      app.moduleName ??
+      '-',
+    documents:
+      (app.Documents ?? app.documents ?? []).map((document) => ({
+        ...document,
+        type: 
+          document.DocumentType ?? 
+          document.documentType,
+        path: 
+          document.FilePath ?? 
+          document.filePath,
+      })),
+    reason:
+      app.DecisionReason ?? 
+      app.decisionReason ??
+      '-',
+    comment:
+      app.ReviewComment ??
+      app.reviewComment ??
+      app.comment ??
+      '',
+  });
+
     // ---- Fetch applications on mount ----
   useEffect(() => {
     let cancelled = false;
@@ -59,8 +94,6 @@ const ReviewApplications = () => {
         setLoading(true);
         const data = await apiGet('/lecturer/applications');
   
-        console.log('Fetched applications:', data);
-
         const payload = data?.data ?? data;
         const list = Array.isArray(payload)
           ? payload
@@ -71,7 +104,7 @@ const ReviewApplications = () => {
             [];
   
         if (!cancelled) {
-          const mappedList = list.map(mapApplication); 
+          const mappedList = list.map(mapApplicationOverview); 
           setApplications(mappedList);
           setError('');
         }
@@ -114,10 +147,50 @@ const filteredApplications = applications.filter((application) => {
 });
 
   // Open application for review
-  const handleReview = (applicationId) => {
-    setSelectedApplication(apiGet(`/lecturer/applications/fetch/${applicationId}`));
-    //setComment(application.comment || '');
+  const handleReview = async (application) => {
+    try {
+      const data = await apiGet(
+        `/lecturer/applications/fetch/${application.id}`
+      );
+      const payload = data?.data ?? data;
+      const fullApplication = Array.isArray(payload)
+        ? payload[0]
+        : payload?.application ??
+          payload?.rows?.[0] ??
+          payload?.results?.[0] ??
+          payload?.items?.[0] ??
+          payload;
+
+      setSelectedApplication(mapApplicationDetail(fullApplication));
+      setError('');
+    } catch (err) {
+      setError(err.message);
+    }
   };
+
+  //File download function
+  const viewDocument = (document) => {
+    const filePath = document.path ?? document.FilePath;
+
+    if (!filePath) {
+      setError('Document not found.');
+      return;
+    }
+
+    const fileName = String(filePath).replace(/\\/g, '/').split('/').pop();
+    if (!fileName) {
+      setError('Document not found.');
+      return;
+    }
+
+    const link = window.document.createElement('a');
+    link.href = `/backend/documents/${encodeURIComponent(fileName)}`;
+    link.download = fileName;
+    window.document.body.appendChild(link);
+    link.click();
+    link.remove();
+  }
+
 
   // Return to application list
   const handleBack = () => {
@@ -148,6 +221,11 @@ const filteredApplications = applications.filter((application) => {
     );
 
     setSelectedApplication(updatedApplication);
+
+    apiPatch(`/lecturer/applications/review/${selectedApplication.id}`, {
+      decision: newStatus,
+      comment: selectedApplication.comment,
+    });
   };
 
   // Save comment
@@ -173,6 +251,8 @@ const filteredApplications = applications.filter((application) => {
 
     setSelectedApplication(updatedApplication);
   };
+
+
 
   /*
    * APPLICATION REVIEW PAGE
@@ -306,7 +386,7 @@ const filteredApplications = applications.filter((application) => {
                       </label>
 
                       <p className="text-gray-900">
-                        {selectedApplication.module}
+                        {selectedApplication.moduleCode} - {selectedApplication.moduleName}
                       </p>
                     </div>
 
@@ -316,7 +396,7 @@ const filteredApplications = applications.filter((application) => {
                       </label>
 
                       <p className="text-gray-900">
-                        {selectedApplication.applicationDate}
+                        {selectedApplication.dateSubmitted}
                       </p>
                     </div>
 
@@ -354,16 +434,13 @@ const filteredApplications = applications.filter((application) => {
 
                           <div>
                             <p className="font-semibold text-gray-900">
-                              {document.name}
-                            </p>
-
-                            <p className="text-sm text-gray-500">
-                              {document.status}
+                              {document.type || document.documentType || 'Document'}
                             </p>
                           </div>
 
                           <button
                             type="button"
+                            onClick={() => viewDocument(document)}
                             className="border-2 border-primary text-primary px-4 py-2 rounded-lg font-semibold hover:bg-primary-lightest transition"
                           >
                             View
@@ -647,7 +724,7 @@ const filteredApplications = applications.filter((application) => {
                         </tr>
                       ) : filteredApplications.length > 0 ? (
                         filteredApplications.map((raw) => {
-                          const application = mapApplication(raw);
+                          const application = mapApplicationOverview(raw);
 
                           return (
                             <tr
