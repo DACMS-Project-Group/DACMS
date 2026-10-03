@@ -86,7 +86,6 @@ function App() {
               
             />
            <Route path="/verify-hours" element={<VerifyWorkHours />} />
-=======
             {/* ===== LECTURER ROUTES ===== */}
             <Route element={<ProtectedRoute requiredRoles={['lecturer']} />}>
               <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
