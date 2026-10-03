@@ -1,5 +1,6 @@
 import express from 'express';
 import AdminController from '../controllers/AdminController.js';
+import ModuleController from '../controllers/ModuleController.js';
 import {authenticate, authorize} from '../middlewares/authMiddleware.js'
 
 const router = express.Router();
@@ -73,6 +74,12 @@ router.post('/claims/export',
              authenticate,
              authorize([3]),
              AdminController.exportClaims
+)
+
+router.get('/modules',
+    authenticate,
+    authorize([3]),
+    ModuleController.getModules
 )
 
 export default router;
