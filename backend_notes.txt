@@ -713,6 +713,7 @@ EXAMPLE CALL: http://localhost:5000/api/<root>/<call>/:<param>
 NOTE: seperate connection to user socket using socket-client.io required for in-app notifications
 
 /api {
+<<<<<<< HEAD
 	/notifications {
 		/send {
 			type: POST
@@ -769,6 +770,65 @@ NOTE: seperate connection to user socket using socket-client.io required for in-
 			}
 		}
 	}
+=======
+    /notifications {
+        /send {
+            type: POST
+            auth: true
+            desc: Sends notification to db, email and user socket
+            request body {
+                "RecipientId" :
+                "title" :
+                "type" :
+                "message" :
+            }
+            response body {
+                "NotificationId" :
+                "RecipientId" :
+                "title" :
+                "type" :
+                "message" :
+                "IsRead" :
+                "CreatedTimestamp" :
+            }
+        }
+        
+        /fetch {
+            type: GET
+            auth: true
+            desc: Gets all notifications for signed-in user based on cookie
+            response body {
+                "notifications" : [
+                    {
+                        "NotificationId" :
+                        "RecipientId" :
+                        "title" :
+                        "type" :
+                        "message" :
+                        "IsRead" :
+                        "CreatedTimestamp"
+                    }
+                ]
+            }
+        }
+        
+        /read/:id {
+            params: id = notification id
+            type: PATCH
+            auth: true
+            desc: Marks given notification as read
+            response body {
+                "NotificationId" :
+                "RecipientId" :
+                "title" :
+                "type" :
+                "message" :
+                "IsRead" :
+                "CreatedTimestamp" :
+            }
+        }
+    }
+>>>>>>> e4a0beabef60119eaa9ca18e02fa5837c3e14ad2
 }
 
 
