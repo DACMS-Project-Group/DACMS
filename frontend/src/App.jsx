@@ -73,20 +73,6 @@ function App() {
               <Route path="/claim-detail/:id" element={<ClaimDetail />} />
             </Route>
 
-<<<<<<< HEAD
-          {/* ===== LECTURER ROUTES ===== */}
-          <Route element={<ProtectedRoute requiredRoles={['lecturer']} />}>
-            <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
-            <Route path="/review-applications" element={<ReviewApplications />} />
-            <Route path="/application-review/:id" element={<ApplicationReview />} />
-              <Route path="/assistant-positions" element={<AssistantPositions />} />
-            <Route
-              path="/assign-responsibilities"
-              element={<AssignAssistantResponsibilities />}
-              
-            />
-           <Route path="/verify-hours" element={<VerifyWorkHours />} />
-=======
             {/* ===== LECTURER ROUTES ===== */}
             <Route element={<ProtectedRoute requiredRoles={['lecturer']} />}>
               <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
@@ -102,7 +88,6 @@ function App() {
               element={<AssistantPositions />}
             />
             <Route path="/verify-hours" element={<VerifyWorkHours />} />
->>>>>>> e315157 (Added unread notification badge)
             <Route path="/notifications" element={<Notifications />} />
              <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
             </Route>
