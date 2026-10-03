@@ -43,7 +43,14 @@ class DemiApplicationRepository extends BaseRepository {
                 u."Email",
                 s."StudentNumber",
                 s."ContactDetails",
-                d."FilePath" AS "Documents",
+                (
+                    SELECT JSON_AGG(JSON_BUILD_OBJECT(
+                        'DocumentType', d."DocumentType",
+                        'FilePath', d."FilePath"
+                    ))
+                    FROM "SUPPORTING_DOCUMENT" d
+                    WHERE d."StudentID" = s."StudentID"
+                ) AS "Documents",
                 m."ModuleCode",
                 m."ModuleName"
             FROM "DEMI_APPLICATION" a
@@ -51,7 +58,6 @@ class DemiApplicationRepository extends BaseRepository {
             JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
             JOIN "STUDENT" s ON s."StudentID" = a."StudentID"
             JOIN "APP_USER" u ON u."UserID" = s."StudentID"
-            JOIN "SUPPORTING_DOCUMENT" d ON d."StudentID" = s."StudentID"
             WHERE "ApplicationID" = $1
             `
             , [applicationId]
@@ -73,16 +79,18 @@ class DemiApplicationRepository extends BaseRepository {
 
     /** Lecturer reviews assistant application */
 
-    async lecturerReviewApplication(applicationId, lecturerDecision) {
+    async lecturerReviewApplication(applicationId, lecturerDecision, reviewComment) {
         return await this.query(
             `
             UPDATE "DEMI_APPLICATION"
-            SET "ApplicationStatus" = $1
+            SET 
+                "ApplicationStatus" = $1
+                "ReviewComment" = $3
             WHERE "ApplicationID" = $2
             RETURNING *
             COMMIT
             `
-            , [lecturerDecision, applicationId]
+            , [lecturerDecision, applicationId, decisionReason, reviewComment]
         )
     }
 
