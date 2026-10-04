@@ -10,6 +10,15 @@ RUN sed -i 's/v3\.\([0-9]*\) main/v3.\1 community/' /etc/apk/repositories \
 COPY package*.json ./
 RUN npm install
 
+RUN npm install cookie-parser
+RUN npm install express-session
+RUN npm install socket.io
+RUN npm install adm-zip
+RUN npm install nodemailer
+RUN npm install jsonwebtoken
+
+
+
 COPY . .
 
 EXPOSE 5000

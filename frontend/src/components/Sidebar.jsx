@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { liveNotifs } from '../contexts/NotificationContext'
 
 const Sidebar = ({ userRole = 'student' }) => {
   // Normalise the role so that Lecturer, LECTURER, lecturer, etc.
@@ -7,7 +8,7 @@ const Sidebar = ({ userRole = 'student' }) => {
   const role = userRole?.toLowerCase().trim();
 
   const { logout } = useAuth();
-
+  const { unreadCount } = liveNotifs();
   // Student Navigation
   const studentNavItems = [
     { name: 'Dashboard', href: '/student-dashboard' },
@@ -66,13 +67,39 @@ const Sidebar = ({ userRole = 'student' }) => {
               `
             }
           >
-            {item.name}
+            <span>{item.name}</span>
+
+            {item.name === 'Notifications'  && (
+              <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full ml-2">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>
 
       {/* Bottom Navigation */}
       <div className="p-4">
+
+        {/* Profile is strictly for students */}
+        {role === 'student' && (
+          <NavLink
+            to="/profile"
+            className={({ isActive }) =>
+              `
+              block px-4 py-3 rounded-xl
+              transition-colors duration-200 mb-2
+              ${
+                isActive
+                  ? 'bg-primary-light font-semibold'
+                  : 'hover:bg-primary-light'
+              }
+              `
+            }
+          >
+            Profile
+          </NavLink>
+        )}
 
         {/* Profile is strictly for students */}
         {role === 'student' && (

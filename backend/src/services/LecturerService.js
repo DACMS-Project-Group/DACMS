@@ -21,12 +21,12 @@ class LecturerService {
         return { stats };
     }
 
-    async getApplicationsForLecturer(lecturerId) {
+    async lecturerFetchApplications(lecturerId) {
         return this.demiApplicationRepository.lecturerFetchApplications(lecturerId);
     }
 
-    async getApplicationById(lecturerId, applicationId) {
-        const application = await this.demiApplicationRepository.lecturerFindApplicationById(applicationId);
+    async lecturerFetchApplicationById(applicationId) {
+        const application = await this.demiApplicationRepository.lecturerFetchApplicationById(applicationId);
 
         if (!application || application.length === 0) {
             throw new Error('Application not found');
@@ -35,7 +35,7 @@ class LecturerService {
         return application;
     }
 
-    async reviewApplication(lecturerId, applicationId, decision) {
+    async lecturerReviewApplication(applicationId, decision) {
         if (!decision) {
             throw new Error('Decision is required');
         }

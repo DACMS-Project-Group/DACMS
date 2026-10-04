@@ -12,39 +12,39 @@ const router = express.Router();
 
 // -- Dashboard ------------------------------------------------------------
 router.get(
-    '/dashboard',
+    '/student/dashboard',
     authenticate,
     StudentDashboardController.getDashboard.bind(StudentDashboardController)
 );
 
 // -- Demi Applications ------------------------------------------------------
 router.get(
-    '/listings/open',
+    '/student/listings/open',
     authenticate,
     DemiApplicationController.getOpenListings.bind(DemiApplicationController)
 );
 
 router.get(
-    '/applications',
+    '/student/applications',
     authenticate,
     DemiApplicationController.getMyApplications.bind(DemiApplicationController)
 );
 
 router.post(
-    '/applications',
+    '/student/applications',
     authenticate,
     DemiApplicationController.apply.bind(DemiApplicationController)
 );
 
 // -- Supporting Documents -----------------------------------------------------
 router.get(
-    '/documents',
+    '/student/documents',
     authenticate,
     DemiApplicationController.getMyDocuments.bind(DemiApplicationController)
 );
 
 router.post(
-    '/documents',
+    '/student/documents',
     authenticate,
     upload.single('file'),
     DemiApplicationController.uploadDocument.bind(DemiApplicationController)
@@ -52,44 +52,44 @@ router.post(
 
 // -- Working Hours (Positions & Sessions) --------------------------------------
 router.get(
-    '/positions',
+    '/student/positions',
     authenticate,
     WorkSessionController.getMyPositions.bind(WorkSessionController)
 );
 
 router.get(
-    '/positions/:positionId/sessions',
+    '/student/positions/:positionId/sessions',
     authenticate,
     WorkSessionController.listSessionsForPosition.bind(WorkSessionController)
 );
 
 router.get(
-    '/positions/:positionId/sessions/:sessionId',
+    '/student/positions/:positionId/sessions/:sessionId',
     authenticate,
     WorkSessionController.getSessionDetail.bind(WorkSessionController)
 );
 
 router.post(
-    '/positions/:positionId/sessions/create',
+    '/student/positions/:positionId/sessions/create',
     authenticate,
     WorkSessionController.createSession.bind(WorkSessionController)
 );
 
 // -- Remuneration Claims --------------------------------------------------------
 router.get(
-    '/claims',
+    '/student/claims',
     authenticate,
     RemunerationClaimController.getMyClaims.bind(RemunerationClaimController)
 );
 
 router.get(
-    '/claims/:id',
+    '/student/claims/:id',
     authenticate,
     RemunerationClaimController.getClaimById.bind(RemunerationClaimController)
 );
 
 router.post(
-    '/claims/create',
+    '/student/claims/create',
     authenticate,
     RemunerationClaimController.generateClaim.bind(RemunerationClaimController)
 );
@@ -97,13 +97,13 @@ router.post(
 // -- Profile ----------------------------------------------------------------
 // match the team's contract; StudentController itself is unchanged.
 router.get(
-    '/profile/',
+    '/student/profile/',
     authenticate,
     StudentController.getProfile.bind(StudentController)
 );
 
 router.patch(
-    '/profile/edit',
+    '/student/profile/edit',
     authenticate,
     StudentController.updateProfile.bind(StudentController)
 );
