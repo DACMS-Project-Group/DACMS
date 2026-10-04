@@ -34,7 +34,7 @@ class DemiApplicationRepository extends BaseRepository {
         return { output: rows.length, rows };
     }
 
-    async lecturerFindApplicationById(applicationId) {
+    async lecturerFetchApplicationById(applicationId) {
         return await this.query(
             `
             SELECT 
@@ -58,7 +58,7 @@ class DemiApplicationRepository extends BaseRepository {
             JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
             JOIN "STUDENT" s ON s."StudentID" = a."StudentID"
             JOIN "APP_USER" u ON u."UserID" = s."StudentID"
-            WHERE "ApplicationID" = $1
+            WHERE a."ApplicationID" = $1
             `
             , [applicationId]
         )

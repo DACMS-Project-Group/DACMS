@@ -62,6 +62,7 @@ const ReviewApplications = () => {
       '—',
     phone: 
       app.ContactDetails ?? 
+      app.contactDetails ??
       app.phone ?? 
       '—',
     moduleName:
@@ -157,15 +158,22 @@ const filteredApplications = applications.filter((application) => {
         `/lecturer/applications/fetch/${application.id}`
       );
       const payload = data?.data ?? data;
-      const fullApplication = Array.isArray(payload)
-        ? payload[0]
-        : payload?.application ??
-          payload?.rows?.[0] ??
-          payload?.results?.[0] ??
-          payload?.items?.[0] ??
-          payload;
+      const detail = Array.isArray(payload)
+          ? payload
+          : payload?.rows ??
+            payload?.data ??
+            payload?.application ??
+            payload?.application[0] ??
+            payload?.data?.application[0] ??
+            payload?.results ??
+            payload?.items ??
+            [];
 
-      setSelectedApplication(mapApplicationDetail(fullApplication));
+
+      const fullApplication = detail.map(mapApplicationDetail);
+
+      setSelectedApplication(fullApplication[0] || null);
+
       setError('');
     } catch (err) {
       setError(err.message);

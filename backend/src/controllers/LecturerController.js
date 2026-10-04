@@ -52,7 +52,7 @@ class LecturerController {
             const decision = req.body.decision;
             const comment = req.body.comment;
 
-            const data = await LecturerService.reviewApplication(lecturerId, applicationId, decision, comment);
+            const data = await LecturerService.lecturerReviewApplication(applicationId, decision, comment);
             return res.status(200).json(data);
         } catch (error) {
             res.status(500).json( {error : error.message });
