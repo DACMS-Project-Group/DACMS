@@ -1,11 +1,10 @@
-//import React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
   const navigate = useNavigate();
 
-  const handleRoleSelect = (role) => {
-    navigate(`/login?role=${role}`);
+  const handleLogin = () => {
+    navigate('/login');
   };
 
   return (
@@ -51,30 +50,14 @@ const LandingPage = () => {
                 </p>
               </div>
 
-              {/* ===== THREE ROLE BUTTONS ===== */}
-              <div className="mt-6 flex flex-col sm:flex-row gap-3 md:gap-4">
-                
+              {/* ===== SINGLE LOGIN BUTTON ===== */}
+              <div className="mt-8">
                 <button
-                  onClick={() => handleRoleSelect('student')}
-                  className="bg-white text-primary-dark px-8 py-3 rounded-xl font-semibold text-center hover:bg-primary-light hover:text-white transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.35)] min-w-[140px] cursor-pointer"
+                  onClick={handleLogin}
+                  className="bg-white text-primary-dark px-12 py-4 rounded-xl font-semibold text-center hover:bg-primary-light hover:text-white transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.35)] min-w-[200px] cursor-pointer"
                 >
-                  <span className="block text-base">Student</span>
+                  <span className="block text-lg">Login</span>
                 </button>
-
-                <button
-                  onClick={() => handleRoleSelect('lecturer')}
-                  className="bg-white text-primary-dark px-8 py-3 rounded-xl font-semibold text-center hover:bg-primary-light hover:text-white transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.35)] min-w-[140px] cursor-pointer"
-                >
-                  <span className="block text-base">Lecturer</span>
-                </button>
-
-                <button
-                  onClick={() => handleRoleSelect('admin')}
-                  className="bg-white text-primary-dark px-8 py-3 rounded-xl font-semibold text-center hover:bg-primary-light hover:text-white transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.35)] min-w-[140px] cursor-pointer"
-                >
-                  <span className="block text-base">Administrator</span>
-                </button>
-
               </div>
 
             </div>
