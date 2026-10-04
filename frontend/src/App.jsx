@@ -79,6 +79,7 @@ function App() {
               element={<AssignAssistantResponsibilities />}
             />
             <Route path="/review-claims" element={<ReviewClaims />} />
+            <Route path="/review-claim/:id" element={<ClaimReview />} />
             <Route
               path="/assistant-positions"
               element={<AssistantPositions />}

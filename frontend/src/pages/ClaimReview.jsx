@@ -1,31 +1,69 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import claimsData from '../data/claimsData';
+import { apiGet, apiPatch } from '../api';
 
 const ClaimReview = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
+  const isLecturerReview = location.pathname.startsWith('/review-claim/');
+  const listPath = isLecturerReview ? '/review-claims' : '/claims-verification';
 
   const claimFromState = location.state?.claim;
-
-  const claim =
+  const demoClaim =
     claimFromState ||
     claimsData.find((item) => String(item.id) === String(id)) ||
     claimsData[0];
 
-  const [claimStatus, setClaimStatus] = useState(claim.status);
-
+  const [claim, setClaim] = useState(isLecturerReview ? null : demoClaim);
+  const [claimStatus, setClaimStatus] = useState(demoClaim.status);
   const [verifiedSessions, setVerifiedSessions] = useState(
-    claim.sessions.map((session) => session.status === 'Verified')
+    isLecturerReview
+      ? []
+      : demoClaim.sessions.map((session) => session.status === 'Verified')
   );
-
+  const [lecturerComment, setLecturerComment] = useState('');
   const [rejectionReason, setRejectionReason] = useState('');
   const [showRejectBox, setShowRejectBox] = useState(false);
+  const [isLoading, setIsLoading] = useState(isLecturerReview);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [loadError, setLoadError] = useState('');
+  const [actionError, setActionError] = useState('');
+
+  useEffect(() => {
+    if (!isLecturerReview) return undefined;
+
+    let isCurrent = true;
+    setIsLoading(true);
+
+    apiGet(`/lecturer/claims/fetch/${id}`)
+      .then((result) => {
+        if (!isCurrent) return;
+        if (!result) throw new Error('Claim not found for this lecturer.');
+
+        setClaim(result);
+        setClaimStatus(result.status);
+        setVerifiedSessions(
+          result.sessions.map((session) => session.status === 'Verified')
+        );
+        setLecturerComment(result.lecturerComment || '');
+      })
+      .catch((error) => {
+        if (isCurrent) setLoadError(error.message);
+      })
+      .finally(() => {
+        if (isCurrent) setIsLoading(false);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, [id, isLecturerReview]);
 
   const formatAmount = (amount) => {
     return `R ${amount.toLocaleString('en-ZA', {
@@ -46,10 +84,10 @@ const ClaimReview = () => {
     (verified) => verified
   );
 
-  const calculatedAmount = claim.hours * claim.hourlyRate;
+  const calculatedAmount = claim ? claim.hours * claim.hourlyRate : 0;
 
   const calculationValid =
-    Math.abs(calculatedAmount - claim.amount) < 0.01;
+    claim && Math.abs(calculatedAmount - claim.amount) < 0.01;
 
   const toggleSessionVerification = (index) => {
     setVerifiedSessions((current) =>
@@ -63,42 +101,97 @@ const ClaimReview = () => {
     setVerifiedSessions(claim.sessions.map(() => true));
   };
 
-  const handleApprove = () => {
+  const handleApprove = async () => {
+    setActionError('');
+
+    if (claim.sessions.length === 0) {
+      setActionError('This claim has no work sessions to verify.');
+      return;
+    }
+
     if (!allSessionsVerified) {
-      window.alert(
-        'Please verify all timesheet sessions before approving this claim.'
-      );
+      setActionError('Verify all timesheet sessions before approving this claim.');
       return;
     }
 
     if (!calculationValid) {
-      window.alert(
-        'The claim calculation is invalid and must be reviewed before approval.'
-      );
+      setActionError('The claim calculation must be valid before approval.');
       return;
     }
 
-    setClaimStatus('Verified');
+    const approvedStatus = isLecturerReview
+      ? 'Approved by Lecturer'
+      : 'Verified';
 
-    navigate('/claims-verification', {
+    if (isLecturerReview) {
+      if (!lecturerComment.trim()) {
+        setActionError('Add a comment before approving this claim.');
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        const result = await apiPatch('/lecturer/claims/review', {
+          claim_id: claim.id,
+          status: approvedStatus,
+          comment: lecturerComment.trim(),
+        });
+        if (!result) throw new Error('The claim could not be updated.');
+        navigate(listPath, { replace: true });
+      } catch (error) {
+        setActionError(error.message);
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    setClaimStatus(approvedStatus);
+
+    navigate(listPath, {
       state: {
         updatedClaim: {
           id: claim.id,
-          status: 'Verified',
+          status: approvedStatus,
         },
       },
     });
   };
 
-  const handleReject = () => {
+  const handleReject = async () => {
+    setActionError('');
+
+    if (isLecturerReview) {
+      if (!lecturerComment.trim()) {
+        setActionError('Add a comment before rejecting this claim.');
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        const result = await apiPatch('/lecturer/claims/review', {
+          claim_id: claim.id,
+          status: 'Rejected by Lecturer',
+          comment: lecturerComment.trim(),
+        });
+        if (!result) throw new Error('The claim could not be updated.');
+        navigate(listPath, { replace: true });
+      } catch (error) {
+        setActionError(error.message);
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
     if (!rejectionReason.trim()) {
-      window.alert('Please provide a reason for rejecting the claim.');
+      setActionError('Please provide a reason for rejecting the claim.');
       return;
     }
 
     setClaimStatus('Rejected');
 
-    navigate('/claims-verification', {
+    navigate(listPath, {
       state: {
         updatedClaim: {
           id: claim.id,
@@ -108,18 +201,53 @@ const ClaimReview = () => {
     });
   };
 
+  const renderPageMessage = (message, showBackButton = false) => (
+    <div className="min-h-screen bg-off-white">
+      <Navbar />
+      <div className="flex">
+        <Sidebar userRole={isLecturerReview ? 'lecturer' : 'admin'} />
+        <main className="flex-1">
+          <div className="bg-primary px-8 py-4">
+            <h1 className="text-2xl font-semibold text-white font-poppins">
+              {isLecturerReview ? 'Claim Verification' : 'Claim Review'}
+            </h1>
+          </div>
+          <div className="p-8">
+            <Card>
+              <p className="text-neutral font-inter">{message}</p>
+              {showBackButton && (
+                <button
+                  type="button"
+                  onClick={() => navigate(listPath)}
+                  className="mt-4 rounded-lg bg-primary px-4 py-2 font-semibold text-white font-inter"
+                >
+                  Back to Claims
+                </button>
+              )}
+            </Card>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+
+  if (isLoading) return renderPageMessage('Loading claim...');
+  if (loadError || !claim) {
+    return renderPageMessage(loadError || 'Claim not found.', true);
+  }
+
   return (
     <div className="min-h-screen bg-off-white">
       <Navbar />
 
       <div className="flex">
-        <Sidebar userRole="admin" />
+        <Sidebar userRole={isLecturerReview ? 'lecturer' : 'admin'} />
 
         <main className="flex-1">
           {/* Page Header */}
           <div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-semibold text-white font-poppins">
-              Claim Review
+              {isLecturerReview ? 'Claim Verification' : 'Claim Review'}
             </h1>
           </div>
 
@@ -477,12 +605,32 @@ const ClaimReview = () => {
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral font-inter">
-                  Approve the claim once the timesheets and calculations have
-                  been verified, or reject it with a reason.
+                  {isLecturerReview
+                    ? 'Approve or reject this claim with a comment for administrative processing.'
+                    : 'Approve the claim once the timesheets and calculations have been verified, or reject it with a reason.'}
                 </p>
               </div>
 
-              {showRejectBox && (
+              {isLecturerReview && (
+                <div className="mb-5">
+                  <label
+                    htmlFor="lecturer-comment"
+                    className="mb-2 block text-sm font-medium text-neutral font-inter"
+                  >
+                    Lecturer Comment
+                  </label>
+                  <textarea
+                    id="lecturer-comment"
+                    rows="4"
+                    value={lecturerComment}
+                    onChange={(event) => setLecturerComment(event.target.value)}
+                    placeholder="Add a comment about this claim..."
+                    className="w-full rounded-xl border border-neutral bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary-lightest font-inter"
+                  />
+                </div>
+              )}
+
+              {!isLecturerReview && showRejectBox && (
                 <div className="mb-5">
                   <label
                     htmlFor="rejection-reason"
@@ -504,8 +652,25 @@ const ClaimReview = () => {
                 </div>
               )}
 
+              {actionError && (
+                <p role="alert" className="mb-4 text-sm font-medium text-red-700 font-inter">
+                  {actionError}
+                </p>
+              )}
+
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-                {!showRejectBox && (
+                {isLecturerReview && (
+                  <button
+                    type="button"
+                    onClick={handleReject}
+                    disabled={isSubmitting}
+                    className="rounded-xl border border-red-500 px-5 py-3 font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 font-inter"
+                  >
+                    Reject Claim
+                  </button>
+                )}
+
+                {!isLecturerReview && !showRejectBox && (
                   <button
                     type="button"
                     onClick={() => setShowRejectBox(true)}
@@ -515,7 +680,7 @@ const ClaimReview = () => {
                   </button>
                 )}
 
-                {showRejectBox && (
+                {!isLecturerReview && showRejectBox && (
                   <>
                     <button
                       type="button"
@@ -528,6 +693,7 @@ const ClaimReview = () => {
                     <button
                       type="button"
                       onClick={handleReject}
+                      disabled={isSubmitting}
                       className="rounded-xl bg-red-600 px-5 py-3 font-semibold text-white transition hover:bg-red-700 font-inter"
                     >
                       Confirm Rejection
@@ -539,9 +705,10 @@ const ClaimReview = () => {
                   <button
                     type="button"
                     onClick={handleApprove}
+                    disabled={isSubmitting}
                     className="rounded-xl bg-primary px-5 py-3 font-semibold text-white transition hover:bg-primary-dark font-inter"
                   >
-                    Approve Claim
+                    {isSubmitting ? 'Saving...' : 'Approve Claim'}
                   </button>
                 )}
               </div>

@@ -76,12 +76,28 @@ class LecturerService {
         return LecturerRepository.getClaimById(lecturerId, claimId);
     }
 
-    async reviewClaim(lecturerId, claimId, status) {
-        if (!status) {
-            throw new Error('Status is required');
+    async reviewClaim(lecturerId, claimId, status, comment) {
+        const claimStatus = {
+            Approved: 'Approved by Lecturer',
+            'Approved by Lecturer': 'Approved by Lecturer',
+            Rejected: 'Rejected by Lecturer',
+            'Rejected by Lecturer': 'Rejected by Lecturer'
+        }[status];
+
+        if (!claimStatus) {
+            throw new Error('Status must be Approved or Rejected by Lecturer');
         }
 
-        return LecturerRepository.reviewClaim(lecturerId, claimId, status);
+        if (!comment?.trim()) {
+            throw new Error('A comment is required when reviewing a claim');
+        }
+
+        return LecturerRepository.reviewClaim(
+            lecturerId,
+            claimId,
+            claimStatus,
+            comment.trim()
+        );
     }
 
     async getBudgetsSummary(lecturerId) {

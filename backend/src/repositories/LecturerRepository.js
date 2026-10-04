@@ -226,8 +226,10 @@ class LecturerRepository {
                 c."TotalHoursClaimed",
                 c."TotalClaimAmount",
                 c."ClaimStatus",
+                c."LecturerComment",
                 c."SubmissionDate",
                 m."ModuleCode",
+                s."StudentNumber",
                 CONCAT(
                     au."Title", ' ',
                     au."FName", ' ',
@@ -258,8 +260,10 @@ class LecturerRepository {
             total_claim_amount:
                 Number(row.TotalClaimAmount ?? 0),
             claim_status: row.ClaimStatus,
+            lecturer_comment: row.LecturerComment,
             submission_date: row.SubmissionDate,
             module_code: row.ModuleCode,
+            student_number: row.StudentNumber,
             student_name: row.student_name
         }));
     }
@@ -271,6 +275,7 @@ class LecturerRepository {
                 c."ClaimReferenceNumber" AS "reference",
                 c."SubmissionDate" AS "submittedDate",
                 c."ClaimStatus" AS "status",
+                c."LecturerComment" AS "lecturerComment",
                 c."PeriodStartDate" AS "periodStartDate",
                 c."PeriodEndDate" AS "periodEndDate",
                 c."TotalHoursClaimed" AS "hours",
@@ -377,6 +382,7 @@ class LecturerRepository {
             moduleCode: claimRow.moduleCode,
             moduleName: claimRow.moduleName,
             lecturer: claimRow.lecturer,
+            lecturerComment: claimRow.lecturerComment,
             period,
             submittedDate: formatDisplayDate(claimRow.submittedDate),
             hours: Number(claimRow.hours ?? 0),
@@ -404,10 +410,11 @@ class LecturerRepository {
         };
     }
 
-    static async reviewClaim(lecturerId, claimId, status) {
+    static async reviewClaim(lecturerId, claimId, status, comment) {
         const query = `
             UPDATE "REMUNERATION_CLAIM" c
-            SET "ClaimStatus" = $3
+            SET "ClaimStatus" = $3,
+                "LecturerComment" = $4
             FROM "DEMI_APPLICATION" da
             JOIN "DEMI_LISTING" dl
                 ON dl."ListingID" = da."ListingID"
@@ -418,12 +425,13 @@ class LecturerRepository {
                 c."ClaimID",
                 c."ClaimReferenceNumber",
                 c."ClaimStatus",
+                c."LecturerComment",
                 c."SubmissionDate";
         `;
 
         const result = await pool.query(
             query,
-            [claimId, lecturerId, status]
+            [claimId, lecturerId, status, comment]
         );
 
         return result.rows[0] || null;

@@ -121,8 +121,14 @@ class LecturerController {
             const lecturerId = getAuthUserId(req);
             const claimId = req.params.claim_id || req.body.claim_id;
             const status = req.body.status;
+            const comment = req.body.comment;
 
-            const data = await LecturerService.reviewClaim(lecturerId, claimId, status);
+            const data = await LecturerService.reviewClaim(
+                lecturerId,
+                claimId,
+                status,
+                comment
+            );
             return res.status(200).json(data);
         } catch (error) {
             return res.status(500).json({ error: error.message });

@@ -296,7 +296,7 @@ async function main() {
     { label: 'Review session', method: 'PATCH', path: '/lecturer/sessions/review/1', body: { decision: true }, expectedStatus: 200 },
     { label: 'Claims summary', method: 'GET', path: '/lecturer/claims', expectedStatus: 200 },
     { label: 'Claim by id', method: 'GET', path: '/lecturer/claims/fetch/1', expectedStatus: 200 },
-    { label: 'Review claim', method: 'PATCH', path: '/lecturer/claims/review', body: { claim_id: 1, status: 'Approved' }, expectedStatus: 200 },
+    { label: 'Review claim', method: 'PATCH', path: '/lecturer/claims/review', body: { claim_id: 1, status: 'Approved by Lecturer', comment: 'Hours and amount verified.' }, expectedStatus: 200 },
     { label: 'Budgets summary', method: 'GET', path: '/lecturer/budgets', expectedStatus: 200 },
     { label: 'Budget by id', method: 'GET', path: '/lecturer/budgets/fetch/1', expectedStatus: 200 },
     { label: 'Lecturer unauthenticated access', method: 'GET', path: '/lecturer/dashboard_statistics', expectedStatus: 401, noCookie: true }

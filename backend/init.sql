@@ -266,6 +266,7 @@ CREATE TABLE "REMUNERATION_CLAIM" (
     "TotalClaimAmount" decimal(10,2) NOT NULL,
     "HourlyRateApplied" decimal(10,2) NOT NULL,
     "ClaimStatus" varchar(20) DEFAULT 'Pending',
+    "LecturerComment" TEXT,
     "SubmissionDate" timestamptz DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "PK_REMUNERATION_CLAIM" PRIMARY KEY ("ClaimID"),
     CONSTRAINT "UQ_REMUNERATION_CLAIM_ReferenceNumber" UNIQUE ("ClaimReferenceNumber"),

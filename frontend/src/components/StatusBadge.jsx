@@ -4,6 +4,8 @@ const StatusBadge = ({ status }) => {
   // This object maps each status to a color combination
   const statusColors = {
     'Approved': 'bg-success text-white',
+    'Approved by Lecturer': 'bg-success text-white',
+    'Rejected by Lecturer': 'bg-error text-white',
     'Paid': 'bg-success text-white',
     'Pending': 'bg-warning text-dark',
     'Rejected': 'bg-error text-white'
