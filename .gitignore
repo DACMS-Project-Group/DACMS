@@ -9,4 +9,4 @@
 **/build/
 
 # Docker persistent volume local backups
-.docker/
+.docker/backend/cookies.txt

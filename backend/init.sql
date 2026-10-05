@@ -105,12 +105,10 @@ CREATE TABLE "STUDENT" (
     "AccountType" varchar(20) DEFAULT 'Savings',
     "BranchCode" varchar(10) NOT NULL,
     "AccountHolderName" varchar(100),
-    CONSTRAINT "PK_STUDENT" PRIMARY KEY ("StudentID"),
-    CONSTRAINT "UQ_STUDENT_StudentNumber" UNIQUE ("StudentNumber"),
-    CONSTRAINT "FK_STUDENT_APP_USER" FOREIGN KEY ("StudentID") REFERENCES"APP_USER" ("UserID") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
-    -- Added for StudentProfile.jsx (P&C122F) full-form coverage. Additive
-    -- only: the blob columns above (ResidentialAddress/PostalAddress/
-    -- HighestQualification) are untouched for seed-data compatibility.
+   
+-- Added for StudentProfile.jsx (P&C122F) full-form coverage. Additive
+-- only: the blob columns above (ResidentialAddress/PostalAddress/
+-- HighestQualification) are untouched for seed-data compatibility.
     "Initials" varchar(10),
     "MiddleNames" varchar(100),
     "NickName" varchar(50),
@@ -166,9 +164,9 @@ CREATE TABLE "STUDENT" (
     "DeclarationAgreed" boolean DEFAULT false,
     "Signature" text,
 
-    CONSTRAINT "PK_STUDENT" PRIMARY KEY ("StudentID"),
-    CONSTRAINT "UQ_STUDENT_StudentNumber" UNIQUE ("StudentNumber"),
-    CONSTRAINT "FK_STUDENT_APP_USER" FOREIGN KEY ("StudentID") REFERENCES "APP_USER" ("UserID") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
+     CONSTRAINT "PK_STUDENT" PRIMARY KEY ("StudentID"),
+CONSTRAINT "UQ_STUDENT_StudentNumber" UNIQUE ("StudentNumber"),
+CONSTRAINT "FK_STUDENT_APP_USER" FOREIGN KEY ("StudentID") REFERENCES "APP_USER" ("UserID") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
 
 );
 
@@ -586,8 +584,6 @@ INSERT INTO "SECURITY_TOKEN" ("UserID", "JWT_Token", "IssuedAt", "ExpiresAt") VA
 (11, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMSIsIm5hbWUiOiJBbGFuIFNtaXRoIn0', '2026-08-29 07:30:00+02', '2026-08-30 07:30:00+02'),
 (15, 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxNSIsIm5hbWUiOiJFcmljIEpvaG5zb24ifQ', '2026-08-29 07:00:00+02', '2026-08-30 07:00:00+02');
 
-INSERT INTO "DEMI_APPLICATION" ("StudentID", "ListingID", "ApplicationStatus", "DateSubmitted")
-VALUES (101, 1, 'In Review', CURRENT_TIMESTAMP);
 
 -- Seed Test Position linked to Application #1
 INSERT INTO "DEMI_POSITION" ("ApplicationID", "PaymentScaleID", "TotalAllocatedHours", "PositionStatus", "AdminComment")
