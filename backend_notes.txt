@@ -903,6 +903,27 @@ These routes are registered in the backend API router. All use the /api prefix.
         }
 
         /claims/export {
+            type: GET
+            auth: true, admin
+            desc: Fetches verified claims formatted for the payment export page
+            response body {
+                "claims": [
+                    {
+                        "id": claim ID,
+                        "reference_number": claim reference,
+                        "student": student name,
+                        "module": module code,
+                        "hours": total hours claimed,
+                        "rate": hourly rate,
+                        "amount": total claim amount,
+                        "status": "Approved",
+                        "date": submission date
+                    }
+                ]
+            }
+        }
+
+        /claims/export {
             type: POST
             auth: true, admin
             desc: Exports the specified claims as PDF files in a ZIP archive

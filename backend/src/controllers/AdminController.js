@@ -75,6 +75,15 @@ class AdminController {
         }
     }
 
+    static async getClaimsForExport(req, res) {
+        try {
+            const data = await AdminService.getClaimsForExport();
+            return res.status(200).json(data);
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
     static async getClaimById(req, res) {
         const { claim_id } = req.params;
         try {
