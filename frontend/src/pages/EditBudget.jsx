@@ -1,94 +1,187 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
+import { apiGet, apiPut } from '../api';
 
 const EditBudget = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const currentYear = new Date().getFullYear();
 
   const [formData, setFormData] = useState({
-    moduleCode: 'CMPG323',
-    moduleName: 'Software Engineering',
-    allocatedBudget: '75000',
-    year: '2026',
-    budgetPeriod: 'Semester 2',
+    moduleId: '',
+    moduleCode: '',
+    moduleName: '',
+    lecturerId: '',
+    allocatedBudget: '',
+    currentUsage: '',
+    maxHours: '',
+    year: String(currentYear),
   });
 
-  const [lecturers, setLecturers] = useState([
-    {
-      lecturer: 'Dr John Example',
-      allocation: '20000',
-    },
-    {
-      lecturer: 'Prof Jane Example',
-      allocation: '15000',
-    },
-    {
-      lecturer: 'Dr Michael Example',
-      allocation: '10000',
-    },
-  ]);
+  const [modules, setModules] = useState([]);
+  const [lecturers, setLecturers] = useState([]);
 
-  const [lecturerForm, setLecturerForm] = useState({
-    lecturer: '',
-    allocation: '',
-  });
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
-  const lecturerList = [
-    'Dr John Example',
-    'Prof Jane Example',
-    'Dr Michael Example',
-    'Ms Sarah Example',
-  ];
+  useEffect(() => {
+    const loadBudgetData = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const [budgetResponse, modulesResponse, lecturersResponse] =
+          await Promise.all([
+            apiGet(`/admin/budgets/fetch/${id}`),
+            apiGet('/admin/modules'),
+            apiGet('/admin/lecturers'),
+          ]);
+
+        const budget = budgetResponse?.data?.[0];
+
+        if (!budget) {
+          throw new Error('Budget not found.');
+        }
+
+        setModules(
+          Array.isArray(modulesResponse)
+            ? modulesResponse
+            : modulesResponse?.data || []
+        );
+
+        setLecturers(
+          Array.isArray(lecturersResponse)
+            ? lecturersResponse
+            : lecturersResponse?.data || []
+        );
+
+        setFormData({
+          moduleId: budget.module_id ?? '',
+          moduleCode: budget.module_code ?? '',
+          moduleName:
+            budget.module_name ??
+            budget.module_description ??
+            '',
+          lecturerId: budget.lecturer_id ?? '',
+          allocatedBudget: budget.allocated_budget ?? '',
+          currentUsage: budget.current_budget_usage ?? '0',
+          maxHours: budget.max_allowable_work_hours ?? '',
+          year: String(budget.academic_year ?? currentYear),
+        });
+      } catch (err) {
+        console.error('Failed to load budget:', err);
+        setError(err.message || 'Failed to load budget information.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      loadBudgetData();
+    }
+  }, [id, currentYear]);
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
+
+    setError('');
+    setSuccess('');
+
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
   };
 
-  const addLecturer = () => {
-    if (!lecturerForm.lecturer || !lecturerForm.allocation) {
-      return;
-    }
+  const handleModuleChange = (e) => {
+    const moduleId = e.target.value;
 
-    setLecturers([
-      ...lecturers,
-      lecturerForm,
-    ]);
-
-    setLecturerForm({
-      lecturer: '',
-      allocation: '',
-    });
-  };
-
-  const removeLecturer = (index) => {
-    setLecturers(
-      lecturers.filter((_, i) => i !== index)
+    const selectedModule = modules.find(
+      (module) =>
+        String(module.module_id) === String(moduleId)
     );
+
+    setError('');
+    setSuccess('');
+
+    setFormData({
+      ...formData,
+      moduleId,
+      moduleCode: selectedModule?.module_code || '',
+      moduleName:
+        selectedModule?.module_name ||
+        selectedModule?.description ||
+        '',
+    });
   };
 
-  const totalAllocation = lecturers.reduce(
-    (total, lecturer) =>
-      total + Number(lecturer.allocation),
-    0
-  );
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log('Updated Budget:', {
-      id,
-      ...formData,
-      lecturers,
-    });
+    try {
+      setSubmitting(true);
+      setError('');
+      setSuccess('');
 
-    navigate(`/budget-management/details/${id}`);
+      if (!formData.moduleId) {
+        throw new Error('Module is required.');
+      }
+
+      if (!formData.lecturerId) {
+        throw new Error('Lecturer is required.');
+      }
+
+      if (formData.allocatedBudget === '') {
+        throw new Error('Allocated budget is required.');
+      }
+
+      if (formData.maxHours === '') {
+        throw new Error('Max hours is required.');
+      }
+
+      if (formData.year === '') {
+        throw new Error('Budget year is required.');
+      }
+
+      if (Number(formData.year) < currentYear) {
+        throw new Error(
+          `Budget year cannot be earlier than ${currentYear}.`
+        );
+      }
+
+      const updateData = {
+        module_id: Number(formData.moduleId),
+        lecturer_id: Number(formData.lecturerId),
+        allocated_budget: Number(formData.allocatedBudget),
+        current_budget_usage: Number(formData.currentUsage || 0),
+        max_allowable_work_hours: Number(formData.maxHours),
+        academic_year: Number(formData.year),
+      };
+
+      await apiPut(
+        `/admin/budgets/edit/${id}`,
+        updateData
+      );
+
+      setSuccess('Budget updated successfully.');
+    } catch (err) {
+      console.error('Failed to update budget:', err);
+      setError(err.message || 'Failed to update budget.');
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+  const selectedLecturer = lecturers.find(
+    (lecturer) =>
+      String(lecturer.lecturer_id) ===
+      String(formData.lecturerId)
+  );
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -121,6 +214,20 @@ const EditBudget = () => {
                 Update the budget allocation and lecturer information.
               </p>
             </div>
+
+            {/* Error */}
+            {error && (
+              <div className="mb-6 p-4 border border-red-300 bg-red-50 text-red-700 rounded-xl font-inter">
+                {error}
+              </div>
+            )}
+
+            {/* Success */}
+            {success && (
+              <div className="mb-6 p-4 border border-green-300 bg-green-50 text-green-700 rounded-xl font-inter">
+                {success}
+              </div>
+            )}
 
             <form onSubmit={handleSubmit}>
 
@@ -155,7 +262,11 @@ const EditBudget = () => {
                       <input
                         id="moduleCode"
                         type="text"
-                        value={formData.moduleCode}
+                        value={
+                          loading
+                            ? 'Loading...'
+                            : formData.moduleCode
+                        }
                         readOnly
                         className="w-full h-12 px-4 border border-neutral rounded-xl bg-primary-lightest font-inter"
                       />
@@ -173,7 +284,11 @@ const EditBudget = () => {
                       <input
                         id="moduleName"
                         type="text"
-                        value={formData.moduleName}
+                        value={
+                          loading
+                            ? 'Loading...'
+                            : formData.moduleName
+                        }
                         readOnly
                         className="w-full h-12 px-4 border border-neutral rounded-xl bg-primary-lightest font-inter"
                       />
@@ -200,6 +315,10 @@ const EditBudget = () => {
                           name="allocatedBudget"
                           value={formData.allocatedBudget}
                           onChange={handleChange}
+                          min="0"
+                          step="0.01"
+                          required
+                          disabled={loading || submitting}
                           className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
                         />
 
@@ -215,39 +334,74 @@ const EditBudget = () => {
                         Budget Year
                       </label>
 
-                      <select
+                      <input
                         id="year"
+                        type="number"
                         name="year"
                         value={formData.year}
                         onChange={handleChange}
+                        min={currentYear}
+                        max="2100"
+                        step="1"
+                        required
+                        disabled={loading || submitting}
                         className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
-                      >
-                        <option>2026</option>
-                        <option>2027</option>
-                        <option>2028</option>
-                      </select>
+                      />
+
                     </div>
 
-                    {/* Budget Period */}
+                    {/* Current Usage */}
                     <div>
                       <label
-                        htmlFor="budgetPeriod"
+                        htmlFor="currentUsage"
                         className="block text-sm font-medium text-neutral mb-2 font-inter"
                       >
-                        Budget Period
+                        Current Usage
                       </label>
 
-                      <select
-                        id="budgetPeriod"
-                        name="budgetPeriod"
-                        value={formData.budgetPeriod}
-                        onChange={handleChange}
-                        className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
+                      <div className="flex">
+
+                        <span className="flex items-center px-4 bg-primary-lightest border border-r-0 border-neutral rounded-l-xl font-inter text-primary font-semibold">
+                          R
+                        </span>
+
+                        <input
+                          id="currentUsage"
+                          type="number"
+                          name="currentUsage"
+                          value={formData.currentUsage}
+                          onChange={handleChange}
+                          min="0"
+                          step="0.01"
+                          required
+                          disabled={loading || submitting}
+                          className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
+                        />
+
+                      </div>
+                    </div>
+
+                    {/* Max Hours */}
+                    <div>
+                      <label
+                        htmlFor="maxHours"
+                        className="block text-sm font-medium text-neutral mb-2 font-inter"
                       >
-                        <option>Semester 1</option>
-                        <option>Semester 2</option>
-                        <option>Full Year</option>
-                      </select>
+                        Max Hours
+                      </label>
+
+                      <input
+                        id="maxHours"
+                        type="number"
+                        name="maxHours"
+                        value={formData.maxHours}
+                        onChange={handleChange}
+                        min="0"
+                        step="0.5"
+                        required
+                        disabled={loading || submitting}
+                        className="w-full h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
+                      />
                     </div>
 
                   </div>
@@ -269,22 +423,33 @@ const EditBudget = () => {
 
                     {/* Lecturer */}
                     <select
-                      value={lecturerForm.lecturer}
-                      onChange={(e) =>
-                        setLecturerForm({
-                          ...lecturerForm,
-                          lecturer: e.target.value,
-                        })
-                      }
+                      id="lecturer"
+                      value={formData.lecturerId}
+                      onChange={(e) => {
+                        setError('');
+                        setSuccess('');
+
+                        setFormData({
+                          ...formData,
+                          lecturerId: e.target.value,
+                        });
+                      }}
+                      required
+                      disabled={loading || submitting}
                       className="h-12 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary font-inter"
                     >
                       <option value="">
-                        Select Lecturer
+                        {loading
+                          ? 'Loading Lecturers...'
+                          : 'Select Lecturer'}
                       </option>
 
-                      {lecturerList.map((lecturer) => (
-                        <option key={lecturer}>
-                          {lecturer}
+                      {lecturers.map((lecturer) => (
+                        <option
+                          key={lecturer.lecturer_id}
+                          value={lecturer.lecturer_id}
+                        >
+                          {lecturer.name} - {lecturer.email}
                         </option>
                       ))}
                     </select>
@@ -299,13 +464,19 @@ const EditBudget = () => {
                       <input
                         type="number"
                         placeholder="Allocation Amount"
-                        value={lecturerForm.allocation}
-                        onChange={(e) =>
-                          setLecturerForm({
-                            ...lecturerForm,
-                            allocation: e.target.value,
-                          })
-                        }
+                        value={formData.allocatedBudget}
+                        onChange={(e) => {
+                          setError('');
+                          setSuccess('');
+
+                          setFormData({
+                            ...formData,
+                            allocatedBudget: e.target.value,
+                          });
+                        }}
+                        min="0"
+                        step="0.01"
+                        disabled={loading || submitting}
                         className="w-full h-12 px-4 border border-neutral rounded-r-xl focus:outline-none focus:border-primary font-inter"
                       />
 
@@ -314,8 +485,8 @@ const EditBudget = () => {
                     {/* Add Lecturer */}
                     <button
                       type="button"
-                      onClick={addLecturer}
-                      className="h-12 px-6 border-2 border-primary text-primary rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
+                      disabled
+                      className="h-12 px-6 border-2 border-primary text-primary rounded-xl font-semibold hover:bg-primary-lightest transition font-inter disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       + Add Lecturer
                     </button>
@@ -347,20 +518,19 @@ const EditBudget = () => {
 
                       <tbody>
 
-                        {lecturers.map((lecturer, index) => (
+                        {!loading && selectedLecturer && (
                           <tr
-                            key={index}
                             className="border-t border-neutral/30 hover:bg-primary-lightest/30 transition"
                           >
 
                             <td className="p-4 text-dark font-inter">
-                              {lecturer.lecturer}
+                              {selectedLecturer.name}
                             </td>
 
                             <td className="p-4 text-dark font-inter">
                               R{' '}
                               {Number(
-                                lecturer.allocation
+                                formData.allocatedBudget || 0
                               ).toLocaleString('en-ZA')}
                             </td>
 
@@ -368,10 +538,8 @@ const EditBudget = () => {
 
                               <button
                                 type="button"
-                                onClick={() =>
-                                  removeLecturer(index)
-                                }
-                                className="text-red-600 font-semibold hover:underline font-inter"
+                                disabled
+                                className="text-red-600 font-semibold hover:underline font-inter disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 Remove
                               </button>
@@ -379,7 +547,18 @@ const EditBudget = () => {
                             </td>
 
                           </tr>
-                        ))}
+                        )}
+
+                        {!loading && !selectedLecturer && (
+                          <tr>
+                            <td
+                              colSpan="3"
+                              className="p-4 text-center text-neutral font-inter"
+                            >
+                              No lecturer assigned.
+                            </td>
+                          </tr>
+                        )}
 
                       </tbody>
 
@@ -398,9 +577,9 @@ const EditBudget = () => {
 
                       <p className="text-2xl font-poppins font-bold text-primary mt-1">
                         R{' '}
-                        {totalAllocation.toLocaleString(
-                          'en-ZA'
-                        )}
+                        {Number(
+                          formData.allocatedBudget || 0
+                        ).toLocaleString('en-ZA')}
                       </p>
 
                     </div>
@@ -421,16 +600,18 @@ const EditBudget = () => {
                       `/budget-management/details/${id}`
                     )
                   }
-                  className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
+                  disabled={submitting}
+                  className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-lightest transition font-inter disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
 
                 <button
                   type="submit"
-                  className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
+                  disabled={loading || submitting}
+                  className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition font-inter disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Save Changes
+                  {submitting ? 'Saving...' : 'Save Changes'}
                 </button>
 
               </div>

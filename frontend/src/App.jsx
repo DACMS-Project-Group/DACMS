@@ -23,7 +23,7 @@ import ReviewApplications from './pages/ReviewApplications';
 import ApplicationReview from './pages/ApplicationReview';
 import AssignAssistantResponsibilities from './pages/AssignAssistantResponsibilities';
 import VerifyWorkHours from './pages/VerifyWorkHours';
-import AssistantPositions from './pages/AssistantPositions';
+import AssistantListings from './pages/AssistantListings';
 
 // ===== ADMIN PAGES =====
 import AdminDashboard from './pages/AdminDashboard';
@@ -58,7 +58,7 @@ function App() {
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
 
-            {/* ===== STUDENT ROUTES ===== */}  
+            {/* ===== STUDENT ROUTES ===== */}
             <Route element={<ProtectedRoute requiredRoles={['student']} />}>
               <Route path="/student-dashboard" element={<Dashboard />} />
               <Route path="/profile" element={<StudentProfile />} />
@@ -82,15 +82,14 @@ function App() {
                 path="/assign-responsibilities"
                 element={<AssignAssistantResponsibilities />}
               />
-            <Route path="/review-claims" element={<ReviewClaims />} />
-            <Route path="/review-claim/:id" element={<ClaimReview />} />
-            <Route
-              path="/assistant-positions"
-              element={<AssistantPositions />}
-            />
-            <Route path="/verify-hours" element={<VerifyWorkHours />} />
-            <Route path="/notifications" element={<Notifications />} />
-             <Route path="/assign-responsibilities" element={<AssignAssistantResponsibilities />} />
+              <Route path="/review-claims" element={<ReviewClaims />} />
+              <Route path="/review-claim/:id" element={<ClaimReview />} />
+              <Route
+                path="/assistant-listings"
+                element={<AssistantListings />}
+              />
+              <Route path="/verify-hours" element={<VerifyWorkHours />} />
+              <Route path="/notifications" element={<Notifications />} />
             </Route>
 
             {/* ===== ADMIN ROUTES ===== */}
@@ -119,8 +118,6 @@ function App() {
               />
               <Route path="/notifications" element={<Notifications />} />
             </Route>
-
-          
 
             {/* ===== FALLBACK ===== */}
             <Route path="*" element={<Navigate to="/" replace />} />
