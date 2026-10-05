@@ -25,6 +25,123 @@ class LecturerRepository {
         };
     }
 
+    static async getAssistantsWithResponsibilities(lecturerId) {
+        const query = `
+            SELECT
+                p."PositionID",
+                CONCAT(u."FName", ' ', u."LName") AS "StudentName",
+                s."StudentNumber",
+                m."ModuleCode",
+                COALESCE(worked."HoursWorked", 0) AS "HoursWorked",
+                p."TotalAllocatedHours",
+                COALESCE(
+                    array_agg(r."Description") FILTER (
+                        WHERE r."ResponsibilityID" IS NOT NULL
+                    ),
+                    ARRAY[]::text[]
+                ) AS "Responsibilities"
+            FROM "DEMI_POSITION" p
+            JOIN "DEMI_APPLICATION" a
+                ON a."ApplicationID" = p."ApplicationID"
+            JOIN "DEMI_LISTING" l
+                ON l."ListingID" = a."ListingID"
+            JOIN "STUDENT" s
+                ON s."StudentID" = a."StudentID"
+            JOIN "APP_USER" u
+                ON u."UserID" = s."StudentID"
+            JOIN "NWU_MODULE" m
+                ON m."ModuleID" = l."ModuleID"
+            LEFT JOIN "RESPONSIBILITY" r
+                ON r."PositionID" = p."PositionID"
+            LEFT JOIN LATERAL (
+                SELECT SUM(ws."TotalHoursWorked") AS "HoursWorked"
+                FROM "WORK_SESSION" ws
+                WHERE ws."PositionID" = p."PositionID"
+            ) worked ON TRUE
+            WHERE l."LecturerID" = $1
+              AND a."ApplicationStatus" = 'Approved'
+              AND p."PositionStatus" = 'Approved'
+            GROUP BY
+                p."PositionID",
+                u."FName",
+                u."LName",
+                s."StudentNumber",
+                m."ModuleCode",
+                worked."HoursWorked",
+                p."TotalAllocatedHours"
+            ORDER BY u."LName", u."FName", m."ModuleCode";
+        `;
+
+        const { rows } = await pool.query(query, [lecturerId]);
+        return rows;
+    }
+
+    static async saveAssistantResponsibilities(lecturerId, positionId, hourLimit, descriptions) {
+        const client = await pool.connect();
+
+        try {
+            await client.query('BEGIN');
+
+            const position = await client.query(
+                `
+                SELECT p."PositionID"
+                FROM "DEMI_POSITION" p
+                JOIN "DEMI_APPLICATION" a
+                    ON a."ApplicationID" = p."ApplicationID"
+                JOIN "DEMI_LISTING" l
+                    ON l."ListingID" = a."ListingID"
+                WHERE p."PositionID" = $1
+                  AND l."LecturerID" = $2
+                  AND a."ApplicationStatus" = 'Approved'
+                  AND p."PositionStatus" = 'Approved'
+                FOR UPDATE OF p
+                `,
+                [positionId, lecturerId]
+            );
+
+            if (position.rows.length === 0) {
+                await client.query('ROLLBACK');
+                return null;
+            }
+
+            await client.query(
+                `
+                UPDATE "DEMI_POSITION"
+                SET "TotalAllocatedHours" = $1
+                WHERE "PositionID" = $2
+                `,
+                [hourLimit, positionId]
+            );
+
+            await client.query(
+                `DELETE FROM "RESPONSIBILITY" WHERE "PositionID" = $1`,
+                [positionId]
+            );
+
+            for (const description of descriptions) {
+                await client.query(
+                    `
+                    INSERT INTO "RESPONSIBILITY" ("PositionID", "Description")
+                    VALUES ($1, $2)
+                    `,
+                    [positionId, description]
+                );
+            }
+
+            await client.query('COMMIT');
+            return {
+                positionId: Number(positionId),
+                hourLimit,
+                responsibilities: descriptions
+            };
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
     static async getDashboardMetrics(lecturerId) {
         const query = `
             SELECT

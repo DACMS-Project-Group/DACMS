@@ -2,6 +2,13 @@ import LecturerRepository from '../repositories/LecturerRepository.js';
 import DemiApplicationRepository from '../repositories/DemiApplicationRepository.js';
 import WorkSessionRepository from '../repositories/WorkSessionRepository.js';
 
+const RESPONSIBILITY_LABELS = {
+    tutoring: 'Tutoring',
+    marking: 'Marking',
+    invigilation: 'Invigilation',
+    labAssistance: 'Lab Assistance'
+};
+
 class LecturerService {
     constructor() {
         this.demiApplicationRepository = new DemiApplicationRepository();
@@ -23,6 +30,95 @@ class LecturerService {
 
     async getApplicationsForLecturer(lecturerId) {
         return this.demiApplicationRepository.lecturerFetchApplications(lecturerId);
+    }
+
+    async getAssistantsWithResponsibilities(lecturerId) {
+        const rows = await LecturerRepository.getAssistantsWithResponsibilities(lecturerId);
+
+        return {
+            assistants: rows.map((row) => {
+                const descriptions = row.Responsibilities.map((description) =>
+                    description.toLowerCase()
+                );
+                const hasResponsibility = (terms) =>
+                    descriptions.some((description) =>
+                        terms.some((term) => description.includes(term))
+                    );
+
+                return {
+                    id: Number(row.PositionID),
+                    name: row.StudentName,
+                    studentNumber: row.StudentNumber,
+                    module: row.ModuleCode,
+                    hoursWorked: Number(row.HoursWorked ?? 0),
+                    hourLimit: Number(row.TotalAllocatedHours ?? 0),
+                    responsibilities: {
+                        tutoring: hasResponsibility([
+                            'tutor',
+                            'tutorial',
+                            'office hour',
+                            'consult',
+                            'demonstrat'
+                        ]),
+                        marking: hasResponsibility(['mark', 'grade', 'assess']),
+                        invigilation: hasResponsibility(['invigil']),
+                        labAssistance: hasResponsibility(['lab'])
+                    }
+                };
+            })
+        };
+    }
+
+    async saveAssistantResponsibilities(lecturerId, positionId, update) {
+        const { responsibilities, hourLimit } = update ?? {};
+        const responsibilityKeys = Object.keys(RESPONSIBILITY_LABELS);
+        const numericHourLimit = Number(hourLimit);
+
+        if (
+            !Number.isFinite(numericHourLimit) ||
+            numericHourLimit < 1 ||
+            numericHourLimit > 40
+        ) {
+            throw new Error('Hour limit must be a number between 1 and 40.');
+        }
+
+        if (
+            !responsibilities ||
+            typeof responsibilities !== 'object' ||
+            Array.isArray(responsibilities) ||
+            Object.keys(responsibilities).length !== responsibilityKeys.length ||
+            responsibilityKeys.some(
+                (key) => typeof responsibilities[key] !== 'boolean'
+            ) ||
+            Object.keys(responsibilities).some(
+                (key) => !responsibilityKeys.includes(key)
+            )
+        ) {
+            throw new Error(
+                `Responsibilities must include boolean values for: ${responsibilityKeys.join(', ')}.`
+            );
+        }
+
+        const descriptions = responsibilityKeys
+            .filter((key) => responsibilities[key])
+            .map((key) => RESPONSIBILITY_LABELS[key]);
+
+        const saved = await LecturerRepository.saveAssistantResponsibilities(
+            lecturerId,
+            positionId,
+            numericHourLimit,
+            descriptions
+        );
+
+        if (!saved) {
+            throw new Error('Assistant position not found.');
+        }
+
+        return {
+            positionId: saved.positionId,
+            hourLimit: saved.hourLimit,
+            responsibilities
+        };
     }
 
     async getApplicationById(lecturerId, applicationId) {

@@ -37,6 +37,55 @@ class LecturerController {
         }
     }
 
+    static async getAssistantsWithResponsibilities(req, res) {
+        const lecturerId = getAuthUserId(req);
+        if (!lecturerId) {
+            return res.status(401).json({ error: 'Authenticated lecturer ID is required.' });
+        }
+
+        try {
+            const data = await LecturerService.getAssistantsWithResponsibilities(lecturerId);
+            return res.status(200).json(data);
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    static async saveAssistantResponsibilities(req, res) {
+        const lecturerId = getAuthUserId(req);
+        if (!lecturerId) {
+            return res.status(401).json({ error: 'Authenticated lecturer ID is required.' });
+        }
+
+        const positionId = Number(req.params.position_id);
+        if (!Number.isInteger(positionId) || positionId < 1) {
+            return res.status(400).json({ error: 'position_id must be a positive integer.' });
+        }
+
+        try {
+            const data = await LecturerService.saveAssistantResponsibilities(
+                lecturerId,
+                positionId,
+                req.body
+            );
+            return res.status(200).json({
+                message: 'Assistant responsibilities saved successfully.',
+                data
+            });
+        } catch (error) {
+            if (error.message === 'Assistant position not found.') {
+                return res.status(404).json({ error: error.message });
+            }
+            if (
+                error.message.startsWith('Hour limit') ||
+                error.message.startsWith('Responsibilities')
+            ) {
+                return res.status(400).json({ error: error.message });
+            }
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
     static async lecturerFetchApplicationById(req, res) {
         try {
             const lecturerId = getAuthUserId(req);
