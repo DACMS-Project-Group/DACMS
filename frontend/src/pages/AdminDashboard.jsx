@@ -4,6 +4,7 @@ import StatusBadge from '../components/StatusBadge';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
+import { apiGet } from '../api';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -71,7 +72,6 @@ const AdminDashboard = () => {
             </h1>
           </div>
 
-          {/* Main Content */}
           <div className="p-8">
             {/* Welcome */}
             <div className="mb-8">
@@ -81,18 +81,22 @@ const AdminDashboard = () => {
               <p className="text-neutral mt-2 font-inter">
                 Monitor and manage the Assistant Applications and Claims Management System.
               </p>
+
+              {error && (
+                <p className="mt-2 text-sm text-error font-inter">
+                  Could not load dashboard data: {error}
+                </p>
+              )}
             </div>
 
-            {/* ================================
-                SYSTEM STATISTICS
-            ================================= */}
+            {/* SYSTEM STATISTICS */}
             <section className="mb-8">
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 System Statistics
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {statistics.map((stat) => (
+                {statisticCards.map((stat) => (
                   <Card key={stat.title}>
                     <div className="flex justify-between items-start">
                       <div>
@@ -100,7 +104,7 @@ const AdminDashboard = () => {
                           {stat.title}
                         </p>
                         <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                          {stat.value}
+                          {loading ? '—' : stat.value}
                         </p>
                       </div>
                     </div>
@@ -116,7 +120,7 @@ const AdminDashboard = () => {
               {/* Monthly Claims */}
               <section className="min-w-0 h-full flex flex-col">
                 <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                  Monthly Claims Summary
+                  Monthly Work Summary
                 </h3>
 
                 <Card className="h-full flex flex-col justify-between">
@@ -269,9 +273,7 @@ const AdminDashboard = () => {
               </section>
             </div>
 
-            {/* ================================
-                ADMINISTRATOR ACTIONS
-            ================================= */}
+            {/* ADMINISTRATOR ACTIONS */}
             <section className="mb-8">
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 Administrator Actions
@@ -339,7 +341,6 @@ const AdminDashboard = () => {
           </div>
         </main>
       </div>
-
     </div>
   );
 };

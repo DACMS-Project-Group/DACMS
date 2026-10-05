@@ -28,8 +28,18 @@ class LecturerService {
         return { stats };
     }
 
-    async getApplicationsForLecturer(lecturerId) {
+    async lecturerFetchApplications(lecturerId) {
         return this.demiApplicationRepository.lecturerFetchApplications(lecturerId);
+    }
+
+    async getApplicationById(lecturerId, applicationId) {
+        const application = await this.demiApplicationRepository.lecturerFindApplicationById(applicationId);
+
+        if (!application || application.length === 0) {
+            throw new Error('Application not found');
+        }
+
+        return application;
     }
 
     async getAssistantsWithResponsibilities(lecturerId) {
@@ -121,8 +131,97 @@ class LecturerService {
         };
     }
 
-    async getApplicationById(lecturerId, applicationId) {
-        const application = await this.demiApplicationRepository.lecturerFindApplicationById(applicationId);
+    async getAssistantsWithResponsibilities(lecturerId) {
+        const rows = await LecturerRepository.getAssistantsWithResponsibilities(lecturerId);
+
+        return {
+            assistants: rows.map((row) => {
+                const descriptions = row.Responsibilities.map((description) =>
+                    description.toLowerCase()
+                );
+                const hasResponsibility = (terms) =>
+                    descriptions.some((description) =>
+                        terms.some((term) => description.includes(term))
+                    );
+
+                return {
+                    id: Number(row.PositionID),
+                    name: row.StudentName,
+                    studentNumber: row.StudentNumber,
+                    module: row.ModuleCode,
+                    hoursWorked: Number(row.HoursWorked ?? 0),
+                    hourLimit: Number(row.TotalAllocatedHours ?? 0),
+                    responsibilities: {
+                        tutoring: hasResponsibility([
+                            'tutor',
+                            'tutorial',
+                            'office hour',
+                            'consult',
+                            'demonstrat'
+                        ]),
+                        marking: hasResponsibility(['mark', 'grade', 'assess']),
+                        invigilation: hasResponsibility(['invigil']),
+                        labAssistance: hasResponsibility(['lab'])
+                    }
+                };
+            })
+        };
+    }
+
+    async saveAssistantResponsibilities(lecturerId, positionId, update) {
+        const { responsibilities, hourLimit } = update ?? {};
+        const responsibilityKeys = Object.keys(RESPONSIBILITY_LABELS);
+        const numericHourLimit = Number(hourLimit);
+
+        if (
+            !Number.isFinite(numericHourLimit) ||
+            numericHourLimit < 1 ||
+            numericHourLimit > 40
+        ) {
+            throw new Error('Hour limit must be a number between 1 and 40.');
+        }
+
+        if (
+            !responsibilities ||
+            typeof responsibilities !== 'object' ||
+            Array.isArray(responsibilities) ||
+            Object.keys(responsibilities).length !== responsibilityKeys.length ||
+            responsibilityKeys.some(
+                (key) => typeof responsibilities[key] !== 'boolean'
+            ) ||
+            Object.keys(responsibilities).some(
+                (key) => !responsibilityKeys.includes(key)
+            )
+        ) {
+            throw new Error(
+                `Responsibilities must include boolean values for: ${responsibilityKeys.join(', ')}.`
+            );
+        }
+
+        const descriptions = responsibilityKeys
+            .filter((key) => responsibilities[key])
+            .map((key) => RESPONSIBILITY_LABELS[key]);
+
+        const saved = await LecturerRepository.saveAssistantResponsibilities(
+            lecturerId,
+            positionId,
+            numericHourLimit,
+            descriptions
+        );
+
+        if (!saved) {
+            throw new Error('Assistant position not found.');
+        }
+
+        return {
+            positionId: saved.positionId,
+            hourLimit: saved.hourLimit,
+            responsibilities
+        };
+    }
+
+    async lecturerFetchApplicationById(applicationId) {
+        const application = await this.demiApplicationRepository.lecturerFetchApplicationById(applicationId);
 
         if (!application || application.length === 0) {
             throw new Error('Application not found');
@@ -131,7 +230,7 @@ class LecturerService {
         return application;
     }
 
-    async reviewApplication(lecturerId, applicationId, decision) {
+    async lecturerReviewApplication(applicationId, decision) {
         if (!decision) {
             throw new Error('Decision is required');
         }

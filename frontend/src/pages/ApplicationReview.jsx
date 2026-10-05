@@ -4,10 +4,12 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { apiPatch } from '../api';
 
 const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
   const navigate = useNavigate();
 
+  const [revStatus, setRevStatus] = useState(application?.status || '');
   const [comment, setComment] = useState(application?.comment || '');
   const [message, setMessage] = useState('');
 
@@ -47,19 +49,28 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
   }
 
   // Update application status
-  const handleStatusUpdate = (newStatus) => {
+  const handleStatusUpdate = async () => {
     const updatedApplication = {
       ...application,
-      status: newStatus,
-      comment: comment,
+      status: revStatus,
+      //comment: comment,
     };
+
+    try {
+      await apiPatch(`/lecturer/applications/review/${application.id}`, {
+      decision : revStatus
+      });
+    } catch (error) {
+      console.error('Error updating application status:', error);
+      return;
+    }
 
     if (onUpdateApplication) {
       onUpdateApplication(updatedApplication);
     }
 
     setMessage(
-      `Application has been ${newStatus.toLowerCase()}.`
+      `Application has been ${revStatus.toLowerCase()}.`
     );
 
     setTimeout(() => {
@@ -329,7 +340,10 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
 
                   <button
                     type="button"
-                    onClick={() => handleStatusUpdate('Approved')}
+                    onClick={() => {
+                      setRevStatus('Approved');
+                      handleStatusUpdate();
+                    }}
                     className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition"
                   >
                     Approve Application
@@ -337,7 +351,10 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
 
                   <button
                     type="button"
-                    onClick={() => handleStatusUpdate('Rejected')}
+                    onClick={() => {
+                      setRevStatus('Rejected');
+                      handleStatusUpdate();
+                    }}
                     className="bg-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-700 transition"
                   >
                     Reject Application
@@ -345,7 +362,10 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
 
                   <button
                     type="button"
-                    onClick={() => handleStatusUpdate('Changes Requested')}
+                    onClick={() => {
+                      setRevStatus('Changes Requested');
+                      handleStatusUpdate();
+                    }}
                     className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-lightest transition"
                   >
                     Request Changes

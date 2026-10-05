@@ -217,7 +217,6 @@ const ExportPayments = () => {
                     <label className="block text-sm text-neutral mb-2 font-inter font-medium">
                       Date From
                     </label>
-
                     <input
                       type="date"
                       className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
@@ -229,7 +228,6 @@ const ExportPayments = () => {
                     <label className="block text-sm text-neutral mb-2 font-inter font-medium">
                       Date To
                     </label>
-
                     <input
                       type="date"
                       className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"

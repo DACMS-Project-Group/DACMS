@@ -349,6 +349,90 @@ const VerifyWorkHours = () => {
                 </table>
               </div>
             </Card>
+
+            {/* Decision */}
+            <Card>
+              <div className="mb-5">
+                <h2 className="text-lg font-semibold text-primary-dark">
+                  Verification Decision
+                </h2>
+
+                <p className="mt-1 text-sm text-neutral">
+                  Approve the recorded hours once all sessions have been
+                  verified, or reject them with a reason.
+                </p>
+              </div>
+
+              {error && (
+                <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {error}
+                </div>
+              )}
+
+              {showRejectBox && (
+                <div className="mb-5">
+                  <label
+                    htmlFor="rejection-reason"
+                    className="mb-2 block text-sm font-medium text-neutral"
+                  >
+                    Rejection Reason
+                  </label>
+
+                  <textarea
+                    id="rejection-reason"
+                    rows="4"
+                    value={rejectionReason}
+                    onChange={(event) =>
+                      setRejectionReason(event.target.value)
+                    }
+                    placeholder="Explain why these recorded hours are being rejected..."
+                    className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-purple-200"
+                  />
+                </div>
+              )}
+
+              <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
+                {!showRejectBox && (
+                  <button
+                    type="button"
+                    onClick={() => setShowRejectBox(true)}
+                    className="rounded-lg border border-red-500 px-5 py-3 font-semibold text-red-600 transition hover:bg-red-50"
+                  >
+                    Reject Hours
+                  </button>
+                )}
+
+                {showRejectBox && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setShowRejectBox(false)}
+                      className="rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-700 transition hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleReject}
+                      className="rounded-lg bg-red-600 px-5 py-3 font-semibold text-white transition hover:bg-red-700"
+                    >
+                      Confirm Rejection
+                    </button>
+                  </>
+                )}
+
+                {!showRejectBox && (
+                  <button
+                    type="button"
+                    onClick={handleApprove}
+                    className="rounded-lg bg-primary px-5 py-3 font-semibold text-white transition hover:bg-primary-dark"
+                  >
+                    Approve Hours
+                  </button>
+                )}
+              </div>
+            </Card>
           </div>
         </main>
       </div>

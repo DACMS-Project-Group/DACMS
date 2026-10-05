@@ -308,27 +308,22 @@ const BudgetDetails = () => {
               <Card>
                 <div className="overflow-x-auto">
                   <table className="w-full">
-
                     <thead className="bg-primary-lightest">
                       <tr>
                         <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
                           Date
                         </th>
-
                         <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
                           User
                         </th>
-
                         <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
                           Action
                         </th>
-
                         <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
                           Details
                         </th>
                       </tr>
                     </thead>
-
                     <tbody>
                       {auditLogs.map((log, index) => (
                         <tr
@@ -338,29 +333,24 @@ const BudgetDetails = () => {
                           <td className="p-4 text-dark font-inter">
                             {log.date}
                           </td>
-
                           <td className="p-4 text-dark font-inter">
                             {log.user}
                           </td>
-
                           <td className="p-4">
                             <span className="px-3 py-1 rounded-full bg-primary-lightest text-primary text-xs font-semibold font-inter">
                               {log.action}
                             </span>
                           </td>
-
                           <td className="p-4 text-neutral font-inter">
                             {log.description}
                           </td>
                         </tr>
                       ))}
                     </tbody>
-
                   </table>
                 </div>
               </Card>
             </section>
-
           </div>
         </main>
       </div>

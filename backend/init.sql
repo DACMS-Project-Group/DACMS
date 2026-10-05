@@ -205,6 +205,8 @@ CREATE TABLE "DEMI_APPLICATION" (
     "ApplicationStatus" VARCHAR(30) DEFAULT 'Pending',
     "VerificationEligibilityStatus" VARCHAR(30),
     "DateSubmitted" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    "AppReason" TEXT,
+    "ReviewComment" TEXT,
     CONSTRAINT "PK_DEMI_APPLICATION" PRIMARY KEY ("ApplicationID"),
     CONSTRAINT "CHK_DEMI_APPLICATION_Status" CHECK (
         "ApplicationStatus" IN ('Pending', 'In Review', 'Approved', 'Rejected', 'Returned')
@@ -457,17 +459,17 @@ INSERT INTO "DEMI_LISTING" ("ModuleID", "LecturerID", "Deadline", "MinimumGrade"
 (10, 12, '2026-08-31 23:59:59+02', 65.00);
 
 -- 12. Insert Applications
-INSERT INTO "DEMI_APPLICATION" ("StudentID", "ListingID", "ApplicationStatus", "VerificationEligibilityStatus", "DateSubmitted") VALUES 
-(1, 1, 'Approved', 'Eligible', '2026-08-01 10:00:00+02'),   -- ApplicationID: 1
-(2, 2, 'Approved', 'Eligible', '2026-08-02 11:30:00+02'),   -- ApplicationID: 2
-(3, 1, 'Approved', 'Eligible', '2026-08-03 09:15:00+02'),   -- ApplicationID: 3
-(4, 4, 'In Review', 'Eligible', '2026-08-04 14:00:00+02'),  -- ApplicationID: 4
-(5, 5, 'Approved', 'Eligible', '2026-08-05 15:45:00+02'),   -- ApplicationID: 5
-(6, 6, 'Pending', 'Eligible', '2026-08-06 08:30:00+02'),    -- ApplicationID: 6
-(7, 3, 'Approved', 'Eligible', '2026-08-07 12:10:00+02'),   -- ApplicationID: 7
-(8, 7, 'Pending', 'Eligible', '2026-08-08 16:20:00+02'),    -- ApplicationID: 8
-(9, 9, 'Approved', 'Eligible', '2026-08-09 11:00:00+02'),   -- ApplicationID: 9
-(10, 8, 'Approved', 'Eligible', '2026-08-10 13:25:00+02');  -- ApplicationID: 10
+INSERT INTO "DEMI_APPLICATION" ("StudentID", "ListingID", "ApplicationStatus", "VerificationEligibilityStatus", "DateSubmitted", "AppReason", "ReviewComment") VALUES 
+(1, 1, 'Approved', 'Eligible', '2026-08-01 10:00:00+02', 'Meets eligibility requirements', NULL),   -- ApplicationID: 1
+(2, 2, 'Approved', 'Eligible', '2026-08-02 11:30:00+02', 'Meets eligibility requirements', NULL),   -- ApplicationID: 2
+(3, 1, 'Approved', 'Eligible', '2026-08-03 09:15:00+02', 'Meets eligibility requirements', NULL),   -- ApplicationID: 3
+(4, 4, 'In Review', 'Eligible', '2026-08-04 14:00:00+02', 'Application is under review', NULL),      -- ApplicationID: 4
+(5, 5, 'Approved', 'Eligible', '2026-08-05 15:45:00+02', 'Meets eligibility requirements', NULL),   -- ApplicationID: 5
+(6, 6, 'Pending', 'Eligible', '2026-08-06 08:30:00+02', 'Awaiting application review', NULL),        -- ApplicationID: 6
+(7, 3, 'Approved', 'Eligible', '2026-08-07 12:10:00+02', 'Meets eligibility requirements', NULL),   -- ApplicationID: 7
+(8, 7, 'Pending', 'Eligible', '2026-08-08 16:20:00+02', 'Awaiting application review', NULL),        -- ApplicationID: 8
+(9, 9, 'Approved', 'Eligible', '2026-08-09 11:00:00+02', 'Meets eligibility requirements', NULL),   -- ApplicationID: 9
+(10, 8, 'Approved', 'Eligible', '2026-08-10 13:25:00+02', 'Meets eligibility requirements', NULL);  -- ApplicationID: 10
 
 -- 13. Insert Active Positions (Linked to Approved Applications)
 -- ScaleID 1 = UG (86.75), ScaleID 2 = PG (107.80)
