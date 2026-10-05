@@ -7,20 +7,19 @@ class WorkSessionRepository extends BaseRepository {
     }
 
     /** Lecturer access to Sessions */
-
     async fetchSessionsForLecturer(lecturerId) {
-        return await this.query(
+        return this.query(
             `
             SELECT
                 w."SessionID",
                 w."StartTime"::DATE AS "SessionDate",
                 m."ModuleCode",
                 CONCAT(
-                    COALESCE(s."Title", ''),
-                    CASE WHEN COALESCE(s."Title", '') = '' THEN '' ELSE ' ' END,
-                    s."FName",
+                    COALESCE(au."Title", ''),
+                    CASE WHEN COALESCE(au."Title", '') = '' THEN '' ELSE ' ' END,
+                    au."FName",
                     ' ',
-                    s."LName"
+                    au."LName"
                 ) AS "StudentName",
                 s."StudentNumber" AS "StudentNumber",
                 w."ActivityDescription",
@@ -34,36 +33,36 @@ class WorkSessionRepository extends BaseRepository {
             JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
             JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
             JOIN "STUDENT" s ON s."StudentID" = a."StudentID"
+            JOIN "APP_USER" au ON au."UserID" = a."StudentID"
             WHERE l."LecturerID" = $1
-            `
-            , [lecturerId]
-        )
+            ORDER BY w."StartTime" DESC
+            `,
+            [lecturerId]
+        );
     }
 
-    async fetchSessionByIdForLecturer(sessionId){
-        return await this.query(
+    async fetchSessionByIdForLecturer(sessionId) {
+        return this.query(
             `
             SELECT *
             FROM "WORK_SESSION"
             WHERE "SessionID" = $1
-            `
-            , [sessionId]
-        )
+            `,
+            [sessionId]
+        );
     }
 
     async reviewSessionByLecturer(sessionId, approvalStatus) {
-        return await this.query(
+        return this.query(
             `
             UPDATE "WORK_SESSION"
             SET "LecturerApproval" = $1
             WHERE "SessionID" = $2
             RETURNING "SessionID", "LecturerApproval"
-            `
-            , [approvalStatus, sessionId]
-        )
+            `,
+            [approvalStatus, sessionId]
+        );
     }
-
-    /** Get student ID from session for notification */
 
     async getStudentIdFromSession(sessionId) {
         const studentId = await this.query(
@@ -74,138 +73,11 @@ class WorkSessionRepository extends BaseRepository {
             JOIN "DEMI_POSITION" p ON p."PositionID" = w."PositionID"
             JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
             WHERE w."SessionID" = $1;
-            `, [sessionId]
-        )
+            `,
+            [sessionId]
+        );
 
-        return studentId[0].StudentID;
-    }
-
-    /** Lecturer access to Sessions */
-
-    async fetchSessionsForLecturer(lecturerId) {
-        return await this.query(
-            `
-            SELECT
-                w."StartTime"::DATE AS "SessionDate",
-                m."ModuleCode",
-                w."ActivityDescription",
-                w."StartTime"::TIME AS "StartTime",
-                w."EndTime"::TIME AS "EndTime",
-                w."TotalHoursWorked",
-                w."LecturerApproval"
-            FROM "WORK_SESSION" w
-            JOIN "DEMI_POSITION" p ON p."PositionID" = w."PositionID"
-            JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
-            JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
-            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
-            WHERE l."LecturerID" = $1
-            `
-            , [lecturerId]
-        )
-    }
-
-    async fetchSessionByIdForLecturer(sessionId){
-        return await this.query(
-            `
-            SELECT *
-            FROM "WORK_SESSION"
-            WHERE "SessionID" = $1
-            `
-            , [sessionId]
-        )
-    }
-
-    async reviewSessionByLecturer(sessionId, approvalStatus) {
-        return await this.query(
-            `
-            UPDATE "WORK_SESSION"
-            SET "LecturerApproval" = $1
-            WHERE "SessionID" = $2
-            RETURNING "SessionID", "LecturerApproval"
-            `
-            , [approvalStatus, sessionId]
-        )
-    }
-
-    /** Get student ID from session for notification */
-
-    async getStudentIdFromSession(sessionId) {
-        const studentId = await this.query(
-            `
-            SELECT 
-                a."StudentID"
-            FROM "WORK_SESSION" w
-            JOIN "DEMI_POSITION" p ON p."PositionID" = w."PositionID"
-            JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
-            WHERE w."SessionID" = $1;
-            `, [sessionId]
-        )
-
-        return studentId[0].StudentID;
-    }
-
-    /** Lecturer access to Sessions */
-
-    async fetchSessionsForLecturer(lecturerId) {
-        return await this.query(
-            `
-            SELECT
-                w."StartTime"::DATE AS "SessionDate",
-                m."ModuleCode",
-                w."ActivityDescription",
-                w."StartTime"::TIME AS "StartTime",
-                w."EndTime"::TIME AS "EndTime",
-                w."TotalHoursWorked",
-                w."LecturerApproval"
-            FROM "WORK_SESSION" w
-            JOIN "DEMI_POSITION" p ON p."PositionID" = w."PositionID"
-            JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
-            JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
-            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
-            WHERE l."LecturerID" = $1
-            `
-            , [lecturerId]
-        )
-    }
-
-    async fetchSessionByIdForLecturer(sessionId){
-        return await this.query(
-            `
-            SELECT *
-            FROM "WORK_SESSION"
-            WHERE "SessionID" = $1
-            `
-            , [sessionId]
-        )
-    }
-
-    async reviewSessionByLecturer(sessionId, approvalStatus) {
-        return await this.query(
-            `
-            UPDATE "WORK_SESSION"
-            SET "LecturerApproval" = $1
-            WHERE "SessionID" = $2
-            RETURNING "SessionID", "LecturerApproval"
-            `
-            , [approvalStatus, sessionId]
-        )
-    }
-
-    /** Get student ID from session for notification */
-
-    async getStudentIdFromSession(sessionId) {
-        const studentId = await this.query(
-            `
-            SELECT 
-                a."StudentID"
-            FROM "WORK_SESSION" w
-            JOIN "DEMI_POSITION" p ON p."PositionID" = w."PositionID"
-            JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
-            WHERE w."SessionID" = $1;
-            `, [sessionId]
-        )
-
-        return studentId[0].StudentID;
+        return studentId[0]?.StudentID ?? null;
     }
 
     /**

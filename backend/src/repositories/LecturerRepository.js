@@ -174,7 +174,15 @@ class LecturerRepository {
                 (
                     SELECT COALESCE(SUM(mb."MaxAllowableWorkHours"), 0)
                     FROM "MODULE_BUDGET" mb
-                    WHERE mb."LecturerID" = $1
+                    WHERE (
+                        mb."LecturerID" = $1
+                        OR EXISTS (
+                            SELECT 1
+                            FROM "LECTURER_MODULE" lm
+                            WHERE lm."LecturerID" = $1
+                              AND lm."ModuleID" = mb."ModuleID"
+                        )
+                    )
                 ) AS hours_allocated;
         `;
 
@@ -202,7 +210,15 @@ class LecturerRepository {
                     WHERE "CurrentBudgetUsage" >= "AllocatedBudget" * $2
                 ) AS count_near_limit
             FROM "MODULE_BUDGET"
-            WHERE "LecturerID" = $1
+            WHERE (
+                "LecturerID" = $1
+                OR EXISTS (
+                    SELECT 1
+                    FROM "LECTURER_MODULE" lm
+                    WHERE lm."LecturerID" = $1
+                      AND lm."ModuleID" = "MODULE_BUDGET"."ModuleID"
+                )
+            )
             AND "AcademicYear" = EXTRACT(YEAR FROM CURRENT_DATE);
         `;
 
@@ -236,7 +252,15 @@ class LecturerRepository {
             FROM "MODULE_BUDGET" b
             JOIN "NWU_MODULE" m
                 ON m."ModuleID" = b."ModuleID"
-            WHERE b."LecturerID" = $1
+            WHERE (
+                b."LecturerID" = $1
+                OR EXISTS (
+                    SELECT 1
+                    FROM "LECTURER_MODULE" lm
+                    WHERE lm."LecturerID" = $1
+                      AND lm."ModuleID" = b."ModuleID"
+                )
+            )
             AND b."AcademicYear" = EXTRACT(YEAR FROM CURRENT_DATE)
             ORDER BY m."ModuleCode";
         `;
@@ -274,7 +298,15 @@ class LecturerRepository {
             JOIN "NWU_MODULE" m
                 ON m."ModuleID" = b."ModuleID"
             WHERE b."BudgetID" = $1
-            AND b."LecturerID" = $2;
+              AND (
+                    b."LecturerID" = $2
+                    OR EXISTS (
+                        SELECT 1
+                        FROM "LECTURER_MODULE" lm
+                        WHERE lm."LecturerID" = $2
+                          AND lm."ModuleID" = b."ModuleID"
+                    )
+              );
         `;
 
         const result = await pool.query(

@@ -47,97 +47,8 @@ class LecturerService {
 
         return {
             assistants: rows.map((row) => {
-                const descriptions = row.Responsibilities.map((description) =>
-                    description.toLowerCase()
-                );
-                const hasResponsibility = (terms) =>
-                    descriptions.some((description) =>
-                        terms.some((term) => description.includes(term))
-                    );
-
-                return {
-                    id: Number(row.PositionID),
-                    name: row.StudentName,
-                    studentNumber: row.StudentNumber,
-                    module: row.ModuleCode,
-                    hoursWorked: Number(row.HoursWorked ?? 0),
-                    hourLimit: Number(row.TotalAllocatedHours ?? 0),
-                    responsibilities: {
-                        tutoring: hasResponsibility([
-                            'tutor',
-                            'tutorial',
-                            'office hour',
-                            'consult',
-                            'demonstrat'
-                        ]),
-                        marking: hasResponsibility(['mark', 'grade', 'assess']),
-                        invigilation: hasResponsibility(['invigil']),
-                        labAssistance: hasResponsibility(['lab'])
-                    }
-                };
-            })
-        };
-    }
-
-    async saveAssistantResponsibilities(lecturerId, positionId, update) {
-        const { responsibilities, hourLimit } = update ?? {};
-        const responsibilityKeys = Object.keys(RESPONSIBILITY_LABELS);
-        const numericHourLimit = Number(hourLimit);
-
-        if (
-            !Number.isFinite(numericHourLimit) ||
-            numericHourLimit < 1 ||
-            numericHourLimit > 40
-        ) {
-            throw new Error('Hour limit must be a number between 1 and 40.');
-        }
-
-        if (
-            !responsibilities ||
-            typeof responsibilities !== 'object' ||
-            Array.isArray(responsibilities) ||
-            Object.keys(responsibilities).length !== responsibilityKeys.length ||
-            responsibilityKeys.some(
-                (key) => typeof responsibilities[key] !== 'boolean'
-            ) ||
-            Object.keys(responsibilities).some(
-                (key) => !responsibilityKeys.includes(key)
-            )
-        ) {
-            throw new Error(
-                `Responsibilities must include boolean values for: ${responsibilityKeys.join(', ')}.`
-            );
-        }
-
-        const descriptions = responsibilityKeys
-            .filter((key) => responsibilities[key])
-            .map((key) => RESPONSIBILITY_LABELS[key]);
-
-        const saved = await LecturerRepository.saveAssistantResponsibilities(
-            lecturerId,
-            positionId,
-            numericHourLimit,
-            descriptions
-        );
-
-        if (!saved) {
-            throw new Error('Assistant position not found.');
-        }
-
-        return {
-            positionId: saved.positionId,
-            hourLimit: saved.hourLimit,
-            responsibilities
-        };
-    }
-
-    async getAssistantsWithResponsibilities(lecturerId) {
-        const rows = await LecturerRepository.getAssistantsWithResponsibilities(lecturerId);
-
-        return {
-            assistants: rows.map((row) => {
-                const descriptions = row.Responsibilities.map((description) =>
-                    description.toLowerCase()
+                const descriptions = (row.Responsibilities ?? []).map((description) =>
+                    String(description).toLowerCase()
                 );
                 const hasResponsibility = (terms) =>
                     descriptions.some((description) =>
@@ -238,11 +149,15 @@ class LecturerService {
         return this.demiApplicationRepository.lecturerReviewApplication(applicationId, decision);
     }
 
-    async getSessionsForLecturer(lecturerId) {
+    async fetchSessionsForLecturer(lecturerId) {
         return this.workSessionRepository.fetchSessionsForLecturer(lecturerId);
     }
 
-    async getSessionByIdForLecturer(sessionId) {
+    async getSessionsForLecturer(lecturerId) {
+        return this.fetchSessionsForLecturer(lecturerId);
+    }
+
+    async fetchSessionByIdForLecturer(sessionId) {
         const session = await this.workSessionRepository.fetchSessionByIdForLecturer(sessionId);
 
         if (!session || session.length === 0) {
@@ -252,12 +167,20 @@ class LecturerService {
         return session;
     }
 
-    async reviewSession(lecturerId, sessionId, decision) {
+    async getSessionByIdForLecturer(sessionId) {
+        return this.fetchSessionByIdForLecturer(sessionId);
+    }
+
+    async reviewSessionByLecturer(sessionId, decision) {
         if (!decision) {
             throw new Error('Decision is required');
         }
 
         return this.workSessionRepository.reviewSessionByLecturer(sessionId, decision);
+    }
+
+    async getStudentIdBySession(sessionId) {
+        return this.workSessionRepository.getStudentIdFromSession(sessionId);
     }
 
     async getClaimsSummary(lecturerId) {

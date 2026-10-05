@@ -1,4 +1,5 @@
 import LecturerService from '../services/LecturerService.js';
+import NotificationService from '../services/NotificationService.js';
 import getAuthUserId from '../utils/getAuthUserId.js';
 
 class LecturerController {
@@ -111,45 +112,51 @@ class LecturerController {
     static async getLecturerSessions(req, res) {
         try {
             const lecturerId = getAuthUserId(req);
+            if (!lecturerId) {
+                return res.status(401).json({ error: 'Authenticated lecturer ID is required.' });
+            }
+
             const sessions = await LecturerService.fetchSessionsForLecturer(lecturerId);
             return res.status(200).json(sessions);
         } catch (error) {
-            return res.status(500).json(error.message);
+            return res.status(500).json({ error: error.message });
         }
-        
     }
 
     static async getLecturerSessionById(req, res) {
-        try{
+        try {
             const sessionId = req.params.id;
             const session = await LecturerService.fetchSessionByIdForLecturer(sessionId);
             return res.status(200).json({ session });
         } catch (error) {
-            return res.status(500).json(error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
     static async lecturerReviewSession(req, res) {
         try {
             const sessionId = req.params.id;
-            const { reviewedStatus } = req.body;
-            const reviewedSession  = await LecturerService.reviewSessionByLecturer(sessionId, reviewedStatus);
+            const reviewedStatus = req.body.decision ?? req.body.reviewedStatus;
+            const reviewedSession = await LecturerService.reviewSessionByLecturer(sessionId, reviewedStatus);
             const studentId = await LecturerService.getStudentIdBySession(sessionId);
-            const notification = await NotificationService.sendNotification( {
-                recipientId : studentId, 
-                title : "Session Status Updated", 
-                type : reviewedStatus,
-                message : `The status of your session ${sessionId} has been updated to ${reviewedStatus}` 
-            } )
-            return res.status(200).json( {reviewedSession} );
+            await NotificationService.sendNotification({
+                recipientId: studentId,
+                subject: 'Session Status Updated',
+                type: reviewedStatus,
+                message: `The status of your session ${sessionId} has been updated to ${reviewedStatus}`
+            });
+            return res.status(200).json({ reviewedSession });
         } catch (error) {
-            return res.status(500).json(error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
     static async getClaimsSummary(req, res) {
         try {
-            const lecturerId = req.user.user_id;
+            const lecturerId = getAuthUserId(req);
+            if (!lecturerId) {
+                return res.status(401).json({ error: 'Authenticated lecturer ID is required.' });
+            }
 
             const data = await LecturerService.getClaimsSummary(lecturerId);
 
@@ -211,7 +218,10 @@ class LecturerController {
 
     static async getBudgetsSummary(req, res) {
         try {
-            const lecturerId = req.user.user_id;
+            const lecturerId = getAuthUserId(req);
+            if (!lecturerId) {
+                return res.status(401).json({ error: 'Authenticated lecturer ID is required.' });
+            }
 
             const data = await LecturerService.getBudgetsSummary(lecturerId);
 
@@ -224,7 +234,11 @@ class LecturerController {
 
     static async getBudgetById(req, res) {
         try {
-            const lecturerId = req.user.user_id;
+            const lecturerId = getAuthUserId(req);
+            if (!lecturerId) {
+                return res.status(401).json({ error: 'Authenticated lecturer ID is required.' });
+            }
+
             const budgetId = Number(req.params.budget_id);
 
             if (!Number.isInteger(budgetId) || budgetId <= 0) {
