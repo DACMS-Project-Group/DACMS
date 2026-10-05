@@ -31,11 +31,11 @@ class AdminRepository {
     static async getMonthlyWorkSessions() {
         const query = `
             SELECT
-                TO_CHAR("StartTime", 'YYYY-MM') AS month,
+                TO_CHAR("StartTime", 'FMMonth') AS month,
                 COUNT(*) AS total_sessions
             FROM "WORK_SESSION"
             WHERE "StartTime" >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months'
-            GROUP BY TO_CHAR("StartTime", 'YYYY-MM')
+            GROUP BY TO_CHAR("StartTime", 'FMMonth')
             ORDER BY month;
         `;
 
@@ -45,6 +45,35 @@ class AdminRepository {
             month: row.month || null,
             total_sessions: Number(row.total_sessions ?? 0),
         }));
+    }
+
+    static async getMonthlyClaims() {
+        const query = `
+            SELECT
+                TO_CHAR(m.month_date, 'FMMonth') AS month,
+                COALESCE(SUM(c."TotalClaimAmount"), 0) AS total_amount
+            FROM generate_series(
+                DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '5 months',
+                DATE_TRUNC('month', CURRENT_DATE),
+                INTERVAL '1 month'
+            ) AS m(month_date)
+            LEFT JOIN "REMUNERATION_CLAIM" c
+                ON DATE_TRUNC('month', COALESCE(c."SubmissionDate", c."PeriodStartDate"::timestamptz)) = m.month_date
+                AND (c."ClaimStatus" IS NULL OR c."ClaimStatus" != 'Rejected')
+            GROUP BY m.month_date
+            ORDER BY m.month_date DESC;
+        `;
+
+        const result = await pool.query(query);
+
+        return result.rows.map((row) => {
+            const num = Math.round(Number(row.total_amount ?? 0));
+            const formatted = num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+            return {
+                month: row.month || null,
+                amount: `R ${formatted}`,
+            };
+        });
     }
 
     static async getPendingAppointments() {
@@ -320,7 +349,7 @@ class AdminRepository {
             WHERE "BudgetID" = $${index}
             RETURNING *;
         `;
-        
+
         const result = await pool.query(query, values);
         if (result.rows.length === 0) {
             throw new Error("Budget not found");
@@ -398,6 +427,51 @@ class AdminRepository {
             submission_date: row.SubmissionDate,
             module_code: row.ModuleCode,
             student_name: row.student_name
+        }));
+    }
+
+    static async getClaimsForExport() {
+        const query = `
+            SELECT
+                c."ClaimID" AS id,
+                c."ClaimReferenceNumber" AS reference_number,
+                CONCAT(
+                    COALESCE(au."Title", ''),
+                    CASE WHEN COALESCE(au."Title", '') = '' THEN '' ELSE ' ' END,
+                    COALESCE(au."FName", ''),
+                    ' ',
+                    COALESCE(au."LName", '')
+                ) AS student,
+                m."ModuleCode" AS module,
+                c."TotalHoursClaimed" AS hours,
+                c."HourlyRateApplied" AS rate,
+                c."TotalClaimAmount" AS amount,
+                'Approved' AS status,
+                c."SubmissionDate" AS date
+            FROM "REMUNERATION_CLAIM" c
+            JOIN "DEMI_APPLICATION" da
+                ON da."ApplicationID" = c."ApplicationID"
+            JOIN "STUDENT" s
+                ON s."StudentID" = da."StudentID"
+            JOIN "APP_USER" au
+                ON au."UserID" = s."StudentID"
+            JOIN "NWU_MODULE" m
+                ON m."ModuleID" = c."ModuleID"
+            WHERE c."ClaimStatus" = 'Verified'
+            ORDER BY c."SubmissionDate" DESC;
+        `;
+        const result = await pool.query(query);
+
+        return result.rows.map(row => ({
+            id: row.id,
+            reference_number: row.reference_number,
+            student: row.student.trim(),
+            module: row.module,
+            hours: Number(row.hours ?? 0),
+            rate: Number(row.rate ?? 0),
+            amount: Number(row.amount ?? 0),
+            status: row.status,
+            date: row.date
         }));
     }
 
@@ -635,7 +709,7 @@ class AdminRepository {
             responsibilities: Array.isArray(row.responsibilities) ? row.responsibilities : []
         };
     }
-    
+
     static async reviewPosition(position_id, action, comment) {
         const client = await pool.connect();
         try {
@@ -675,7 +749,7 @@ class AdminRepository {
                 VALUES ($1, 'Position Review', $2, $3);
             `;
             const message = `Your position request for Application #${ApplicationID} has been ${action.toLowerCase()}. Comment: ${comment || 'None'}`;
-            
+
             await client.query(notifQuery, [StudentID, 'Position Decision', message]);
             await client.query(notifQuery, [lecturerId, 'Position Decision', message]);
 
@@ -687,6 +761,124 @@ class AdminRepository {
         } finally {
             client.release();
         }
+    }
+
+    // recieves an array of claim ids
+    // queries database for matching claims
+    // returns an array of claim objects
+    static async exportClaims(claims) {
+        if (!Array.isArray(claims) || claims.length === 0) {
+            return [];
+        }
+
+        const claimQuery = `
+            SELECT
+                c."ClaimID",
+                c."ClaimReferenceNumber",
+                c."SubmissionDate",
+                c."ClaimStatus",
+                c."PeriodStartDate",
+                c."PeriodEndDate",
+                c."TotalHoursClaimed",
+                c."HourlyRateApplied",
+                c."TotalClaimAmount",
+                c."ModuleID",
+                s."StudentID",
+                s."StudentNumber",
+                CONCAT(
+                    COALESCE(au."Title", ''),
+                    CASE WHEN COALESCE(au."Title", '') = '' THEN '' ELSE ' ' END,
+                    COALESCE(au."FName", ''),
+                    ' ',
+                    COALESCE(au."LName", '')
+                ) AS student_name,
+                m."ModuleCode" AS module_code,
+                m."ModuleName" AS module_name,
+                da."ApplicationID"
+            FROM "REMUNERATION_CLAIM" c
+            JOIN "DEMI_APPLICATION" da
+                ON da."ApplicationID" = c."ApplicationID"
+            JOIN "STUDENT" s
+                ON s."StudentID" = da."StudentID"
+            JOIN "APP_USER" au
+                ON au."UserID" = s."StudentID"
+            JOIN "NWU_MODULE" m
+                ON m."ModuleID" = c."ModuleID"
+            WHERE c."ClaimID" = ANY($1)
+            ORDER BY c."SubmissionDate" DESC;
+        `;
+
+        const claimResult = await pool.query(claimQuery, [claims]);
+        const exportRows = [];
+
+        for (const claim of claimResult.rows) {
+            const sessionQuery = `
+                SELECT
+                    ws."SessionID" AS id,
+                    ws."StartTime" AS date,
+                    TO_CHAR(ws."StartTime", 'HH24:MI') AS start_time,
+                    TO_CHAR(ws."EndTime", 'HH24:MI') AS end_time,
+                    ROUND(COALESCE(ws."TotalHoursWorked", 0), 2) AS hours,
+                    CASE
+                        WHEN ws."LecturerApproval" = true THEN 'Verified'
+                        ELSE 'Pending'
+                    END AS status
+                FROM "WORK_SESSION" ws
+                JOIN "DEMI_POSITION" dp
+                    ON dp."PositionID" = ws."PositionID"
+                JOIN "DEMI_APPLICATION" da
+                    ON da."ApplicationID" = dp."ApplicationID"
+                JOIN "DEMI_LISTING" dl
+                    ON dl."ListingID" = da."ListingID"
+                WHERE da."StudentID" = $1
+                  AND dl."ModuleID" = $2
+                  AND ws."StartTime" >= $3
+                  AND ws."EndTime" IS NOT NULL
+                  AND ws."EndTime" <= $4
+                ORDER BY ws."StartTime" ASC;
+            `;
+
+            const sessionResult = await pool.query(sessionQuery, [
+                claim.StudentID,
+                claim.ModuleID,
+                claim.PeriodStartDate,
+                claim.PeriodEndDate
+            ]);
+
+            exportRows.push({
+                student: {
+                    id: claim.StudentID,
+                    student_number: claim.StudentNumber,
+                    name: claim.student_name
+                },
+                module: {
+                    id: claim.ModuleID,
+                    code: claim.module_code,
+                    name: claim.module_name
+                },
+                claim: {
+                    id: claim.ClaimID,
+                    reference_number: claim.ClaimReferenceNumber,
+                    submission_date: claim.SubmissionDate,
+                    status: claim.ClaimStatus,
+                    period_start_date: claim.PeriodStartDate,
+                    period_end_date: claim.PeriodEndDate,
+                    total_hours_claimed: Number(claim.TotalHoursClaimed ?? 0),
+                    hourly_rate_applied: Number(claim.HourlyRateApplied ?? 0),
+                    total_claim_amount: Number(claim.TotalClaimAmount ?? 0)
+                },
+                sessions: sessionResult.rows.map((row) => ({
+                    id: row.id,
+                    date: row.date ? new Date(row.date).toISOString().slice(0, 10) : null,
+                    start_time: row.start_time,
+                    end_time: row.end_time,
+                    hours: Number(row.hours ?? 0),
+                    status: row.status
+                }))
+            });
+        }
+
+        return exportRows;
     }
 }
 

@@ -5,11 +5,13 @@ class AdminService {
     static async getDashboardSummary() {
         const stats = await AdminRepository.getDashboardMetrics();
         const monthlyWork = await AdminRepository.getMonthlyWorkSessions();
+        const monthlyClaims = await AdminRepository.getMonthlyClaims();
         const pendingAppointments = await AdminRepository.getPendingAppointments();
 
         return {
             stats,
             monthlyWork,
+            monthlyClaims,
             pendingAppointments
         };
     }
@@ -49,6 +51,11 @@ class AdminService {
         };
     }
 
+    static async getClaimsForExport() {
+        const claims = await AdminRepository.getClaimsForExport();
+        return { claims };
+    }
+
     static async getClaimById(claim_id) {
         const data = await AdminRepository.getClaimById(claim_id);
         return { data };
@@ -83,6 +90,11 @@ class AdminService {
         }
 
         const data = await AdminRepository.reviewPosition(position_id, action, comment);
+        return { data };
+    }
+
+    static async exportClaims(claims) {
+        const data = await AdminRepository.exportClaims(claims);
         return { data };
     }
 }

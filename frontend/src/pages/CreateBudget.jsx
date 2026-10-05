@@ -1,422 +1,371 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
+import Card from '../components/Card';
+import StatusBadge from '../components/StatusBadge';
 
-const CreateBudget = () => {
-  const navigate = useNavigate();
+const BudgetDetails = () => {
+  const { id } = useParams();
 
-  const [formData, setFormData] = useState({
-    moduleCode: '',
-    allocatedBudget: '',
-    budgetPeriod: 'Semester 2',
+  const budget = {
+    id: id || 'BUD-2026-002',
+    moduleCode: 'CMPG323',
+    moduleName: 'Software Engineering',
+    allocated: 75000,
+    used: 61500,
     year: '2026',
-  });
+    period: 'Semester 2',
+    status: 'Warning',
+  };
 
-  const [lecturers, setLecturers] = useState([]);
-
-  const [lecturerForm, setLecturerForm] = useState({
-    lecturer: '',
-    allocation: '',
-  });
-
-  const modules = [
+  const lecturers = [
     {
-      code: 'CMPG321',
-      name: 'Advanced Databases',
+      name: 'Dr John Example',
+      allocated: 20000,
+      used: 16500,
     },
     {
-      code: 'CMPG323',
-      name: 'Software Engineering',
+      name: 'Prof Jane Example',
+      allocated: 15000,
+      used: 12000,
     },
     {
-      code: 'CMPG315',
-      name: 'Programming',
-    },
-    {
-      code: 'CMPG311',
-      name: 'Systems Analysis',
+      name: 'Dr Michael Example',
+      allocated: 10000,
+      used: 8500,
     },
   ];
 
-  const lecturerList = [
-    'Dr John Example',
-    'Prof Jane Example',
-    'Dr Michael Example',
-    'Ms Sarah Example',
+  const auditLogs = [
+    {
+      date: '28 Aug 2026',
+      user: 'Administrator',
+      action: 'Created',
+      description: 'Budget created',
+    },
+    {
+      date: '30 Aug 2026',
+      user: 'Administrator',
+      action: 'Updated',
+      description: 'Budget allocation updated',
+    },
+    {
+      date: '02 Sep 2026',
+      user: 'Administrator',
+      action: 'Updated',
+      description: 'Lecturer allocation modified',
+    },
   ];
 
-  const selectedModule = modules.find(
-    (module) => module.code === formData.moduleCode
+  const percentage = Math.round(
+    (budget.used / budget.allocated) * 100
   );
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
+  const remaining = budget.allocated - budget.used;
 
-  const addLecturer = () => {
-    if (
-      !lecturerForm.lecturer ||
-      !lecturerForm.allocation
-    ) {
-      return;
-    }
-
-    setLecturers([
-      ...lecturers,
-      lecturerForm,
-    ]);
-
-    setLecturerForm({
-      lecturer: '',
-      allocation: '',
-    });
-  };
-
-  const removeLecturer = (index) => {
-    setLecturers(
-      lecturers.filter((_, i) => i !== index)
-    );
-  };
-
-  const totalAllocation = lecturers.reduce(
-    (total, lecturer) =>
-      total + Number(lecturer.allocation),
-    0
-  );
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    console.log({
-      ...formData,
-      lecturers,
-    });
-
-    navigate('/budget-management');
-  };
+  const formatCurrency = (amount) =>
+    `R ${amount.toLocaleString('en-ZA')}`;
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA]">
-
+    <div className="min-h-screen bg-off-white">
       <Navbar />
 
       <div className="flex">
-
         <Sidebar userRole="admin" />
 
-        <main className="flex-1 p-8">
-
-          <div className="bg-[#6C3D91] text-white px-8 py-5 rounded-t-lg">
-            <h1 className="text-3xl font-bold">
-              Create Budget
+        <main className="flex-1">
+          {/* Page Header */}
+          <div className="bg-primary px-8 py-4">
+            <h1 className="text-2xl font-semibold text-white font-poppins">
+              Budget Details
             </h1>
           </div>
 
-          <div className="bg-white p-8">
+          <div className="p-8">
 
+            {/* Page Introduction */}
             <div className="mb-8">
-              <h2 className="text-2xl font-semibold text-[#6C3D91]">
-                Budget Information
+              <h2 className="text-3xl font-poppins font-semibold text-primary">
+                {budget.moduleCode} — {budget.moduleName}
               </h2>
 
-              <p className="text-[#78848E] mt-1">
-                Create a new module budget and allocate funding.
+              <p className="text-neutral mt-2 font-inter">
+                View budget allocation, utilisation, lecturer allocations,
+                and audit history.
               </p>
             </div>
 
-            <form onSubmit={handleSubmit}>
+            {/* Budget Information */}
+            <section className="mb-8">
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                Budget Information
+              </h3>
 
-              {/* Budget Information */}
-              <div className="border border-[#78848E] rounded-xl p-6 mb-8">
-
-                <h3 className="text-lg font-semibold text-[#6C3D91] mb-6">
-                  Budget Information
-                </h3>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
-                      Module Code
-                    </label>
+                    <p className="text-sm text-neutral font-inter">
+                      Budget ID
+                    </p>
 
-                    <select
-                      name="moduleCode"
-                      value={formData.moduleCode}
-                      onChange={handleChange}
-                      required
-                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl focus:outline-none focus:border-[#6C3D91]"
-                    >
-                      <option value="">
-                        Select Module
-                      </option>
-
-                      {modules.map((module) => (
-                        <option
-                          key={module.code}
-                          value={module.code}
-                        >
-                          {module.code} - {module.name}
-                        </option>
-                      ))}
-                    </select>
+                    <p className="font-semibold text-dark mt-1 font-inter">
+                      {budget.id}
+                    </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
-                      Module Name
-                    </label>
+                    <p className="text-sm text-neutral font-inter">
+                      Budget Period
+                    </p>
 
-                    <input
-                      type="text"
-                      value={
-                        selectedModule?.name || ''
-                      }
-                      readOnly
-                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl bg-[#F3F4F6]"
-                    />
+                    <p className="font-semibold text-dark mt-1 font-inter">
+                      {budget.period}, {budget.year}
+                    </p>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
-                      Allocated Budget
-                    </label>
+                    <p className="text-sm text-neutral font-inter">
+                      Status
+                    </p>
 
-                    <div className="flex">
-                      <span className="flex items-center px-4 bg-[#F3F4F6] border border-r-0 border-[#78848E] rounded-l-xl">
-                        R
-                      </span>
-
-                      <input
-                        type="number"
-                        name="allocatedBudget"
-                        value={formData.allocatedBudget}
-                        onChange={handleChange}
-                        required
-                        min="0"
-                        className="w-full h-12 px-4 border border-[#78848E] rounded-r-xl focus:outline-none focus:border-[#6C3D91]"
-                      />
+                    <div className="mt-1">
+                      <StatusBadge status={budget.status} />
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
-                      Budget Year
-                    </label>
-
-                    <select
-                      name="year"
-                      value={formData.year}
-                      onChange={handleChange}
-                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl"
-                    >
-                      <option>2026</option>
-                      <option>2027</option>
-                      <option>2028</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-[#78848E] mb-2">
-                      Budget Period
-                    </label>
-
-                    <select
-                      name="budgetPeriod"
-                      value={formData.budgetPeriod}
-                      onChange={handleChange}
-                      className="w-full h-12 px-4 border border-[#78848E] rounded-xl"
-                    >
-                      <option>Semester 1</option>
-                      <option>Semester 2</option>
-                      <option>Full Year</option>
-                    </select>
-                  </div>
-
                 </div>
+              </Card>
+            </section>
+
+            {/* Budget Summary */}
+            <section className="mb-8">
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                Budget Summary
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                <Card>
+                  <p className="text-neutral font-inter font-medium">
+                    Allocated Budget
+                  </p>
+
+                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
+                    {formatCurrency(budget.allocated)}
+                  </p>
+                </Card>
+
+                <Card>
+                  <p className="text-neutral font-inter font-medium">
+                    Budget Used
+                  </p>
+
+                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
+                    {formatCurrency(budget.used)}
+                  </p>
+                </Card>
+
+                <Card>
+                  <p className="text-neutral font-inter font-medium">
+                    Remaining
+                  </p>
+
+                  <p
+                    className={`text-3xl font-poppins font-bold mt-3 ${
+                      remaining < 0
+                        ? 'text-red-600'
+                        : 'text-primary'
+                    }`}
+                  >
+                    {formatCurrency(remaining)}
+                  </p>
+                </Card>
 
               </div>
+            </section>
 
-              {/* Lecturer Allocation */}
-              <div className="border border-[#78848E] rounded-xl p-6 mb-8">
+            {/* Budget Utilisation */}
+            <section className="mb-8">
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                Budget Utilisation
+              </h3>
 
-                <h3 className="text-lg font-semibold text-[#6C3D91] mb-6">
-                  Lecturer Allocation
-                </h3>
+              <Card>
+                <div className="flex justify-between items-center mb-3">
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <span className="text-neutral font-inter">
+                    {formatCurrency(budget.used)} used of{' '}
+                    {formatCurrency(budget.allocated)}
+                  </span>
 
-                  <select
-                    value={lecturerForm.lecturer}
-                    onChange={(e) =>
-                      setLecturerForm({
-                        ...lecturerForm,
-                        lecturer: e.target.value,
-                      })
-                    }
-                    className="h-12 px-4 border border-[#78848E] rounded-xl"
-                  >
-                    <option value="">
-                      Select Lecturer
-                    </option>
-
-                    {lecturerList.map((lecturer) => (
-                      <option key={lecturer}>
-                        {lecturer}
-                      </option>
-                    ))}
-                  </select>
-
-                  <input
-                    type="number"
-                    placeholder="Allocation Amount"
-                    value={lecturerForm.allocation}
-                    onChange={(e) =>
-                      setLecturerForm({
-                        ...lecturerForm,
-                        allocation: e.target.value,
-                      })
-                    }
-                    className="h-12 px-4 border border-[#78848E] rounded-xl"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={addLecturer}
-                    className="h-12 px-6 border-2 border-[#6C3D91] text-[#6C3D91] rounded-xl font-semibold hover:bg-[#E8DDF0]"
-                  >
-                    + Add Lecturer
-                  </button>
+                  <span className="font-semibold text-dark font-inter">
+                    {percentage}%
+                  </span>
 
                 </div>
 
-                {lecturers.length > 0 && (
-                  <div className="mt-6">
+                <div className="w-full h-4 bg-primary-lightest rounded-full overflow-hidden">
+                  <div
+                    className={`h-4 rounded-full ${
+                      percentage >= 100
+                        ? 'bg-red-600'
+                        : percentage >= 80
+                        ? 'bg-yellow-500'
+                        : 'bg-green-600'
+                    }`}
+                    style={{
+                      width: `${Math.min(percentage, 100)}%`,
+                    }}
+                  />
+                </div>
 
-                    <table className="w-full">
+                {percentage >= 80 && (
+                  <div className="mt-5 p-4 bg-primary-lightest rounded-xl">
+                    <p className="text-primary font-semibold font-inter">
+                      ⚠ Budget approaching limit
+                    </p>
 
-                      <thead className="bg-[#F3F4F6]">
-                        <tr>
-                          <th className="text-left p-4 text-sm text-[#78848E]">
-                            Lecturer
-                          </th>
-
-                          <th className="text-left p-4 text-sm text-[#78848E]">
-                            Allocation
-                          </th>
-
-                          <th className="text-right p-4 text-sm text-[#78848E]">
-                            Action
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-
-                        {lecturers.map(
-                          (lecturer, index) => (
-                            <tr
-                              key={index}
-                              className="border-b"
-                            >
-
-                              <td className="p-4">
-                                {lecturer.lecturer}
-                              </td>
-
-                              <td className="p-4">
-                                R{' '}
-                                {Number(
-                                  lecturer.allocation
-                                ).toLocaleString(
-                                  'en-ZA'
-                                )}
-                              </td>
-
-                              <td className="p-4 text-right">
-
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    removeLecturer(
-                                      index
-                                    )
-                                  }
-                                  className="text-[#DC3545] font-semibold"
-                                >
-                                  Remove
-                                </button>
-
-                              </td>
-
-                            </tr>
-                          )
-                        )}
-
-                      </tbody>
-
-                    </table>
-
+                    <p className="text-sm text-neutral mt-1 font-inter">
+                      This budget has reached {percentage}% utilisation.
+                    </p>
                   </div>
                 )}
+              </Card>
+            </section>
 
-                <div className="flex justify-end mt-6">
+            {/* Lecturer Allocation */}
+            <section className="mb-8">
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                Lecturer Allocation
+              </h3>
 
-                  <div className="text-right">
+              <Card>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
 
-                    <p className="text-sm text-[#78848E]">
-                      Total Lecturer Allocation
-                    </p>
+                    <thead className="bg-primary-lightest">
+                      <tr>
+                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
+                          Lecturer
+                        </th>
 
-                    <p className="text-xl font-bold text-[#6C3D91]">
-                      R{' '}
-                      {totalAllocation.toLocaleString(
-                        'en-ZA'
-                      )}
-                    </p>
+                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
+                          Allocated
+                        </th>
 
-                  </div>
+                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
+                          Used
+                        </th>
 
+                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
+                          Remaining
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {lecturers.map((lecturer) => {
+                        const lecturerRemaining =
+                          lecturer.allocated - lecturer.used;
+
+                        return (
+                          <tr
+                            key={lecturer.name}
+                            className="border-t border-neutral/30 hover:bg-primary-lightest/30 transition"
+                          >
+                            <td className="p-4 font-semibold text-dark font-inter">
+                              {lecturer.name}
+                            </td>
+
+                            <td className="p-4 text-dark font-inter">
+                              {formatCurrency(lecturer.allocated)}
+                            </td>
+
+                            <td className="p-4 text-dark font-inter">
+                              {formatCurrency(lecturer.used)}
+                            </td>
+
+                            <td className="p-4 text-dark font-inter">
+                              {formatCurrency(lecturerRemaining)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+
+                  </table>
                 </div>
+              </Card>
+            </section>
 
-              </div>
+            {/* Budget Audit History */}
+            <section>
+              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                Budget Audit History
+              </h3>
 
-              {/* Buttons */}
-              <div className="flex justify-end gap-4">
+              <Card>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    navigate('/budget-management')
-                  }
-                  className="h-11 px-6 border border-[#78848E] rounded-xl font-semibold hover:bg-[#F3F4F6]"
-                >
-                  Cancel
-                </button>
+                    <thead className="bg-primary-lightest">
+                      <tr>
+                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
+                          Date
+                        </th>
 
-                <button
-                  type="submit"
-                  className="h-11 px-6 bg-[#6C3D91] text-white rounded-xl font-semibold hover:bg-[#5A3280]"
-                >
-                  Create Budget
-                </button>
+                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
+                          User
+                        </th>
 
-              </div>
+                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
+                          Action
+                        </th>
 
-            </form>
+                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
+                          Details
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {auditLogs.map((log, index) => (
+                        <tr
+                          key={index}
+                          className="border-t border-neutral/30 hover:bg-primary-lightest/30 transition"
+                        >
+                          <td className="p-4 text-dark font-inter">
+                            {log.date}
+                          </td>
+
+                          <td className="p-4 text-dark font-inter">
+                            {log.user}
+                          </td>
+
+                          <td className="p-4">
+                            <span className="px-3 py-1 rounded-full bg-primary-lightest text-primary text-xs font-semibold font-inter">
+                              {log.action}
+                            </span>
+                          </td>
+
+                          <td className="p-4 text-neutral font-inter">
+                            {log.description}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+
+                  </table>
+                </div>
+              </Card>
+            </section>
 
           </div>
-
         </main>
-
       </div>
-
     </div>
   );
 };
 
-export default CreateBudget;
+export default BudgetDetails;

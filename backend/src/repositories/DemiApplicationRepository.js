@@ -34,12 +34,31 @@ class DemiApplicationRepository extends BaseRepository {
         return { output: rows.length, rows };
     }
 
-    async lecturerFindApplicationById(applicationId) {
+    async lecturerFetchApplicationById(applicationId) {
         return await this.query(
             `
-            SELECT *
-            FROM "DEMI_APPLICATION"
-            WHERE "ApplicationID" = $1
+            SELECT 
+                a.*,
+                CONCAT(u."FName", ' ', u."LName") AS "StudentName",
+                u."Email",
+                s."StudentNumber",
+                s."ContactDetails",
+                (
+                    SELECT JSON_AGG(JSON_BUILD_OBJECT(
+                        'DocumentType', d."DocumentType",
+                        'FilePath', d."FilePath"
+                    ))
+                    FROM "SUPPORTING_DOCUMENT" d
+                    WHERE d."StudentID" = s."StudentID"
+                ) AS "Documents",
+                m."ModuleCode",
+                m."ModuleName"
+            FROM "DEMI_APPLICATION" a
+            JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+            JOIN "STUDENT" s ON s."StudentID" = a."StudentID"
+            JOIN "APP_USER" u ON u."UserID" = s."StudentID"
+            WHERE a."ApplicationID" = $1
             `
             , [applicationId]
         )
@@ -60,14 +79,16 @@ class DemiApplicationRepository extends BaseRepository {
 
     /** Lecturer reviews assistant application */
 
-    async lecturerReviewApplication(applicationId, lecturerDecision) {
+    async lecturerReviewApplication(applicationId, lecturerDecision, reviewComment) {
         return await this.query(
             `
             UPDATE "DEMI_APPLICATION"
-            SET "ApplicationStatus" = $1
+            SET "ApplicationStatus" = $1,
+                "ReviewComment" = $3
             WHERE "ApplicationID" = $2
+            RETURNING *
             `
-            , [lecturerDecision, applicationId]
+            , [lecturerDecision, applicationId, reviewComment]
         )
     }
 

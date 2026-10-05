@@ -1,217 +1,447 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
+import { apiGet } from '../api';
 
 const LectureDashboard = () => {
   const navigate = useNavigate();
 
+  const [stats, setStats] = useState(null);
+  const [sessions, setSessions] = useState([]);
+  const [claimsData, setClaimsData] = useState(null);
+  const [applications, setApplications] = useState([]);
+  const [budgetsData, setBudgetsData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        setLoading(true);
+
+        const [statsRes, sessionsRes, claimsRes, appsRes, budgetsRes] =
+          await Promise.all([
+            apiGet('/lecturer/dashboard_statistics'),
+            apiGet('/lecturer/sessions'),
+            apiGet('/lecturer/claims'),
+            apiGet('/lecturer/applications'),
+            apiGet('/lecturer/budgets'),
+          ]);
+
+        if (cancelled) return;
+
+        setStats(statsRes?.stats || null);
+        setSessions(Array.isArray(sessionsRes) ? sessionsRes : []);
+        setClaimsData(claimsRes || null);
+        setApplications(
+          Array.isArray(appsRes?.rows)
+            ? appsRes.rows
+            : Array.isArray(appsRes)
+              ? appsRes
+              : []
+        );
+        setBudgetsData(budgetsRes || null);
+        setError('');
+      } catch (err) {
+        if (!cancelled) setError(err.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const formatAmount = (amount) =>
+    `R ${Number(amount).toLocaleString('en-ZA', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    })}`;
+
+  const formatDate = (iso) => {
+    if (!iso) return '—';
+    try {
+      return new Date(iso).toLocaleDateString('en-ZA', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      });
+    } catch {
+      return iso;
+    }
+  };
+
+  const formatMonth = (yyyyMm) => {
+    if (!yyyyMm) return '—';
+    const [year, month] = yyyyMm.split('-');
+    const date = new Date(Number(year), Number(month) - 1, 1);
+    return date.toLocaleDateString('en-ZA', {
+      month: 'long',
+      year: 'numeric',
+    });
+  };
+
+  // Budget utilisation
+  const budgetStats = budgetsData?.stats || {};
+  const budgets = budgetsData?.budgets || [];
+  const allocated = budgetStats.total_allocated ?? 0;
+  const used = budgetStats.total_used ?? 0;
+  const remaining = budgetStats.total_remaining ?? 0;
+  const utilisationPct =
+    allocated > 0 ? Math.min((used / allocated) * 100, 100) : 0;
+
+  // Claims summary
+  const claimsStats = claimsData?.stats || {};
+
   return (
-    <div className="flex min-h-screen bg-off-white">
-      
-      {/* ===== SIDEBAR ===== */}
-      <Sidebar userRole="lecturer" />
-      
-      {/* ===== MAIN CONTENT ===== */}
-      <div className="flex-1">
-        
-        {/* ===== TOP NAVBAR ===== */}
-        <Navbar />
-        
-        {/* ===== PAGE TITLE BAR ===== */}
-        <div className="bg-primary h-16 flex items-center px-8">
-          <h1 className="text-3xl font-poppins font-bold text-white">
-            Lecturer Dashboard
-          </h1>
-        </div>
+    <div className="min-h-screen bg-off-white">
+      <Navbar />
 
-        {/* ===== MAIN CONTENT ===== */}
-        <div className="p-8">
+      <div className="flex">
+        <Sidebar userRole="lecturer" />
 
-          {/* Description */}
-          <div className="mb-8">
-            <p className="text-neutral text-base font-inter">
-              Here's an overview of your assistant applications and activities.
-            </p>
+        <main className="flex-1">
+          {/* Page Header */}
+          <div className="bg-primary h-16 flex items-center px-8">
+            <h1 className="text-3xl font-poppins font-bold text-white">
+              Lecturer Dashboard
+            </h1>
           </div>
 
-          {/* ===== OVERVIEW STATS ===== */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
-              Overview
-            </h2>
+          {/* Page Content */}
+          <div className="p-8">
+            {/* Introduction */}
+            <div className="mb-8">
+              <p className="text-neutral text-base font-inter">
+                Here's an overview of your assistant applications and
+                activities.
+              </p>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-              {/* Applicants */}
-              <Card>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
-                    A
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral font-inter">Applicants</p>
-                    <h2 className="text-2xl font-poppins font-bold text-dark">48</h2>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Approved Assistants */}
-              <Card>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
-                    D
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral font-inter">Approved Assistants</p>
-                    <h2 className="text-2xl font-poppins font-bold text-dark">20</h2>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Pending Applications */}
-              <Card>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
-                    P
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral font-inter">Pending Applications</p>
-                    <h2 className="text-2xl font-poppins font-bold text-dark">3</h2>
-                  </div>
-                </div>
-              </Card>
-
-              {/* Hours Allocated */}
-              <Card>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-full bg-primary-lightest flex items-center justify-center text-primary font-bold text-lg font-poppins">
-                    H
-                  </div>
-                  <div>
-                    <p className="text-sm text-neutral font-inter">Hours Allocated</p>
-                    <h2 className="text-2xl font-poppins font-bold text-dark">120h</h2>
-                  </div>
-                </div>
-              </Card>
-
+              {error && (
+                <p className="mt-2 text-sm text-error font-inter">
+                  Could not load dashboard data: {error}
+                </p>
+              )}
             </div>
-          </div>
 
-          {/* ===== BUDGET ALLOCATION ===== */}
-          <div className="mb-8">
-            <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
-              Budget Allocation
-            </h2>
-            <Card>
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                <div>
-                  <h3 className="text-2xl font-poppins font-semibold text-dark">
-                    Budget Allocation
+            {/* Overview */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+                Overview
+              </h2>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <Card>
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Number of Applicants
+                    </p>
+                    <p className="mt-2 text-3xl font-bold text-primary-dark">
+                      {loading ? '—' : stats?.total_applicants ?? 0}
+                    </p>
+                  </div>
+                </Card>
+
+                <Card>
+                  <div>
+                    <p className="text-sm text-neutral">Approved Demis</p>
+                    <p className="mt-2 text-3xl font-bold text-primary-dark">
+                      {loading ? '—' : stats?.approved_demis ?? 0}
+                    </p>
+                  </div>
+                </Card>
+
+                <Card>
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Pending Applications
+                    </p>
+                    <p className="mt-2 text-3xl font-bold text-primary-dark">
+                      {loading ? '—' : stats?.pending_applications ?? 0}
+                    </p>
+                  </div>
+                </Card>
+
+                <Card>
+                  <div>
+                    <p className="text-sm text-neutral">Hours Allocated</p>
+                    <p className="mt-2 text-3xl font-bold text-primary-dark">
+                      {loading ? '—' : `${stats?.hours_allocated ?? 0}h`}
+                    </p>
+                  </div>
+                </Card>
+              </div>
+            </div>
+
+            {/* Claims + Applications grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+              {/* Claims summary */}
+              <div>
+                <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+                  Claims Summary
+                </h2>
+
+                <Card>
+                  {loading ? (
+                    <p className="py-6 text-center text-neutral font-inter">
+                      Loading…
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-neutral">Total Claims</p>
+                        <p className="mt-1 text-2xl font-bold text-primary-dark">
+                          {claimsStats.total_claims ?? 0}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-neutral">Pending</p>
+                        <p className="mt-1 text-2xl font-bold text-primary-dark">
+                          {claimsStats.total_pending ?? 0}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-neutral">Under Review</p>
+                        <p className="mt-1 text-2xl font-bold text-primary-dark">
+                          {claimsStats.total_under_review ?? 0}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-neutral">Verified</p>
+                        <p className="mt-1 text-2xl font-bold text-primary-dark">
+                          {claimsStats.total_verified ?? 0}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => navigate('/review-claims')}
+                    className="text-primary font-semibold hover:underline mt-4 font-inter"
+                  >
+                    Review claims →
+                  </button>
+                </Card>
+              </div>
+
+              {/* Applications */}
+              <div>
+                <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+                  Applications
+                </h2>
+
+                <Card>
+                  {loading ? (
+                    <p className="py-6 text-center text-neutral font-inter">
+                      Loading…
+                    </p>
+                  ) : applications.length === 0 ? (
+                    <p className="py-6 text-center text-neutral font-inter">
+                      No applications yet
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {applications.slice(0, 4).map((app) => (
+                        <div
+                          key={app.ApplicationID}
+                          className="border-b border-neutral pb-4 last:border-0"
+                        >
+                          <div className="flex justify-between items-start gap-3">
+                            <div className="min-w-0">
+                              <p className="text-sm font-semibold text-dark font-inter truncate">
+                                {app.ModuleCode} — {app.Student}
+                              </p>
+                              <p className="text-xs text-neutral mt-1 font-inter">
+                                Student #: {app.StudentNumber}
+                              </p>
+                              <p className="text-xs text-neutral mt-1 font-inter">
+                                Submitted: {formatDate(app.DateSubmitted)}
+                              </p>
+                            </div>
+                            <span className="shrink-0 rounded-full bg-warning px-2 py-0.5 text-xs font-semibold text-white">
+                              {app.ApplicationStatus}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  <button
+                    onClick={() => navigate('/review-applications')}
+                    className="text-primary font-semibold hover:underline mt-4 font-inter"
+                  >
+                    Review applications →
+                  </button>
+                </Card>
+              </div>
+            </div>
+
+            {/* Work Sessions */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+                Work Sessions
+              </h2>
+
+              <Card>
+                {loading ? (
+                  <p className="py-6 text-center text-neutral font-inter">
+                    Loading…
+                  </p>
+                ) : sessions.length === 0 ? (
+                  <p className="py-6 text-center text-neutral font-inter">
+                    No work sessions awaiting verification.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {sessions.slice(0, 5).map((session, index) => (
+                      <div
+                        key={session.SessionID ?? session.session_id ?? index}
+                        className="border-b border-neutral pb-4 last:border-0"
+                      >
+                        <div className="flex justify-between items-start gap-3">
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-dark font-inter">
+                              {session.Student ?? session.student ?? '—'}
+                            </p>
+                            <p className="text-xs text-neutral mt-1 font-inter">
+                              {session.ModuleCode ?? session.module_code ?? ''}
+                            </p>
+                            {session.Date && (
+                              <p className="text-xs text-neutral mt-1 font-inter">
+                                {formatDate(session.Date)}
+                              </p>
+                            )}
+                          </div>
+                          <span className="shrink-0 text-sm font-semibold text-primary-dark font-inter">
+                            {session.Hours ?? session.hours ?? 0} hrs
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  onClick={() => navigate('/verify-hours')}
+                  className="text-primary font-semibold hover:underline mt-4 font-inter"
+                >
+                  Verify hours →
+                </button>
+              </Card>
+            </div>
+
+            {/* Budget Utilisation */}
+            <div className="mb-8">
+              <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+                Budget Utilisation
+              </h2>
+
+              <Card>
+                <div className="mb-5">
+                  <h3 className="text-xl font-poppins font-semibold text-primary-dark">
+                    Current Budget
                   </h3>
-                  <p className="text-neutral mt-1 font-inter">
-                    View the current budget allocated for assistant appointments.
+                  <p className="mt-1 text-sm text-neutral">
+                    View the budget allocated for your assistant appointments
+                    and how much has been used.
                   </p>
                 </div>
-                <button 
-                  onClick={() => navigate('/budget-management')}
-                  className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition text-center font-inter"
-                >
-                  View Budget Allocation →
-                </button>
-              </div>
-            </Card>
+
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="rounded-lg bg-off-white p-5">
+                    <p className="text-sm text-neutral">Allocated Budget</p>
+                    <p className="mt-2 text-2xl font-bold text-primary-dark">
+                      {loading ? '—' : formatAmount(allocated)}
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg bg-off-white p-5">
+                    <p className="text-sm text-neutral">Amount Used</p>
+                    <p className="mt-2 text-2xl font-bold text-primary-dark">
+                      {loading ? '—' : formatAmount(used)}
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg bg-off-white p-5">
+                    <p className="text-sm text-neutral">Remaining Budget</p>
+                    <p className="mt-2 text-2xl font-bold text-primary-dark">
+                      {loading ? '—' : formatAmount(remaining)}
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg bg-off-white p-5">
+                    <p className="text-sm text-neutral">Utilisation</p>
+                    <p className="mt-2 text-2xl font-bold text-primary-dark">
+                      {loading ? '—' : `${utilisationPct.toFixed(1)}%`}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="mt-6">
+                  <div className="mb-2 flex items-center justify-between">
+                    <span className="text-sm font-medium text-gray-700">
+                      Budget Used
+                    </span>
+                    <span className="text-sm font-medium text-gray-700">
+                      {utilisationPct.toFixed(1)}%
+                    </span>
+                  </div>
+
+                  <div className="h-3 w-full rounded-full bg-gray-200">
+                    <div
+                      className="h-3 rounded-full bg-primary"
+                      style={{ width: `${utilisationPct}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Per-module budgets */}
+                {budgets.length > 0 && (
+                  <div className="mt-6 border-t border-neutral pt-4">
+                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                      Your Modules
+                    </h4>
+                    <div className="space-y-3">
+                      {budgets.map((budget) => (
+                        <div
+                          key={budget.budget_id}
+                          className="flex justify-between items-center text-sm"
+                        >
+                          <div className="min-w-0">
+                            <p className="font-semibold text-dark font-inter">
+                              {budget.module_code}
+                            </p>
+                            <p className="text-xs text-neutral font-inter truncate">
+                              {budget.module_description}
+                            </p>
+                          </div>
+                          <div className="text-right shrink-0 ml-4">
+                            <p className="font-semibold text-primary-dark font-inter">
+                              {formatAmount(budget.remaining_budget)}
+                            </p>
+                            <p className="text-xs text-neutral font-inter">
+                              of {formatAmount(budget.allocated_budget)}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Card>
+            </div>
           </div>
-
-          {/* ===== NOTIFICATIONS ===== */}
-          <div>
-            <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
-              Notifications
-            </h2>
-
-            <Card>
-              <div className="space-y-5">
-
-                {/* Application Review */}
-                <div className="border-b border-neutral pb-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 rounded-full bg-warning mt-2"></div>
-                    <div>
-                      <p className="font-semibold text-dark font-inter">
-                        Applications to Review
-                      </p>
-                      <p className="text-dark font-inter">
-                        You have 3 assistant applications waiting for your review.
-                      </p>
-                      <p className="text-sm text-neutral mt-1 font-inter">Today</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Upcoming Appointment */}
-                <div className="border-b border-neutral pb-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 rounded-full bg-warning mt-2"></div>
-                    <div>
-                      <p className="font-semibold text-dark font-inter">
-                        Upcoming Appointment
-                      </p>
-                      <p className="text-dark font-inter">
-                        You have an appointment scheduled for tomorrow at 10:00.
-                      </p>
-                      <p className="text-sm text-neutral mt-1 font-inter">Today</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Work Session Review */}
-                <div className="border-b border-neutral pb-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 rounded-full bg-primary mt-2"></div>
-                    <div>
-                      <p className="font-semibold text-dark font-inter">
-                        Work Session Review
-                      </p>
-                      <p className="text-dark font-inter">
-                        An assistant work session has been submitted for your review.
-                      </p>
-                      <p className="text-sm text-neutral mt-1 font-inter">Yesterday</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Claim Submitted */}
-                <div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-3 h-3 rounded-full bg-success mt-2"></div>
-                    <div>
-                      <p className="font-semibold text-dark font-inter">
-                        Claim Submitted
-                      </p>
-                      <p className="text-dark font-inter">
-                        A new claim has been submitted and requires your review.
-                      </p>
-                      <p className="text-sm text-neutral mt-1 font-inter">Yesterday</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* View All */}
-                <div className="text-right pt-2">
-                  <button 
-                    onClick={() => navigate('/notifications')}
-                    className="text-primary font-semibold hover:underline font-inter"
-                  >
-                    View all →
-                  </button>
-                </div>
-
-              </div>
-            </Card>
-          </div>
-
-        </div>
+        </main>
       </div>
     </div>
   );
