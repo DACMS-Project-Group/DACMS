@@ -182,6 +182,12 @@ class LecturerRepository {
                             WHERE lm."LecturerID" = $1
                               AND lm."ModuleID" = mb."ModuleID"
                         )
+                        OR EXISTS (
+                            SELECT 1
+                            FROM "DEMI_LISTING" dl
+                            WHERE dl."LecturerID" = $1
+                              AND dl."ModuleID" = mb."ModuleID"
+                        )
                     )
                 ) AS hours_allocated;
         `;
@@ -217,6 +223,12 @@ class LecturerRepository {
                     FROM "LECTURER_MODULE" lm
                     WHERE lm."LecturerID" = $1
                       AND lm."ModuleID" = "MODULE_BUDGET"."ModuleID"
+                )
+                OR EXISTS (
+                    SELECT 1
+                    FROM "DEMI_LISTING" dl
+                    WHERE dl."LecturerID" = $1
+                      AND dl."ModuleID" = "MODULE_BUDGET"."ModuleID"
                 )
             )
             AND "AcademicYear" = EXTRACT(YEAR FROM CURRENT_DATE);
@@ -259,6 +271,12 @@ class LecturerRepository {
                     FROM "LECTURER_MODULE" lm
                     WHERE lm."LecturerID" = $1
                       AND lm."ModuleID" = b."ModuleID"
+                )
+                OR EXISTS (
+                    SELECT 1
+                    FROM "DEMI_LISTING" dl
+                    WHERE dl."LecturerID" = $1
+                      AND dl."ModuleID" = b."ModuleID"
                 )
             )
             AND b."AcademicYear" = EXTRACT(YEAR FROM CURRENT_DATE)
@@ -305,6 +323,12 @@ class LecturerRepository {
                         FROM "LECTURER_MODULE" lm
                         WHERE lm."LecturerID" = $2
                           AND lm."ModuleID" = b."ModuleID"
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM "DEMI_LISTING" dl
+                        WHERE dl."LecturerID" = $2
+                          AND dl."ModuleID" = b."ModuleID"
                     )
               );
         `;
