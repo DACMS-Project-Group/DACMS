@@ -1,6 +1,7 @@
 import AdminService from '../services/AdminService.js';
 import ExportedClaim from '../templates/ExportedClaim.js';
 import AdmZip from 'adm-zip';
+import ModuleBudget from '../models/ModuleBudget.js';
 
 class AdminController {
     static async getDashboardSummary(req, res) {
@@ -35,7 +36,7 @@ class AdminController {
     static async createBudget(req, res) {
         try {
             const budgetData = req.body || {};
-            const budget = new Budget(budgetData);
+            const budget = new ModuleBudget(budgetData);
             budget.validate();
 
             const data = await AdminService.createBudget(budget);
