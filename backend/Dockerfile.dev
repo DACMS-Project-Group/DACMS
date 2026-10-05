@@ -16,6 +16,7 @@ RUN npm install socket.io
 RUN npm install adm-zip
 RUN npm install nodemailer
 RUN npm install jsonwebtoken
+RUN npm install handlebars
 
 
 
