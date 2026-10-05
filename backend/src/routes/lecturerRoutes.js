@@ -61,6 +61,20 @@ router.get(
 );
 
 router.get(
+    '/assistants',
+    authenticate,
+    authorize([2]),
+    LecturerController.getAssistantsWithResponsibilities
+);
+
+router.put(
+    '/assistants/:position_id/responsibilities',
+    authenticate,
+    authorize([2]),
+    LecturerController.saveAssistantResponsibilities
+);
+
+router.get(
     '/applications/fetch/:id',
     authenticate,
     authorize([2]),
@@ -93,41 +107,6 @@ router.patch(
     authenticate,
     authorize([2]),
     LecturerController.lecturerReviewSession.bind(LecturerController)
-);
-
-router.get(
-    '/claims',
-    authenticate,
-    authorize([2]),
-    LecturerController.getClaimsSummary
-);
-
-router.get(
-    '/claims/fetch/:claim_id',
-    authenticate,
-    authorize([2]),
-    LecturerController.getClaimById
-);
-
-router.patch(
-    '/claims/review',
-    authenticate,
-    authorize([2]),
-    LecturerController.reviewClaim
-);
-
-router.get(
-    '/budgets',
-    authenticate,
-    authorize([2]),
-    LecturerController.getBudgetsSummary
-);
-
-router.get(
-    '/budgets/fetch/:budget_id',
-    authenticate,
-    authorize([2]),
-    LecturerController.getBudgetById
 );
 
 router.get(

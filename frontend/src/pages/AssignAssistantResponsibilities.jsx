@@ -1,43 +1,37 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
+import { apiGet, apiPut } from '../api';
 
 const AssignAssistantResponsibilities = () => {
-  const navigate = useNavigate();
+  const [assistants, setAssistants] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
+  const [saveFeedback, setSaveFeedback] = useState({});
 
-  // Sample approved assistants data
-  const [assistants, setAssistants] = useState([
-    {
-      id: 1,
-      name: 'Thamsanqa Ndlakuse',
-      studentNumber: '51480204',
-      module: 'MATH201',
-      hoursWorked: 12.5,
-      responsibilities: {
-        tutoring: true,
-        marking: false,
-        invigilation: false,
-        labAssistance: true,
-      },
-      hourLimit: 20,
-    },
-    {
-      id: 2,
-      name: 'Sarah Johnson',
-      studentNumber: '49876543',
-      module: 'PHYS101',
-      hoursWorked: 8.0,
-      responsibilities: {
-        tutoring: false,
-        marking: true,
-        invigilation: false,
-        labAssistance: true,
-      },
-      hourLimit: 15,
-    },
-  ]);
+  useEffect(() => {
+    let isCurrent = true;
+
+    const loadAssistants = async () => {
+      try {
+        const result = await apiGet('/lecturer/assistants');
+        if (!Array.isArray(result?.assistants)) {
+          throw new Error('The assistant list response was invalid.');
+        }
+        if (isCurrent) setAssistants(result.assistants);
+      } catch (error) {
+        if (isCurrent) setLoadError(error.message);
+      } finally {
+        if (isCurrent) setIsLoading(false);
+      }
+    };
+
+    loadAssistants();
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
 
   // Handle checkbox changes
   const handleResponsibilityChange = (id, responsibility) => {
@@ -65,12 +59,49 @@ const AssignAssistantResponsibilities = () => {
     );
   };
 
-  // Handle save
-  const handleSave = (id) => {
+  const handleSave = async (id) => {
     const assistant = assistants.find((a) => a.id === id);
-    console.log('Saving:', assistant);
-    // TODO: API call to save responsibilities and hour limit
-    alert(`Responsibilities saved for ${assistant.name}`);
+    if (!assistant) return;
+
+    setSaveFeedback((current) => ({
+      ...current,
+      [id]: { isSaving: true, message: '', isError: false },
+    }));
+
+    try {
+      const result = await apiPut(
+        `/lecturer/assistants/${encodeURIComponent(id)}/responsibilities`,
+        {
+          hourLimit: assistant.hourLimit,
+          responsibilities: assistant.responsibilities,
+        }
+      );
+
+      setAssistants((current) =>
+        current.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                hourLimit: result.data.hourLimit,
+                responsibilities: result.data.responsibilities,
+              }
+            : item
+        )
+      );
+      setSaveFeedback((current) => ({
+        ...current,
+        [id]: {
+          isSaving: false,
+          message: `Responsibilities saved for ${assistant.name}.`,
+          isError: false,
+        },
+      }));
+    } catch (error) {
+      setSaveFeedback((current) => ({
+        ...current,
+        [id]: { isSaving: false, message: error.message, isError: true },
+      }));
+    }
   };
 
   return (
@@ -105,6 +136,22 @@ const AssignAssistantResponsibilities = () => {
               <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
                 Approved Assistants
               </h2>
+
+              {isLoading && (
+                <p className="text-neutral font-inter" role="status">
+                  Loading approved assistants...
+                </p>
+              )}
+              {!isLoading && loadError && (
+                <p className="text-red-700 font-inter" role="alert">
+                  Unable to load approved assistants: {loadError}
+                </p>
+              )}
+              {!isLoading && !loadError && assistants.length === 0 && (
+                <p className="text-neutral font-inter">
+                  No approved assistants are available to assign.
+                </p>
+              )}
 
               <div className="space-y-6">
                 {assistants.map((assistant) => (
@@ -207,6 +254,7 @@ const AssignAssistantResponsibilities = () => {
                             handleHourLimitChange(assistant.id, e.target.value)
                           }
                           className="w-32 px-4 py-2 border border-neutral rounded-xl font-inter text-dark focus:outline-none focus:border-primary"
+                          aria-label={`Hour limit for ${assistant.name}`}
                           min="1"
                           max="40"
                         />
@@ -218,11 +266,24 @@ const AssignAssistantResponsibilities = () => {
                     <div className="flex justify-end">
                       <button
                         onClick={() => handleSave(assistant.id)}
-                        className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
+                        disabled={saveFeedback[assistant.id]?.isSaving}
+                        className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition font-inter disabled:opacity-60"
                       >
-                        Save
+                        {saveFeedback[assistant.id]?.isSaving ? 'Saving...' : 'Save'}
                       </button>
                     </div>
+                    {saveFeedback[assistant.id]?.message && (
+                      <p
+                        className={`mt-3 text-sm font-inter ${
+                          saveFeedback[assistant.id].isError
+                            ? 'text-red-700'
+                            : 'text-green-700'
+                        }`}
+                        role={saveFeedback[assistant.id].isError ? 'alert' : 'status'}
+                      >
+                        {saveFeedback[assistant.id].message}
+                      </p>
+                    )}
                   </Card>
                 ))}
               </div>

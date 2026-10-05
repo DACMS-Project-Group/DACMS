@@ -193,6 +193,9 @@ async function runCase({
 async function registerAndLogin(role) {
   const payload = { ...ROLE_CONFIG[role] };
   payload.email = makeUniqueEmail(role);
+  if (role === 'student') {
+    payload.student_number = `T${Date.now().toString().slice(-10)}${Math.random().toString(36).slice(2, 6)}`;
+  }
 
   const createResult = await apiRequest({
     role,
@@ -272,14 +275,16 @@ async function main() {
   }
 
   const studentCases = [
-    { label: 'Student dashboard', method: 'GET', path: '/student/student/dashboard', expectedStatus: 200 },
-    { label: 'Open listings', method: 'GET', path: '/student/student/listings/open', expectedStatus: 200 },
-    { label: 'My applications', method: 'GET', path: '/student/student/applications', expectedStatus: 200 },
-    { label: 'My documents', method: 'GET', path: '/student/student/documents', expectedStatus: 200 },
-    { label: 'My positions', method: 'GET', path: '/student/student/positions', expectedStatus: 200 },
-    { label: 'Student claims', method: 'GET', path: '/student/student/claims', expectedStatus: 200 },
-    { label: 'Student profile', method: 'GET', path: '/student/student/profile/', expectedStatus: 200 },
-    { label: 'Student unauthenticated access', method: 'GET', path: '/student/student/dashboard', expectedStatus: 401, noCookie: true }
+    { label: 'Student dashboard', method: 'GET', path: '/student/dashboard', expectedStatus: 200 },
+    { label: 'Open listings', method: 'GET', path: '/student/listings/open', expectedStatus: 200 },
+    { label: 'My applications', method: 'GET', path: '/student/applications', expectedStatus: 200 },
+    { label: 'My documents', method: 'GET', path: '/student/documents', expectedStatus: 200 },
+    { label: 'My positions', method: 'GET', path: '/student/positions', expectedStatus: 200 },
+    { label: 'Student claims', method: 'GET', path: '/student/claims', expectedStatus: 200 },
+    { label: 'Student profile', method: 'GET', path: '/student/profile/', expectedStatus: 200 },
+    { label: 'Student cannot list lecturer assistants', method: 'GET', path: '/lecturer/assistants', expectedStatus: 403 },
+    { label: 'Student cannot save assistant responsibilities', method: 'PUT', path: '/lecturer/assistants/1/responsibilities', body: { hourLimit: 20, responsibilities: { tutoring: true, marking: false, invigilation: false, labAssistance: false } }, expectedStatus: 403 },
+    { label: 'Student unauthenticated access', method: 'GET', path: '/student/dashboard', expectedStatus: 401, noCookie: true }
   ];
 
   const lecturerCases = [
@@ -289,6 +294,12 @@ async function main() {
     { label: 'Create listing', method: 'POST', path: '/lecturer/listings/create', body: { moduleId: 1, deadline: '2026-12-31T23:59:59.000Z', minimumGrade: 70 }, expectedStatus: 201 },
     { label: 'Edit listing', method: 'PATCH', path: '/lecturer/listings/edit/1', body: { moduleId: 1, deadline: '2026-12-31T23:59:59.000Z', minimumGrade: 65 }, expectedStatus: 200 },
     { label: 'Applications', method: 'GET', path: '/lecturer/applications', expectedStatus: 200 },
+    { label: 'Approved assistants and responsibilities', method: 'GET', path: '/lecturer/assistants', expectedStatus: 200 },
+    { label: 'Save responsibilities rejects invalid hour limit', method: 'PUT', path: '/lecturer/assistants/1/responsibilities', body: { hourLimit: 41, responsibilities: { tutoring: true, marking: false, invigilation: false, labAssistance: false } }, expectedStatus: 400 },
+    { label: 'Save responsibilities rejects unavailable position', method: 'PUT', path: '/lecturer/assistants/2147483647/responsibilities', body: { hourLimit: 20, responsibilities: { tutoring: true, marking: false, invigilation: false, labAssistance: false } }, expectedStatus: 404 },
+    { label: 'Save responsibilities requires valid position id', method: 'PUT', path: '/lecturer/assistants/not-a-position/responsibilities', body: { hourLimit: 20, responsibilities: { tutoring: true, marking: false, invigilation: false, labAssistance: false } }, expectedStatus: 400 },
+    { label: 'Assistant list requires authentication', method: 'GET', path: '/lecturer/assistants', expectedStatus: 401, noCookie: true },
+    { label: 'Save responsibilities requires authentication', method: 'PUT', path: '/lecturer/assistants/1/responsibilities', body: { hourLimit: 20, responsibilities: { tutoring: true, marking: false, invigilation: false, labAssistance: false } }, expectedStatus: 401, noCookie: true },
     { label: 'Application by id', method: 'GET', path: '/lecturer/applications/fetch/1', expectedStatus: 200 },
     { label: 'Review application', method: 'PATCH', path: '/lecturer/applications/review/1', body: { decision: 'Approved' }, expectedStatus: 200 },
     { label: 'Lecturer sessions', method: 'GET', path: '/lecturer/sessions', expectedStatus: 200 },
@@ -296,14 +307,14 @@ async function main() {
     { label: 'Review session', method: 'PATCH', path: '/lecturer/sessions/review/1', body: { decision: true }, expectedStatus: 200 },
     { label: 'Claims summary', method: 'GET', path: '/lecturer/claims', expectedStatus: 200 },
     { label: 'Claim by id', method: 'GET', path: '/lecturer/claims/fetch/1', expectedStatus: 200 },
-    { label: 'Review claim', method: 'PATCH', path: '/lecturer/claims/review', body: { claim_id: 1, status: 'Approved' }, expectedStatus: 200 },
+    { label: 'Review claim', method: 'PATCH', path: '/lecturer/claims/review', body: { claim_id: 1, status: 'Approved by Lecturer', comment: 'Hours and amount verified.' }, expectedStatus: 200 },
     { label: 'Budgets summary', method: 'GET', path: '/lecturer/budgets', expectedStatus: 200 },
     { label: 'Budget by id', method: 'GET', path: '/lecturer/budgets/fetch/1', expectedStatus: 200 },
     { label: 'Lecturer unauthenticated access', method: 'GET', path: '/lecturer/dashboard_statistics', expectedStatus: 401, noCookie: true }
   ];
 
   const adminCases = [
-    { label: 'Admin dashboard', method: 'GET', path: '/admin/dashboard_statistics', expectedStatus: 200 },
+    { label: 'Admin dashboard', method: 'GET', path: '/admin/dashboard', expectedStatus: 200 },
     { label: 'Budgets summary', method: 'GET', path: '/admin/budgets', expectedStatus: 200 },
     { label: 'Fetch budget by id', method: 'GET', path: '/admin/budgets/fetch/1', expectedStatus: 200 },
     { label: 'Create budget', method: 'POST', path: '/admin/budgets/create', body: { module_id: 1, lecturer_id: 11, allocated_budget: 1000, current_budget_usage: 0, max_allowable_work_hours: 120, academic_year: 2026 }, expectedStatus: 201 },
@@ -314,7 +325,9 @@ async function main() {
     { label: 'Appointments', method: 'GET', path: '/admin/appointments', expectedStatus: 200 },
     { label: 'Fetch appointment by position', method: 'GET', path: '/admin/appointments/fetch/1', expectedStatus: 200 },
     { label: 'Review appointment', method: 'PATCH', path: '/admin/appointments/review/1', body: { action: 'Approved', comment: 'Looks good' }, expectedStatus: 200 },
-    { label: 'Admin unauthenticated access', method: 'GET', path: '/admin/dashboard_statistics', expectedStatus: 401, noCookie: true }
+    { label: 'Admin cannot list lecturer assistants', method: 'GET', path: '/lecturer/assistants', expectedStatus: 403 },
+    { label: 'Admin cannot save assistant responsibilities', method: 'PUT', path: '/lecturer/assistants/1/responsibilities', body: { hourLimit: 20, responsibilities: { tutoring: true, marking: false, invigilation: false, labAssistance: false } }, expectedStatus: 403 },
+    { label: 'Admin unauthenticated access', method: 'GET', path: '/admin/dashboard', expectedStatus: 401, noCookie: true }
   ];
 
   console.log('\n\n========================================');

@@ -1,4 +1,5 @@
 import LecturerService from '../services/LecturerService.js';
+import NotificationService from '../services/NotificationService.js';
 import getAuthUserId from '../utils/getAuthUserId.js';
 
 class LecturerController {
@@ -37,6 +38,55 @@ class LecturerController {
         }
     }
 
+    static async getAssistantsWithResponsibilities(req, res) {
+        const lecturerId = getAuthUserId(req);
+        if (!lecturerId) {
+            return res.status(401).json({ error: 'Authenticated lecturer ID is required.' });
+        }
+
+        try {
+            const data = await LecturerService.getAssistantsWithResponsibilities(lecturerId);
+            return res.status(200).json(data);
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    static async saveAssistantResponsibilities(req, res) {
+        const lecturerId = getAuthUserId(req);
+        if (!lecturerId) {
+            return res.status(401).json({ error: 'Authenticated lecturer ID is required.' });
+        }
+
+        const positionId = Number(req.params.position_id);
+        if (!Number.isInteger(positionId) || positionId < 1) {
+            return res.status(400).json({ error: 'position_id must be a positive integer.' });
+        }
+
+        try {
+            const data = await LecturerService.saveAssistantResponsibilities(
+                lecturerId,
+                positionId,
+                req.body
+            );
+            return res.status(200).json({
+                message: 'Assistant responsibilities saved successfully.',
+                data
+            });
+        } catch (error) {
+            if (error.message === 'Assistant position not found.') {
+                return res.status(404).json({ error: error.message });
+            }
+            if (
+                error.message.startsWith('Hour limit') ||
+                error.message.startsWith('Responsibilities')
+            ) {
+                return res.status(400).json({ error: error.message });
+            }
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
     static async lecturerFetchApplicationById(req, res) {
         try {
             const application = await LecturerService.lecturerFetchApplicationById(req.params.id);
@@ -62,45 +112,51 @@ class LecturerController {
     static async getLecturerSessions(req, res) {
         try {
             const lecturerId = getAuthUserId(req);
+            if (!lecturerId) {
+                return res.status(401).json({ error: 'Authenticated lecturer ID is required.' });
+            }
+
             const sessions = await LecturerService.fetchSessionsForLecturer(lecturerId);
             return res.status(200).json(sessions);
         } catch (error) {
-            return res.status(500).json(error.message);
+            return res.status(500).json({ error: error.message });
         }
-        
     }
 
     static async getLecturerSessionById(req, res) {
-        try{
+        try {
             const sessionId = req.params.id;
             const session = await LecturerService.fetchSessionByIdForLecturer(sessionId);
             return res.status(200).json({ session });
         } catch (error) {
-            return res.status(500).json(error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
     static async lecturerReviewSession(req, res) {
         try {
             const sessionId = req.params.id;
-            const { reviewedStatus } = req.body;
-            const reviewedSession  = await LecturerService.reviewSessionByLecturer(sessionId, reviewedStatus);
+            const reviewedStatus = req.body.decision ?? req.body.reviewedStatus;
+            const reviewedSession = await LecturerService.reviewSessionByLecturer(sessionId, reviewedStatus);
             const studentId = await LecturerService.getStudentIdBySession(sessionId);
-            const notification = await NotificationService.sendNotification( {
-                recipientId : studentId, 
-                title : "Session Status Updated", 
-                type : reviewedStatus,
-                message : `The status of your session ${sessionId} has been updated to ${reviewedStatus}` 
-            } )
-            return res.status(200).json( {reviewedSession} );
+            await NotificationService.sendNotification({
+                recipientId: studentId,
+                subject: 'Session Status Updated',
+                type: reviewedStatus,
+                message: `The status of your session ${sessionId} has been updated to ${reviewedStatus}`
+            });
+            return res.status(200).json({ reviewedSession });
         } catch (error) {
-            return res.status(500).json(error.message);
+            return res.status(500).json({ error: error.message });
         }
     }
 
     static async getClaimsSummary(req, res) {
         try {
-            const lecturerId = req.user.user_id;
+            const lecturerId = getAuthUserId(req);
+            if (!lecturerId) {
+                return res.status(401).json({ error: 'Authenticated lecturer ID is required.' });
+            }
 
             const data = await LecturerService.getClaimsSummary(lecturerId);
 
@@ -142,41 +198,18 @@ class LecturerController {
 
     static async reviewClaim(req, res) {
         try {
-            const lecturerId = req.user.user_id;
-
-            const claimId = Number(req.body?.claim_id);
-            const status = req.body?.status;
-
-            if (!Number.isInteger(claimId) || claimId <= 0) {
-                return res.status(400).json({
-                    error: 'A valid claim_id is required.'
-                });
-            }
-
-            const allowedStatuses = ['Under Review', 'Verified'];
-
-            if (!allowedStatuses.includes(status)) {
-                return res.status(400).json({
-                    error: 'Status must be Under Review or Verified.'
-                });
-            }
+            const lecturerId = getAuthUserId(req);
+            const claimId = req.params.claim_id || req.body.claim_id;
+            const status = req.body.status;
+            const comment = req.body.comment;
 
             const data = await LecturerService.reviewClaim(
                 lecturerId,
                 claimId,
-                status
+                status,
+                comment
             );
-
-            if (!data) {
-                return res.status(404).json({
-                    error: 'Claim not found or does not belong to this lecturer.'
-                });
-            }
-
-            return res.status(200).json({
-                message: 'Claim reviewed successfully.',
-                data
-            });
+            return res.status(200).json(data);
         } catch (error) {
             console.error('Lecturer claim review error:', error);
             return res.status(500).json({ error: error.message });
@@ -185,7 +218,10 @@ class LecturerController {
 
     static async getBudgetsSummary(req, res) {
         try {
-            const lecturerId = req.user.user_id;
+            const lecturerId = getAuthUserId(req);
+            if (!lecturerId) {
+                return res.status(401).json({ error: 'Authenticated lecturer ID is required.' });
+            }
 
             const data = await LecturerService.getBudgetsSummary(lecturerId);
 
@@ -198,7 +234,11 @@ class LecturerController {
 
     static async getBudgetById(req, res) {
         try {
-            const lecturerId = req.user.user_id;
+            const lecturerId = getAuthUserId(req);
+            if (!lecturerId) {
+                return res.status(401).json({ error: 'Authenticated lecturer ID is required.' });
+            }
+
             const budgetId = Number(req.params.budget_id);
 
             if (!Number.isInteger(budgetId) || budgetId <= 0) {
