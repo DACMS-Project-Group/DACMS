@@ -1,7 +1,14 @@
 import pool from '../config/db.js';
-import { io, userSockets } from '../server.js';
 import nodemailer from 'nodemailer';
 import getAuthUserId from '../utils/getAuthUserId.js';
+
+let ioInstance = null;
+let socketMap = new Map();
+
+export function configureSocketIO(socketServer, sockets = new Map()) {
+    ioInstance = socketServer;
+    socketMap = sockets;
+}
 
 class NotificationService {
     static async sendNotification({ recipientId, subject, type, message }) {
@@ -25,13 +32,11 @@ class NotificationService {
 
         const newNotification = rows[0];
 
-        // 2. Push via Socket if the recipient is online
-        const recipientSocketId = userSockets.get(recipientId);
-        if (recipientSocketId) {
-            io.to(recipientSocketId).emit('newNotification', newNotification);
+        const recipientSocketId = socketMap.get(recipientId);
+        if (recipientSocketId && ioInstance) {
+            ioInstance.to(recipientSocketId).emit('newNotification', newNotification);
         }
         
-        // 3. Send email notification
         try {
             console.log((await this.sendEmailNotification({ recipientUserId: recipientId, notificationID: newNotification.NotificationID })).message);
         } catch (error) {

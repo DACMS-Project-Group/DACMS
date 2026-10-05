@@ -95,7 +95,6 @@ router.post(
 );
 
 // -- Profile ----------------------------------------------------------------
-// match the team's contract; StudentController itself is unchanged.
 router.get(
     '/profile/',
     authenticate,

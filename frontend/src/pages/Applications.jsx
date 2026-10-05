@@ -70,8 +70,8 @@ const Applications = () => {
       '—',
     status:
       app.status ??
-      app.application_status ??
-      app.verificationEligibilityStatus ??
+      app.applicationStatus ??
+      app.ApplicationStatus ??
       'Pending',
     dateSubmitted:
       app.date_submitted ??

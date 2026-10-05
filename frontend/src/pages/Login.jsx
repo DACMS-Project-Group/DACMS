@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const Login = () => {
   const { login } = useAuth();
@@ -8,6 +9,14 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
+
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Get the role from URL parameter
+  const selectedRole = searchParams.get('role') || 'student';
 
   const handleLogin = async (e) => {
     e.preventDefault();

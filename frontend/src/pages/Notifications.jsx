@@ -4,6 +4,7 @@ import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import { useAuth } from '../contexts/AuthContext';
 import { apiGet, apiPatch } from '../api';
+import { liveNotifs } from '../contexts/NotificationContext';
 
 const Notifications = () => {
   const { user } = useAuth();
@@ -14,6 +15,9 @@ const Notifications = () => {
   const [error, setError] = useState('');
   const [expandedId, setExpandedId] = useState(null);
 
+  const { fetchNotifications } = liveNotifs();
+
+  // ---- Load notifications on mount ----
   useEffect(() => {
     let cancelled = false;
 
@@ -29,13 +33,35 @@ const Notifications = () => {
         if (!cancelled) {
           setNotifications(
             list.map((n) => ({
-              id: n.NotificationID ?? n.NotificationId ?? n.id,
-              title: n.Subject ?? n.title ?? '(No subject)',
-              message: n.Message ?? n.message ?? '',
-              timestamp: n.CreatedTimestamp ?? n.created_at ?? n.timestamp,
-              read: Boolean(n.IsRead ?? n.is_read ?? n.read),
-              type: n.NotificationType ?? n.type ?? 'info',
-              category: n.NotificationType ?? 'General',
+              id: n.NotificationID ?? 
+                  n.notificationID ?? 
+                  n.id, 
+              title: 
+                n.Subject ?? 
+                n.subject ?? 
+                n.title ?? 
+                'No Subject',
+              type: 
+                n.NotificationType ?? 
+                n.notificationType ?? 
+                n.type ?? 
+                'info',
+              message: 
+                n.Message ??
+                n.message ??
+                'No message',
+              timestamp: 
+                n.CreatedTimestamp ?? 
+                n.createdTimestamp ??
+                n.created_at ?? 
+                n.timestamp,
+              read: Boolean(
+                n.IsRead ?? 
+                n.is_read ?? 
+                n.read
+              ),
+              type: n.type || 'info',
+              category: n.category || 'General',
             }))
           );
           setError('');
@@ -64,13 +90,12 @@ const Notifications = () => {
         current.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
 
+
       try {
         await apiPatch(`/notifications/read/${id}`);
+        await fetchNotifications();
+
       } catch (err) {
-        setNotifications((current) =>
-          current.map((n) => (n.id === id ? { ...n, read: false } : n))
-        );
-        console.error('Failed to mark as read:', err);
       }
     }
   };
@@ -87,9 +112,10 @@ const Notifications = () => {
       await Promise.all(
         unread.map((n) => apiPatch(`/notifications/read/${n.id}`))
       );
+      await fetchNotifications();
     } catch (err) {
       console.error('Some notifications failed to mark as read:', err);
-    }
+    }   
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
