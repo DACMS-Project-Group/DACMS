@@ -4,45 +4,42 @@ import StatusBadge from '../components/StatusBadge';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
+import { apiGet } from '../api';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [appointmentPage, setAppointmentPage] = useState(1);
   const APPOINTMENTS_PER_PAGE = 4;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/admin/dashboard_statistics', {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        const result = await response.json();
+        const result = await apiGet('/admin/dashboard');
         setData(result);
       } catch (error) {
-        console.error('Error fecthing dashboard data: ', error);
+        console.error('Error fetching dashboard data:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
 
     fetchData();
   }, []);
 
   const statistics = [
-    { title: "Total", value: data?.stats?.total_modules ?? 'null' },
+    { title: "Total Modules", value: data?.stats?.total_modules ?? 'null' },
     { title: 'Total Lecturers', value: data?.stats?.total_lecturers ?? 'null' },
     { title: 'Total Assistants', value: data?.stats?.total_demis ?? 'null' },
     { title: 'Pending Approvals', value: data?.stats?.total_pending_approvals ?? 'null' },
     { title: 'Pending Claims', value: data?.stats?.total_pending_claims ?? 'null' },
-    { title: 'Budget Usage', value: '--' },
   ];
 
   const monthlyClaims = data?.monthlyClaims || [];
-
+  const monthlyWork = data?.monthlyWork || [];
   const pendingAppointments = data?.pendingAppointments || [];
   const totalAppointmentPages = Math.max(
     Math.ceil(pendingAppointments.length / APPOINTMENTS_PER_PAGE),
@@ -72,7 +69,6 @@ const AdminDashboard = () => {
             </h1>
           </div>
 
-          {/* Main Content */}
           <div className="p-8">
             {/* Welcome */}
             <div className="mb-8">
@@ -82,11 +78,15 @@ const AdminDashboard = () => {
               <p className="text-neutral mt-2 font-inter">
                 Monitor and manage the Assistant Applications and Claims Management System.
               </p>
+
+              {error && (
+                <p className="mt-2 text-sm text-error font-inter">
+                  Could not load dashboard data: {error}
+                </p>
+              )}
             </div>
 
-            {/* ================================
-                SYSTEM STATISTICS
-            ================================= */}
+            {/* SYSTEM STATISTICS */}
             <section className="mb-8">
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 System Statistics
@@ -101,7 +101,7 @@ const AdminDashboard = () => {
                           {stat.title}
                         </p>
                         <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                          {stat.value}
+                          {loading ? '—' : stat.value}
                         </p>
                       </div>
                     </div>
@@ -111,17 +111,17 @@ const AdminDashboard = () => {
             </section>
 
             {/* ================================
-                MONTHLY CLAIMS + PENDING ITEMS
+                MONTHLY CLAIMS, MONTHLY WORK SESSIONS, AND PENDING CLAIMS
             ================================= */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 items-stretch">
               {/* Monthly Claims */}
-              <section>
+              <section className="min-w-0 h-full flex flex-col">
                 <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                  Monthly Claims Summary
+                  Monthly Work Summary
                 </h3>
 
-                <Card>
-                  <div className="space-y-4">
+                <Card className="h-full flex flex-col justify-between">
+                  <div className="space-y-4 flex-1">
                     {monthlyClaims.map((claim) => (
                       <div
                         key={claim.month}
@@ -146,14 +146,45 @@ const AdminDashboard = () => {
                 </Card>
               </section>
 
+              <section className="min-w-0 h-full flex flex-col">
+                <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                  Work Sessions
+                </h3>
+
+                <Card className="h-full flex flex-col justify-between">
+                  <div className="space-y-4 flex-1">
+                    {monthlyWork.map((month) => (
+                      <div
+                        key={month.month}
+                        className="flex justify-between items-center border-b border-neutral pb-3 last:border-0"
+                      >
+                        <span className="font-semibold text-dark font-inter">
+                          {month.month}
+                        </span>
+                        <span className="font-semibold text-primary font-inter">
+                          {month.total_sessions}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() => navigate('/claims-verification')}
+                    className="text-primary font-semibold hover:underline mt-4 font-inter"
+                  >
+                    View claims →
+                  </button>
+                </Card>
+              </section>
+
               {/* Pending Appointments */}
-              <section>
+              <section className="min-w-0 h-full flex flex-col">
                 <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                   Pending Appointments
                 </h3>
 
-                <Card>
-                  <div className="space-y-3">
+                <Card className="h-full flex flex-col justify-between">
+                  <div className="space-y-3 flex-1">
                     {currentAppointments.length > 0 ? (
                       currentAppointments.map((appointment, index) => (
                         <div
@@ -239,15 +270,13 @@ const AdminDashboard = () => {
               </section>
             </div>
 
-            {/* ================================
-                ADMINISTRATOR ACTIONS
-            ================================= */}
+            {/* ADMINISTRATOR ACTIONS */}
             <section className="mb-8">
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                 Administrator Actions
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
                 <button
                   onClick={() => navigate('/budget-management')}
                   className="bg-primary text-white px-6 py-4 rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
@@ -279,18 +308,18 @@ const AdminDashboard = () => {
             </section>
 
             {/* ================================
-                PAYMENT INFORMATION
+                Claims Export
             ================================= */}
             <section>
               <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                Payment Information
+                Claims Export
               </h3>
 
               <Card>
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div>
                     <p className="font-semibold text-dark font-inter">
-                      Export payment information
+                      Export approved claims
                     </p>
                     <p className="text-sm text-neutral mt-1 font-inter">
                       Generate payment information for HR and Remuneration departments.
@@ -301,7 +330,7 @@ const AdminDashboard = () => {
                     onClick={() => navigate('/export-payments')}
                     className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
                   >
-                    Export Payment Information
+                    Export Claims
                   </button>
                 </div>
               </Card>
@@ -309,7 +338,6 @@ const AdminDashboard = () => {
           </div>
         </main>
       </div>
-
     </div>
   );
 };

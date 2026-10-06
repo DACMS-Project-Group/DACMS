@@ -107,7 +107,69 @@ CREATE TABLE "STUDENT" (
     "AccountHolderName" varchar(100),
     CONSTRAINT "PK_STUDENT" PRIMARY KEY ("StudentID"),
     CONSTRAINT "UQ_STUDENT_StudentNumber" UNIQUE ("StudentNumber"),
+    CONSTRAINT "FK_STUDENT_APP_USER" FOREIGN KEY ("StudentID") REFERENCES"APP_USER" ("UserID") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
+    -- Added for StudentProfile.jsx (P&C122F) full-form coverage. Additive
+    -- only: the blob columns above (ResidentialAddress/PostalAddress/
+    -- HighestQualification) are untouched for seed-data compatibility.
+    "Initials" varchar(10),
+    "MiddleNames" varchar(100),
+    "NickName" varchar(50),
+    "Race" varchar(30),
+    "MaritalStatus" varchar(20),
+    "PreviousSurname" varchar(100),
+    "HomeLanguage" varchar(30),
+    "PreferenceLanguage" varchar(30),
+    "Disability" varchar(3),
+    "PrimaryEmploymentOutside" varchar(3),
+    "StudentType" varchar(20),
+    "Nationality" varchar(50),
+    "CountryOfBirth" varchar(50),
+    "CountryOfPassportIssue" varchar(50),
+    "PermitNumber" varchar(30),
+    "CurrentlyEmployedByNwu" varchar(3),
+    "OeCodeAndName1" varchar(150),
+    "JobName1" varchar(100),
+    "OeCodeAndName2" varchar(150),
+    "JobName2" varchar(100),
+
+    "NextOfKinTitle" varchar(10),
+    "NextOfKinInitials" varchar(10),
+    "NextOfKinSurname" varchar(100),
+    "NextOfKinRelationship" varchar(50),
+    "NextOfKinDaytimePhoneNo" varchar(20),
+    "IsNextOfKinNwuEmployee" varchar(3),
+    "NextOfKinNwuNumber" varchar(20),
+
+    "ResUnitNo" varchar(20),
+    "ResComplex" varchar(100),
+    "ResStreetNo" varchar(20),
+    "ResStreetName" varchar(150),
+    "ResSuburb" varchar(100),
+    "ResTownCity" varchar(100),
+    "ResPostalCode" varchar(10),
+    "SameAsResidential" boolean DEFAULT true,
+    "PoBoxNo" varchar(20),
+    "PrivateBagNo" varchar(20),
+    "PostOfficeBranch" varchar(100),
+    "MailingPostalCode" varchar(10),
+    "WorkPhoneNo" varchar(20),
+
+    "QualificationInstitution" varchar(150),
+    "QualificationType" varchar(100),
+    "QualificationStatus" varchar(20),
+    "QualificationAwardedDate" date,
+
+    "AccountHolderRelationship" varchar(30),
+
+    "DeclarationInitialsSurname" varchar(100),
+    "DeclarationDate" date,
+    "DeclarationAgreed" boolean DEFAULT false,
+    "Signature" text,
+
+    CONSTRAINT "PK_STUDENT" PRIMARY KEY ("StudentID"),
+    CONSTRAINT "UQ_STUDENT_StudentNumber" UNIQUE ("StudentNumber"),
     CONSTRAINT "FK_STUDENT_APP_USER" FOREIGN KEY ("StudentID") REFERENCES "APP_USER" ("UserID") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
+
 );
 
 -- 8. CREATE SUPPORTING DOCUMENTS TABLE
@@ -205,6 +267,8 @@ CREATE TABLE "DEMI_APPLICATION" (
     "ApplicationStatus" VARCHAR(30) DEFAULT 'Pending',
     "VerificationEligibilityStatus" VARCHAR(30),
     "DateSubmitted" TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP,
+    "AppReason" TEXT,
+    "ReviewComment" TEXT,
     CONSTRAINT "PK_DEMI_APPLICATION" PRIMARY KEY ("ApplicationID"),
     CONSTRAINT "CHK_DEMI_APPLICATION_Status" CHECK (
         "ApplicationStatus" IN ('Pending', 'In Review', 'Approved', 'Rejected', 'Returned')
@@ -266,6 +330,7 @@ CREATE TABLE "REMUNERATION_CLAIM" (
     "TotalClaimAmount" decimal(10,2) NOT NULL,
     "HourlyRateApplied" decimal(10,2) NOT NULL,
     "ClaimStatus" varchar(20) DEFAULT 'Pending',
+    "LecturerComment" TEXT,
     "SubmissionDate" timestamptz DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT "PK_REMUNERATION_CLAIM" PRIMARY KEY ("ClaimID"),
     CONSTRAINT "UQ_REMUNERATION_CLAIM_ReferenceNumber" UNIQUE ("ClaimReferenceNumber"),
@@ -456,17 +521,17 @@ INSERT INTO "DEMI_LISTING" ("ModuleID", "LecturerID", "Deadline", "MinimumGrade"
 (10, 12, '2026-08-31 23:59:59+02', 65.00);
 
 -- 12. Insert Applications
-INSERT INTO "DEMI_APPLICATION" ("StudentID", "ListingID", "ApplicationStatus", "VerificationEligibilityStatus", "DateSubmitted") VALUES 
-(1, 1, 'Approved', 'Eligible', '2026-08-01 10:00:00+02'),   -- ApplicationID: 1
-(2, 2, 'Approved', 'Eligible', '2026-08-02 11:30:00+02'),   -- ApplicationID: 2
-(3, 1, 'Approved', 'Eligible', '2026-08-03 09:15:00+02'),   -- ApplicationID: 3
-(4, 4, 'In Review', 'Eligible', '2026-08-04 14:00:00+02'),  -- ApplicationID: 4
-(5, 5, 'Approved', 'Eligible', '2026-08-05 15:45:00+02'),   -- ApplicationID: 5
-(6, 6, 'Pending', 'Eligible', '2026-08-06 08:30:00+02'),    -- ApplicationID: 6
-(7, 3, 'Approved', 'Eligible', '2026-08-07 12:10:00+02'),   -- ApplicationID: 7
-(8, 7, 'Pending', 'Eligible', '2026-08-08 16:20:00+02'),    -- ApplicationID: 8
-(9, 9, 'Approved', 'Eligible', '2026-08-09 11:00:00+02'),   -- ApplicationID: 9
-(10, 8, 'Approved', 'Eligible', '2026-08-10 13:25:00+02');  -- ApplicationID: 10
+INSERT INTO "DEMI_APPLICATION" ("StudentID", "ListingID", "ApplicationStatus", "VerificationEligibilityStatus", "DateSubmitted", "AppReason", "ReviewComment") VALUES 
+(1, 1, 'Approved', 'Eligible', '2026-08-01 10:00:00+02', 'Meets eligibility requirements', NULL),   -- ApplicationID: 1
+(2, 2, 'Approved', 'Eligible', '2026-08-02 11:30:00+02', 'Meets eligibility requirements', NULL),   -- ApplicationID: 2
+(3, 1, 'Approved', 'Eligible', '2026-08-03 09:15:00+02', 'Meets eligibility requirements', NULL),   -- ApplicationID: 3
+(4, 4, 'In Review', 'Eligible', '2026-08-04 14:00:00+02', 'Application is under review', NULL),      -- ApplicationID: 4
+(5, 5, 'Approved', 'Eligible', '2026-08-05 15:45:00+02', 'Meets eligibility requirements', NULL),   -- ApplicationID: 5
+(6, 6, 'Pending', 'Eligible', '2026-08-06 08:30:00+02', 'Awaiting application review', NULL),        -- ApplicationID: 6
+(7, 3, 'Approved', 'Eligible', '2026-08-07 12:10:00+02', 'Meets eligibility requirements', NULL),   -- ApplicationID: 7
+(8, 7, 'Pending', 'Eligible', '2026-08-08 16:20:00+02', 'Awaiting application review', NULL),        -- ApplicationID: 8
+(9, 9, 'Approved', 'Eligible', '2026-08-09 11:00:00+02', 'Meets eligibility requirements', NULL),   -- ApplicationID: 9
+(10, 8, 'Approved', 'Eligible', '2026-08-10 13:25:00+02', 'Meets eligibility requirements', NULL);  -- ApplicationID: 10
 
 -- 13. Insert Active Positions (Linked to Approved Applications)
 -- ScaleID 1 = UG (86.75), ScaleID 2 = PG (107.80)

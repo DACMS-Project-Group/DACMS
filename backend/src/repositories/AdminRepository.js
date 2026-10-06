@@ -31,11 +31,11 @@ class AdminRepository {
     static async getMonthlyWorkSessions() {
         const query = `
             SELECT
-                TO_CHAR("StartTime", 'YYYY-MM') AS month,
+                TO_CHAR("StartTime", 'FMMonth') AS month,
                 COUNT(*) AS total_sessions
             FROM "WORK_SESSION"
             WHERE "StartTime" >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months'
-            GROUP BY TO_CHAR("StartTime", 'YYYY-MM')
+            GROUP BY TO_CHAR("StartTime", 'FMMonth')
             ORDER BY month;
         `;
 
@@ -427,6 +427,51 @@ class AdminRepository {
             submission_date: row.SubmissionDate,
             module_code: row.ModuleCode,
             student_name: row.student_name
+        }));
+    }
+
+    static async getClaimsForExport() {
+        const query = `
+            SELECT
+                c."ClaimID" AS id,
+                c."ClaimReferenceNumber" AS reference_number,
+                CONCAT(
+                    COALESCE(au."Title", ''),
+                    CASE WHEN COALESCE(au."Title", '') = '' THEN '' ELSE ' ' END,
+                    COALESCE(au."FName", ''),
+                    ' ',
+                    COALESCE(au."LName", '')
+                ) AS student,
+                m."ModuleCode" AS module,
+                c."TotalHoursClaimed" AS hours,
+                c."HourlyRateApplied" AS rate,
+                c."TotalClaimAmount" AS amount,
+                'Approved' AS status,
+                c."SubmissionDate" AS date
+            FROM "REMUNERATION_CLAIM" c
+            JOIN "DEMI_APPLICATION" da
+                ON da."ApplicationID" = c."ApplicationID"
+            JOIN "STUDENT" s
+                ON s."StudentID" = da."StudentID"
+            JOIN "APP_USER" au
+                ON au."UserID" = s."StudentID"
+            JOIN "NWU_MODULE" m
+                ON m."ModuleID" = c."ModuleID"
+            WHERE c."ClaimStatus" = 'Verified'
+            ORDER BY c."SubmissionDate" DESC;
+        `;
+        const result = await pool.query(query);
+
+        return result.rows.map(row => ({
+            id: row.id,
+            reference_number: row.reference_number,
+            student: row.student.trim(),
+            module: row.module,
+            hours: Number(row.hours ?? 0),
+            rate: Number(row.rate ?? 0),
+            amount: Number(row.amount ?? 0),
+            status: row.status,
+            date: row.date
         }));
     }
 

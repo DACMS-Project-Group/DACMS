@@ -168,8 +168,10 @@ const ClaimsVerification = () => {
                       <option value="All">All Statuses</option>
                       <option value="Pending">Pending</option>
                       <option value="Under Review">Under Review</option>
+                      <option value="Approved by Lecturer">Approved by Lecturer</option>
                       <option value="Verified">Verified</option>
                       <option value="Approved">Approved</option>
+                      <option value="Rejected by Lecturer">Rejected by Lecturer</option>
                       <option value="Rejected">Rejected</option>
                     </select>
                   </div>

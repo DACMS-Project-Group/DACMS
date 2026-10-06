@@ -1,10 +1,12 @@
 import express from 'express';
 import AdminController from '../controllers/AdminController.js';
+import ModuleController from '../controllers/ModuleController.js';
 import {authenticate, authorize} from '../middlewares/authMiddleware.js'
+import LecturerController from '../controllers/LecturerController.js';
 
 const router = express.Router();
 
-router.get('/dashboard_statistics', 
+router.get('/dashboard', 
            authenticate, 
            authorize([3]), 
            AdminController.getDashboardSummary
@@ -37,6 +39,12 @@ router.get('/claims',
             authenticate,
             authorize([3]),
             AdminController.getClaimsSummary
+);
+
+router.get('/claims/export',
+            authenticate,
+            authorize([3]),
+            AdminController.getClaimsForExport
 );
 
 router.get('/claims/fetch/:claim_id',
@@ -73,6 +81,18 @@ router.post('/claims/export',
              authenticate,
              authorize([3]),
              AdminController.exportClaims
+)
+
+router.get('/modules',
+    authenticate,
+    authorize([3]),
+    ModuleController.getModules
+)
+
+router.get('/modules/:moduleId/lecturers',
+    authenticate,
+    authorize([3]),
+    LecturerController.getLecturersByModule
 )
 
 export default router;

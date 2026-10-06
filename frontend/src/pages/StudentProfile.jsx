@@ -110,21 +110,20 @@ const StudentProfile = () => {
         if (!cancelled) {
           setFormData((prev) => ({
             ...prev,
-            // Section A
             title: student.title ?? prev.title,
             surname: student.last_name ?? student.surname ?? prev.surname,
-            firstName: student.first_name ?? student.firstName ?? prev.firstName,
+            firstName:
+              student.first_name ?? student.firstName ?? prev.firstName,
             studentNumber: student.student_number ?? prev.studentNumber,
             emailAddress: student.email ?? prev.emailAddress,
-            contactDetails: student.contact_details ?? prev.contactDetails,
+            contactDetails:
+              student.contact_details ?? prev.contactDetails,
 
-            // Section E — the 4 editable fields
             bankName: student.bank_name ?? prev.bankName,
             accountNumber: student.account_number ?? prev.accountNumber,
             branchCode: student.branch_code ?? prev.branchCode,
             mobileNo: student.contact_details ?? prev.mobileNo,
 
-            // Declaration (from earlier save if present)
             declarationInitialsSurname:
               student.declaration_initials_surname ??
               prev.declarationInitialsSurname,
@@ -132,7 +131,6 @@ const StudentProfile = () => {
               student.declaration_date ?? prev.declarationDate,
           }));
 
-          // Start in read mode if we loaded a profile, edit mode if empty
           setIsEditing(!student.student_number);
           setLoadError('');
         }
@@ -150,7 +148,6 @@ const StudentProfile = () => {
     };
   }, []);
 
-  // Dynamically update required documents based on SA Citizenship state
   const requiredDocuments = useMemo(() => {
     const baseDocuments = [
       { key: 'academicTranscript', name: 'Academic Transcript', required: true },
@@ -316,7 +313,7 @@ const StudentProfile = () => {
 
     try {
       setSaving(true);
-      await apiPatch('/student/profile', payload);
+      await apiPatch('/student/profile/edit', payload);
 
       const declarationName = `${formData.initials} ${formData.surname}`.trim();
       const declarationDate = new Date().toISOString().split('T')[0];
@@ -389,7 +386,7 @@ const StudentProfile = () => {
 
           {!loading && !loadError && (
             <form onSubmit={handleSaveProfile} className="p-8 space-y-6">
-              {/* SECTION A — unchanged */}
+              {/* SECTION A */}
               <Card>
                 <div className="p-6">
                   <h2 className="text-xl font-bold text-primary-dark mb-6">
@@ -399,7 +396,8 @@ const StudentProfile = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                     <div>
                       <label className="block font-semibold mb-2">
-                        Justifiable Reason <span className="text-red-500">*</span>
+                        Justifiable Reason{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -414,7 +412,8 @@ const StudentProfile = () => {
 
                     <div>
                       <label className="block font-semibold mb-2">
-                        Student Number <span className="text-red-500">*</span>
+                        Student Number{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -429,7 +428,9 @@ const StudentProfile = () => {
 
                     <div>
                       <label className="block font-semibold mb-2">
-                        {formData.saCitizen === 'Yes' ? 'ID No.' : 'ID / Identity No.'}
+                        {formData.saCitizen === 'Yes'
+                          ? 'ID No.'
+                          : 'ID / Identity No.'}
                       </label>
                       <input
                         type="text"
@@ -522,7 +523,9 @@ const StudentProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2">Middle Names</label>
+                      <label className="block font-semibold mb-2">
+                        Middle Names
+                      </label>
                       <input
                         type="text"
                         name="middleNames"
@@ -534,7 +537,9 @@ const StudentProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2">Nick Name</label>
+                      <label className="block font-semibold mb-2">
+                        Nick Name
+                      </label>
                       <input
                         type="text"
                         name="nickName"
@@ -605,7 +610,9 @@ const StudentProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2">Previous Surname</label>
+                      <label className="block font-semibold mb-2">
+                        Previous Surname
+                      </label>
                       <input
                         type="text"
                         name="previousSurname"
@@ -661,7 +668,8 @@ const StudentProfile = () => {
 
                     <div>
                       <label className="block font-semibold mb-2">
-                        Preference Language <span className="text-red-500">*</span>
+                        Preference Language{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <select
                         name="preferenceLanguage"
@@ -698,7 +706,8 @@ const StudentProfile = () => {
 
                     <div>
                       <label className="block font-semibold mb-2">
-                        Are you currently employed by NWU? <span className="text-red-500">*</span>
+                        Are you currently employed by NWU?{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <select
                         name="currentlyEmployedByNwu"
@@ -716,7 +725,8 @@ const StudentProfile = () => {
 
                     <div>
                       <label className="block font-semibold mb-2">
-                        Primary Employment Outside of Organization? <span className="text-red-500">*</span>
+                        Primary Employment Outside of Organization?{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <select
                         name="primaryEmploymentOutside"
@@ -766,7 +776,9 @@ const StudentProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2">Country of Birth</label>
+                      <label className="block font-semibold mb-2">
+                        Country of Birth
+                      </label>
                       <input
                         type="text"
                         name="countryOfBirth"
@@ -778,7 +790,9 @@ const StudentProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2">Income Tax No.</label>
+                      <label className="block font-semibold mb-2">
+                        Income Tax No.
+                      </label>
                       <input
                         type="text"
                         name="incomeTaxNo"
@@ -799,7 +813,8 @@ const StudentProfile = () => {
 
                         <div>
                           <label className="block font-semibold mb-2">
-                            Passport Number <span className="text-red-500">*</span>
+                            Passport Number{' '}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -814,7 +829,8 @@ const StudentProfile = () => {
 
                         <div>
                           <label className="block font-semibold mb-2">
-                            Country of Passport Issue <span className="text-red-500">*</span>
+                            Country of Passport Issue{' '}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -829,7 +845,8 @@ const StudentProfile = () => {
 
                         <div>
                           <label className="block font-semibold mb-2">
-                            Study / Work Permit Number <span className="text-red-500">*</span>
+                            Study / Work Permit Number{' '}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -1006,7 +1023,9 @@ const StudentProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2">Daytime Phone No.</label>
+                      <label className="block font-semibold mb-2">
+                        Daytime Phone No.
+                      </label>
                       <input
                         type="tel"
                         name="nextOfKinDaytimePhoneNo"
@@ -1052,7 +1071,8 @@ const StudentProfile = () => {
                     {formData.isNextOfKinNwuEmployee === 'Yes' && (
                       <div>
                         <label className="block font-semibold mb-2">
-                          If yes, his/her NWU No. <span className="text-red-500">*</span>
+                          If yes, his/her NWU No.{' '}
+                          <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
@@ -1084,7 +1104,9 @@ const StudentProfile = () => {
 
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-sm font-semibold mb-1">Unit No.</label>
+                          <label className="block text-sm font-semibold mb-1">
+                            Unit No.
+                          </label>
                           <input
                             type="text"
                             name="resUnitNo"
@@ -1096,7 +1118,9 @@ const StudentProfile = () => {
                         </div>
 
                         <div>
-                          <label className="block text-sm font-semibold mb-1">Complex</label>
+                          <label className="block text-sm font-semibold mb-1">
+                            Complex
+                          </label>
                           <input
                             type="text"
                             name="resComplex"
@@ -1111,7 +1135,8 @@ const StudentProfile = () => {
                       <div className="grid grid-cols-3 gap-3">
                         <div>
                           <label className="block text-sm font-semibold mb-1">
-                            Street No. <span className="text-red-500">*</span>
+                            Street No.{' '}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -1126,7 +1151,8 @@ const StudentProfile = () => {
 
                         <div className="col-span-2">
                           <label className="block text-sm font-semibold mb-1">
-                            Street Name / Farm Name <span className="text-red-500">*</span>
+                            Street Name / Farm Name{' '}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -1142,7 +1168,8 @@ const StudentProfile = () => {
 
                       <div>
                         <label className="block text-sm font-semibold mb-1">
-                          Suburb / District <span className="text-red-500">*</span>
+                          Suburb / District{' '}
+                          <span className="text-red-500">*</span>
                         </label>
                         <input
                           type="text"
@@ -1158,7 +1185,8 @@ const StudentProfile = () => {
                       <div className="grid grid-cols-2 gap-3">
                         <div>
                           <label className="block text-sm font-semibold mb-1">
-                            Town / City <span className="text-red-500">*</span>
+                            Town / City{' '}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -1173,7 +1201,8 @@ const StudentProfile = () => {
 
                         <div>
                           <label className="block text-sm font-semibold mb-1">
-                            Postal Code <span className="text-red-500">*</span>
+                            Postal Code{' '}
+                            <span className="text-red-500">*</span>
                           </label>
                           <input
                             type="text"
@@ -1190,7 +1219,9 @@ const StudentProfile = () => {
 
                     <div className="space-y-4">
                       <div className="flex items-center justify-between border-b pb-2">
-                        <h3 className="font-bold text-lg text-gray-800">Postal Address</h3>
+                        <h3 className="font-bold text-lg text-gray-800">
+                          Postal Address
+                        </h3>
 
                         <label className="flex items-center text-xs text-gray-600 gap-1.5 cursor-pointer">
                           <input
@@ -1208,7 +1239,9 @@ const StudentProfile = () => {
                       {!formData.sameAsResidential && (
                         <>
                           <div>
-                            <label className="block text-sm font-semibold mb-1">PO Box No.</label>
+                            <label className="block text-sm font-semibold mb-1">
+                              PO Box No.
+                            </label>
                             <input
                               type="text"
                               name="poBoxNo"
@@ -1220,7 +1253,9 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block text-sm font-semibold mb-1">Private Bag No.</label>
+                            <label className="block text-sm font-semibold mb-1">
+                              Private Bag No.
+                            </label>
                             <input
                               type="text"
                               name="privateBagNo"
@@ -1246,7 +1281,9 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block text-sm font-semibold mb-1">Postal Code</label>
+                            <label className="block text-sm font-semibold mb-1">
+                              Postal Code
+                            </label>
                             <input
                               type="text"
                               name="postalCode"
@@ -1278,7 +1315,9 @@ const StudentProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2">Work Telephone No.</label>
+                      <label className="block font-semibold mb-2">
+                        Work Telephone No.
+                      </label>
                       <input
                         type="tel"
                         name="workPhoneNo"
@@ -1335,7 +1374,8 @@ const StudentProfile = () => {
 
                     <div>
                       <label className="block font-semibold mb-2">
-                        Qualification Type <span className="text-red-500">*</span>
+                        Qualification Type{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -1350,7 +1390,8 @@ const StudentProfile = () => {
 
                     <div>
                       <label className="block font-semibold mb-2">
-                        Qualification Status <span className="text-red-500">*</span>
+                        Qualification Status{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <select
                         name="qualificationStatus"
@@ -1367,7 +1408,9 @@ const StudentProfile = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold mb-2">Awarded Date</label>
+                      <label className="block font-semibold mb-2">
+                        Awarded Date
+                      </label>
                       <input
                         type="date"
                         name="awardedDate"
@@ -1396,7 +1439,8 @@ const StudentProfile = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                     <div>
                       <label className="block font-semibold mb-2">
-                        Account Holder Surname and Initials <span className="text-red-500">*</span>
+                        Account Holder Surname and Initials{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -1426,7 +1470,8 @@ const StudentProfile = () => {
 
                     <div>
                       <label className="block font-semibold mb-2">
-                        Bank Branch Code <span className="text-red-500">*</span>
+                        Bank Branch Code{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -1441,7 +1486,8 @@ const StudentProfile = () => {
 
                     <div>
                       <label className="block font-semibold mb-2">
-                        Account Number <span className="text-red-500">*</span>
+                        Account Number{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <input
                         type="text"
@@ -1467,7 +1513,9 @@ const StudentProfile = () => {
                         required
                       >
                         <option value="">Select account type</option>
-                        <option value="Cheque / Current">Cheque / Current</option>
+                        <option value="Cheque / Current">
+                          Cheque / Current
+                        </option>
                         <option value="Savings">Savings</option>
                         <option value="Transmission">Transmission</option>
                       </select>
@@ -1475,7 +1523,8 @@ const StudentProfile = () => {
 
                     <div>
                       <label className="block font-semibold mb-2">
-                        Account Holder Relationship <span className="text-red-500">*</span>
+                        Account Holder Relationship{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                       <select
                         name="accountHolderRelationship"
@@ -1487,7 +1536,9 @@ const StudentProfile = () => {
                       >
                         <option value="">Select relationship</option>
                         <option value="Own">Own Account</option>
-                        <option value="Parent/Guardian">Parent/Guardian Account</option>
+                        <option value="Parent/Guardian">
+                          Parent/Guardian Account
+                        </option>
                         <option value="Spouse">Spouse Account</option>
                         <option value="Other">Other</option>
                       </select>
@@ -1504,7 +1555,8 @@ const StudentProfile = () => {
                   </h2>
 
                   <p className="text-sm text-gray-600 mb-6">
-                    Please attach clear copies of all required supporting documentation below.
+                    Please attach clear copies of all required supporting
+                    documentation below.
                   </p>
 
                   <div className="space-y-4">
@@ -1516,7 +1568,9 @@ const StudentProfile = () => {
                         <div>
                           <p className="font-semibold text-gray-800">
                             {doc.name}{' '}
-                            {doc.required && <span className="text-red-500">*</span>}
+                            {doc.required && (
+                              <span className="text-red-500">*</span>
+                            )}
                           </p>
 
                           {uploadedFiles[doc.key] && (
@@ -1532,7 +1586,9 @@ const StudentProfile = () => {
                               <input
                                 type="file"
                                 id={`file-${doc.key}`}
-                                onChange={(e) => handleFileUpload(doc.key, e)}
+                                onChange={(e) =>
+                                  handleFileUpload(doc.key, e)
+                                }
                                 className="hidden"
                               />
 
@@ -1540,13 +1596,17 @@ const StudentProfile = () => {
                                 htmlFor={`file-${doc.key}`}
                                 className="cursor-pointer bg-white border border-gray-300 text-gray-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 shadow-sm"
                               >
-                                {uploadedFiles[doc.key] ? 'Change File' : 'Choose File'}
+                                {uploadedFiles[doc.key]
+                                  ? 'Change File'
+                                  : 'Choose File'}
                               </label>
 
                               {uploadedFiles[doc.key] && (
                                 <button
                                   type="button"
-                                  onClick={() => handleRemoveFile(doc.key)}
+                                  onClick={() =>
+                                    handleRemoveFile(doc.key)
+                                  }
                                   className="text-red-600 hover:text-red-800 text-sm font-medium"
                                 >
                                   Remove
@@ -1555,7 +1615,9 @@ const StudentProfile = () => {
                             </>
                           ) : (
                             <span className="text-sm font-medium text-gray-500">
-                              {uploadedFiles[doc.key] ? 'Attached' : 'Not Provided'}
+                              {uploadedFiles[doc.key]
+                                ? 'Attached'
+                                : 'Not Provided'}
                             </span>
                           )}
                         </div>
@@ -1568,11 +1630,14 @@ const StudentProfile = () => {
               {/* DECLARATION */}
               <Card>
                 <div className="p-6">
-                  <h2 className="text-xl font-bold text-primary-dark mb-4">Declaration</h2>
+                  <h2 className="text-xl font-bold text-primary-dark mb-4">
+                    Declaration
+                  </h2>
 
                   <div className="space-y-4">
                     <p className="text-sm text-gray-700 leading-relaxed font-medium">
-                      I, the undersigned, hereby confirm that the information I provided is true and correct.
+                      I, the undersigned, hereby confirm that the information
+                      I provided is true and correct.
                     </p>
 
                     <div className="flex items-start gap-3 mt-4">
@@ -1580,7 +1645,9 @@ const StudentProfile = () => {
                         type="checkbox"
                         id="declarationAgreement"
                         checked={agreed}
-                        onChange={(e) => isEditing && setAgreed(e.target.checked)}
+                        onChange={(e) =>
+                          isEditing && setAgreed(e.target.checked)
+                        }
                         disabled={!isEditing}
                         className="mt-1 h-4 w-4 text-primary rounded border-gray-300"
                       />
@@ -1589,26 +1656,31 @@ const StudentProfile = () => {
                         htmlFor="declarationAgreement"
                         className="text-sm font-medium text-gray-800"
                       >
-                        I agree to the declaration statement above <span className="text-red-500">*</span>
+                        I agree to the declaration statement above{' '}
+                        <span className="text-red-500">*</span>
                       </label>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 pt-4 border-t items-end">
                       <div>
-                        <label className="block font-semibold mb-2">Initials and Surname</label>
+                        <label className="block font-semibold mb-2">
+                          Initials and Surname
+                        </label>
                         <div className="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 text-gray-700">
                           {formData.declarationInitialsSurname ||
                             `${formData.initials} ${formData.surname}`.trim() ||
                             'Automatically recorded'}
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
-                          Automatically recorded from the student information above.
+                          Automatically recorded from the student information
+                          above.
                         </p>
                       </div>
 
                       <div>
                         <label className="block font-semibold mb-2">
-                          Student Signature <span className="text-red-500">*</span>
+                          Student Signature{' '}
+                          <span className="text-red-500">*</span>
                         </label>
 
                         {isEditing ? (
@@ -1649,9 +1721,12 @@ const StudentProfile = () => {
                       </div>
 
                       <div>
-                        <label className="block font-semibold mb-2">Date</label>
+                        <label className="block font-semibold mb-2">
+                          Date
+                        </label>
                         <div className="w-full border border-gray-300 rounded-lg p-3 bg-gray-100 text-gray-700">
-                          {formData.declarationDate || 'Automatically recorded when saved'}
+                          {formData.declarationDate ||
+                            'Automatically recorded when saved'}
                         </div>
                         <p className="text-xs text-gray-500 mt-1">
                           Automatically recorded when the declaration is saved.

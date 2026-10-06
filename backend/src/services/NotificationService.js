@@ -1,10 +1,20 @@
 import pool from '../config/db.js';
-import { io, userSockets } from '../server.js';
 import nodemailer from 'nodemailer';
 import getAuthUserId from '../utils/getAuthUserId.js';
+import compileTemplate from '../utils/templateCompiler.js';
+import path from 'path';
+import { fileURLToPath } from "url";
+
+let ioInstance = null;
+let socketMap = new Map();
+
+export function configureSocketIO(socketServer, sockets = new Map()) {
+    ioInstance = socketServer;
+    socketMap = sockets;
+}
 
 class NotificationService {
-    static async sendNotification({ recipientId, subject, type, message }) {
+    static async sendNotification({ senderId, recipientId, subject, type, message }) {
         const insertQuery = await pool.query(
             `
             INSERT INTO "NOTIFICATION" ("RecipientUserID", "Subject", "NotificationType", "Message")
@@ -25,15 +35,13 @@ class NotificationService {
 
         const newNotification = rows[0];
 
-        // 2. Push via Socket if the recipient is online
-        const recipientSocketId = userSockets.get(recipientId);
-        if (recipientSocketId) {
-            io.to(recipientSocketId).emit('newNotification', newNotification);
+        const recipientSocketId = socketMap.get(recipientId);
+        if (recipientSocketId && ioInstance) {
+            ioInstance.to(recipientSocketId).emit('newNotification', newNotification);
         }
         
-        // 3. Send email notification
         try {
-            console.log((await this.sendEmailNotification({ recipientUserId: recipientId, notificationID: newNotification.NotificationID })).message);
+            console.log((await this.sendEmailNotification({ senderId: senderId, recipientUserId: recipientId, notificationID: newNotification.NotificationID })).message);
         } catch (error) {
             console.error('Error sending email notification:', error);
         }
@@ -79,15 +87,15 @@ class NotificationService {
     }
 
     //email notifcation
-    static async sendEmailNotification({ recipientUserId, notificationID }) {
+    static async sendEmailNotification({ senderId, recipientUserId, notificationID }) {
         // Fetch the recipient's email from the database
-        const { rows: userEmailRows } = await pool.query(
-            `
-            SELECT "Email" FROM "APP_USER" 
-            WHERE "UserID" = $1
-            `,
-            [recipientUserId]
-        );
+        const recipientRows = await this.getUserInfo(recipientUserId);
+        if (!recipientRows.length) {
+            throw new Error(`Recipient user ${recipientUserId} was not found`);
+        }
+
+        //fetch sender's name from the database
+        const senderRows = senderId ? await this.getUserInfo(senderId) : [];
 
         // Fetch notification details from the database
         const { rows: notificationRows } = await pool.query(
@@ -111,12 +119,27 @@ class NotificationService {
             },
         });
 
+        //compile the email template
+        const compiledMessage = await compileTemplate('email_format', {
+            title: recipientRows[0].Title || '',
+            name: recipientRows[0].FullName || 'Applicant',
+            message: notificationRows[0]?.Message || 'You have a new notification.',
+            sender: senderRows[0]?.FullName || 'Assistant Applications and Communications Management System'
+        });
+
         // Compose the email
         let mailOptions = {
             from: '"AACMS Notifications" <aacms@noreply.nwu.ac.za>',
-            to: userEmailRows[0].Email,
-            subject: notificationRows[0].Subject,
-            text: notificationRows[0].Message
+            to: recipientRows[0].Email,
+            subject: notificationRows[0]?.Subject || 'New notification',
+            html: compiledMessage,
+           attachments: [
+               {
+                    filename: 'NWU-Acronym-Logo-Purple_Digital.png',
+                    path: path.join(path.dirname(fileURLToPath(import.meta.url)), '../assets', 'NWU-Acronym-Logo-Purple-Digital.png'),
+                    cid: 'NWU-Logo'
+               }
+           ]
         };
 
         // Send the email
@@ -128,5 +151,19 @@ class NotificationService {
         return { message: 'Email notification sent successfully.' };
     }
 
+    static async getUserInfo(userId) {
+        const { rows } = await pool.query(
+            `
+            SELECT 
+                "Title", 
+                CONCAT("FName", ' ', "LName") AS "FullName",
+                "Email"
+            FROM "APP_USER" 
+            WHERE "UserID" = $1
+            `,
+            [userId]
+        );
+        return rows;
+    }
 }
 export default NotificationService;
