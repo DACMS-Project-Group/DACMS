@@ -2,6 +2,8 @@ import AdminService from '../services/AdminService.js';
 import ModuleBudget from '../models/ModuleBudget.js';
 import ExportedClaim from '../templates/ExportedClaim.js';
 import AdmZip from 'adm-zip';
+import getAuthUserId from '../utils/getAuthUserId.js';
+import { writeAuditLog } from '../utils/auditLogger.js';
 
 class AdminController {
     static async getDashboardSummary(req, res) {
@@ -98,7 +100,22 @@ class AdminController {
         const { claim_id } = req.params;
 
         try {
+            const adminId = getAuthUserId(req);
             const data = await AdminService.approveClaim(claim_id);
+
+            if (data) {
+                await writeAuditLog({
+                    userId: adminId,
+                    role: 'admin',
+                    action: 'ADMIN_CLAIM_APPROVAL',
+                    recordType: 'claim',
+                    recordId: claim_id,
+                    event: {
+                        result: 'approved'
+                    }
+                });
+            }
+
             return res.status(200).json({
                 message: 'Claim approved successfully',
                 data
@@ -136,7 +153,22 @@ class AdminController {
         const { action, comment } = req.body;
 
         try {
+            const adminId = getAuthUserId(req);
             const data = await AdminService.reviewPosition(position_id, action, comment);
+
+            if (data) {
+                await writeAuditLog({
+                    userId: adminId,
+                    role: 'admin',
+                    action: 'ADMIN_APPOINTMENT_REVIEW',
+                    recordType: 'appointment',
+                    recordId: position_id,
+                    event: {
+                        decision: action
+                    }
+                });
+            }
+
             return res.status(200).json({
                 message: `Position decision processed successfully (${action})`,
                 data: data.data
@@ -159,6 +191,7 @@ class AdminController {
         try {
             const exportData = await AdminService.exportClaims(claims);
             const zip = new AdmZip();
+            const adminId = getAuthUserId(req);
 
             for (const item of exportData.data) {
                 const pdfBuffer = await ExportedClaim.buildClaimPdfBuffer(item);
@@ -169,6 +202,18 @@ class AdminController {
             }
 
             const zipBuffer = zip.toBuffer();
+
+            await writeAuditLog({
+                userId: adminId,
+                role: 'admin',
+                action: 'ADMIN_CLAIM_EXPORT',
+                recordType: 'claim_export',
+                recordId: null,
+                event: {
+                    claim_ids: claims,
+                    record_count: exportData.data.length
+                }
+            });
 
             res.setHeader('Content-Type', 'application/zip');
             res.setHeader(
