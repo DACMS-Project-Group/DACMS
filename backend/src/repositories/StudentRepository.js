@@ -112,10 +112,18 @@ class StudentRepository extends BaseRepository {
         super('"STUDENT"', Student);
     }
 
-    async findByUserId(userId) {
+        async findByUserId(userId) {
         const rows = await this.query(
             `
-            SELECT u.*, s.*
+            SELECT
+                u."UserID"        AS "UserID",
+                u."Title"         AS "Title",
+                u."FName"         AS "FName",
+                u."LName"         AS "LName",
+                u."Email"         AS "Email",
+                u."RoleID"        AS "RoleID",
+                u."CreatedAt"     AS "CreatedAt",
+                s.*
             FROM "APP_USER" u
             JOIN "STUDENT" s ON s."StudentID" = u."UserID"
             WHERE u."UserID" = $1

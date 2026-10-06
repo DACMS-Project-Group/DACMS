@@ -10,3 +10,7 @@
 
 # Docker persistent volume local backups
 .docker/backend/cookies.txt
+cookies.txt
+admin-cookies.txt
+lecturer-cookies.txt
+backend/cookies.txt
