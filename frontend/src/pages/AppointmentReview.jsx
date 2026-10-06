@@ -24,7 +24,9 @@ const AppointmentReview = () => {
         setLoading(true);
         setError('');
 
-        const response = await getAppointmentById(position_id);
+        const response = await apiGet(
+          `/admin/appointments/fetch/${position_id}`
+        );
 
         if (!response?.position) {
           setError('Appointment not found.');
@@ -44,7 +46,7 @@ const AppointmentReview = () => {
       fetchAppointment();
     } else {
       setLoading(false);
-      setError('No appointment ID was provided.');
+      setError('No position ID was provided.');
     }
   }, [position_id]);
 
@@ -67,10 +69,12 @@ const AppointmentReview = () => {
       setSubmitting(true);
       setError('');
 
-      await reviewAppointment(
-        position_id,
-        decision,
-        comments
+      await apiPatch(
+        `/admin/appointments/review/${position_id}`,
+        {
+          action: decision,
+          comment: comments,
+        }
       );
 
       setSubmitted(true);
