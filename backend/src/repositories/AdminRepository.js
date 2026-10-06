@@ -794,6 +794,11 @@ class AdminRepository {
                 ) AS student_name,
                 m."ModuleCode" AS module_code,
                 m."ModuleName" AS module_name,
+                s."BankName",
+                s."AccountNumber",
+                s."AccountType",
+                s."BranchCode",
+                s."AccountHolderName",
                 da."ApplicationID"
             FROM "REMUNERATION_CLAIM" c
             JOIN "DEMI_APPLICATION" da
@@ -816,6 +821,7 @@ class AdminRepository {
                 SELECT
                     ws."SessionID" AS id,
                     ws."StartTime" AS date,
+                    ws."ActivityDescription" AS description,
                     TO_CHAR(ws."StartTime", 'HH24:MI') AS start_time,
                     TO_CHAR(ws."EndTime", 'HH24:MI') AS end_time,
                     ROUND(COALESCE(ws."TotalHoursWorked", 0), 2) AS hours,
@@ -851,6 +857,13 @@ class AdminRepository {
                     student_number: claim.StudentNumber,
                     name: claim.student_name
                 },
+                banking: {
+                    bank: claim.BankName,
+                    account_holder: claim.AccountHolderName || claim.student_name.trim(),
+                    account_number: claim.AccountNumber,
+                    account_type: claim.AccountType,
+                    branch_code: claim.BranchCode
+                },
                 module: {
                     id: claim.ModuleID,
                     code: claim.module_code,
@@ -870,6 +883,7 @@ class AdminRepository {
                 sessions: sessionResult.rows.map((row) => ({
                     id: row.id,
                     date: row.date ? new Date(row.date).toISOString().slice(0, 10) : null,
+                    description: row.description,
                     start_time: row.start_time,
                     end_time: row.end_time,
                     hours: Number(row.hours ?? 0),

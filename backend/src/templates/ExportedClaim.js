@@ -2,8 +2,30 @@ class ExportedClaim {
     static async buildClaimPdfBuffer(claimExport) {
         const claim = claimExport?.claim || {};
         const student = claimExport?.student || {};
+        const banking = claimExport?.banking || {};
         const moduleInfo = claimExport?.module || {};
         const sessions = Array.isArray(claimExport?.sessions) ? claimExport.sessions : [];
+        const sessionsByMonth = new Map();
+        const generatedAt = this.escapeHtml(new Date().toLocaleString('en-ZA'));
+
+        for (const session of sessions) {
+            const date = session.date ? new Date(session.date) : null;
+            const hasValidDate = date && !Number.isNaN(date.getTime());
+            const monthKey = hasValidDate
+                ? `${date.getFullYear()}-${date.getMonth()}`
+                : 'unknown';
+            const monthLabel = hasValidDate
+                ? date.toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' })
+                : 'Date not available';
+
+            if (!sessionsByMonth.has(monthKey)) {
+                sessionsByMonth.set(monthKey, { label: monthLabel, sessions: [], totalHours: 0 });
+            }
+            const month = sessionsByMonth.get(monthKey);
+            month.sessions.push(session);
+            const hours = Number(session.hours ?? 0);
+            month.totalHours += Number.isFinite(hours) ? hours : 0;
+        }
 
         const html = `
             <!DOCTYPE html>
@@ -148,10 +170,25 @@ class ExportedClaim {
 
                     .total-row strong { color: var(--nwu-navy); }
 
+                    .bank-details {
+                        margin-top: 26px;
+                    }
+
+                    .bank-details-grid {
+                        display: grid;
+                        grid-template-columns: repeat(2, minmax(0, 1fr));
+                        column-gap: 24px;
+                    }
+
                     .claim-section {
                         border: 1px solid var(--nwu-border);
                         border-radius: 5px;
                         margin-top: 26px;
+                    }
+
+                    .sessions-section {
+                        break-before: page;
+                        page-break-before: always;
                     }
 
                     .info-table {
@@ -204,6 +241,19 @@ class ExportedClaim {
                         background: var(--nwu-light);
                     }
 
+                    .sessions-table .month-row th {
+                        background: #e9eaf0;
+                        color: var(--nwu-navy);
+                        font-size: 11px;
+                        text-transform: uppercase;
+                    }
+
+                    .sessions-table .month-total td {
+                        background: var(--nwu-light);
+                        color: var(--nwu-navy);
+                        font-weight: 700;
+                    }
+
                     .empty-box {
                         margin-top: 12px;
                         border: 1px solid var(--nwu-border);
@@ -215,15 +265,6 @@ class ExportedClaim {
                         font-size: 12px;
                     }
 
-                    .footer {
-                        margin-top: auto;
-                        padding-top: 12px;
-                        border-top: 1px solid var(--nwu-border);
-                        font-size: 10px;
-                        color: var(--nwu-muted);
-                        display: flex;
-                        justify-content: space-between;
-                    }
                 </style>
             </head>
             <body>
@@ -306,7 +347,18 @@ class ExportedClaim {
                             </table>
                         </div>
 
-                        <div class="claim-section">
+                        <div class="totals bank-details">
+                            <h3>Bank Details</h3>
+                            <div class="bank-details-grid">
+                                <div class="total-row"><span>Bank</span><strong>${this.escapeHtml(banking.bank || 'Not provided')}</strong></div>
+                                <div class="total-row"><span>Account holder</span><strong>${this.escapeHtml(banking.account_holder || student.name || 'Not provided')}</strong></div>
+                                <div class="total-row"><span>Account number</span><strong>${this.escapeHtml(banking.account_number || 'Not provided')}</strong></div>
+                                <div class="total-row"><span>Account type</span><strong>${this.escapeHtml(banking.account_type || 'Not provided')}</strong></div>
+                                <div class="total-row"><span>Branch code</span><strong>${this.escapeHtml(banking.branch_code || 'Not provided')}</strong></div>
+                            </div>
+                        </div>
+
+                        <div class="claim-section sessions-section">
                             <div class="panel-header" style="border-radius: 5px 5px 0 0;">Sessions</div>
                             ${
                                 sessions.length
@@ -314,21 +366,33 @@ class ExportedClaim {
                                         <table class="sessions-table">
                                             <thead>
                                                 <tr>
-                                                    <th style="width: 16%;">Date</th>
-                                                    <th style="width: 18%;">Start</th>
-                                                    <th style="width: 18%;">End</th>
-                                                    <th style="width: 12%;">Hours</th>
-                                                    <th style="width: 36%;">Status</th>
+                                                    <th style="width: 14%;">Date</th>
+                                                    <th style="width: 32%;">Description</th>
+                                                    <th style="width: 12%;">Start</th>
+                                                    <th style="width: 12%;">End</th>
+                                                    <th style="width: 10%;">Hours</th>
+                                                    <th style="width: 20%;">Status</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
-                                                ${sessions.map((session) => `
-                                                    <tr>
-                                                        <td>${this.escapeHtml(this.formatDate(session.date))}</td>
-                                                        <td>${this.escapeHtml(session.start_time || 'N/A')}</td>
-                                                        <td>${this.escapeHtml(session.end_time || 'N/A')}</td>
-                                                        <td>${this.escapeHtml(Number(session.hours ?? 0).toFixed(2))}</td>
-                                                        <td>${this.escapeHtml(session.status || 'Pending')}</td>
+                                                ${[...sessionsByMonth.values()].map((group) => `
+                                                    <tr class="month-row">
+                                                        <th colspan="6">${this.escapeHtml(group.label)}</th>
+                                                    </tr>
+                                                    ${group.sessions.map((session) => `
+                                                        <tr>
+                                                            <td>${this.escapeHtml(this.formatDate(session.date))}</td>
+                                                            <td>${this.escapeHtml(session.description || session.activity_description || session.activity || 'Not provided')}</td>
+                                                            <td>${this.escapeHtml(session.start_time || 'N/A')}</td>
+                                                            <td>${this.escapeHtml(session.end_time || 'N/A')}</td>
+                                                            <td>${this.escapeHtml(Number(session.hours ?? 0).toFixed(2))}</td>
+                                                            <td>${this.escapeHtml(session.status || 'Pending')}</td>
+                                                        </tr>
+                                                    `).join('')}
+                                                    <tr class="month-total">
+                                                        <td colspan="4">Total for ${this.escapeHtml(group.label)}</td>
+                                                        <td>${group.totalHours.toFixed(2)}</td>
+                                                        <td></td>
                                                     </tr>
                                                 `).join('')}
                                             </tbody>
@@ -342,10 +406,6 @@ class ExportedClaim {
                             }
                         </div>
 
-                        <div class="footer">
-                            <span>Generated by NWU DACMS Remuneration Export</span>
-                            <span>${this.escapeHtml(new Date().toLocaleString('en-ZA'))}</span>
-                        </div>
                     </div>
                 </div>
             </body>
@@ -366,10 +426,17 @@ class ExportedClaim {
         const pdfBuffer = await page.pdf({
             format: 'A4',
             printBackground: true,
+            displayHeaderFooter: true,
+            footerTemplate: `
+                <div style="width: 100%; margin: 0 20px; padding-top: 5px; border-top: 1px solid #E5E7EB; color: #7e7f81; font-family: Arial, Helvetica, sans-serif; font-size: 8px; display: flex; justify-content: space-between;">
+                    <span>Generated by NWU AACMS Remuneration Export ${generatedAt}</span>
+                    <span>Page <span class="pageNumber"></span> of <span class="totalPages"></span></span>
+                </div>
+            `,
             margin: {
                 top: '0',
                 right: '0',
-                bottom: '0',
+                bottom: '14mm',
                 left: '0',
             }
         });
