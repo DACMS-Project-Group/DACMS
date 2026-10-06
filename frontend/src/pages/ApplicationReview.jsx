@@ -6,12 +6,21 @@ import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiPatch } from '../api';
 
-const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
+const ApplicationReview = ({
+  application,
+  onBack,
+  onUpdateApplication,
+}) => {
   const navigate = useNavigate();
 
-  const [revStatus, setRevStatus] = useState(application?.status || '');
-  const [comment, setComment] = useState(application?.comment || '');
+  const [revStatus, setRevStatus] = useState(
+    application?.status || ''
+  );
+  const [comment, setComment] = useState(
+    application?.comment || ''
+  );
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(false);
 
   // If no application was selected
   if (!application) {
@@ -36,7 +45,9 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
 
               <button
                 type="button"
-                onClick={() => navigate('/review-applications')}
+                onClick={() =>
+                  navigate('/review-applications')
+                }
                 className="mt-4 bg-primary text-white px-5 py-2 rounded-lg font-semibold"
               >
                 Back to Review Applications
@@ -49,33 +60,63 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
   }
 
   // Update application status
-  const handleStatusUpdate = async () => {
+  const handleStatusUpdate = async (decision) => {
+    // DEBUG: Check which IDs are available
+    console.log(
+      'Application being reviewed:',
+      application
+    );
+    console.log(
+      'Application ID:',
+      application?.id
+    );
+    console.log(
+      'Appointment ID:',
+      application?.appointmentId
+    );
+
+    setLoading(true);
+    setMessage('');
+
     const updatedApplication = {
       ...application,
-      status: revStatus,
-      //comment: comment,
+      status: decision,
     };
 
     try {
-      await apiPatch(`/lecturer/applications/review/${application.id}`, {
-      decision : revStatus
-      });
+      await apiPatch(
+        `/lecturer/applications/review/${application.id}`,
+        {
+          decision: decision,
+        }
+      );
+
+      setRevStatus(decision);
+
+      if (onUpdateApplication) {
+        onUpdateApplication(updatedApplication);
+      }
+
+      setMessage(
+        `Application has been ${decision.toLowerCase()}.`
+      );
+
+      setTimeout(() => {
+        navigate('/review-applications');
+      }, 1000);
     } catch (error) {
-      console.error('Error updating application status:', error);
-      return;
+      console.error(
+        'Error updating application status:',
+        error
+      );
+
+      setMessage(
+        error.message ||
+          'Could not update the application status.'
+      );
+    } finally {
+      setLoading(false);
     }
-
-    if (onUpdateApplication) {
-      onUpdateApplication(updatedApplication);
-    }
-
-    setMessage(
-      `Application has been ${revStatus.toLowerCase()}.`
-    );
-
-    setTimeout(() => {
-      navigate('/review-applications');
-    }, 1000);
   };
 
   // Save lecturer comment
@@ -94,18 +135,15 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
 
   return (
     <div className="min-h-screen bg-off-white">
-      
       {/* Top Navbar */}
       <Navbar />
 
       <div className="flex">
-
         {/* Lecturer Sidebar */}
         <Sidebar userRole="lecturer" />
 
         {/* Main Content */}
         <main className="flex-1">
-
           {/* Page Title */}
           <div className="bg-primary text-white px-8 py-5">
             <h1 className="text-2xl font-bold">
@@ -114,11 +152,16 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
           </div>
 
           <div className="p-8">
-
             {/* Back Button */}
             <button
               type="button"
-              onClick={() => navigate('/review-applications')}
+              onClick={() => {
+                if (onBack) {
+                  onBack();
+                } else {
+                  navigate('/review-applications');
+                }
+              }}
               className="mt-4 bg-primary text-white px-5 py-2 rounded-lg font-semibold"
             >
               Back to Review Applications
@@ -127,16 +170,15 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
             {/* Application Header */}
             <Card>
               <div className="p-6">
-
                 <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-
                   <div>
                     <h2 className="text-2xl font-bold text-primary-dark">
                       {application.studentName}
                     </h2>
 
                     <p className="text-gray-600 mt-1">
-                      Student Number: {application.studentNumber}
+                      Student Number:{' '}
+                      {application.studentNumber}
                     </p>
 
                     <p className="text-gray-600">
@@ -144,23 +186,21 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
                     </p>
                   </div>
 
-                  <StatusBadge status={application.status} />
-
+                  <StatusBadge
+                    status={application.status}
+                  />
                 </div>
-
               </div>
             </Card>
 
             {/* Student Information */}
             <Card>
               <div className="p-6">
-
                 <h3 className="text-xl font-bold text-primary-dark mb-5">
                   Student Information
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
                   <div>
                     <label className="block text-sm font-semibold text-gray-600 mb-1">
                       Full Names
@@ -200,22 +240,18 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
                       {application.phone}
                     </p>
                   </div>
-
                 </div>
-
               </div>
             </Card>
 
             {/* Application Information */}
             <Card>
               <div className="p-6">
-
                 <h3 className="text-xl font-bold text-primary-dark mb-5">
                   Application Information
                 </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-
                   <div>
                     <label className="block text-sm font-semibold text-gray-600 mb-1">
                       Module
@@ -245,69 +281,72 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
                       {application.reason}
                     </p>
                   </div>
-
                 </div>
-
               </div>
             </Card>
 
             {/* Supporting Documents */}
             <Card>
               <div className="p-6">
-
                 <h3 className="text-xl font-bold text-primary-dark mb-5">
                   Supporting Documents
                 </h3>
 
                 <div className="space-y-3">
-
-                  {application.documents.map((document, index) => (
-                    <div
-                      key={index}
-                      className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border border-gray-200 rounded-xl p-4"
-                    >
-
-                      <div>
-                        <p className="font-semibold text-gray-900">
-                          {document.name}
-                        </p>
-
-                        <p className="text-sm text-gray-500">
-                          {document.status}
-                        </p>
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setMessage(
-                            `${document.name} selected for viewing.`
-                          )
-                        }
-                        className="border-2 border-primary text-primary px-4 py-2 rounded-lg font-semibold hover:bg-primary-lightest transition"
+                  {(application.documents || []).map(
+                    (document, index) => (
+                      <div
+                        key={index}
+                        className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 border border-gray-200 rounded-xl p-4"
                       >
-                        View Document
-                      </button>
+                        <div>
+                          <p className="font-semibold text-gray-900">
+                            {document.name}
+                          </p>
 
-                    </div>
-                  ))}
+                          <p className="text-sm text-gray-500">
+                            {document.status}
+                          </p>
+                        </div>
 
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setMessage(
+                              `${document.name} selected for viewing.`
+                            )
+                          }
+                          className="border-2 border-primary text-primary px-4 py-2 rounded-lg font-semibold hover:bg-primary-lightest transition"
+                        >
+                          View Document
+                        </button>
+                      </div>
+                    )
+                  )}
+
+                  {(!application.documents ||
+                    application.documents.length ===
+                      0) && (
+                    <p className="text-gray-500">
+                      No supporting documents available.
+                    </p>
+                  )}
                 </div>
-
               </div>
             </Card>
 
             {/* Lecturer Comments */}
             <Card>
               <div className="p-6">
-
                 <h3 className="text-xl font-bold text-primary-dark mb-5">
                   Lecturer Comments
                 </h3>
 
                 <textarea
                   value={comment}
-                  onChange={(event) => setComment(event.target.value)}
+                  onChange={(event) =>
+                    setComment(event.target.value)
+                  }
                   placeholder="Enter comments or feedback for the student..."
                   rows="5"
                   className="w-full border border-gray-300 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-primary"
@@ -320,69 +359,78 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
                 >
                   Save Comment
                 </button>
-
               </div>
             </Card>
 
             {/* Application Decision */}
             <Card>
               <div className="p-6">
-
                 <h3 className="text-xl font-bold text-primary-dark mb-5">
                   Application Decision
                 </h3>
 
                 <p className="text-gray-600 mb-5">
-                  Review the application and select a decision.
+                  Review the application and select a
+                  decision.
                 </p>
 
                 <div className="flex flex-wrap gap-4">
-
+                  {/* Approve */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setRevStatus('Approved');
-                      handleStatusUpdate();
-                    }}
-                    className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition"
+                    disabled={loading}
+                    onClick={() =>
+                      handleStatusUpdate('Approved')
+                    }
+                    className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Approve Application
+                    {loading &&
+                    revStatus === 'Approved'
+                      ? 'Approving...'
+                      : 'Approve Application'}
                   </button>
 
+                  {/* Reject */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setRevStatus('Rejected');
-                      handleStatusUpdate();
-                    }}
-                    className="bg-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-700 transition"
+                    disabled={loading}
+                    onClick={() =>
+                      handleStatusUpdate('Rejected')
+                    }
+                    className="bg-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Reject Application
+                    {loading &&
+                    revStatus === 'Rejected'
+                      ? 'Rejecting...'
+                      : 'Reject Application'}
                   </button>
 
+                  {/* Request Changes */}
                   <button
                     type="button"
-                    onClick={() => {
-                      setRevStatus('Changes Requested');
-                      handleStatusUpdate();
-                    }}
-                    className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-lightest transition"
+                    disabled={loading}
+                    onClick={() =>
+                      handleStatusUpdate(
+                        'Changes Requested'
+                      )
+                    }
+                    className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-lightest transition disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Request Changes
+                    {loading &&
+                    revStatus ===
+                      'Changes Requested'
+                      ? 'Requesting...'
+                      : 'Request Changes'}
                   </button>
-
                 </div>
 
                 <div className="mt-6 p-4 bg-gray-50 rounded-xl">
-
                   <p className="text-sm text-gray-600 mb-2">
                     Current Application Status
                   </p>
 
-                  <StatusBadge status={application.status} />
-
+                  <StatusBadge status={revStatus} />
                 </div>
-
               </div>
             </Card>
 
@@ -394,7 +442,6 @@ const ApplicationReview = ({ application, onBack, onUpdateApplication }) => {
                 </p>
               </div>
             )}
-
           </div>
         </main>
       </div>

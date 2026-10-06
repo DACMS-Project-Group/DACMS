@@ -1,96 +1,119 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { apiGet } from '../api';
 
 const Claims = () => {
   const navigate = useNavigate();
 
-  const claims = [
-    {
-      id: 1,
-      reference: 'CLM-2026-001',
-      moduleCode: 'CMPG311',
-      moduleName: 'Databases',
-      period: '02 Sep 2026 - 12 Sep 2026',
-      hours: 13.5,
-      hourlyRate: 45,
-      amount: 607.5,
-      status: 'Pending',
-      submittedDate: '13 September 2026',
-    },
-    {
-      id: 2,
-      reference: 'CLM-2026-000',
-      moduleCode: 'CMPG311',
-      moduleName: 'Databases',
-      period: '18 Aug 2026 - 30 Aug 2026',
-      hours: 10,
-      hourlyRate: 45,
-      amount: 450,
-      status: 'Approved',
-      submittedDate: '31 August 2026',
-    },
-  ];
+  const [claims, setClaims] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadClaims = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const data = await apiGet('/student/claims');
+
+        if (!cancelled) {
+          setClaims(data?.claims || []);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message || 'Failed to load claims.');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadClaims();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const formatDate = (date) => {
+    if (!date) return '—';
+
+    return new Date(date).toLocaleDateString('en-ZA', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
+  const formatPeriod = (startDate, endDate) => {
+    if (!startDate && !endDate) return '—';
+
+    if (startDate && endDate) {
+      return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+    }
+
+    return formatDate(startDate || endDate);
+  };
+
+  const formatCurrency = (amount) => {
+    return `R ${Number(amount || 0).toFixed(2)}`;
+  };
 
   const totalClaims = claims.length;
 
   const pendingClaims = claims.filter(
-    (claim) => claim.status === 'Pending'
+    (claim) => claim.ClaimStatus === 'Pending'
   ).length;
 
   const approvedClaims = claims.filter(
-    (claim) => claim.status === 'Approved'
+    (claim) =>
+      claim.ClaimStatus === 'Approved' ||
+      claim.ClaimStatus === 'Verified'
   ).length;
 
   const rejectedClaims = claims.filter(
-    (claim) => claim.status === 'Rejected'
+    (claim) => claim.ClaimStatus === 'Rejected'
   ).length;
 
-  const formatAmount = (amount) => {
-    return `R ${amount.toLocaleString('en-ZA', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-  };
-
   const handleViewClaim = (claim) => {
-    navigate(`/claim-detail/${claim.id}`, {
-      state: {
-        claim,
-      },
+    navigate(`/claim-detail/${claim.ClaimID}`, {
+      state: { claim },
     });
   };
 
   return (
     <div className="min-h-screen bg-off-white">
-      {/* Top Navigation */}
       <Navbar />
 
-      {/* Sidebar + Main Content */}
       <div className="flex">
-        {/* Sidebar */}
-        <Sidebar />
+        <Sidebar userRole="student" />
 
-        {/* Main Content */}
         <main className="flex-1">
-
-          {/* Page Header */}
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white">
+          <div className="bg-primary h-16 flex items-center px-8">
+            <h1 className="text-3xl font-poppins font-bold text-white">
               Claims
             </h1>
           </div>
 
-          {/* Page Content */}
           <div className="p-8">
-
-            {/* Page Introduction */}
-            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            {/* Page heading and Generate New Claim button */}
+            <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <p className="text-neutral">
-                  View and manage your remuneration claims.
+                <h2 className="text-3xl font-poppins font-semibold text-primary">
+                  My Claims
+                </h2>
+
+                <p className="text-neutral mt-2">
+                  View and track your remuneration claims.
                 </p>
               </div>
 
@@ -103,205 +126,201 @@ const Claims = () => {
               </button>
             </div>
 
-            {/* Summary Cards */}
-            <div className="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-
+            {/* Summary cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
               <Card>
-                <p className="text-sm text-neutral">
+                <p className="text-sm text-neutral font-inter">
                   Total Claims
                 </p>
 
-                <p className="mt-2 text-2xl font-bold text-primary-dark">
+                <p className="text-3xl font-poppins font-bold text-primary mt-2">
                   {totalClaims}
                 </p>
-
-                <p className="mt-1 text-xs text-neutral">
-                  Claims submitted
-                </p>
               </Card>
 
               <Card>
-                <p className="text-sm text-neutral">
-                  Pending Claims
+                <p className="text-sm text-neutral font-inter">
+                  Pending
                 </p>
 
-                <p className="mt-2 text-2xl font-bold text-primary-dark">
+                <p className="text-3xl font-poppins font-bold text-primary mt-2">
                   {pendingClaims}
                 </p>
-
-                <p className="mt-1 text-xs text-neutral">
-                  Awaiting verification
-                </p>
               </Card>
 
               <Card>
-                <p className="text-sm text-neutral">
-                  Approved Claims
+                <p className="text-sm text-neutral font-inter">
+                  Approved
                 </p>
 
-                <p className="mt-2 text-2xl font-bold text-primary-dark">
+                <p className="text-3xl font-poppins font-bold text-primary mt-2">
                   {approvedClaims}
                 </p>
-
-                <p className="mt-1 text-xs text-neutral">
-                  Successfully approved
-                </p>
               </Card>
 
               <Card>
-                <p className="text-sm text-neutral">
-                  Rejected Claims
+                <p className="text-sm text-neutral font-inter">
+                  Rejected
                 </p>
 
-                <p className="mt-2 text-2xl font-bold text-primary-dark">
+                <p className="text-3xl font-poppins font-bold text-primary mt-2">
                   {rejectedClaims}
                 </p>
-
-                <p className="mt-1 text-xs text-neutral">
-                  Claims requiring attention
-                </p>
               </Card>
-
             </div>
 
-            {/* Claim History */}
-            <Card>
-
-              <div className="mb-5">
-                <h2 className="text-lg font-semibold text-primary-dark">
-                  Claim History
-                </h2>
-
-                <p className="mt-1 text-sm text-neutral">
-                  View your submitted remuneration claims and their current status.
+            {/* Loading */}
+            {loading && (
+              <Card>
+                <p className="py-8 text-center text-neutral font-inter">
+                  Loading claims...
                 </p>
-              </div>
+              </Card>
+            )}
 
-              {claims.length === 0 ? (
-
-                <div className="rounded-lg border border-dashed border-gray-300 px-6 py-10 text-center">
-
-                  <h3 className="text-lg font-semibold text-gray-700">
-                    No Claims Yet
-                  </h3>
-
-                  <p className="mt-2 text-sm text-neutral">
-                    You have not submitted any remuneration claims yet.
+            {/* Error */}
+            {!loading && error && (
+              <Card>
+                <div className="py-8 text-center">
+                  <p className="font-semibold text-error font-inter">
+                    Could not load claims
                   </p>
 
-                  <button
-                    type="button"
-                    onClick={() => navigate('/generate-new-claim')}
-                    className="mt-4 rounded-lg bg-primary px-5 py-2.5 font-medium text-white transition hover:bg-primary-dark"
-                  >
-                    Generate New Claim
-                  </button>
-
+                  <p className="mt-1 text-sm text-neutral font-inter">
+                    {error}
+                  </p>
                 </div>
+              </Card>
+            )}
 
-              ) : (
+            {/* Empty state */}
+            {!loading && !error && claims.length === 0 && (
+              <Card>
+                <div className="py-10 text-center">
+                  <p className="font-medium text-dark font-inter">
+                    No claims yet
+                  </p>
 
+                  <p className="mt-1 text-sm text-neutral font-inter">
+                    Your remuneration claims will appear here once they have
+                    been submitted.
+                  </p>
+                </div>
+              </Card>
+            )}
+
+            {/* Claims table */}
+            {!loading && !error && claims.length > 0 && (
+              <Card>
                 <div className="overflow-x-auto">
-
-                  <table className="w-full min-w-[950px]">
-
+                  <table className="w-full">
                     <thead>
-                      <tr className="border-b border-gray-200 text-left">
-
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                      <tr className="border-b border-gray-200">
+                        <th className="text-left py-4 px-4 font-poppins font-semibold text-dark">
                           Reference
                         </th>
 
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        <th className="text-left py-4 px-4 font-poppins font-semibold text-dark">
                           Module
                         </th>
 
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        <th className="text-left py-4 px-4 font-poppins font-semibold text-dark">
                           Period
                         </th>
 
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        <th className="text-left py-4 px-4 font-poppins font-semibold text-dark">
                           Hours
                         </th>
 
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        <th className="text-left py-4 px-4 font-poppins font-semibold text-dark">
                           Amount
                         </th>
 
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        <th className="text-left py-4 px-4 font-poppins font-semibold text-dark">
                           Status
                         </th>
 
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        <th className="text-right py-4 px-4 font-poppins font-semibold text-dark">
                           Action
                         </th>
-
                       </tr>
                     </thead>
 
                     <tbody>
-
                       {claims.map((claim) => (
                         <tr
-                          key={claim.id}
-                          className="border-b border-gray-100 last:border-b-0"
+                          key={claim.ClaimID}
+                          className="border-b border-gray-100 last:border-0"
                         >
+                          <td className="py-4 px-4">
+                            <p className="font-semibold text-dark">
+                              {claim.ClaimReferenceNumber}
+                            </p>
 
-                          <td className="px-4 py-4 text-sm font-medium text-gray-800">
-                            {claim.reference}
+                            <p className="text-xs text-neutral mt-1">
+                              Submitted {formatDate(claim.SubmissionDate)}
+                            </p>
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            <div>
-                              <p className="font-medium">
-                                {claim.moduleCode}
-                              </p>
+                          <td className="py-4 px-4">
+                            <p className="font-semibold text-dark">
+                              {claim.ModuleCode}
+                            </p>
 
-                              <p className="text-xs text-neutral">
-                                {claim.moduleName}
-                              </p>
-                            </div>
+                            <p className="text-sm text-neutral mt-1">
+                              {claim.ModuleName}
+                            </p>
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {claim.period}
+                          <td className="py-4 px-4 text-sm text-neutral">
+                            {formatPeriod(
+                              claim.PeriodStartDate,
+                              claim.PeriodEndDate
+                            )}
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {claim.hours.toFixed(2)}
+                          <td className="py-4 px-4 text-dark">
+                            {Number(
+                              claim.TotalHoursClaimed || 0
+                            ).toFixed(1)}
                           </td>
 
-                          <td className="px-4 py-4 text-sm font-medium text-gray-800">
-                            {formatAmount(claim.amount)}
+                          <td className="py-4 px-4 font-semibold text-dark">
+                            {formatCurrency(claim.TotalClaimAmount)}
                           </td>
 
-                          <td className="px-4 py-4">
-                            <StatusBadge status={claim.status} />
+                          <td className="py-4 px-4">
+                            <StatusBadge
+                              status={claim.ClaimStatus || 'Pending'}
+                            />
                           </td>
 
-                          <td className="px-4 py-4">
+                          <td className="py-4 px-4 text-right">
                             <button
                               type="button"
                               onClick={() => handleViewClaim(claim)}
-                              className="font-medium text-primary hover:text-primary-dark"
+                              className="text-primary font-semibold hover:underline"
                             >
-                              View Details
+                              View Details →
                             </button>
                           </td>
-
                         </tr>
                       ))}
-
                     </tbody>
-
                   </table>
-
                 </div>
+              </Card>
+            )}
 
-              )}
-
-            </Card>
-
+            <div className="mt-8">
+              <button
+                type="button"
+                onClick={() => navigate('/student-dashboard')}
+                className="text-primary font-semibold hover:underline"
+              >
+                ← Back to Dashboard
+              </button>
+            </div>
           </div>
         </main>
       </div>

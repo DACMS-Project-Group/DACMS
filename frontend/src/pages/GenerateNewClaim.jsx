@@ -1,156 +1,504 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
+import { apiGet, apiPost } from '../api';
 
 const GenerateNewClaim = () => {
   const navigate = useNavigate();
 
-  // Sample student information
-  // This will later come from the API.
-  const student = {
-    studentNumber: '12345678',
-    fullName: 'John Doe',
-    bankingStatus: 'Banking details verified',
+  const [applications, setApplications] = useState([]);
+  const [positions, setPositions] = useState([]);
+  const [sessions, setSessions] = useState([]);
+  const [student, setStudent] = useState(null);
+
+  const [selectedApplicationId, setSelectedApplicationId] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [sessionsLoading, setSessionsLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [error, setError] = useState('');
+  const [claimSubmitted, setClaimSubmitted] = useState(false);
+  const [submittedClaim, setSubmittedClaim] = useState(null);
+
+  /*
+   * Load the student's applications, active Demi positions,
+   * and authenticated student profile.
+   */
+  useEffect(() => {
+    const loadClaimData = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const [
+          applicationsResponse,
+          positionsResponse,
+          studentResponse,
+        ] = await Promise.all([
+          apiGet('/student/applications'),
+          apiGet('/student/positions'),
+          apiGet('/student/profile/'),
+        ]);
+
+        const applicationData =
+          Array.isArray(applicationsResponse)
+            ? applicationsResponse
+            : applicationsResponse?.applications || [];
+
+        const positionData =
+          Array.isArray(positionsResponse)
+            ? positionsResponse
+            : positionsResponse?.positions || [];
+
+        const studentData =
+          studentResponse?.student ?? studentResponse;
+
+        setApplications(applicationData);
+        setPositions(positionData);
+        setStudent(studentData);
+
+        /*
+         * Select the first application that has a matching
+         * Demi position.
+         */
+        const firstValidApplication = applicationData.find((application) => {
+          const applicationId =
+            application.application_id ??
+            application.ApplicationID ??
+            application.id;
+
+          return positionData.some((position) => {
+            const positionApplicationId =
+              position.application_id ??
+              position.ApplicationID;
+
+            return (
+              String(positionApplicationId) ===
+              String(applicationId)
+            );
+          });
+        });
+
+        if (firstValidApplication) {
+          const applicationId =
+            firstValidApplication.application_id ??
+            firstValidApplication.ApplicationID ??
+            firstValidApplication.id;
+
+          setSelectedApplicationId(String(applicationId));
+        }
+      } catch (err) {
+        setError(
+          err.message || 'Unable to load your claim information.'
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadClaimData();
+  }, []);
+
+  /*
+   * Get ApplicationID consistently.
+   */
+  const getApplicationId = (application) => {
+    return (
+      application.application_id ??
+      application.ApplicationID ??
+      application.id
+    );
   };
 
-  // Sample Assistant appointments
-  // A student can have multiple appointments/modules.
-  // This will later come from the API.
-  const appointments = [
-    {
-      id: 1,
-      moduleCode: 'CMPG311',
-      moduleName: 'Databases',
-      lecturer: 'Lecturer Name',
-      hourlyRate: 45,
-    },
-    {
-      id: 2,
-      moduleCode: 'CMPG312',
-      moduleName: 'Operating Systems',
-      lecturer: 'Lecturer Name',
-      hourlyRate: 45,
-    },
-  ];
+  /*
+   * Get PositionID consistently.
+   */
+  const getPositionId = (position) => {
+    return (
+      position.position_id ??
+      position.PositionID ??
+      position.id
+    );
+  };
 
-  // Sample verified work sessions from all appointments.
-  // Only verified sessions can be included in a claim.
-  // These will later come from the API.
-  const approvedSessions = [
-    {
-      id: 1,
-      appointmentId: 1,
-      moduleCode: 'CMPG311',
-      moduleName: 'Databases',
-      date: '2026-09-02',
-      activity: 'Student consultation',
-      startTime: '08:00',
-      endTime: '12:00',
-      hours: 4,
-      status: 'Verified',
-    },
-    {
-      id: 2,
-      appointmentId: 1,
-      moduleCode: 'CMPG311',
-      moduleName: 'Databases',
-      date: '2026-09-05',
-      activity: 'Tutorial assistance',
-      startTime: '09:00',
-      endTime: '13:30',
-      hours: 4.5,
-      status: 'Verified',
-    },
-    {
-      id: 3,
-      appointmentId: 2,
-      moduleCode: 'CMPG312',
-      moduleName: 'Operating Systems',
-      date: '2026-09-04',
-      activity: 'Tutorial assistance',
-      startTime: '09:00',
-      endTime: '12:00',
-      hours: 3,
-      status: 'Verified',
-    },
-  ];
+  /*
+   * Get the selected application.
+   */
+  const selectedApplication = useMemo(() => {
+    return applications.find(
+      (application) =>
+        String(getApplicationId(application)) ===
+        String(selectedApplicationId)
+    );
+  }, [applications, selectedApplicationId]);
 
-  const [claimSubmitted, setClaimSubmitted] = useState(false);
+  /*
+   * Find the active Demi Position belonging to the selected application.
+   */
+  const selectedPosition = useMemo(() => {
+    if (!selectedApplicationId) {
+      return null;
+    }
 
-  // Calculate total approved hours.
-  const totalHours = approvedSessions.reduce(
-    (total, session) => total + session.hours,
+    return (
+      positions.find((position) => {
+        const positionApplicationId =
+          position.application_id ??
+          position.ApplicationID;
+
+        return (
+          String(positionApplicationId) ===
+          String(selectedApplicationId)
+        );
+      }) || null
+    );
+  }, [positions, selectedApplicationId]);
+
+  /*
+   * Load Work Sessions whenever the selected Demi Position changes.
+   */
+  useEffect(() => {
+    const loadSessions = async () => {
+      if (!selectedPosition) {
+        setSessions([]);
+        return;
+      }
+
+      const positionId = getPositionId(selectedPosition);
+
+      if (!positionId) {
+        setSessions([]);
+        return;
+      }
+
+      try {
+        setSessionsLoading(true);
+        setError('');
+
+        const response = await apiGet(
+          `/student/positions/${positionId}/sessions`
+        );
+
+        const sessionData =
+          Array.isArray(response)
+            ? response
+            : response?.sessions || [];
+
+        setSessions(sessionData);
+      } catch (err) {
+        setSessions([]);
+        setError(
+          err.message || 'Unable to load your work sessions.'
+        );
+      } finally {
+        setSessionsLoading(false);
+      }
+    };
+
+    loadSessions();
+  }, [selectedPosition]);
+
+  /*
+   * Only completed and lecturer-approved work sessions
+   * are available for claiming.
+   */
+  const approvedSessions = useMemo(() => {
+    return sessions.filter((session) => {
+      const lecturerApproval =
+        session.lecturer_approval ??
+        session.LecturerApproval;
+
+      const endTime =
+        session.end_time ??
+        session.EndTime;
+
+      return lecturerApproval === true && endTime;
+    });
+  }, [sessions]);
+
+  /*
+   * Position information.
+   */
+  const moduleCode =
+    selectedPosition?.module_code ??
+    selectedPosition?.ModuleCode ??
+    selectedApplication?.module_code ??
+    selectedApplication?.ModuleCode ??
+    '';
+
+  const moduleName =
+    selectedPosition?.module_name ??
+    selectedPosition?.ModuleName ??
+    selectedApplication?.module_name ??
+    selectedApplication?.ModuleName ??
+    '';
+
+  const lecturerFirstName =
+    selectedPosition?.lecturer_f_name ??
+    selectedPosition?.LecturerFName ??
+    '';
+
+  const lecturerLastName =
+    selectedPosition?.lecturer_l_name ??
+    selectedPosition?.LecturerLName ??
+    '';
+
+  const lecturer =
+    selectedPosition?.lecturer ??
+    selectedPosition?.lecturer_name ??
+    selectedPosition?.LecturerName ??
+    (`${lecturerFirstName} ${lecturerLastName}`.trim() || '-');
+
+  /*
+   * Payment Scale → StandardHourlyRate.
+   */
+  const hourlyRate = Number(
+    selectedPosition?.standard_hourly_rate ??
+    selectedPosition?.StandardHourlyRate ??
     0
   );
 
-  // Calculate total claim amount using each appointment's hourly rate.
-  const totalClaimAmount = approvedSessions.reduce((total, session) => {
-    const appointment = appointments.find(
-      (item) => item.id === session.appointmentId
-    );
+  /*
+   * Calculate total approved hours.
+   */
+  const totalHours = approvedSessions.reduce(
+    (total, session) => {
+      const hours = Number(
+        session.total_hours ??
+        session.TotalHoursWorked ??
+        0
+      );
 
-    if (!appointment) {
-      return total;
+      return total + hours;
+    },
+    0
+  );
+
+  /*
+   * Display calculation.
+   * The backend remains the official source of truth
+   * when the claim is created.
+   */
+  const totalClaimAmount = totalHours * hourlyRate;
+
+  /*
+   * Earliest approved session date.
+   */
+  const periodStart = useMemo(() => {
+    if (approvedSessions.length === 0) {
+      return null;
     }
 
-    return total + session.hours * appointment.hourlyRate;
-  }, 0);
+    const dates = approvedSessions
+      .map((session) => {
+        const startTime =
+          session.start_time ??
+          session.StartTime;
 
-  // Format dates for display.
+        return startTime ? new Date(startTime) : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => a - b);
+
+    return dates[0] || null;
+  }, [approvedSessions]);
+
+  /*
+   * Latest approved session date.
+   */
+  const periodEnd = useMemo(() => {
+    if (approvedSessions.length === 0) {
+      return null;
+    }
+
+    const dates = approvedSessions
+      .map((session) => {
+        const endTime =
+          session.end_time ??
+          session.EndTime;
+
+        return endTime ? new Date(endTime) : null;
+      })
+      .filter(Boolean)
+      .sort((a, b) => b - a);
+
+    return dates[0] || null;
+  }, [approvedSessions]);
+
+  /*
+   * Format dates.
+   */
   const formatDate = (date) => {
-    return new Date(`${date}T00:00:00`).toLocaleDateString('en-ZA', {
+    if (!date) {
+      return '-';
+    }
+
+    return new Date(date).toLocaleDateString('en-ZA', {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+    });
+  };
+
+  /*
+   * Format session date.
+   */
+  const formatSessionDate = (date) => {
+    if (!date) {
+      return '-';
+    }
+
+    return new Date(date).toLocaleDateString('en-ZA', {
       day: '2-digit',
       month: 'short',
       year: 'numeric',
     });
   };
 
-  // Format currency amounts.
+  /*
+   * Format time.
+   */
+  const formatTime = (date) => {
+    if (!date) {
+      return '-';
+    }
+
+    return new Date(date).toLocaleTimeString('en-ZA', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
+  };
+
+  /*
+   * Format currency.
+   */
   const formatAmount = (amount) => {
-    return `R ${amount.toLocaleString('en-ZA', {
+    return `R ${Number(amount || 0).toLocaleString('en-ZA', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   };
 
-  // Get total hours for a specific module.
-  const getModuleTotalHours = (moduleCode) => {
-    return approvedSessions
-      .filter((session) => session.moduleCode === moduleCode)
-      .reduce((total, session) => total + session.hours, 0);
+  /*
+   * Change the selected application.
+   */
+  const handleApplicationChange = (event) => {
+    setSelectedApplicationId(event.target.value);
+    setClaimSubmitted(false);
+    setSubmittedClaim(null);
+    setError('');
   };
 
-  // Get total claim amount for a specific module.
-  const getModuleAmount = (moduleCode) => {
-    const appointment = appointments.find(
-      (item) => item.moduleCode === moduleCode
-    );
-
-    if (!appointment) {
-      return 0;
+  /*
+   * Submit the claim.
+   *
+   * Backend route:
+   * POST /api/student/claims/create
+   *
+   * Only ApplicationID is sent.
+   */
+  const handleSubmitClaim = async () => {
+    if (!selectedApplicationId) {
+      setError('Please select an Assistant appointment.');
+      return;
     }
 
-    const hours = getModuleTotalHours(moduleCode);
+    if (!selectedPosition) {
+      setError(
+        'No active Assistant appointment is available for this application.'
+      );
+      return;
+    }
 
-    return hours * appointment.hourlyRate;
+    if (approvedSessions.length === 0) {
+      setError(
+        'No approved work sessions are available to claim yet.'
+      );
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError('');
+
+      const response = await apiPost(
+        '/student/claims/create',
+        {
+          applicationId: Number(selectedApplicationId),
+        }
+      );
+
+      setSubmittedClaim(response?.claim || response || null);
+      setClaimSubmitted(true);
+    } catch (err) {
+      setError(
+        err.message || 'Unable to submit the remuneration claim.'
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  // Get the unique modules included in the claim.
-  const getUniqueModules = () => {
-    return [...new Set(approvedSessions.map((session) => session.moduleCode))];
-  };
-
-  // Submit the remuneration claim.
-  const handleSubmitClaim = () => {
-    setClaimSubmitted(true);
-  };
-
-  // Return to the Claims page.
+  /*
+   * Return to Claims.
+   */
   const handleBackToClaims = () => {
     navigate('/claims');
   };
+
+  /*
+   * Student information.
+   */
+  const studentFirstName =
+    student?.first_name ??
+    student?.FName ??
+    '';
+
+  const studentLastName =
+    student?.last_name ??
+    student?.LName ??
+    '';
+
+  const studentName =
+    `${studentFirstName} ${studentLastName}`.trim() || '-';
+
+  const studentNumber =
+    student?.student_number ??
+    student?.StudentNumber ??
+    '-';
+
+  const studentEmail =
+    student?.email ??
+    student?.Email ??
+    '-';
+
+  const studentStudyLevel =
+    student?.study_level ??
+    student?.StudyLevel ??
+    '-';
+
+  /*
+   * Account details.
+   * These values are automatically retrieved from
+   * the student's Student Profile.
+   */
+  const bankName =
+    student?.bank_name ??
+    student?.BankName ??
+    '-';
+
+  const accountNumber =
+    student?.account_number ??
+    student?.AccountNumber ??
+    '-';
+
+  const branchCode =
+    student?.branch_code ??
+    student?.BranchCode ??
+    '-';
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -187,6 +535,28 @@ const GenerateNewClaim = () => {
               </button>
             </div>
 
+            {/* Loading */}
+            {loading && (
+              <Card className="mb-6">
+                <p className="text-sm text-neutral">
+                  Loading your claim information...
+                </p>
+              </Card>
+            )}
+
+            {/* Error Message */}
+            {error && (
+              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-5 py-4">
+                <h3 className="font-semibold text-red-800">
+                  Unable to continue
+                </h3>
+
+                <p className="mt-1 text-sm text-red-700">
+                  {error}
+                </p>
+              </div>
+            )}
+
             {/* Success Message */}
             {claimSubmitted && (
               <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-5 py-4">
@@ -195,9 +565,41 @@ const GenerateNewClaim = () => {
                 </h3>
 
                 <p className="mt-1 text-sm text-green-700">
-                  Your remuneration claim has been submitted and is awaiting
-                  verification.
+                  Your remuneration claim has been submitted and is
+                  awaiting verification.
                 </p>
+
+                {submittedClaim && (
+                  <div className="mt-3 space-y-1 text-sm text-green-800">
+                    <p>
+                      <span className="font-medium">
+                        Claim Reference:
+                      </span>{' '}
+                      {submittedClaim.reference_number ??
+                        submittedClaim.ClaimReferenceNumber ??
+                        '-'}
+                    </p>
+
+                    <p>
+                      <span className="font-medium">
+                        Amount:
+                      </span>{' '}
+                      {formatAmount(
+                        submittedClaim.total_claim_amount ??
+                        submittedClaim.TotalClaimAmount
+                      )}
+                    </p>
+
+                    <p>
+                      <span className="font-medium">
+                        Status:
+                      </span>{' '}
+                      {submittedClaim.claim_status ??
+                        submittedClaim.ClaimStatus ??
+                        '-'}
+                    </p>
+                  </div>
+                )}
 
                 <button
                   type="button"
@@ -217,43 +619,118 @@ const GenerateNewClaim = () => {
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral">
-                  Your information used for this remuneration claim.
+                  Your authenticated student account is used for this
+                  remuneration claim.
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-
-                <div>
+              {!student ? (
+                <div className="rounded-lg border border-gray-200 bg-off-white px-5 py-4">
                   <p className="text-sm text-neutral">
-                    Student Number
-                  </p>
-
-                  <p className="mt-1 font-semibold text-gray-800">
-                    {student.studentNumber}
+                    Loading student information...
                   </p>
                 </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
 
-                <div>
-                  <p className="text-sm text-neutral">
-                    Full Name
-                  </p>
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Student Name
+                    </p>
 
-                  <p className="mt-1 font-semibold text-gray-800">
-                    {student.fullName}
-                  </p>
+                    <p className="mt-1 font-semibold text-gray-800">
+                      {studentName}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Student Number
+                    </p>
+
+                    <p className="mt-1 font-semibold text-gray-800">
+                      {studentNumber}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Email
+                    </p>
+
+                    <p className="mt-1 font-semibold text-gray-800">
+                      {studentEmail}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Study Level
+                    </p>
+
+                    <p className="mt-1 font-semibold text-gray-800">
+                      {studentStudyLevel}
+                    </p>
+                  </div>
+
                 </div>
+              )}
+            </Card>
 
-                <div>
-                  <p className="text-sm text-neutral">
-                    Banking Details
-                  </p>
+            {/* Account Details */}
+            <Card className="mb-6">
+              <div className="mb-5">
+                <h2 className="text-lg font-semibold text-primary-dark">
+                  Account Details
+                </h2>
 
-                  <p className="mt-1 font-semibold text-green-700">
-                    {student.bankingStatus}
-                  </p>
-                </div>
-
+                <p className="mt-1 text-sm text-neutral">
+                  Your banking details are automatically retrieved from
+                  your Student Profile.
+                </p>
               </div>
+
+              {!student ? (
+                <div className="rounded-lg border border-gray-200 bg-off-white px-5 py-4">
+                  <p className="text-sm text-neutral">
+                    Loading account details...
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Bank Name
+                    </p>
+
+                    <p className="mt-1 font-semibold text-gray-800">
+                      {bankName}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Account Number
+                    </p>
+
+                    <p className="mt-1 font-semibold text-gray-800">
+                      {accountNumber}
+                    </p>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Branch Code
+                    </p>
+
+                    <p className="mt-1 font-semibold text-gray-800">
+                      {branchCode}
+                    </p>
+                  </div>
+
+                </div>
+              )}
             </Card>
 
             {/* Claim Period */}
@@ -264,8 +741,8 @@ const GenerateNewClaim = () => {
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral">
-                  This claim includes all verified Assistant work sessions
-                  available for the current claim period.
+                  The dates below show the range of approved work
+                  sessions currently available for this claim.
                 </p>
               </div>
 
@@ -277,7 +754,7 @@ const GenerateNewClaim = () => {
                   </p>
 
                   <p className="mt-1 font-semibold text-gray-800">
-                    02 September 2026
+                    {formatDate(periodStart)}
                   </p>
                 </div>
 
@@ -287,7 +764,7 @@ const GenerateNewClaim = () => {
                   </p>
 
                   <p className="mt-1 font-semibold text-gray-800">
-                    05 September 2026
+                    {formatDate(periodEnd)}
                   </p>
                 </div>
 
@@ -302,84 +779,160 @@ const GenerateNewClaim = () => {
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral">
-                  All approved Assistant appointments with verified work
-                  included in this claim.
+                  Select the Assistant appointment for which you want
+                  to generate a remuneration claim.
                 </p>
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[750px]">
+              {applications.length === 0 ? (
 
-                  <thead>
-                    <tr className="border-b border-gray-200 text-left">
+                <div className="rounded-lg border border-dashed border-gray-300 px-6 py-10 text-center">
+                  <h3 className="text-lg font-semibold text-gray-700">
+                    No Applications Found
+                  </h3>
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                        Module
-                      </th>
+                  <p className="mt-2 text-sm text-neutral">
+                    You do not have any applications available for
+                    remuneration claims.
+                  </p>
+                </div>
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                        Lecturer
-                      </th>
+              ) : (
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                        Hourly Rate
-                      </th>
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-[850px]">
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                        Hours
-                      </th>
+                    <thead>
+                      <tr className="border-b border-gray-200 text-left">
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                        Amount
-                      </th>
+                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                          Select
+                        </th>
 
-                    </tr>
-                  </thead>
+                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                          Module
+                        </th>
 
-                  <tbody>
-                    {getUniqueModules().map((moduleCode) => {
-                      const appointment = appointments.find(
-                        (item) => item.moduleCode === moduleCode
-                      );
+                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                          Lecturer
+                        </th>
 
-                      if (!appointment) {
-                        return null;
-                      }
+                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                          Hourly Rate
+                        </th>
 
-                      return (
-                        <tr
-                          key={moduleCode}
-                          className="border-b border-gray-100 last:border-b-0"
-                        >
+                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                          Approved Hours
+                        </th>
 
-                          <td className="px-4 py-4 text-sm font-medium text-primary-dark">
-                            {appointment.moduleCode} -{' '}
-                            {appointment.moduleName}
-                          </td>
+                      </tr>
+                    </thead>
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {appointment.lecturer}
-                          </td>
+                    <tbody>
+                      {applications.map((application) => {
+                        const applicationId =
+                          getApplicationId(application);
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {formatAmount(appointment.hourlyRate)}
-                          </td>
+                        const position = positions.find(
+                          (item) =>
+                            String(
+                              item.application_id ??
+                              item.ApplicationID
+                            ) === String(applicationId)
+                        );
 
-                          <td className="px-4 py-4 text-sm font-medium text-gray-800">
-                            {getModuleTotalHours(moduleCode).toFixed(2)}
-                          </td>
+                        const applicationModuleCode =
+                          position?.module_code ??
+                          position?.ModuleCode ??
+                          application.module_code ??
+                          application.ModuleCode ??
+                          '-';
 
-                          <td className="px-4 py-4 text-sm font-medium text-gray-800">
-                            {formatAmount(getModuleAmount(moduleCode))}
-                          </td>
+                        const applicationModuleName =
+                          position?.module_name ??
+                          position?.ModuleName ??
+                          application.module_name ??
+                          application.ModuleName ??
+                          '';
 
-                        </tr>
-                      );
-                    })}
-                  </tbody>
+                        const applicationLecturerFirstName =
+                          position?.lecturer_f_name ??
+                          position?.LecturerFName ??
+                          '';
 
-                </table>
-              </div>
+                        const applicationLecturerLastName =
+                          position?.lecturer_l_name ??
+                          position?.LecturerLName ??
+                          '';
+
+                        const applicationLecturer =
+                          position?.lecturer ??
+                          position?.lecturer_name ??
+                          position?.LecturerName ??
+                          (`${applicationLecturerFirstName} ${applicationLecturerLastName}`.trim() || '-');
+
+                        const applicationRate = Number(
+                          position?.standard_hourly_rate ??
+                          position?.StandardHourlyRate ??
+                          0
+                        );
+
+                        const isSelected =
+                          String(applicationId) ===
+                          String(selectedApplicationId);
+
+                        return (
+                          <tr
+                            key={applicationId}
+                            className={`border-b border-gray-100 last:border-b-0 ${
+                              isSelected ? 'bg-purple-50' : ''
+                            }`}
+                          >
+
+                            <td className="px-4 py-4">
+                              <input
+                                type="radio"
+                                name="selectedApplication"
+                                value={applicationId}
+                                checked={isSelected}
+                                onChange={handleApplicationChange}
+                                className="h-4 w-4"
+                              />
+                            </td>
+
+                            <td className="px-4 py-4 text-sm font-medium text-primary-dark">
+                              {applicationModuleCode}
+
+                              {applicationModuleName
+                                ? ` - ${applicationModuleName}`
+                                : ''}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {applicationLecturer}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {position
+                                ? formatAmount(applicationRate)
+                                : '-'}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm font-medium text-gray-800">
+                              {isSelected
+                                ? totalHours.toFixed(2)
+                                : '-'}
+                            </td>
+
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+
+                  </table>
+                </div>
+
+              )}
             </Card>
 
             {/* Approved Work Sessions */}
@@ -390,12 +943,20 @@ const GenerateNewClaim = () => {
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral">
-                  All verified work sessions from your Assistant appointments
-                  are automatically included in this claim.
+                  Only completed work sessions that have been approved
+                  by the lecturer are included in the claim.
                 </p>
               </div>
 
-              {approvedSessions.length === 0 ? (
+              {sessionsLoading ? (
+
+                <div className="rounded-lg border border-dashed border-gray-300 px-6 py-10 text-center">
+                  <p className="text-sm text-neutral">
+                    Loading approved work sessions...
+                  </p>
+                </div>
+
+              ) : approvedSessions.length === 0 ? (
 
                 <div className="rounded-lg border border-dashed border-gray-300 px-6 py-10 text-center">
 
@@ -404,17 +965,10 @@ const GenerateNewClaim = () => {
                   </h3>
 
                   <p className="mt-2 text-sm text-neutral">
-                    You do not have any verified work sessions available for
+                    You do not have any completed work sessions
+                    approved by your lecturer and available for
                     claiming.
                   </p>
-
-                  <button
-                    type="button"
-                    onClick={() => navigate('/work-tracking')}
-                    className="mt-4 rounded-lg bg-primary px-5 py-2.5 font-medium text-white transition hover:bg-primary-dark"
-                  >
-                    View Work Tracking
-                  </button>
 
                 </div>
 
@@ -454,40 +1008,66 @@ const GenerateNewClaim = () => {
                     </thead>
 
                     <tbody>
-                      {approvedSessions.map((session) => (
-                        <tr
-                          key={session.id}
-                          className="border-b border-gray-100 last:border-b-0"
-                        >
+                      {approvedSessions.map((session) => {
+                        const startTime =
+                          session.start_time ??
+                          session.StartTime;
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {formatDate(session.date)}
-                          </td>
+                        const endTime =
+                          session.end_time ??
+                          session.EndTime;
 
-                          <td className="px-4 py-4 text-sm font-medium text-primary-dark">
-                            {session.moduleCode}
-                          </td>
+                        const activity =
+                          session.activity_description ??
+                          session.ActivityDescription ??
+                          '-';
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {session.activity}
-                          </td>
+                        const hours = Number(
+                          session.total_hours ??
+                          session.TotalHoursWorked ??
+                          0
+                        );
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
-                            {session.startTime} - {session.endTime}
-                          </td>
+                        const sessionId =
+                          session.session_id ??
+                          session.SessionID;
 
-                          <td className="px-4 py-4 text-sm font-medium text-gray-800">
-                            {session.hours.toFixed(2)}
-                          </td>
+                        return (
+                          <tr
+                            key={sessionId}
+                            className="border-b border-gray-100 last:border-b-0"
+                          >
 
-                          <td className="px-4 py-4">
-                            <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                              {session.status}
-                            </span>
-                          </td>
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {formatSessionDate(startTime)}
+                            </td>
 
-                        </tr>
-                      ))}
+                            <td className="px-4 py-4 text-sm font-medium text-primary-dark">
+                              {moduleCode || '-'}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {activity}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm text-gray-700">
+                              {formatTime(startTime)} -{' '}
+                              {formatTime(endTime)}
+                            </td>
+
+                            <td className="px-4 py-4 text-sm font-medium text-gray-800">
+                              {hours.toFixed(2)}
+                            </td>
+
+                            <td className="px-4 py-4">
+                              <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                                Verified
+                              </span>
+                            </td>
+
+                          </tr>
+                        );
+                      })}
                     </tbody>
 
                   </table>
@@ -504,8 +1084,9 @@ const GenerateNewClaim = () => {
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral">
-                  The total claim amount is automatically calculated from all
-                  verified work sessions included in this claim.
+                  The total claim amount is calculated from your
+                  approved work sessions and the hourly rate from the
+                  Payment Scale connected to your Assistant position.
                 </p>
               </div>
 
@@ -523,11 +1104,11 @@ const GenerateNewClaim = () => {
 
                 <div className="rounded-lg bg-off-white p-5">
                   <p className="text-sm text-neutral">
-                    Modules Included
+                    Hourly Rate
                   </p>
 
                   <p className="mt-2 text-2xl font-bold text-primary-dark">
-                    {getUniqueModules().length}
+                    {formatAmount(hourlyRate)}
                   </p>
                 </div>
 
@@ -552,28 +1133,24 @@ const GenerateNewClaim = () => {
 
                 <div className="space-y-3">
 
-                  {getUniqueModules().map((moduleCode) => (
-                    <div
-                      key={moduleCode}
-                      className="flex flex-col justify-between gap-2 border-b border-gray-100 pb-3 last:border-b-0 sm:flex-row"
-                    >
+                  <div className="flex flex-col justify-between gap-2 border-b border-gray-100 pb-3 sm:flex-row">
 
-                      <div>
-                        <p className="font-medium text-gray-800">
-                          {moduleCode}
-                        </p>
-
-                        <p className="text-sm text-neutral">
-                          {getModuleTotalHours(moduleCode).toFixed(2)} hours
-                        </p>
-                      </div>
-
-                      <p className="font-semibold text-gray-800">
-                        {formatAmount(getModuleAmount(moduleCode))}
+                    <div>
+                      <p className="font-medium text-gray-800">
+                        {moduleCode || 'Selected Module'}
                       </p>
 
+                      <p className="text-sm text-neutral">
+                        {totalHours.toFixed(2)} hours ×{' '}
+                        {formatAmount(hourlyRate)}
+                      </p>
                     </div>
-                  ))}
+
+                    <p className="font-semibold text-gray-800">
+                      {formatAmount(totalClaimAmount)}
+                    </p>
+
+                  </div>
 
                 </div>
               </div>
@@ -586,19 +1163,16 @@ const GenerateNewClaim = () => {
                 </p>
 
                 <p className="mt-1 font-semibold text-gray-800">
-                  Total approved hours across all modules ={' '}
-                  {totalHours.toFixed(2)} hours
-                </p>
-
-                <p className="mt-1 font-semibold text-primary-dark">
-                  Total Claim Amount = {formatAmount(totalClaimAmount)}
+                  {totalHours.toFixed(2)} hours ×{' '}
+                  {formatAmount(hourlyRate)} ={' '}
+                  {formatAmount(totalClaimAmount)}
                 </p>
 
               </div>
             </Card>
 
             {/* Submit Claim */}
-            {!claimSubmitted && approvedSessions.length > 0 && (
+            {!claimSubmitted && (
               <Card>
 
                 <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
@@ -609,17 +1183,25 @@ const GenerateNewClaim = () => {
                     </h2>
 
                     <p className="mt-1 text-sm text-neutral">
-                      Review all claim information before submitting it for
-                      verification.
+                      Review all claim information before submitting
+                      it for verification.
                     </p>
                   </div>
 
                   <button
                     type="button"
                     onClick={handleSubmitClaim}
-                    className="rounded-lg bg-primary px-6 py-3 font-medium text-white transition hover:bg-primary-dark"
+                    disabled={
+                      submitting ||
+                      loading ||
+                      !selectedPosition ||
+                      approvedSessions.length === 0
+                    }
+                    className="rounded-lg bg-primary px-6 py-3 font-medium text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Submit Claim
+                    {submitting
+                      ? 'Submitting...'
+                      : 'Submit Claim'}
                   </button>
 
                 </div>
