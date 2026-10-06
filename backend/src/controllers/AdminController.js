@@ -1,6 +1,8 @@
 import AdminService from '../services/AdminService.js';
+import ModuleBudget from '../models/ModuleBudget.js';
 import ExportedClaim from '../templates/ExportedClaim.js';
 import AdmZip from 'adm-zip';
+import ModuleBudget from '../models/ModuleBudget.js';
 
 class AdminController {
     static async getDashboardSummary(req, res) {
@@ -35,7 +37,7 @@ class AdminController {
     static async createBudget(req, res) {
         try {
             const budgetData = req.body || {};
-            const budget = new Budget(budgetData);
+            const budget = new ModuleBudget(budgetData);
             budget.validate();
 
             const data = await AdminService.createBudget(budget);
@@ -68,6 +70,15 @@ class AdminController {
     static async getClaimsSummary(req, res) {
         try {
             const data = await AdminService.getClaimsSummary();
+            return res.status(200).json(data);
+        } catch (error) {
+            return res.status(500).json({ error: error.message });
+        }
+    }
+
+    static async getClaimsForExport(req, res) {
+        try {
+            const data = await AdminService.getClaimsForExport();
             return res.status(200).json(data);
         } catch (error) {
             return res.status(500).json({ error: error.message });

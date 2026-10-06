@@ -61,6 +61,20 @@ router.get(
 );
 
 router.get(
+    '/assistants',
+    authenticate,
+    authorize([2]),
+    LecturerController.getAssistantsWithResponsibilities
+);
+
+router.put(
+    '/assistants/:position_id/responsibilities',
+    authenticate,
+    authorize([2]),
+    LecturerController.saveAssistantResponsibilities
+);
+
+router.get(
     '/applications/fetch/:id',
     authenticate,
     authorize([2]),

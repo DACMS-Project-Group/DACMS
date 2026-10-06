@@ -25,6 +25,123 @@ class LecturerRepository {
         };
     }
 
+    static async getAssistantsWithResponsibilities(lecturerId) {
+        const query = `
+            SELECT
+                p."PositionID",
+                CONCAT(u."FName", ' ', u."LName") AS "StudentName",
+                s."StudentNumber",
+                m."ModuleCode",
+                COALESCE(worked."HoursWorked", 0) AS "HoursWorked",
+                p."TotalAllocatedHours",
+                COALESCE(
+                    array_agg(r."Description") FILTER (
+                        WHERE r."ResponsibilityID" IS NOT NULL
+                    ),
+                    ARRAY[]::text[]
+                ) AS "Responsibilities"
+            FROM "DEMI_POSITION" p
+            JOIN "DEMI_APPLICATION" a
+                ON a."ApplicationID" = p."ApplicationID"
+            JOIN "DEMI_LISTING" l
+                ON l."ListingID" = a."ListingID"
+            JOIN "STUDENT" s
+                ON s."StudentID" = a."StudentID"
+            JOIN "APP_USER" u
+                ON u."UserID" = s."StudentID"
+            JOIN "NWU_MODULE" m
+                ON m."ModuleID" = l."ModuleID"
+            LEFT JOIN "RESPONSIBILITY" r
+                ON r."PositionID" = p."PositionID"
+            LEFT JOIN LATERAL (
+                SELECT SUM(ws."TotalHoursWorked") AS "HoursWorked"
+                FROM "WORK_SESSION" ws
+                WHERE ws."PositionID" = p."PositionID"
+            ) worked ON TRUE
+            WHERE l."LecturerID" = $1
+              AND a."ApplicationStatus" = 'Approved'
+              AND p."PositionStatus" = 'Approved'
+            GROUP BY
+                p."PositionID",
+                u."FName",
+                u."LName",
+                s."StudentNumber",
+                m."ModuleCode",
+                worked."HoursWorked",
+                p."TotalAllocatedHours"
+            ORDER BY u."LName", u."FName", m."ModuleCode";
+        `;
+
+        const { rows } = await pool.query(query, [lecturerId]);
+        return rows;
+    }
+
+    static async saveAssistantResponsibilities(lecturerId, positionId, hourLimit, descriptions) {
+        const client = await pool.connect();
+
+        try {
+            await client.query('BEGIN');
+
+            const position = await client.query(
+                `
+                SELECT p."PositionID"
+                FROM "DEMI_POSITION" p
+                JOIN "DEMI_APPLICATION" a
+                    ON a."ApplicationID" = p."ApplicationID"
+                JOIN "DEMI_LISTING" l
+                    ON l."ListingID" = a."ListingID"
+                WHERE p."PositionID" = $1
+                  AND l."LecturerID" = $2
+                  AND a."ApplicationStatus" = 'Approved'
+                  AND p."PositionStatus" = 'Approved'
+                FOR UPDATE OF p
+                `,
+                [positionId, lecturerId]
+            );
+
+            if (position.rows.length === 0) {
+                await client.query('ROLLBACK');
+                return null;
+            }
+
+            await client.query(
+                `
+                UPDATE "DEMI_POSITION"
+                SET "TotalAllocatedHours" = $1
+                WHERE "PositionID" = $2
+                `,
+                [hourLimit, positionId]
+            );
+
+            await client.query(
+                `DELETE FROM "RESPONSIBILITY" WHERE "PositionID" = $1`,
+                [positionId]
+            );
+
+            for (const description of descriptions) {
+                await client.query(
+                    `
+                    INSERT INTO "RESPONSIBILITY" ("PositionID", "Description")
+                    VALUES ($1, $2)
+                    `,
+                    [positionId, description]
+                );
+            }
+
+            await client.query('COMMIT');
+            return {
+                positionId: Number(positionId),
+                hourLimit,
+                responsibilities: descriptions
+            };
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
+    }
+
     static async getDashboardMetrics(lecturerId) {
         const query = `
             SELECT
@@ -57,7 +174,21 @@ class LecturerRepository {
                 (
                     SELECT COALESCE(SUM(mb."MaxAllowableWorkHours"), 0)
                     FROM "MODULE_BUDGET" mb
-                    WHERE mb."LecturerID" = $1
+                    WHERE (
+                        mb."LecturerID" = $1
+                        OR EXISTS (
+                            SELECT 1
+                            FROM "LECTURER_MODULE" lm
+                            WHERE lm."LecturerID" = $1
+                              AND lm."ModuleID" = mb."ModuleID"
+                        )
+                        OR EXISTS (
+                            SELECT 1
+                            FROM "DEMI_LISTING" dl
+                            WHERE dl."LecturerID" = $1
+                              AND dl."ModuleID" = mb."ModuleID"
+                        )
+                    )
                 ) AS hours_allocated;
         `;
 
@@ -85,7 +216,21 @@ class LecturerRepository {
                     WHERE "CurrentBudgetUsage" >= "AllocatedBudget" * $2
                 ) AS count_near_limit
             FROM "MODULE_BUDGET"
-            WHERE "LecturerID" = $1
+            WHERE (
+                "LecturerID" = $1
+                OR EXISTS (
+                    SELECT 1
+                    FROM "LECTURER_MODULE" lm
+                    WHERE lm."LecturerID" = $1
+                      AND lm."ModuleID" = "MODULE_BUDGET"."ModuleID"
+                )
+                OR EXISTS (
+                    SELECT 1
+                    FROM "DEMI_LISTING" dl
+                    WHERE dl."LecturerID" = $1
+                      AND dl."ModuleID" = "MODULE_BUDGET"."ModuleID"
+                )
+            )
             AND "AcademicYear" = EXTRACT(YEAR FROM CURRENT_DATE);
         `;
 
@@ -119,7 +264,21 @@ class LecturerRepository {
             FROM "MODULE_BUDGET" b
             JOIN "NWU_MODULE" m
                 ON m."ModuleID" = b."ModuleID"
-            WHERE b."LecturerID" = $1
+            WHERE (
+                b."LecturerID" = $1
+                OR EXISTS (
+                    SELECT 1
+                    FROM "LECTURER_MODULE" lm
+                    WHERE lm."LecturerID" = $1
+                      AND lm."ModuleID" = b."ModuleID"
+                )
+                OR EXISTS (
+                    SELECT 1
+                    FROM "DEMI_LISTING" dl
+                    WHERE dl."LecturerID" = $1
+                      AND dl."ModuleID" = b."ModuleID"
+                )
+            )
             AND b."AcademicYear" = EXTRACT(YEAR FROM CURRENT_DATE)
             ORDER BY m."ModuleCode";
         `;
@@ -157,7 +316,21 @@ class LecturerRepository {
             JOIN "NWU_MODULE" m
                 ON m."ModuleID" = b."ModuleID"
             WHERE b."BudgetID" = $1
-            AND b."LecturerID" = $2;
+              AND (
+                    b."LecturerID" = $2
+                    OR EXISTS (
+                        SELECT 1
+                        FROM "LECTURER_MODULE" lm
+                        WHERE lm."LecturerID" = $2
+                          AND lm."ModuleID" = b."ModuleID"
+                    )
+                    OR EXISTS (
+                        SELECT 1
+                        FROM "DEMI_LISTING" dl
+                        WHERE dl."LecturerID" = $2
+                          AND dl."ModuleID" = b."ModuleID"
+                    )
+              );
         `;
 
         const result = await pool.query(
@@ -226,8 +399,10 @@ class LecturerRepository {
                 c."TotalHoursClaimed",
                 c."TotalClaimAmount",
                 c."ClaimStatus",
+                c."LecturerComment",
                 c."SubmissionDate",
                 m."ModuleCode",
+                s."StudentNumber",
                 CONCAT(
                     au."Title", ' ',
                     au."FName", ' ',
@@ -258,8 +433,10 @@ class LecturerRepository {
             total_claim_amount:
                 Number(row.TotalClaimAmount ?? 0),
             claim_status: row.ClaimStatus,
+            lecturer_comment: row.LecturerComment,
             submission_date: row.SubmissionDate,
             module_code: row.ModuleCode,
+            student_number: row.StudentNumber,
             student_name: row.student_name
         }));
     }
@@ -271,6 +448,7 @@ class LecturerRepository {
                 c."ClaimReferenceNumber" AS "reference",
                 c."SubmissionDate" AS "submittedDate",
                 c."ClaimStatus" AS "status",
+                c."LecturerComment" AS "lecturerComment",
                 c."PeriodStartDate" AS "periodStartDate",
                 c."PeriodEndDate" AS "periodEndDate",
                 c."TotalHoursClaimed" AS "hours",
@@ -377,6 +555,7 @@ class LecturerRepository {
             moduleCode: claimRow.moduleCode,
             moduleName: claimRow.moduleName,
             lecturer: claimRow.lecturer,
+            lecturerComment: claimRow.lecturerComment,
             period,
             submittedDate: formatDisplayDate(claimRow.submittedDate),
             hours: Number(claimRow.hours ?? 0),
@@ -404,10 +583,11 @@ class LecturerRepository {
         };
     }
 
-    static async reviewClaim(lecturerId, claimId, status) {
+    static async reviewClaim(lecturerId, claimId, status, comment) {
         const query = `
             UPDATE "REMUNERATION_CLAIM" c
-            SET "ClaimStatus" = $3
+            SET "ClaimStatus" = $3,
+                "LecturerComment" = $4
             FROM "DEMI_APPLICATION" da
             JOIN "DEMI_LISTING" dl
                 ON dl."ListingID" = da."ListingID"
@@ -418,12 +598,13 @@ class LecturerRepository {
                 c."ClaimID",
                 c."ClaimReferenceNumber",
                 c."ClaimStatus",
+                c."LecturerComment",
                 c."SubmissionDate";
         `;
 
         const result = await pool.query(
             query,
-            [claimId, lecturerId, status]
+            [claimId, lecturerId, status, comment]
         );
 
         return result.rows[0] || null;

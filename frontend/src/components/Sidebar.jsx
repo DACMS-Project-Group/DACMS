@@ -21,7 +21,7 @@ const Sidebar = ({ userRole = 'student' }) => {
   // Lecturer Navigation
   const lecturerNavItems = [
     { name: 'Dashboard', href: '/lecturer-dashboard' },
-    { name: 'Assistant Positions', href: '/assistant-positions' },
+    { name: 'Assistant Listings', href: '/assistant-listings' },
     { name: 'Review Applications', href: '/review-applications' },
     { name: 'Assign Duties', href: '/assign-responsibilities' },
     { name: 'Review Claims', href: '/review-claims' },

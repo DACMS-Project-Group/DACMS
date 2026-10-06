@@ -1,78 +1,95 @@
-import { useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
-import claimsData from '../data/claimsData';
+import { apiGet } from '../api';
 
 const ClaimsVerification = () => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
 
-  const [claims] = useState(() => {
-    const updatedClaim = location.state?.updatedClaim;
-
-    if (!updatedClaim) {
-      return claimsData;
-    }
-
-    return claimsData.map((claim) =>
-      claim.id === updatedClaim.id
-        ? {
-            ...claim,
-            status: updatedClaim.status,
-          }
-        : claim
-    );
+  const [claims, setClaims] = useState([]);
+  const [stats, setStats] = useState({
+    total_claims: 0,
+    total_pending: 0,
+    total_under_review: 0,
+    total_verified: 0,
   });
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const fetchClaims = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const response = await apiGet('/admin/claims');
+
+        setClaims(response?.claims || []);
+        setStats(
+          response?.stats || {
+            total_claims: 0,
+            total_pending: 0,
+            total_under_review: 0,
+            total_verified: 0,
+          }
+        );
+      } catch (err) {
+        console.error('Failed to load claims:', err);
+        setError('Failed to load claims. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchClaims();
+  }, []);
 
   const filteredClaims = useMemo(() => {
     return claims.filter((claim) => {
       const search = searchTerm.toLowerCase();
 
       const matchesSearch =
-        claim.reference.toLowerCase().includes(search) ||
-        claim.studentName.toLowerCase().includes(search) ||
-        claim.studentNumber.toLowerCase().includes(search) ||
-        claim.moduleCode.toLowerCase().includes(search);
+        claim.reference_number?.toLowerCase().includes(search) ||
+        claim.student_name?.toLowerCase().includes(search) ||
+        claim.module_code?.toLowerCase().includes(search);
 
       const matchesStatus =
         statusFilter === 'All' ||
-        claim.status === statusFilter;
+        claim.claim_status === statusFilter;
 
       return matchesSearch && matchesStatus;
     });
   }, [claims, searchTerm, statusFilter]);
 
-  const totalClaims = claims.length;
-
-  const pendingClaims = claims.filter(
-    (claim) => claim.status === 'Pending'
-  ).length;
-
-  const underReviewClaims = claims.filter(
-    (claim) => claim.status === 'Under Review'
-  ).length;
-
-  const verifiedClaims = claims.filter(
-    (claim) =>
-      claim.status === 'Verified' ||
-      claim.status === 'Approved'
-  ).length;
-
   const formatAmount = (amount) => {
-    return `R ${amount.toLocaleString('en-ZA', {
+    return `R ${Number(amount || 0).toLocaleString('en-ZA', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
   };
 
+  const formatDate = (dateString) => {
+    if (!dateString) {
+      return '-';
+    }
+
+    return new Date(dateString).toLocaleDateString('en-ZA', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
   const handleReviewClaim = (claim) => {
-    navigate(`/claim-review/${claim.id}`, {
+    navigate(`/claim-review/${claim.claim_id}`, {
       state: {
         claim,
       },
@@ -169,8 +186,6 @@ const ClaimsVerification = () => {
                       <option value="Pending">Pending</option>
                       <option value="Under Review">Under Review</option>
                       <option value="Verified">Verified</option>
-                      <option value="Approved">Approved</option>
-                      <option value="Rejected">Rejected</option>
                     </select>
                   </div>
                 </div>
@@ -190,7 +205,7 @@ const ClaimsVerification = () => {
                   </p>
 
                   <p className="mt-3 text-3xl font-bold text-primary font-poppins">
-                    {totalClaims}
+                    {stats.total_claims}
                   </p>
 
                   <p className="mt-1 text-sm text-neutral font-inter">
@@ -204,7 +219,7 @@ const ClaimsVerification = () => {
                   </p>
 
                   <p className="mt-3 text-3xl font-bold text-primary font-poppins">
-                    {pendingClaims}
+                    {stats.total_pending}
                   </p>
 
                   <p className="mt-1 text-sm text-neutral font-inter">
@@ -218,7 +233,7 @@ const ClaimsVerification = () => {
                   </p>
 
                   <p className="mt-3 text-3xl font-bold text-primary font-poppins">
-                    {underReviewClaims}
+                    {stats.total_under_review}
                   </p>
 
                   <p className="mt-1 text-sm text-neutral font-inter">
@@ -232,7 +247,7 @@ const ClaimsVerification = () => {
                   </p>
 
                   <p className="mt-3 text-3xl font-bold text-primary font-poppins">
-                    {verifiedClaims}
+                    {stats.total_verified}
                   </p>
 
                   <p className="mt-1 text-sm text-neutral font-inter">
@@ -256,7 +271,23 @@ const ClaimsVerification = () => {
 
               <Card>
                 <div className="overflow-x-auto">
-                  {filteredClaims.length === 0 ? (
+                  {loading ? (
+                    <div className="px-6 py-10 text-center">
+                      <p className="text-neutral font-inter">
+                        Loading claims...
+                      </p>
+                    </div>
+                  ) : error ? (
+                    <div className="px-6 py-10 text-center">
+                      <h3 className="text-lg font-semibold text-dark font-poppins">
+                        Unable to Load Claims
+                      </h3>
+
+                      <p className="mt-2 text-sm text-neutral font-inter">
+                        {error}
+                      </p>
+                    </div>
+                  ) : filteredClaims.length === 0 ? (
                     <div className="px-6 py-10 text-center">
                       <h3 className="text-lg font-semibold text-dark font-poppins">
                         No Claims Found
@@ -307,47 +338,41 @@ const ClaimsVerification = () => {
                       <tbody>
                         {filteredClaims.map((claim) => (
                           <tr
-                            key={claim.id}
+                            key={claim.claim_id}
                             className="border-t border-neutral/30 transition hover:bg-primary-lightest/30"
                           >
                             <td className="p-4 font-semibold text-dark font-inter">
-                              {claim.reference}
-                            </td>
-
-                            <td className="p-4 font-inter">
-                              <p className="text-dark">
-                                {claim.studentName}
-                              </p>
-
-                              <p className="mt-1 text-sm text-neutral">
-                                {claim.studentNumber}
-                              </p>
-                            </td>
-
-                            <td className="p-4 font-inter">
-                              <p className="text-dark">
-                                {claim.moduleCode}
-                              </p>
-
-                              <p className="mt-1 text-sm text-neutral">
-                                {claim.moduleName}
-                              </p>
+                              {claim.reference_number}
                             </td>
 
                             <td className="p-4 text-dark font-inter">
-                              {claim.hours.toFixed(2)}
+                              {claim.student_name}
+                            </td>
+
+                            <td className="p-4 text-dark font-inter">
+                              {claim.module_code}
+                            </td>
+
+                            <td className="p-4 text-dark font-inter">
+                              {Number(
+                                claim.total_hours_claimed || 0
+                              ).toFixed(2)}
                             </td>
 
                             <td className="p-4 font-semibold text-dark font-inter">
-                              {formatAmount(claim.amount)}
+                              {formatAmount(
+                                claim.total_claim_amount
+                              )}
                             </td>
 
                             <td className="p-4 text-sm text-neutral font-inter">
-                              {claim.submittedDate}
+                              {formatDate(claim.submission_date)}
                             </td>
 
                             <td className="p-4">
-                              <StatusBadge status={claim.status} />
+                              <StatusBadge
+                                status={claim.claim_status}
+                              />
                             </td>
 
                             <td className="p-4">
@@ -384,7 +409,7 @@ const ClaimsVerification = () => {
                     </p>
 
                     <p className="mt-1 font-semibold text-dark font-inter">
-                      {totalClaims}
+                      {stats.total_claims}
                     </p>
                   </div>
 
@@ -394,7 +419,7 @@ const ClaimsVerification = () => {
                     </p>
 
                     <p className="mt-1 font-semibold text-dark font-inter">
-                      {pendingClaims}
+                      {stats.total_pending}
                     </p>
                   </div>
 
@@ -404,7 +429,7 @@ const ClaimsVerification = () => {
                     </p>
 
                     <p className="mt-1 font-semibold text-dark font-inter">
-                      {underReviewClaims}
+                      {stats.total_under_review}
                     </p>
                   </div>
 
@@ -414,7 +439,7 @@ const ClaimsVerification = () => {
                     </p>
 
                     <p className="mt-1 font-semibold text-dark font-inter">
-                      {verifiedClaims}
+                      {stats.total_verified}
                     </p>
                   </div>
                 </div>

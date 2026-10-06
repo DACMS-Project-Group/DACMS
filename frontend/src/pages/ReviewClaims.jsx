@@ -1,63 +1,60 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { apiGet } from '../api';
+
+const formatSubmittedDate = (date) =>
+  date
+    ? new Date(date).toLocaleDateString('en-ZA', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      })
+    : 'Not available';
 
 const ReviewClaims = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
+  const [claims, setClaims] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState('');
 
-  const [claims, setClaims] = useState([
-    {
-      id: 1,
-      reference: 'CLM-001',
-      studentNumber: '12345678',
-      studentName: 'Student Example',
-      moduleCode: 'CMPG323',
-      hours: 10,
-      hourlyRate: 50,
-      amount: 500,
-      date: '13 Sep 2026',
-      status: 'Pending',
-    },
-    {
-      id: 2,
-      reference: 'CLM-002',
-      studentNumber: '23456789',
-      studentName: 'Student Example',
-      moduleCode: 'CMPG321',
-      hours: 12,
-      hourlyRate: 50,
-      amount: 600,
-      date: '12 Sep 2026',
-      status: 'Under Review',
-    },
-    {
-      id: 3,
-      reference: 'CLM-003',
-      studentNumber: '34567890',
-      studentName: 'Student Example',
-      moduleCode: 'CMPG315',
-      hours: 8,
-      hourlyRate: 50,
-      amount: 400,
-      date: '10 Sep 2026',
-      status: 'Verified',
-    },
-    {
-      id: 4,
-      reference: 'CLM-004',
-      studentNumber: '45678901',
-      studentName: 'Student Example',
-      moduleCode: 'CMPG323',
-      hours: 10,
-      hourlyRate: 50,
-      amount: 500,
-      date: '08 Sep 2026',
-      status: 'Paid',
-    },
-  ]);
+  useEffect(() => {
+    let isCurrent = true;
+
+    apiGet('/lecturer/claims')
+      .then((result) => {
+        if (!isCurrent) return;
+
+        const rows = Array.isArray(result?.claims) ? result.claims : [];
+        setClaims(rows.map((claim) => ({
+          id: claim.claim_id,
+          reference: claim.reference_number,
+          studentNumber: claim.student_number,
+          studentName: claim.student_name,
+          moduleCode: claim.module_code,
+          hours: Number(claim.total_hours_claimed ?? 0),
+          amount: Number(claim.total_claim_amount ?? 0),
+          date: formatSubmittedDate(claim.submission_date),
+          status: claim.claim_status,
+          lecturerComment: claim.lecturer_comment || '',
+        })));
+      })
+      .catch((error) => {
+        if (isCurrent) setLoadError(error.message);
+      })
+      .finally(() => {
+        if (isCurrent) setIsLoading(false);
+      });
+
+    return () => {
+      isCurrent = false;
+    };
+  }, []);
 
   const filteredClaims = useMemo(() => {
     return claims.filter((claim) => {
@@ -85,17 +82,14 @@ const ReviewClaims = () => {
   ).length;
 
   const verifiedClaims = claims.filter(
-    (claim) => claim.status === 'Verified'
+    (claim) =>
+      claim.status === 'Verified' ||
+      claim.status === 'Approved' ||
+      claim.status === 'Approved by Lecturer'
   ).length;
 
-  const handleReview = (id) => {
-    setClaims((currentClaims) =>
-      currentClaims.map((claim) =>
-        claim.id === id
-          ? { ...claim, status: 'Verified' }
-          : claim
-      )
-    );
+  const handleReview = (claim) => {
+    navigate(`/review-claim/${claim.id}`);
   };
 
   const formatCurrency = (amount) => {
@@ -230,7 +224,10 @@ const ReviewClaims = () => {
                       <option value="Pending">Pending</option>
                       <option value="Under Review">Under Review</option>
                       <option value="Verified">Verified</option>
-                      <option value="Paid">Paid</option>
+                      <option value="Approved by Lecturer">Approved by Lecturer</option>
+                      <option value="Approved">Approved</option>
+                      <option value="Rejected by Lecturer">Rejected by Lecturer</option>
+                      <option value="Rejected">Rejected</option>
                     </select>
                   </div>
                 </div>
@@ -276,11 +273,15 @@ const ReviewClaims = () => {
                         </th>
 
                         <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
-                          Date
+                          Submitted
                         </th>
 
                         <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
                           Status
+                        </th>
+
+                        <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
+                          Lecturer Comment
                         </th>
 
                         <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
@@ -290,7 +291,19 @@ const ReviewClaims = () => {
                     </thead>
 
                     <tbody>
-                      {filteredClaims.length > 0 ? (
+                      {isLoading ? (
+                        <tr>
+                          <td colSpan="9" className="px-6 py-10 text-center text-neutral font-inter">
+                            Loading claims...
+                          </td>
+                        </tr>
+                      ) : loadError ? (
+                        <tr>
+                          <td colSpan="9" className="px-6 py-10 text-center text-red-700 font-inter">
+                            Unable to load claims: {loadError}
+                          </td>
+                        </tr>
+                      ) : filteredClaims.length > 0 ? (
                         filteredClaims.map((claim) => (
                           <tr
                             key={claim.id}
@@ -330,28 +343,25 @@ const ReviewClaims = () => {
                               <StatusBadge status={claim.status} />
                             </td>
 
+                            <td className="px-4 py-4 text-sm text-dark font-inter">
+                              {claim.lecturerComment || 'Not reviewed'}
+                            </td>
+
                             <td className="px-4 py-4">
-                              {claim.status === 'Pending' ||
-                              claim.status === 'Under Review' ? (
-                                <button
-                                  type="button"
-                                  onClick={() => handleReview(claim.id)}
-                                  className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-dark font-inter"
-                                >
-                                  Verify
-                                </button>
-                              ) : (
-                                <span className="text-sm text-neutral font-inter">
-                                  Reviewed
-                                </span>
-                              )}
+                              <button
+                                type="button"
+                                onClick={() => handleReview(claim)}
+                                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-dark font-inter"
+                              >
+                                Review
+                              </button>
                             </td>
                           </tr>
                         ))
                       ) : (
                         <tr>
                           <td
-                            colSpan="8"
+                            colSpan="9"
                             className="px-6 py-10 text-center text-neutral font-inter"
                           >
                             No claims found matching your search criteria.

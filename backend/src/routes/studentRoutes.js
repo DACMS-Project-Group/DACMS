@@ -36,6 +36,12 @@ router.post(
     DemiApplicationController.apply.bind(DemiApplicationController)
 );
 
+router.post(
+    '/applications/apply-for-assistant',
+    authenticate,
+    DemiApplicationController.apply.bind(DemiApplicationController)
+);
+
 // -- Supporting Documents -----------------------------------------------------
 router.get(
     '/documents',
@@ -95,7 +101,6 @@ router.post(
 );
 
 // -- Profile ----------------------------------------------------------------
-// match the team's contract; StudentController itself is unchanged.
 router.get(
     '/profile/',
     authenticate,

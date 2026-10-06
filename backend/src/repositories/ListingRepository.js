@@ -9,13 +9,13 @@ class ListingRepository extends BaseRepository {
     async getOpenListings() {
         const rows = await this.query(
             `
-            SELECT "ListingID", "ModuleID", "Deadline"
+            SELECT "ListingID", "ModuleID", "Deadline","MinimumGrade"
             FROM "DEMI_LISTING"
             WHERE "Deadline" > NOW()
             ORDER BY "Deadline" ASC
             `
         );
-        return rows.rows; 
+        return rows; 
     }
 
     async getListingById(listingId) {
