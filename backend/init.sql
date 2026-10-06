@@ -105,9 +105,6 @@ CREATE TABLE "STUDENT" (
     "AccountType" varchar(20) DEFAULT 'Savings',
     "BranchCode" varchar(10) NOT NULL,
     "AccountHolderName" varchar(100),
-    CONSTRAINT "PK_STUDENT" PRIMARY KEY ("StudentID"),
-    CONSTRAINT "UQ_STUDENT_StudentNumber" UNIQUE ("StudentNumber"),
-    CONSTRAINT "FK_STUDENT_APP_USER" FOREIGN KEY ("StudentID") REFERENCES"APP_USER" ("UserID") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
     -- Added for StudentProfile.jsx (P&C122F) full-form coverage. Additive
     -- only: the blob columns above (ResidentialAddress/PostalAddress/
     -- HighestQualification) are untouched for seed-data compatibility.

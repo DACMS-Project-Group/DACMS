@@ -4,7 +4,6 @@ import ExportedClaim from '../templates/ExportedClaim.js';
 import AdmZip from 'adm-zip';
 import getAuthUserId from '../utils/getAuthUserId.js';
 import { writeAuditLog } from '../utils/auditLogger.js';
-import ModuleBudget from '../models/ModuleBudget.js';
 
 class AdminController {
     static async getDashboardSummary(req, res) {
