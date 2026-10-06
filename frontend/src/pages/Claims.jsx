@@ -105,14 +105,25 @@ const Claims = () => {
           </div>
 
           <div className="p-8">
-            <div className="mb-8">
-              <h2 className="text-3xl font-poppins font-semibold text-primary">
-                My Claims
-              </h2>
+            {/* Page heading and Generate New Claim button */}
+            <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+              <div>
+                <h2 className="text-3xl font-poppins font-semibold text-primary">
+                  My Claims
+                </h2>
 
-              <p className="text-neutral mt-2">
-                View and track your remuneration claims.
-              </p>
+                <p className="text-neutral mt-2">
+                  View and track your remuneration claims.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => navigate('/generate-new-claim')}
+                className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark"
+              >
+                Generate New Claim
+              </button>
             </div>
 
             {/* Summary cards */}
@@ -269,7 +280,9 @@ const Claims = () => {
                           </td>
 
                           <td className="py-4 px-4 text-dark">
-                            {Number(claim.TotalHoursClaimed || 0).toFixed(1)}
+                            {Number(
+                              claim.TotalHoursClaimed || 0
+                            ).toFixed(1)}
                           </td>
 
                           <td className="py-4 px-4 font-semibold text-dark">
@@ -284,6 +297,7 @@ const Claims = () => {
 
                           <td className="py-4 px-4 text-right">
                             <button
+                              type="button"
                               onClick={() => handleViewClaim(claim)}
                               className="text-primary font-semibold hover:underline"
                             >
@@ -300,6 +314,7 @@ const Claims = () => {
 
             <div className="mt-8">
               <button
+                type="button"
                 onClick={() => navigate('/student-dashboard')}
                 className="text-primary font-semibold hover:underline"
               >
