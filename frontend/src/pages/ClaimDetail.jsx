@@ -1,68 +1,75 @@
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { apiGet } from '../api';
 
 const ClaimDetail = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { id } = useParams();
 
-  const claim = location.state?.claim;
+  const [claim, setClaim] = useState(location.state?.claim || null);
+  const [loading, setLoading] = useState(!location.state?.claim);
+  const [error, setError] = useState('');
 
-  // Fallback data for testing the page directly
-  const defaultClaim = {
-    id: 1,
-    reference: 'CLM-2026-001',
-    moduleCode: 'CMPG311',
-    moduleName: 'Databases',
-    lecturer: 'Lecturer Name',
-    period: '02 Sep 2026 - 05 Sep 2026',
-    hours: 8.5,
-    hourlyRate: 45,
-    amount: 382.5,
-    status: 'Pending',
-    submittedDate: '13 September 2026',
-  };
+  useEffect(() => {
+    let cancelled = false;
 
-  const currentClaim = claim || defaultClaim;
+    const loadClaim = async () => {
+      try {
+        setLoading(true);
+        setError('');
 
-  const student = {
-    studentNumber: '12345678',
-    fullName: 'John Doe',
-    bankingStatus: 'Banking details verified',
-  };
+        const data = await apiGet(`/student/claims/${id}`);
 
-  // Work sessions included in this claim
-  const approvedSessions = [
-    {
-      id: 1,
-      date: '2026-09-02',
-      activity: 'Student consultation',
-      startTime: '08:00',
-      endTime: '12:00',
-      hours: 4,
-    },
-    {
-      id: 2,
-      date: '2026-09-05',
-      activity: 'Tutorial assistance',
-      startTime: '09:00',
-      endTime: '13:30',
-      hours: 4.5,
-    },
-  ];
+        if (!cancelled) {
+          setClaim(data?.claim || null);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message || 'Failed to load claim details.');
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    if (id) {
+      loadClaim();
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id]);
 
   const formatDate = (date) => {
-    return new Date(`${date}T00:00:00`).toLocaleDateString('en-ZA', {
+    if (!date) return '—';
+
+    return new Date(date).toLocaleDateString('en-ZA', {
       day: '2-digit',
       month: 'long',
       year: 'numeric',
     });
   };
 
+  const formatPeriod = (startDate, endDate) => {
+    if (!startDate && !endDate) return '—';
+
+    if (startDate && endDate) {
+      return `${formatDate(startDate)} - ${formatDate(endDate)}`;
+    }
+
+    return formatDate(startDate || endDate);
+  };
+
   const formatAmount = (amount) => {
-    return `R ${amount.toLocaleString('en-ZA', {
+    return `R ${Number(amount || 0).toLocaleString('en-ZA', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
@@ -72,19 +79,83 @@ const ClaimDetail = () => {
     navigate('/claims');
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-off-white">
+        <Navbar />
+
+        <div className="flex">
+          <Sidebar userRole="student" />
+
+          <main className="flex-1">
+            <div className="bg-primary px-8 py-4">
+              <h1 className="text-2xl font-semibold text-white">
+                Claim Detail
+              </h1>
+            </div>
+
+            <div className="p-8">
+              <Card>
+                <p className="py-8 text-center text-neutral font-inter">
+                  Loading claim details...
+                </p>
+              </Card>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !claim) {
+    return (
+      <div className="min-h-screen bg-off-white">
+        <Navbar />
+
+        <div className="flex">
+          <Sidebar userRole="student" />
+
+          <main className="flex-1">
+            <div className="bg-primary px-8 py-4">
+              <h1 className="text-2xl font-semibold text-white">
+                Claim Detail
+              </h1>
+            </div>
+
+            <div className="p-8">
+              <Card>
+                <div className="py-8 text-center">
+                  <p className="font-semibold text-error font-inter">
+                    Could not load claim
+                  </p>
+
+                  <p className="mt-1 text-sm text-neutral font-inter">
+                    {error || 'The requested claim could not be found.'}
+                  </p>
+
+                  <button
+                    type="button"
+                    onClick={handleBackToClaims}
+                    className="mt-6 font-medium text-primary transition hover:text-primary-dark"
+                  >
+                    ← Back to Claims
+                  </button>
+                </div>
+              </Card>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-off-white">
-
-      {/* Top Navigation */}
       <Navbar />
 
-      {/* Sidebar + Main Content */}
       <div className="flex">
+        <Sidebar userRole="student" />
 
-        {/* Sidebar */}
-        <Sidebar />
-
-        {/* Main Content */}
         <main className="flex-1">
 
           {/* Page Header */}
@@ -94,7 +165,6 @@ const ClaimDetail = () => {
             </h1>
           </div>
 
-          {/* Page Content */}
           <div className="p-8">
 
             {/* Back Button */}
@@ -110,21 +180,18 @@ const ClaimDetail = () => {
 
             {/* Claim Overview */}
             <Card className="mb-6">
-
               <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-
                 <div>
                   <p className="text-sm text-neutral">
                     Claim Reference
                   </p>
 
                   <h2 className="mt-1 text-xl font-semibold text-primary-dark">
-                    {currentClaim.reference}
+                    {claim.ClaimReferenceNumber}
                   </h2>
                 </div>
 
-                <StatusBadge status={currentClaim.status} />
-
+                <StatusBadge status={claim.ClaimStatus || 'Pending'} />
               </div>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -135,7 +202,10 @@ const ClaimDetail = () => {
                   </p>
 
                   <p className="mt-1 font-semibold text-gray-800">
-                    {currentClaim.period}
+                    {formatPeriod(
+                      claim.PeriodStartDate,
+                      claim.PeriodEndDate
+                    )}
                   </p>
                 </div>
 
@@ -145,7 +215,7 @@ const ClaimDetail = () => {
                   </p>
 
                   <p className="mt-1 font-semibold text-gray-800">
-                    {currentClaim.submittedDate}
+                    {formatDate(claim.SubmissionDate)}
                   </p>
                 </div>
 
@@ -155,24 +225,22 @@ const ClaimDetail = () => {
                   </p>
 
                   <div className="mt-2">
-                    <StatusBadge status={currentClaim.status} />
+                    <StatusBadge status={claim.ClaimStatus || 'Pending'} />
                   </div>
                 </div>
 
               </div>
-
             </Card>
 
-            {/* Student Information */}
+            {/* Claim Information */}
             <Card className="mb-6">
-
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-primary-dark">
-                  Student Information
+                  Claim Information
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral">
-                  Student information associated with this claim.
+                  Information associated with this remuneration claim.
                 </p>
               </div>
 
@@ -180,44 +248,42 @@ const ClaimDetail = () => {
 
                 <div>
                   <p className="text-sm text-neutral">
-                    Student Number
+                    Claim ID
                   </p>
 
                   <p className="mt-1 font-semibold text-gray-800">
-                    {student.studentNumber}
+                    {claim.ClaimID}
                   </p>
                 </div>
 
                 <div>
                   <p className="text-sm text-neutral">
-                    Full Name
+                    Application ID
                   </p>
 
                   <p className="mt-1 font-semibold text-gray-800">
-                    {student.fullName}
+                    {claim.ApplicationID}
                   </p>
                 </div>
 
                 <div>
                   <p className="text-sm text-neutral">
-                    Banking Details
+                    Student ID
                   </p>
 
-                  <p className="mt-1 font-semibold text-green-700">
-                    {student.bankingStatus}
+                  <p className="mt-1 font-semibold text-gray-800">
+                    {claim.StudentID}
                   </p>
                 </div>
 
               </div>
-
             </Card>
 
-            {/* Appointment Information */}
+            {/* Assistant Appointment */}
             <Card className="mb-6">
-
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-primary-dark">
-                  Demi Appointment
+                  Assistant Appointment
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral">
@@ -233,17 +299,17 @@ const ClaimDetail = () => {
                   </p>
 
                   <p className="mt-1 font-semibold text-gray-800">
-                    {currentClaim.moduleCode} - {currentClaim.moduleName}
+                    {claim.ModuleCode} - {claim.ModuleName}
                   </p>
                 </div>
 
                 <div>
                   <p className="text-sm text-neutral">
-                    Lecturer
+                    Module ID
                   </p>
 
                   <p className="mt-1 font-semibold text-gray-800">
-                    {currentClaim.lecturer || 'Lecturer Name'}
+                    {claim.ModuleID}
                   </p>
                 </div>
 
@@ -253,101 +319,56 @@ const ClaimDetail = () => {
                   </p>
 
                   <p className="mt-1 font-semibold text-gray-800">
-                    {formatAmount(currentClaim.hourlyRate)}
+                    {formatAmount(claim.HourlyRateApplied)}
                   </p>
                 </div>
 
               </div>
-
             </Card>
 
             {/* Work Sessions */}
             <Card className="mb-6">
-
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-primary-dark">
                   Work Sessions Included
                 </h2>
 
                 <p className="mt-1 text-sm text-neutral">
-                  Verified work sessions included in this remuneration claim.
+                  The claim records the total approved hours included in this
+                  remuneration claim. Individual work sessions are not
+                  currently returned by the claim API.
                 </p>
               </div>
 
-              <div className="overflow-x-auto">
+              <div className="rounded-lg border border-gray-200 bg-off-white p-5">
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 
-                <table className="w-full min-w-[750px]">
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Total Approved Hours
+                    </p>
 
-                  <thead>
-                    <tr className="border-b border-gray-200 text-left">
+                    <p className="mt-2 text-2xl font-bold text-primary-dark">
+                      {Number(claim.TotalHoursClaimed || 0).toFixed(2)}
+                    </p>
+                  </div>
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                        Date
-                      </th>
+                  <div>
+                    <p className="text-sm text-neutral">
+                      Claim Amount
+                    </p>
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                        Activity
-                      </th>
+                    <p className="mt-2 text-2xl font-bold text-primary-dark">
+                      {formatAmount(claim.TotalClaimAmount)}
+                    </p>
+                  </div>
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                        Time
-                      </th>
-
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                        Hours
-                      </th>
-
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
-                        Status
-                      </th>
-
-                    </tr>
-                  </thead>
-
-                  <tbody>
-
-                    {approvedSessions.map((session) => (
-                      <tr
-                        key={session.id}
-                        className="border-b border-gray-100 last:border-b-0"
-                      >
-
-                        <td className="px-4 py-4 text-sm text-gray-700">
-                          {formatDate(session.date)}
-                        </td>
-
-                        <td className="px-4 py-4 text-sm text-gray-700">
-                          {session.activity}
-                        </td>
-
-                        <td className="px-4 py-4 text-sm text-gray-700">
-                          {session.startTime} - {session.endTime}
-                        </td>
-
-                        <td className="px-4 py-4 text-sm font-medium text-gray-800">
-                          {session.hours.toFixed(2)}
-                        </td>
-
-                        <td className="px-4 py-4">
-                          <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                            Verified
-                          </span>
-                        </td>
-
-                      </tr>
-                    ))}
-
-                  </tbody>
-
-                </table>
-
+                </div>
               </div>
-
             </Card>
 
             {/* Claim Calculation */}
             <Card className="mb-6">
-
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-primary-dark">
                   Claim Calculation
@@ -366,7 +387,7 @@ const ClaimDetail = () => {
                   </p>
 
                   <p className="mt-2 text-2xl font-bold text-primary-dark">
-                    {currentClaim.hours.toFixed(2)}
+                    {Number(claim.TotalHoursClaimed || 0).toFixed(2)}
                   </p>
                 </div>
 
@@ -376,7 +397,7 @@ const ClaimDetail = () => {
                   </p>
 
                   <p className="mt-2 text-2xl font-bold text-primary-dark">
-                    {formatAmount(currentClaim.hourlyRate)}
+                    {formatAmount(claim.HourlyRateApplied)}
                   </p>
                 </div>
 
@@ -386,31 +407,27 @@ const ClaimDetail = () => {
                   </p>
 
                   <p className="mt-2 text-2xl font-bold text-primary-dark">
-                    {formatAmount(currentClaim.amount)}
+                    {formatAmount(claim.TotalClaimAmount)}
                   </p>
                 </div>
 
               </div>
 
               <div className="mt-5 rounded-lg border border-gray-200 bg-white p-4">
-
                 <p className="text-sm text-neutral">
                   Calculation
                 </p>
 
                 <p className="mt-1 font-semibold text-gray-800">
-                  {currentClaim.hours.toFixed(2)} hours ×{' '}
-                  {formatAmount(currentClaim.hourlyRate)} ={' '}
-                  {formatAmount(currentClaim.amount)}
+                  {Number(claim.TotalHoursClaimed || 0).toFixed(2)} hours ×{' '}
+                  {formatAmount(claim.HourlyRateApplied)} ={' '}
+                  {formatAmount(claim.TotalClaimAmount)}
                 </p>
-
               </div>
-
             </Card>
 
             {/* Claim Status */}
             <Card>
-
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-primary-dark">
                   Claim Status
@@ -429,7 +446,9 @@ const ClaimDetail = () => {
                   </p>
 
                   <div className="mt-2">
-                    <StatusBadge status={currentClaim.status} />
+                    <StatusBadge
+                      status={claim.ClaimStatus || 'Pending'}
+                    />
                   </div>
                 </div>
 
@@ -439,18 +458,18 @@ const ClaimDetail = () => {
                   </p>
 
                   <p className="mt-1 font-semibold text-gray-800">
-                    {currentClaim.status === 'Pending'
+                    {claim.ClaimStatus === 'Pending'
                       ? 'Awaiting administrator verification.'
-                      : currentClaim.status === 'Approved'
+                      : claim.ClaimStatus === 'Approved' ||
+                        claim.ClaimStatus === 'Verified'
                         ? 'Claim approved for remuneration processing.'
-                        : currentClaim.status === 'Rejected'
+                        : claim.ClaimStatus === 'Rejected'
                           ? 'Please review the claim and follow the required action.'
                           : 'Claim is being processed.'}
                   </p>
                 </div>
 
               </div>
-
             </Card>
 
           </div>
