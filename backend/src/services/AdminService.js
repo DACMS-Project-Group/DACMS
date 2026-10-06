@@ -51,6 +51,11 @@ class AdminService {
         };
     }
 
+    static async getClaimsForExport() {
+        const claims = await AdminRepository.getClaimsForExport();
+        return { claims };
+    }
+
     static async getClaimById(claim_id) {
         const data = await AdminRepository.getClaimById(claim_id);
         return { data };

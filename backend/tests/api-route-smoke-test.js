@@ -320,6 +320,7 @@ async function main() {
     { label: 'Create budget', method: 'POST', path: '/admin/budgets/create', body: { module_id: 1, lecturer_id: 11, allocated_budget: 1000, current_budget_usage: 0, max_allowable_work_hours: 120, academic_year: 2026 }, expectedStatus: 201 },
     { label: 'Edit budget', method: 'PUT', path: '/admin/budgets/edit/1', body: { allocated_budget: 1500 }, expectedStatus: 200 },
     { label: 'Claims summary', method: 'GET', path: '/admin/claims', expectedStatus: 200 },
+    { label: 'Claims for payment export', method: 'GET', path: '/admin/claims/export', expectedStatus: 200 },
     { label: 'Fetch claim by id', method: 'GET', path: '/admin/claims/fetch/1', expectedStatus: 200 },
     { label: 'Approve claim', method: 'PATCH', path: '/admin/claims/approve/1', body: { status: 'approved' }, expectedStatus: 200 },
     { label: 'Appointments', method: 'GET', path: '/admin/appointments', expectedStatus: 200 },

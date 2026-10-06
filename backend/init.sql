@@ -107,7 +107,69 @@ CREATE TABLE "STUDENT" (
     "AccountHolderName" varchar(100),
     CONSTRAINT "PK_STUDENT" PRIMARY KEY ("StudentID"),
     CONSTRAINT "UQ_STUDENT_StudentNumber" UNIQUE ("StudentNumber"),
+    CONSTRAINT "FK_STUDENT_APP_USER" FOREIGN KEY ("StudentID") REFERENCES"APP_USER" ("UserID") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
+    -- Added for StudentProfile.jsx (P&C122F) full-form coverage. Additive
+    -- only: the blob columns above (ResidentialAddress/PostalAddress/
+    -- HighestQualification) are untouched for seed-data compatibility.
+    "Initials" varchar(10),
+    "MiddleNames" varchar(100),
+    "NickName" varchar(50),
+    "Race" varchar(30),
+    "MaritalStatus" varchar(20),
+    "PreviousSurname" varchar(100),
+    "HomeLanguage" varchar(30),
+    "PreferenceLanguage" varchar(30),
+    "Disability" varchar(3),
+    "PrimaryEmploymentOutside" varchar(3),
+    "StudentType" varchar(20),
+    "Nationality" varchar(50),
+    "CountryOfBirth" varchar(50),
+    "CountryOfPassportIssue" varchar(50),
+    "PermitNumber" varchar(30),
+    "CurrentlyEmployedByNwu" varchar(3),
+    "OeCodeAndName1" varchar(150),
+    "JobName1" varchar(100),
+    "OeCodeAndName2" varchar(150),
+    "JobName2" varchar(100),
+
+    "NextOfKinTitle" varchar(10),
+    "NextOfKinInitials" varchar(10),
+    "NextOfKinSurname" varchar(100),
+    "NextOfKinRelationship" varchar(50),
+    "NextOfKinDaytimePhoneNo" varchar(20),
+    "IsNextOfKinNwuEmployee" varchar(3),
+    "NextOfKinNwuNumber" varchar(20),
+
+    "ResUnitNo" varchar(20),
+    "ResComplex" varchar(100),
+    "ResStreetNo" varchar(20),
+    "ResStreetName" varchar(150),
+    "ResSuburb" varchar(100),
+    "ResTownCity" varchar(100),
+    "ResPostalCode" varchar(10),
+    "SameAsResidential" boolean DEFAULT true,
+    "PoBoxNo" varchar(20),
+    "PrivateBagNo" varchar(20),
+    "PostOfficeBranch" varchar(100),
+    "MailingPostalCode" varchar(10),
+    "WorkPhoneNo" varchar(20),
+
+    "QualificationInstitution" varchar(150),
+    "QualificationType" varchar(100),
+    "QualificationStatus" varchar(20),
+    "QualificationAwardedDate" date,
+
+    "AccountHolderRelationship" varchar(30),
+
+    "DeclarationInitialsSurname" varchar(100),
+    "DeclarationDate" date,
+    "DeclarationAgreed" boolean DEFAULT false,
+    "Signature" text,
+
+    CONSTRAINT "PK_STUDENT" PRIMARY KEY ("StudentID"),
+    CONSTRAINT "UQ_STUDENT_StudentNumber" UNIQUE ("StudentNumber"),
     CONSTRAINT "FK_STUDENT_APP_USER" FOREIGN KEY ("StudentID") REFERENCES "APP_USER" ("UserID") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
+
 );
 
 -- 8. CREATE SUPPORTING DOCUMENTS TABLE

@@ -41,6 +41,12 @@ router.get('/claims',
             AdminController.getClaimsSummary
 );
 
+router.get('/claims/export',
+            authenticate,
+            authorize([3]),
+            AdminController.getClaimsForExport
+);
+
 router.get('/claims/fetch/:claim_id',
             authenticate,
             authorize([3]),

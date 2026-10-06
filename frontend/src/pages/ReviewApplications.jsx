@@ -256,10 +256,11 @@ const filteredApplications = applications.filter((application) => {
   };
 
   // Save comment
-  const handleSaveComment = () => {
+  const handleSaveComment = async (comment) => {
     if (!selectedApplication) {
       return;
     }
+    setComment(comment);
 
     const updatedApplications = applications.map((application) =>
       application.id === selectedApplication.id
@@ -492,21 +493,11 @@ const filteredApplications = applications.filter((application) => {
 
                   <textarea
                     value={comment}
-                    onChange={(event) =>
-                      setComment(event.target.value)
-                    }
+                    onChange={(event) => setComment(event.target.value)}
                     placeholder="Enter comments or feedback for the student..."
                     rows="5"
                     className="w-full border border-gray-300 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
-
-                  <button
-                    type="button"
-                    onClick={handleSaveComment}
-                    className="mt-4 bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-primary-dark transition"
-                  >
-                    Save Comment
-                  </button>
 
                 </div>
               </Card>

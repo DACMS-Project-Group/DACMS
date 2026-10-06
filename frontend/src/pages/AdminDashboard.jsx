@@ -9,26 +9,23 @@ import { apiGet } from '../api';
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [appointmentPage, setAppointmentPage] = useState(1);
   const APPOINTMENTS_PER_PAGE = 4;
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/api/admin/dashboard', {
-          method: 'GET',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-
-        const result = await response.json();
+        const result = await apiGet('/admin/dashboard');
         setData(result);
       } catch (error) {
-        console.error('Error fecthing dashboard data: ', error);
+        console.error('Error fetching dashboard data:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
-    }
+    };
 
     fetchData();
   }, []);
@@ -96,7 +93,7 @@ const AdminDashboard = () => {
               </h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {statisticCards.map((stat) => (
+                {statistics.map((stat) => (
                   <Card key={stat.title}>
                     <div className="flex justify-between items-start">
                       <div>

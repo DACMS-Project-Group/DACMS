@@ -1,78 +1,60 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { apiGet } from '../api';
 
 const ExportPayments = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('Approved');
+  const [dateFrom, setDateFrom] = useState('');
+  const [dateTo, setDateTo] = useState('');
+  const [claims, setClaims] = useState([]);
   const [selectedClaims, setSelectedClaims] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [exporting, setExporting] = useState(false);
+  const [error, setError] = useState('');
 
-  const claims = [
-    {
-      id: 'CLM-001',
-      student: 'Student Example',
-      module: 'CMPG323',
-      hours: 20,
-      rate: 150,
-      amount: 3000,
-      status: 'Approved',
-      date: '28 Aug 2026',
-    },
-    {
-      id: 'CLM-002',
-      student: 'Student Example',
-      module: 'CMPG321',
-      hours: 15,
-      rate: 150,
-      amount: 2250,
-      status: 'Approved',
-      date: '29 Aug 2026',
-    },
-    {
-      id: 'CLM-003',
-      student: 'Student Example',
-      module: 'CMPG323',
-      hours: 18,
-      rate: 150,
-      amount: 2700,
-      status: 'Approved',
-      date: '30 Aug 2026',
-    },
-    {
-      id: 'CLM-004',
-      student: 'Student Example',
-      module: 'CMPG315',
-      hours: 22,
-      rate: 150,
-      amount: 3300,
-      status: 'Approved',
-      date: '31 Aug 2026',
-    },
-    {
-      id: 'CLM-005',
-      student: 'Student Example',
-      module: 'CMPG323',
-      hours: 16,
-      rate: 150,
-      amount: 2400,
-      status: 'Approved',
-      date: '31 Aug 2026',
-    },
-  ];
+  useEffect(() => {
+    let isMounted = true;
 
-  const filteredClaims = claims.filter(
-    (claim) =>
-      claim.id
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      claim.student
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase()) ||
-      claim.module
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-  );
+    apiGet('/admin/claims/export')
+      .then((result) => {
+        if (!Array.isArray(result?.claims)) {
+          throw new Error('The server returned an invalid claims response.');
+        }
+        if (isMounted) setClaims(result.claims);
+      })
+      .catch((requestError) => {
+        console.error('Error loading claims for payment export:', requestError);
+        if (isMounted) setError(requestError.message || 'Could not load claims.');
+      })
+      .finally(() => {
+        if (isMounted) setLoading(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const normalizedSearch = searchTerm.trim().toLowerCase();
+  const filteredClaims = claims.filter((claim) => {
+    const matchesSearch = [
+      claim.reference_number,
+      claim.id,
+      claim.student,
+      claim.module,
+    ].some((value) => String(value ?? '').toLowerCase().includes(normalizedSearch));
+    const claimDate = new Date(claim.date).toISOString().slice(0, 10);
+    const matchesStatus = statusFilter === 'All' || claim.status === statusFilter;
+
+    return matchesSearch
+      && matchesStatus
+      && (!dateFrom || claimDate >= dateFrom)
+      && (!dateTo || claimDate <= dateTo);
+  });
 
   const toggleClaim = (id) => {
     if (selectedClaims.includes(id)) {
@@ -88,12 +70,13 @@ const ExportPayments = () => {
   };
 
   const toggleAll = () => {
-    if (selectedClaims.length === filteredClaims.length) {
-      setSelectedClaims([]);
+    const visibleIds = filteredClaims.map((claim) => claim.id);
+    const allVisibleSelected = visibleIds.every((id) => selectedClaims.includes(id));
+
+    if (allVisibleSelected) {
+      setSelectedClaims(selectedClaims.filter((id) => !visibleIds.includes(id)));
     } else {
-      setSelectedClaims(
-        filteredClaims.map((claim) => claim.id)
-      );
+      setSelectedClaims([...new Set([...selectedClaims, ...visibleIds])]);
     }
   };
 
@@ -112,29 +95,95 @@ const ExportPayments = () => {
   );
 
   const formatCurrency = (amount) =>
-    `R ${amount.toLocaleString('en-ZA')}`;
+    `R ${Number(amount).toLocaleString('en-ZA')}`;
+
+  const downloadFile = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const exportExcel = () => {
-    if (selectedClaims.length === 0) {
-      alert('Please select at least one claim.');
+    if (!selectedClaimData.length) {
+      setError('Please select at least one claim to export.');
       return;
     }
 
-    alert(
-      `Exporting ${selectedClaims.length} claims to Excel.`
+    const columns = [
+      ['Claim ID', (claim) => claim.reference_number || claim.id],
+      ['Student', (claim) => claim.student],
+      ['Module', (claim) => claim.module],
+      ['Hours', (claim) => claim.hours],
+      ['Rate', (claim) => claim.rate],
+      ['Amount', (claim) => claim.amount],
+      ['Status', (claim) => claim.status],
+      ['Date', (claim) => new Date(claim.date).toISOString().slice(0, 10)],
+    ];
+    const escapeCsv = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
+    const rows = [
+      columns.map(([heading]) => escapeCsv(heading)).join(','),
+      ...selectedClaimData.map((claim) =>
+        columns.map(([, getValue]) => escapeCsv(getValue(claim))).join(',')
+      ),
+    ];
+
+    setError('');
+    downloadFile(
+      new Blob([`\uFEFF${rows.join('\r\n')}`], { type: 'text/csv;charset=utf-8' }),
+      'payment-claims.csv'
     );
   };
 
-  const exportPDF = () => {
-    if (selectedClaims.length === 0) {
-      alert('Please select at least one claim.');
+  const exportPDF = async () => {
+    if (!selectedClaimData.length) {
+      setError('Please select at least one claim to export.');
       return;
     }
 
-    alert(
-      `Exporting ${selectedClaims.length} claims to PDF.`
-    );
+    setError('');
+    setExporting(true);
+    try {
+      const response = await fetch('/api/admin/claims/export', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ claims: selectedClaimData.map((claim) => claim.id) }),
+      });
+
+      if (!response.ok) {
+        const result = await response.json().catch(() => null);
+        throw new Error(result?.error || result?.message || `Export failed (${response.status}).`);
+      }
+
+      downloadFile(await response.blob(), 'payment-claims.zip');
+    } catch (exportError) {
+      console.error('Error exporting claims as PDF:', exportError);
+      setError(exportError.message || 'Could not export claims.');
+    } finally {
+      setExporting(false);
+    }
   };
+
+  const exportDates = selectedClaimData
+    .map((claim) => new Date(claim.date))
+    .sort((first, second) => first - second);
+  const formatPeriodDate = (value) =>
+    value.toLocaleDateString('en-ZA', { month: 'long', year: 'numeric' });
+  const exportPeriod = exportDates.length
+    ? formatPeriodDate(exportDates[0]) === formatPeriodDate(exportDates[exportDates.length - 1])
+      ? formatPeriodDate(exportDates[0])
+      : `${formatPeriodDate(exportDates[0])} - ${formatPeriodDate(exportDates[exportDates.length - 1])}`
+    : '—';
+  const formatDate = (value) => new Date(value).toLocaleDateString('en-ZA', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -204,6 +253,8 @@ const ExportPayments = () => {
                     </label>
 
                     <select
+                      value={statusFilter}
+                      onChange={(event) => setStatusFilter(event.target.value)}
                       className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
                     >
                       <option>Approved</option>
@@ -219,6 +270,8 @@ const ExportPayments = () => {
                     </label>
                     <input
                       type="date"
+                      value={dateFrom}
+                      onChange={(event) => setDateFrom(event.target.value)}
                       className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
                     />
                   </div>
@@ -230,6 +283,8 @@ const ExportPayments = () => {
                     </label>
                     <input
                       type="date"
+                      value={dateTo}
+                      onChange={(event) => setDateTo(event.target.value)}
                       className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
                     />
                   </div>
@@ -322,9 +377,10 @@ const ExportPayments = () => {
                           <input
                             type="checkbox"
                             checked={
-                              selectedClaims.length ===
-                                filteredClaims.length &&
-                              filteredClaims.length > 0
+                              filteredClaims.length > 0 &&
+                              filteredClaims.every((claim) =>
+                                selectedClaims.includes(claim.id)
+                              )
                             }
                             onChange={toggleAll}
                             className="w-4 h-4 accent-primary"
@@ -392,7 +448,7 @@ const ExportPayments = () => {
                           </td>
 
                           <td className="px-5 py-5 font-semibold text-dark font-inter">
-                            {claim.id}
+                            {claim.reference_number || claim.id}
                           </td>
 
                           <td className="px-5 py-5 text-dark font-inter">
@@ -420,7 +476,7 @@ const ExportPayments = () => {
                           </td>
 
                           <td className="px-5 py-5 text-sm text-neutral font-inter">
-                            {claim.date}
+                            {formatDate(claim.date)}
                           </td>
 
                         </tr>
@@ -435,7 +491,9 @@ const ExportPayments = () => {
                             colSpan="9"
                             className="px-5 py-10 text-center text-neutral font-inter"
                           >
-                            No approved claims found matching your search.
+                            {loading
+                              ? 'Loading approved claims...'
+                              : 'No approved claims found matching your filters.'}
                           </td>
 
                         </tr>
@@ -499,7 +557,7 @@ const ExportPayments = () => {
                     </p>
 
                     <p className="text-xl font-poppins font-semibold text-dark mt-1">
-                      August 2026
+                      {exportPeriod}
                     </p>
                   </div>
 
@@ -509,16 +567,18 @@ const ExportPayments = () => {
 
                   <button
                     onClick={exportPDF}
+                    disabled={exporting || loading || selectedClaims.length === 0}
                     className="px-6 py-3 border-2 border-primary text-primary rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
                   >
-                    Export PDF
+                    {exporting ? 'Exporting...' : 'Export PDF'}
                   </button>
 
                   <button
                     onClick={exportExcel}
+                    disabled={loading || selectedClaims.length === 0}
                     className="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
                   >
-                    Export Excel
+                    Export CSV
                   </button>
 
                 </div>
@@ -526,6 +586,12 @@ const ExportPayments = () => {
               </Card>
 
             </section>
+
+            {error && (
+              <p role="alert" className="mt-4 text-sm text-error font-inter">
+                {error}
+              </p>
+            )}
 
           </div>
 
