@@ -1,90 +1,77 @@
+
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { apiGet } from '../api';
 
 const AppointmentApprovals = () => {
   const navigate = useNavigate();
 
-  const appointments = [
-    {
-      id: 1,
-      reference: 'APP-2026-001',
-      studentNumber: '12345678',
-      studentName: 'Student Example',
-      email: 'student@nwu.ac.za',
-      moduleCode: 'CMPG323',
-      moduleName: 'Software Engineering',
-      lecturer: 'Lecturer Example',
-      position: 'Student Assistant',
-      hoursLimit: 10,
-      submittedDate: '13 September 2026',
-      status: 'Pending',
-    },
-    {
-      id: 2,
-      reference: 'APP-2026-002',
-      studentNumber: '23456789',
-      studentName: 'Student Example',
-      email: 'student@nwu.ac.za',
-      moduleCode: 'CMPG321',
-      moduleName: 'Advanced Databases',
-      lecturer: 'Lecturer Example',
-      position: 'Student Assistant',
-      hoursLimit: 12,
-      submittedDate: '12 September 2026',
-      status: 'Pending',
-    },
-    {
-      id: 3,
-      reference: 'APP-2026-003',
-      studentNumber: '34567890',
-      studentName: 'Student Example',
-      email: 'student@nwu.ac.za',
-      moduleCode: 'CMPG315',
-      moduleName: 'Programming',
-      lecturer: 'Lecturer Example',
-      position: 'Student Assistant',
-      hoursLimit: 8,
-      submittedDate: '10 September 2026',
-      status: 'Approved',
-    },
-    {
-      id: 4,
-      reference: 'APP-2026-004',
-      studentNumber: '45678901',
-      studentName: 'Student Example',
-      email: 'student@nwu.ac.za',
-      moduleCode: 'CMPG323',
-      moduleName: 'Software Engineering',
-      lecturer: 'Lecturer Example',
-      position: 'Student Assistant',
-      hoursLimit: 10,
-      submittedDate: '08 September 2026',
-      status: 'Rejected',
-    },
-  ];
+  const [pendingAppointments, setPendingAppointments] = useState([]);
+  const [historyAppointments, setHistoryAppointments] = useState([]);
 
-  const pendingAppointments = appointments.filter(
-    (appointment) => appointment.status === 'Pending'
-  );
+  const [stats, setStats] = useState({
+    total_pending: 0,
+    total_approved: 0,
+    total_rejected: 0,
+    total_returned: 0,
+  });
 
-  const historyAppointments = appointments.filter(
-    (appointment) => appointment.status !== 'Pending'
-  );
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  const approvedAppointments = appointments.filter(
-    (appointment) => appointment.status === 'Approved'
-  );
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        setLoading(true);
+        setError('');
 
-  const rejectedAppointments = appointments.filter(
-    (appointment) => appointment.status === 'Rejected'
-  );
+        const response = await apiGet('/admin/appointments');
 
-  const returnedAppointments = appointments.filter(
-    (appointment) => appointment.status === 'Returned'
-  );
+        setPendingAppointments(response?.pending || []);
+        setHistoryAppointments(response?.history || []);
+
+        setStats(
+          response?.stats || {
+            total_pending: 0,
+            total_approved: 0,
+            total_rejected: 0,
+            total_returned: 0,
+          }
+        );
+      } catch (err) {
+        console.error('Failed to load appointments:', err);
+        setError('Failed to load appointments. Please try again.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAppointments();
+  }, []);
+
+  const formatDate = (dateString) => {
+    if (!dateString) {
+      return '-';
+    }
+
+    return new Date(dateString).toLocaleDateString('en-ZA', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
+
+  const handleReviewAppointment = (appointment) => {
+    navigate(`/appointment-review/${appointment.position_id}`, {
+      state: {
+        appointment,
+      },
+    });
+  };
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -126,7 +113,7 @@ const AppointmentApprovals = () => {
                   </p>
 
                   <p className="mt-3 text-3xl font-poppins font-bold text-primary">
-                    {pendingAppointments.length}
+                    {stats.total_pending}
                   </p>
 
                   <p className="mt-1 text-sm font-inter text-neutral">
@@ -140,7 +127,7 @@ const AppointmentApprovals = () => {
                   </p>
 
                   <p className="mt-3 text-3xl font-poppins font-bold text-primary">
-                    {approvedAppointments.length}
+                    {stats.total_approved}
                   </p>
 
                   <p className="mt-1 text-sm font-inter text-neutral">
@@ -154,7 +141,7 @@ const AppointmentApprovals = () => {
                   </p>
 
                   <p className="mt-3 text-3xl font-poppins font-bold text-primary">
-                    {rejectedAppointments.length}
+                    {stats.total_rejected}
                   </p>
 
                   <p className="mt-1 text-sm font-inter text-neutral">
@@ -168,7 +155,7 @@ const AppointmentApprovals = () => {
                   </p>
 
                   <p className="mt-3 text-3xl font-poppins font-bold text-primary">
-                    {returnedAppointments.length}
+                    {stats.total_returned}
                   </p>
 
                   <p className="mt-1 text-sm font-inter text-neutral">
@@ -192,113 +179,118 @@ const AppointmentApprovals = () => {
 
               <Card>
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[1100px]">
-                    <thead className="bg-primary-lightest">
-                      <tr>
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Reference
-                        </th>
+                  {loading ? (
+                    <div className="px-6 py-10 text-center">
+                      <p className="text-neutral font-inter">
+                        Loading appointments...
+                      </p>
+                    </div>
+                  ) : error ? (
+                    <div className="px-6 py-10 text-center">
+                      <h3 className="text-lg font-semibold text-dark font-poppins">
+                        Unable to Load Appointments
+                      </h3>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Student
-                        </th>
+                      <p className="mt-2 text-sm text-neutral font-inter">
+                        {error}
+                      </p>
+                    </div>
+                  ) : pendingAppointments.length === 0 ? (
+                    <div className="px-6 py-10 text-center">
+                      <h3 className="text-lg font-semibold text-dark font-poppins">
+                        No Pending Appointments
+                      </h3>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Module
-                        </th>
+                      <p className="mt-2 text-sm text-neutral font-inter">
+                        There are currently no appointments awaiting review.
+                      </p>
+                    </div>
+                  ) : (
+                    <table className="w-full min-w-[1100px]">
+                      <thead className="bg-primary-lightest">
+                        <tr>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Reference
+                          </th>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Lecturer
-                        </th>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Student
+                          </th>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Position
-                        </th>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Module
+                          </th>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Hours
-                        </th>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Lecturer
+                          </th>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Date
-                        </th>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Date
+                          </th>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Status
-                        </th>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Status
+                          </th>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {pendingAppointments.map((appointment) => (
-                        <tr
-                          key={appointment.id}
-                          className="border-t border-neutral/30 transition hover:bg-primary-lightest/30"
-                        >
-                          <td className="p-4 font-inter font-semibold text-dark">
-                            {appointment.reference}
-                          </td>
-
-                          <td className="p-4 font-inter">
-                            <p className="text-dark">
-                              {appointment.studentName}
-                            </p>
-
-                            <p className="mt-1 text-sm text-neutral">
-                              {appointment.studentNumber}
-                            </p>
-                          </td>
-
-                          <td className="p-4 font-inter text-dark">
-                            {appointment.moduleCode}
-                          </td>
-
-                          <td className="p-4 font-inter text-dark">
-                            {appointment.lecturer}
-                          </td>
-
-                          <td className="p-4 font-inter text-dark">
-                            {appointment.position}
-                          </td>
-
-                          <td className="p-4 font-inter text-dark">
-                            {appointment.hoursLimit}
-                          </td>
-
-                          <td className="p-4 text-sm font-inter text-neutral">
-                            {appointment.submittedDate}
-                          </td>
-
-                          <td className="p-4">
-                            <StatusBadge status={appointment.status} />
-                          </td>
-
-                          <td className="p-4">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                navigate(
-                                  `/appointment-review/${appointment.id}`,
-                                  {
-                                    state: {
-                                      appointment,
-                                    },
-                                  }
-                                )
-                              }
-                              className="rounded-xl bg-primary px-4 py-2 font-inter font-semibold text-white transition hover:bg-primary-dark"
-                            >
-                              Review
-                            </button>
-                          </td>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Action
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+
+                      <tbody>
+                        {pendingAppointments.map((appointment) => (
+                          <tr
+                            key={appointment.position_id}
+                            className="border-t border-neutral/30 transition hover:bg-primary-lightest/30"
+                          >
+                            <td className="p-4 font-inter font-semibold text-dark">
+                              {appointment.reference}
+                            </td>
+
+                            <td className="p-4 font-inter">
+                              <p className="text-dark">
+                                {appointment.student}
+                              </p>
+
+                              <p className="mt-1 text-sm text-neutral">
+                                {appointment.student_number}
+                              </p>
+                            </td>
+
+                            <td className="p-4 font-inter text-dark">
+                              {appointment.module_code}
+                            </td>
+
+                            <td className="p-4 font-inter text-dark">
+                              {appointment.lecturer}
+                            </td>
+
+                            <td className="p-4 text-sm font-inter text-neutral">
+                              {formatDate(appointment.date_submitted)}
+                            </td>
+
+                            <td className="p-4">
+                              <StatusBadge status={appointment.status} />
+                            </td>
+
+                            <td className="p-4">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  handleReviewAppointment(appointment)
+                                }
+                                className="rounded-xl bg-primary px-4 py-2 font-inter font-semibold text-white transition hover:bg-primary-dark"
+                              >
+                                Review
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
               </Card>
             </section>
@@ -317,76 +309,80 @@ const AppointmentApprovals = () => {
 
               <Card>
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[1000px]">
-                    <thead className="bg-primary-lightest">
-                      <tr>
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Reference
-                        </th>
+                  {historyAppointments.length === 0 ? (
+                    <div className="px-6 py-10 text-center">
+                      <h3 className="text-lg font-semibold text-dark font-poppins">
+                        No Approval History
+                      </h3>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Student
-                        </th>
+                      <p className="mt-2 text-sm text-neutral font-inter">
+                        No appointment decisions have been recorded yet.
+                      </p>
+                    </div>
+                  ) : (
+                    <table className="w-full min-w-[1000px]">
+                      <thead className="bg-primary-lightest">
+                        <tr>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Reference
+                          </th>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Module
-                        </th>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Student
+                          </th>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Lecturer
-                        </th>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Module
+                          </th>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Position
-                        </th>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Lecturer
+                          </th>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Date
-                        </th>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Date
+                          </th>
 
-                        <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {historyAppointments.map((appointment) => (
-                        <tr
-                          key={appointment.id}
-                          className="border-t border-neutral/30 transition hover:bg-primary-lightest/30"
-                        >
-                          <td className="p-4 font-inter font-semibold text-dark">
-                            {appointment.reference}
-                          </td>
-
-                          <td className="p-4 font-inter text-dark">
-                            {appointment.studentName}
-                          </td>
-
-                          <td className="p-4 font-inter text-dark">
-                            {appointment.moduleCode}
-                          </td>
-
-                          <td className="p-4 font-inter text-dark">
-                            {appointment.lecturer}
-                          </td>
-
-                          <td className="p-4 font-inter text-dark">
-                            {appointment.position}
-                          </td>
-
-                          <td className="p-4 text-sm font-inter text-neutral">
-                            {appointment.submittedDate}
-                          </td>
-
-                          <td className="p-4">
-                            <StatusBadge status={appointment.status} />
-                          </td>
+                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
+                            Status
+                          </th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+
+                      <tbody>
+                        {historyAppointments.map((appointment) => (
+                          <tr
+                            key={appointment.position_id}
+                            className="border-t border-neutral/30 transition hover:bg-primary-lightest/30"
+                          >
+                            <td className="p-4 font-inter font-semibold text-dark">
+                              {appointment.reference}
+                            </td>
+
+                            <td className="p-4 font-inter text-dark">
+                              {appointment.student}
+                            </td>
+
+                            <td className="p-4 font-inter text-dark">
+                              {appointment.module_code}
+                            </td>
+
+                            <td className="p-4 font-inter text-dark">
+                              {appointment.lecturer}
+                            </td>
+
+                            <td className="p-4 text-sm font-inter text-neutral">
+                              {formatDate(appointment.date_submitted)}
+                            </td>
+
+                            <td className="p-4">
+                              <StatusBadge status={appointment.status} />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
               </Card>
             </section>
