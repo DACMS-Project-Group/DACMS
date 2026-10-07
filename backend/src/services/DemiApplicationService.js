@@ -26,6 +26,10 @@ class DemiApplicationService {
         return this.demiApplicationRepository.findByStudentId(studentId);
     }
 
+    async getApplicationNotificationDetails(applicationId) {
+        return this.demiApplicationRepository.getApplicationNotificationDetails(applicationId);
+    }
+
     async applyForListing(studentId, listingId) {
         if (!listingId) {
             throw new Error('listingId is required.');

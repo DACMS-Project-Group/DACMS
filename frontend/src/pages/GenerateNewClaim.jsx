@@ -11,6 +11,7 @@ const GenerateNewClaim = () => {
   const [applications, setApplications] = useState([]);
   const [positions, setPositions] = useState([]);
   const [sessions, setSessions] = useState([]);
+  const [claims, setClaims] = useState([]);
   const [student, setStudent] = useState(null);
 
   const [selectedApplicationId, setSelectedApplicationId] = useState('');
@@ -35,10 +36,12 @@ const GenerateNewClaim = () => {
         const [
           applicationsResponse,
           positionsResponse,
+          claimsResponse,
           studentResponse,
         ] = await Promise.all([
           apiGet('/student/applications'),
           apiGet('/student/positions'),
+          apiGet('/student/claims'),
           apiGet('/student/profile/'),
         ]);
 
@@ -52,11 +55,17 @@ const GenerateNewClaim = () => {
             ? positionsResponse
             : positionsResponse?.positions || [];
 
+        const claimData =
+          Array.isArray(claimsResponse)
+            ? claimsResponse
+            : claimsResponse?.claims || [];
+
         const studentData =
           studentResponse?.student ?? studentResponse;
 
         setApplications(applicationData);
         setPositions(positionData);
+        setClaims(claimData);
         setStudent(studentData);
 
         /*
@@ -205,6 +214,24 @@ const GenerateNewClaim = () => {
    * are available for claiming.
    */
   const approvedSessions = useMemo(() => {
+    const applicationClaims = claims.filter((claim) => {
+      const claimApplicationId =
+        claim.application_id ??
+        claim.ApplicationID;
+
+      return String(claimApplicationId) === String(selectedApplicationId);
+    });
+    const latestClaimSubmission = applicationClaims.reduce((latest, claim) => {
+      const submittedAt = new Date(
+        claim.submission_date ??
+        claim.SubmissionDate
+      ).getTime();
+
+      return Number.isFinite(submittedAt) && submittedAt > latest
+        ? submittedAt
+        : latest;
+    }, 0);
+
     return sessions.filter((session) => {
       const lecturerApproval =
         session.lecturer_approval ??
@@ -213,10 +240,13 @@ const GenerateNewClaim = () => {
       const endTime =
         session.end_time ??
         session.EndTime;
+      const endedAt = endTime ? new Date(endTime).getTime() : NaN;
 
-      return lecturerApproval === true && endTime;
+      return lecturerApproval === true &&
+        Number.isFinite(endedAt) &&
+        (!latestClaimSubmission || endedAt > latestClaimSubmission);
     });
-  }, [sessions]);
+  }, [claims, selectedApplicationId, sessions]);
 
   /*
    * Position information.

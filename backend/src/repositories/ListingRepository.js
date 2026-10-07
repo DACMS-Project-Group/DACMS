@@ -6,14 +6,25 @@ class ListingRepository extends BaseRepository {
         super('"DEMI_LISTING"', DemiListing);
     }
 
-    async getOpenListings() {
+    async getListingsForLecturer(lecturerId) {
         const rows = await this.query(
             `
-            SELECT "ListingID", "ModuleID", "Deadline","MinimumGrade"
-            FROM "DEMI_LISTING"
-            WHERE "Deadline" > NOW()
-            ORDER BY "Deadline" ASC
-            `
+            SELECT
+                l."ListingID",
+                l."ModuleID",
+                m."ModuleCode",
+                m."ModuleName",
+                l."Deadline",
+                l."MinimumGrade"
+            FROM "DEMI_LISTING" l
+            JOIN "NWU_MODULE" m
+                ON m."ModuleID" = l."ModuleID"
+            WHERE l."LecturerID" = $1
+            ORDER BY
+                CASE WHEN l."Deadline" > NOW() THEN 0 ELSE 1 END,
+                l."Deadline" ASC
+            `,
+            [lecturerId]
         );
         return rows; 
     }
@@ -46,11 +57,12 @@ class ListingRepository extends BaseRepository {
         const rows = await this.query(
             `
             UPDATE "DEMI_LISTING"
-            SET "ModuleID" = $1, "LecturerID" = $2, "Deadline" = $3, "MinimumGrade" = $4
-            WHERE "ListingID" = $5
+            SET "ModuleID" = $1, "Deadline" = $2, "MinimumGrade" = $3
+            WHERE "ListingID" = $4
+              AND "LecturerID" = $5
             RETURNING *
             `,
-            [moduleId, lecturerId, deadline, minimumGrade, listingId]
+            [moduleId, deadline, minimumGrade, listingId, lecturerId]
         );
         return rows[0] || null;
     }

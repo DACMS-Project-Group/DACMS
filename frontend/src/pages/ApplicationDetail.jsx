@@ -67,6 +67,13 @@ function mapApplication(app, lecturerFromPosition = '') {
       app.id ??
       '',
 
+    reference:
+      app.reference ??
+      app.ApplicationReference ??
+      app.Reference ??
+      app.application_reference ??
+      '',
+
     moduleCode:
       app.moduleCode ??
       app.module_code ??
@@ -340,7 +347,7 @@ const ApplicationDetail = () => {
               </h2>
 
               <p className="text-neutral mt-2">
-                Application ID: {application.id}
+                Application Reference: {application.reference || '—'}
               </p>
             </div>
 
@@ -389,11 +396,11 @@ const ApplicationDetail = () => {
 
                 <div>
                   <p className="text-sm text-neutral">
-                    Application ID
+                    Application Reference
                   </p>
 
                   <p className="font-semibold text-dark mt-1">
-                    {application.id}
+                    {application.reference || '—'}
                   </p>
                 </div>
 

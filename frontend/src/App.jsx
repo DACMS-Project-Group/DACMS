@@ -39,7 +39,7 @@ import AppointmentReview from './pages/AppointmentReview';
 import ReviewClaims from './pages/ReviewClaims';
 
 // ===== NOTIFICATION BADGE =====
-import { NotificationProvider } from './contexts/NotificationContext';
+import { NotificationProvider } from './contexts/notificationContext';
 
 // ===== SHARED PAGES =====
 import Notifications from './pages/Notifications';

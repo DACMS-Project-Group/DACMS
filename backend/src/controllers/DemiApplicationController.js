@@ -30,6 +30,18 @@ class DemiApplicationController {
             const { listingId } = req.body;
 
             const application = await demiApplicationService.applyForListing(studentId, listingId);
+            const details = await demiApplicationService.getApplicationNotificationDetails(
+                application.application_id
+            );
+            await NotificationService.sendNotification({
+                recipientId: details.LecturerID,
+                subject: 'New assistant application to review',
+                type: 'Application Review',
+                message:
+                    `Application ${details.ApplicationReference || `#${details.ApplicationID}`} ` +
+                    `from ${details.StudentName} (${details.StudentNumber}) for ` +
+                    `${details.ModuleCode} needs your review. Open /application-review/${details.ApplicationID}.`
+            });
             res.status(201).json({ application });
         } catch (err) {
             // Known validation errors -> 400

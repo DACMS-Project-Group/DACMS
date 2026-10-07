@@ -3,6 +3,7 @@ class DemiApplication {
         application_id = null,
         student_id,
         listing_id,
+        reference,
         application_status,
         verification_eligibility_status,
         date_submitted = new Date(),
@@ -10,6 +11,7 @@ class DemiApplication {
         this.application_id = application_id;
         this.student_id = student_id;
         this.listing_id = listing_id;
+        this.reference = reference;
         this.application_status = application_status;
         this.verification_eligibility_status = verification_eligibility_status;
         this.date_submitted = date_submitted;
@@ -20,6 +22,7 @@ class DemiApplication {
             application_id: row.ApplicationID,
             student_id: row.StudentID,
             listing_id: row.ListingID,
+            reference: row.Reference,
             application_status: row.ApplicationStatus,
             verification_eligibility_status: row.VerificationEligibilityStatus,
             date_submitted: row.DateSubmitted,
@@ -31,6 +34,7 @@ class DemiApplication {
             ApplicationID: this.application_id,
             StudentID: this.student_id,
             ListingID: this.listing_id,
+            Reference: this.reference,
             ApplicationStatus: this.application_status,
             VerificationEligibilityStatus: this.verification_eligibility_status,
             DateSubmitted: this.date_submitted,

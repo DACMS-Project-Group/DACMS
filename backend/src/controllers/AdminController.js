@@ -1,4 +1,5 @@
 import AdminService from '../services/AdminService.js';
+import NotificationService from '../services/NotificationService.js';
 import ModuleBudget from '../models/ModuleBudget.js';
 import ExportedClaim from '../templates/ExportedClaim.js';
 import AdmZip from 'adm-zip';
@@ -104,6 +105,29 @@ class AdminController {
             const data = await AdminService.approveClaim(claim_id);
 
             if (data) {
+                const claim = data.data;
+                const decisionMessage =
+                    `Claim ${claim.ClaimReferenceNumber} for ${claim.ModuleCode} has been ` +
+                    `approved by the administrator as the final claim decision.`;
+                await Promise.all([
+                    NotificationService.sendNotification({
+                        recipientId: claim.StudentID,
+                        subject: 'Remuneration claim approved',
+                        type: 'Claim Verified',
+                        message:
+                            `${decisionMessage} Approved hours: ${claim.TotalHoursClaimed}; ` +
+                            `amount: R${Number(claim.TotalClaimAmount).toFixed(2)}. ` +
+                            `View /claim-detail/${claim.ClaimID}.`
+                    }),
+                    NotificationService.sendNotification({
+                        recipientId: claim.LecturerID,
+                        subject: 'Remuneration claim approval completed',
+                        type: 'Claim Verified',
+                        message:
+                            `${decisionMessage} No further review is required. ` +
+                            `View /review-claim/${claim.ClaimID}.`
+                    })
+                ]);
                 await writeAuditLog({
                     userId: adminId,
                     role: 'admin',
@@ -155,6 +179,32 @@ class AdminController {
         try {
             const adminId = getAuthUserId(req);
             const data = await AdminService.reviewPosition(position_id, action, comment);
+            const details = data.data.notificationDetails;
+            const reference = details.applicationReference || `#${details.applicationId}`;
+            const nextStep = action === 'Approved'
+                ? 'The appointment is approved and the student can review the appointment details.'
+                : action === 'Returned'
+                    ? 'The application was returned for changes; the student should review the administrator comment.'
+                    : 'The appointment was not approved; the student should review the administrator comment.';
+            const decisionSummary =
+                `Position decision for application ${reference}, ${details.studentName} ` +
+                `(${details.studentNumber}), ${details.moduleCode}: ${action.toLowerCase()}. ` +
+                `${nextStep} Administrator comment: ${comment?.trim() || 'No comment provided.'} ` +
+                `Application #${details.applicationId}.`;
+            await Promise.all([
+                NotificationService.sendNotification({
+                    recipientId: details.studentId,
+                    subject: `Assistant appointment ${action.toLowerCase()}`,
+                    type: `Position ${action}`,
+                    message: `${decisionSummary} View /application-detail/${details.applicationId}.`
+                }),
+                NotificationService.sendNotification({
+                    recipientId: details.lecturerId,
+                    subject: `Assistant appointment ${action.toLowerCase()}`,
+                    type: `Position ${action}`,
+                    message: `${decisionSummary} View /review-applications.`
+                })
+            ]);
 
             if (data) {
                 await writeAuditLog({
@@ -171,11 +221,27 @@ class AdminController {
 
             return res.status(200).json({
                 message: `Position decision processed successfully (${action})`,
-                data: data.data
+                data: {
+                    position_id: data.data.position_id,
+                    status: data.data.status,
+                    comment: data.data.comment
+                }
             });
         } catch (error) {
-            if (error.message.startsWith('Invalid action') || error.message === 'Position not found') {
+            if (
+                error.message.startsWith('Invalid action') ||
+                error.message === 'Position ID must be a positive integer'
+            ) {
                 return res.status(400).json({ error: error.message });
+            }
+            if (error.message === 'Position not found') {
+                return res.status(404).json({ error: error.message });
+            }
+            if (
+                error.message === 'Position is not awaiting admin review' ||
+                error.message === 'Application is not approved for admin review'
+            ) {
+                return res.status(409).json({ error: error.message });
             }
             return res.status(500).json({ error: error.message });
         }

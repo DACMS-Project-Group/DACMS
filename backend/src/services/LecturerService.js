@@ -141,12 +141,17 @@ class LecturerService {
         return application;
     }
 
-    async lecturerReviewApplication(applicationId, decision) {
-        if (!decision) {
-            throw new Error('Decision is required');
+    async lecturerReviewApplication(lecturerId, applicationId, decision, comment) {
+        if (!['Approved', 'Rejected', 'Returned'].includes(decision)) {
+            throw new Error('Decision must be Approved, Rejected, or Returned');
         }
 
-        return this.demiApplicationRepository.lecturerReviewApplication(applicationId, decision);
+        return this.demiApplicationRepository.lecturerReviewApplication(
+            lecturerId,
+            applicationId,
+            decision,
+            comment
+        );
     }
 
     async fetchSessionsForLecturer(lecturerId) {
@@ -172,8 +177,8 @@ class LecturerService {
     }
 
     async reviewSessionByLecturer(sessionId, decision) {
-        if (!decision) {
-            throw new Error('Decision is required');
+        if (typeof decision !== 'boolean') {
+            throw new Error('Decision must be a boolean');
         }
 
         return this.workSessionRepository.reviewSessionByLecturer(sessionId, decision);
@@ -181,6 +186,14 @@ class LecturerService {
 
     async getStudentIdBySession(sessionId) {
         return this.workSessionRepository.getStudentIdFromSession(sessionId);
+    }
+
+    async getSessionNotificationDetails(sessionId) {
+        return this.workSessionRepository.getSessionNotificationDetails(sessionId);
+    }
+
+    async getApplicationNotificationDetails(applicationId) {
+        return this.demiApplicationRepository.getApplicationNotificationDetails(applicationId);
     }
 
     async getClaimsSummary(lecturerId) {
