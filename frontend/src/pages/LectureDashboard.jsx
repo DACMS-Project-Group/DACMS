@@ -310,19 +310,37 @@ const LectureDashboard = () => {
                         <div className="flex justify-between items-start gap-3">
                           <div className="min-w-0">
                             <p className="text-sm font-semibold text-dark font-inter">
-                              {session.Student ?? session.student ?? '—'}
+                              {session.StudentName ??
+                                session.student_name ??
+                                session.Student ??
+                                session.student ??
+                                '—'}
                             </p>
                             <p className="text-xs text-neutral mt-1 font-inter">
                               {session.ModuleCode ?? session.module_code ?? ''}
                             </p>
-                            {session.Date && (
+                            {(session.SessionDate ??
+                              session.session_date ??
+                              session.Date ??
+                              session.date) && (
                               <p className="text-xs text-neutral mt-1 font-inter">
-                                {formatDate(session.Date)}
+                                {formatDate(
+                                  session.SessionDate ??
+                                    session.session_date ??
+                                    session.Date ??
+                                    session.date
+                                )}
                               </p>
                             )}
                           </div>
                           <span className="shrink-0 text-sm font-semibold text-primary-dark font-inter">
-                            {session.Hours ?? session.hours ?? 0} hrs
+                            {Number(
+                              session.TotalHoursWorked ??
+                                session.total_hours_worked ??
+                                session.Hours ??
+                                session.hours ??
+                                0
+                            )} hrs
                           </span>
                         </div>
                       </div>
