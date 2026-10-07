@@ -1,11 +1,13 @@
 import ListingService from '../services/ListingService.js';
+import getAuthUserId from '../utils/getAuthUserId.js';
 
 class ListingController {
     
     static async fetchOpenListings(req, res) {
 
         try {
-            const listings = await ListingService.getOpenListings();
+            const lecturerId = getAuthUserId(req);
+            const listings = await ListingService.getOpenListings(lecturerId);
             return res.status(200).json(listings);
         } catch (error) {
             console.error('Error fetching open listings:', error);

@@ -6,8 +6,11 @@ class ListingService {
         this.listingRepository = new ListingRepository();
     }
 
-    async getOpenListings() {
-        const rows = await this.listingRepository.getOpenListings();
+    async getOpenListings(lecturerId) {
+        if (!lecturerId) {
+            throw new Error('lecturerId is required.');
+        }
+        const rows = await this.listingRepository.getOpenListings(lecturerId);
         return rows;
     }
 
