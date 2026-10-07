@@ -8,7 +8,7 @@ import { apiGet, apiPatch } from '../api';
 
 const AppointmentReview = () => {
   const navigate = useNavigate();
-  const { position_id } = useParams();
+  const { id: position_id } = useParams();
 
   const [appointment, setAppointment] = useState(null);
   const [decision, setDecision] = useState('');
@@ -44,9 +44,6 @@ const AppointmentReview = () => {
 
     if (position_id) {
       fetchAppointment();
-    } else {
-      setLoading(false);
-      setError('No position ID was provided.');
     }
   }, [position_id]);
 
