@@ -6,11 +6,11 @@ class ListingService {
         this.listingRepository = new ListingRepository();
     }
 
-    async getOpenListings(lecturerId) {
+    async getListingsForLecturer(lecturerId) {
         if (!lecturerId) {
             throw new Error('lecturerId is required.');
         }
-        const rows = await this.listingRepository.getOpenListings(lecturerId);
+        const rows = await this.listingRepository.getListingsForLecturer(lecturerId);
         return rows;
     }
 
@@ -46,9 +46,16 @@ class ListingService {
             throw new Error('listingId is required.');
         }
 
+        if (!listingData.moduleId || !listingData.deadline || listingData.minimumGrade == null) {
+            throw new Error('moduleId, deadline, and minimumGrade are required.');
+        }
+
         listingData.lecturerId = getAuthUserId(req);
 
         const rows = await this.listingRepository.editListing(listingId, listingData);
+        if (!rows) {
+            throw new Error('Listing not found or you do not have permission to edit it.');
+        }
         return rows;
     }
 }

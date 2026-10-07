@@ -161,7 +161,7 @@ class NotificationService {
 
         //compile the email template
         const compiledMessage = await compileTemplate('email_format', {
-            title: notificationRows[0]?.Subject || 'New notification',
+            title: recipientRows[0].Title || '',
             name: recipientRows[0].FullName || 'Applicant',
             message: notificationRows[0]?.Message || 'You have a new notification.',
             sender: senderRows[0]?.FullName || 'Assistant Applications and Communications Management System'

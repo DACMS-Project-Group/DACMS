@@ -7,7 +7,7 @@ class ListingController {
 
         try {
             const lecturerId = getAuthUserId(req);
-            const listings = await ListingService.getOpenListings(lecturerId);
+            const listings = await ListingService.getListingsForLecturer(lecturerId);
             return res.status(200).json(listings);
         } catch (error) {
             console.error('Error fetching open listings:', error);
@@ -45,6 +45,12 @@ class ListingController {
             return res.status(200).json(updatedListing);
         } catch (error) {
             console.error('Error editing listing:', error);
+            if (error.message === 'Listing not found or you do not have permission to edit it.') {
+                return res.status(404).json({ error: error.message });
+            }
+            if (error.message === 'moduleId, deadline, and minimumGrade are required.') {
+                return res.status(400).json({ error: error.message });
+            }
             return res.status(500).json({ error: error.message });
         }
     }

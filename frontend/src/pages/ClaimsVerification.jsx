@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
-import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
 
 const ClaimsVerification = () => {
@@ -68,6 +67,23 @@ const ClaimsVerification = () => {
       return matchesSearch && matchesStatus;
     });
   }, [claims, searchTerm, statusFilter]);
+
+  const claimStatusClass = (status) => {
+    switch (status) {
+      case 'Pending':
+        return 'bg-light-grey text-neutral';
+      case 'Approved by Lecturer':
+        return 'bg-warning text-dark';
+      case 'Verified':
+        return 'bg-success text-white';
+      case 'Under Review':
+      case 'Rejected by Lecturer':
+      case 'Rejected':
+        return 'bg-error text-white';
+      default:
+        return 'bg-light-grey text-neutral';
+    }
+  };
 
   const formatAmount = (amount) => {
     return `R ${Number(amount || 0).toLocaleString('en-ZA', {
@@ -184,8 +200,9 @@ const ClaimsVerification = () => {
                     >
                       <option value="All">All Statuses</option>
                       <option value="Pending">Pending</option>
-                      <option value="Under Review">Under Review</option>
+                      <option value="Approved by Lecturer">Approved by Lecturer</option>
                       <option value="Verified">Verified</option>
+                      <option value="Rejected by Lecturer">Rejected by Lecturer</option>
                     </select>
                   </div>
                 </div>
@@ -370,9 +387,9 @@ const ClaimsVerification = () => {
                             </td>
 
                             <td className="p-4">
-                              <StatusBadge
-                                status={claim.claim_status}
-                              />
+                              <span className={`rounded-full px-3 py-1 text-sm font-semibold ${claimStatusClass(claim.claim_status)}`}>
+                                {claim.claim_status}
+                              </span>
                             </td>
 
                             <td className="p-4">
