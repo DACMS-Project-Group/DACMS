@@ -141,7 +141,7 @@ class AdminRepository {
         const query = `
             SELECT
                 dp."PositionID" AS position_id,
-                -- da."ReferenceNumber" AS reference,
+                da."Reference" AS reference,
                 CONCAT(
                     COALESCE(au_stud."Title", ''), ' ', COALESCE(au_stud."FName", ''), ' ', COALESCE(au_stud."LName", '')
                 ) AS student,
@@ -168,7 +168,7 @@ class AdminRepository {
 
         return result.rows.map((row) => ({
             position_id: row.position_id,
-            reference: '!! update data model: add ReferenceNumber to DEMI_APPLICATION',
+            reference: row.reference,
             student: row.student,
             student_number: row.student_number,
             module_code: row.module_code,
