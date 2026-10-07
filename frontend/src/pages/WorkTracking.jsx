@@ -58,17 +58,6 @@ const WorkTracking = () => {
     endTime: '',
   });
 
-  const activities = [
-    'Tutorial assistance',
-    'Student consultation',
-    'Practical assistance',
-    'Assignment assistance',
-    'Laboratory assistance',
-    'Marking / assessment assistance',
-    'Administrative assistance',
-    'Other',
-  ];
-
   useEffect(() => {
     let active = true;
 
@@ -482,21 +471,17 @@ const WorkTracking = () => {
                               >
                                 Activity
                               </label>
-                              <select
+                              <input
                                 id="activity"
                                 name="activity"
+                                type="text"
                                 value={formData.activity}
                                 onChange={handleChange}
                                 required
+                                maxLength={200}
+                                placeholder="Describe the work you performed"
                                 className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-                              >
-                                <option value="">Select an activity</option>
-                                {activities.map((activity) => (
-                                  <option key={activity} value={activity}>
-                                    {activity}
-                                  </option>
-                                ))}
-                              </select>
+                              />
                             </div>
 
                             <div>
