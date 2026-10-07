@@ -177,8 +177,8 @@ class LecturerService {
     }
 
     async reviewSessionByLecturer(sessionId, decision) {
-        if (!decision) {
-            throw new Error('Decision is required');
+        if (typeof decision !== 'boolean') {
+            throw new Error('Decision must be a boolean');
         }
 
         return this.workSessionRepository.reviewSessionByLecturer(sessionId, decision);

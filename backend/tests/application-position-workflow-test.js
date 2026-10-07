@@ -114,6 +114,32 @@ test('lecturer and admin decisions preserve the application-position checkpoint'
         assert.ok(rows[0].position_id);
 
         const positionId = rows[0].position_id;
+        const sessionResult = await pool.query(
+            `
+            INSERT INTO "WORK_SESSION"
+                ("PositionID", "ActivityDescription", "StartTime", "EndTime",
+                 "TotalHoursWorked", "EstimatedRemuneration", "LecturerApproval")
+            VALUES ($1, 'Workflow test session', NOW(), NOW(), 0, 0, true)
+            RETURNING "SessionID"
+            `,
+            [positionId]
+        );
+        const sessionId = sessionResult.rows[0].SessionID;
+        const unverifiedSession = await LecturerService.reviewSessionByLecturer(
+            sessionId,
+            false
+        );
+        assert.equal(unverifiedSession[0].LecturerApproval, false);
+        const verifiedSession = await LecturerService.reviewSessionByLecturer(
+            sessionId,
+            true
+        );
+        assert.equal(verifiedSession[0].LecturerApproval, true);
+        await assert.rejects(
+            LecturerService.reviewSessionByLecturer(sessionId, undefined),
+            { message: 'Decision must be a boolean' }
+        );
+
         await AdminService.reviewPosition(positionId, 'Approved', 'Admin approved');
         rows = await getApplicationState(approved.applicationId);
         assert.equal(rows[0].application_status, 'Approved');

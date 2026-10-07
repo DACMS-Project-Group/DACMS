@@ -40,11 +40,13 @@ class NotificationService {
             ioInstance.to(recipientSocketId).emit('newNotification', newNotification);
         }
         
-        try {
-            console.log((await this.sendEmailNotification({ senderId: senderId, recipientUserId: recipientId, notificationID: newNotification.NotificationID })).message);
-        } catch (error) {
-            console.error('Error sending email notification:', error);
-        }
+        this.sendEmailNotification({
+            senderId,
+            recipientUserId: recipientId,
+            notificationID: newNotification.NotificationID
+        })
+            .then(({ message: emailMessage }) => console.log(emailMessage))
+            .catch((error) => console.error('Error sending email notification:', error));
     
         return newNotification;
     }
