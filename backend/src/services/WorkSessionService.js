@@ -14,6 +14,10 @@ class WorkSessionService {
         return response;
     }
 
+    async getSessionNotificationDetails(sessionId) {
+        return this.workSessionRepository.getSessionNotificationDetails(sessionId);
+    }
+
     async listActivePositions(studentId) {
         return this.workSessionRepository.findActivePositionsForStudent(studentId);
     }

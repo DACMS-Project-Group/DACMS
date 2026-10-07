@@ -78,6 +78,29 @@ class DemiApplicationRepository extends BaseRepository {
         return studentId[0].StudentID;
     }
 
+    async getApplicationNotificationDetails(applicationId) {
+        const rows = await this.query(
+            `
+            SELECT
+                a."ApplicationID",
+                a."Reference" AS "ApplicationReference",
+                a."StudentID",
+                l."LecturerID",
+                CONCAT(au."FName", ' ', au."LName") AS "StudentName",
+                s."StudentNumber",
+                m."ModuleCode"
+            FROM "DEMI_APPLICATION" a
+            JOIN "STUDENT" s ON s."StudentID" = a."StudentID"
+            JOIN "APP_USER" au ON au."UserID" = s."StudentID"
+            JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+            WHERE a."ApplicationID" = $1
+            `,
+            [applicationId]
+        );
+        return rows[0] || null;
+    }
+
     /** Lecturer reviews assistant application */
 
     async ensurePositionForApprovedApplication(client, applicationId, studyLevel) {
@@ -149,10 +172,17 @@ class DemiApplicationRepository extends BaseRepository {
                     a."ApplicationID",
                     a."ApplicationStatus",
                     a."StudentID",
-                    s."StudyLevel"
+                    s."StudyLevel",
+                    a."Reference" AS "ApplicationReference",
+                    l."LecturerID",
+                    CONCAT(student_user."FName", ' ', student_user."LName") AS "StudentName",
+                    s."StudentNumber",
+                    m."ModuleCode"
                 FROM "DEMI_APPLICATION" a
                 JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
                 JOIN "STUDENT" s ON s."StudentID" = a."StudentID"
+                JOIN "APP_USER" student_user ON student_user."UserID" = s."StudentID"
+                JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
                 WHERE a."ApplicationID" = $1
                   AND l."LecturerID" = $2
                 FOR UPDATE OF a

@@ -117,6 +117,37 @@ class LecturerController {
                 decision,
                 comment
             );
+            const details = await LecturerService.getApplicationNotificationDetails(applicationId);
+            const decisionMessage = {
+                Approved: 'Your application has been approved by the lecturer and is awaiting administrator review. This is not a final appointment.',
+                Rejected: 'Your application was not approved. Review the lecturer comment and contact the lecturer if you need clarification.',
+                Returned: 'Your application was returned for changes. Review the lecturer comment and update your application.'
+            }[decision];
+            await NotificationService.sendNotification({
+                recipientId: details.StudentID,
+                subject: `Application ${decision.toLowerCase()}`,
+                type: `Application ${decision}`,
+                message:
+                    `${decisionMessage} Application ` +
+                    `${details.ApplicationReference || `#${details.ApplicationID}`} for ` +
+                    `${details.ModuleCode}. Lecturer comment: ${comment?.trim() || 'No comment provided.'} ` +
+                    `View /application-detail/${details.ApplicationID}.`
+            });
+            if (decision === 'Approved') {
+                const administratorIds = await NotificationService.getAdministratorIds();
+                await Promise.all(administratorIds.map((recipientId) =>
+                    NotificationService.sendNotification({
+                        recipientId,
+                        subject: 'Assistant appointment awaiting review',
+                        type: 'Position Review',
+                        message:
+                            `Application ${details.ApplicationReference || `#${details.ApplicationID}`} ` +
+                            `for ${details.StudentName} (${details.StudentNumber}) in ${details.ModuleCode} ` +
+                            `has lecturer approval and is awaiting your review. ` +
+                            `Open /appointment-approvals.`
+                    })
+                ));
+            }
             return res.status(200).json(data);
         } catch (error) {
             if (error.message.startsWith('Decision must be')) {
@@ -164,12 +195,19 @@ class LecturerController {
             const sessionId = req.params.id;
             const reviewedStatus = req.body.decision ?? req.body.reviewedStatus;
             const reviewedSession = await LecturerService.reviewSessionByLecturer(sessionId, reviewedStatus);
-            const studentId = await LecturerService.getStudentIdBySession(sessionId);
+            const details = await LecturerService.getSessionNotificationDetails(sessionId);
+            const rejectionReason = req.body.reason ?? req.body.comment;
+            const decision = reviewedStatus ? 'verified' : 'rejected';
             await NotificationService.sendNotification({
-                recipientId: studentId,
-                subject: 'Session Status Updated',
-                type: reviewedStatus,
-                message: `The status of your session ${sessionId} has been updated to ${reviewedStatus}`
+                recipientId: details.StudentID,
+                subject: `Work session ${decision}`,
+                type: `Work Session ${reviewedStatus ? 'Verified' : 'Rejected'}`,
+                message:
+                    `Your ${details.ModuleCode} work session on ${details.SessionDate} ` +
+                    `from ${details.StartTime} to ${details.EndTime} ` +
+                    `(${details.ActivityDescription}, ${details.TotalHoursWorked} hours) was ${decision}.` +
+                    (rejectionReason ? ` Reason: ${rejectionReason}` : '') +
+                    ` View /session-detail/${details.SessionID}.`
             });
             return res.status(200).json({ reviewedSession });
         } catch (error) {
@@ -235,6 +273,21 @@ class LecturerController {
                 status,
                 comment
             );
+            if (data) {
+                const decision = data.ClaimStatus === 'Approved by Lecturer' ? 'approved' : 'rejected';
+                const nextStep = decision === 'approved'
+                    ? 'The claim has been forwarded for administrator review.'
+                    : 'Review the comment and contact your lecturer if you need clarification.';
+                await NotificationService.sendNotification({
+                    recipientId: data.StudentID,
+                    subject: `Remuneration claim ${decision}`,
+                    type: `Claim ${decision === 'approved' ? 'Approved' : 'Rejected'}`,
+                    message:
+                        `Claim ${data.ClaimReferenceNumber} for ${data.ModuleCode} was ${decision} by your lecturer. ` +
+                        `${nextStep} Lecturer comment: ${data.LecturerComment || 'No comment provided.'} ` +
+                        `View /claim-detail/${data.ClaimID}.`
+                });
+            }
             return res.status(200).json(data);
         } catch (error) {
             console.error('Lecturer claim review error:', error);

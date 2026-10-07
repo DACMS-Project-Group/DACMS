@@ -17,6 +17,10 @@ class RemunerationClaimService {
         return claim;
     }
 
+    async getClaimNotificationDetails(claimId) {
+        return this.remunerationClaimRepository.findNotificationDetailsByClaimId(claimId);
+    }
+
     /**
      * Generates a claim for all approved, unclaimed work session hours on the
      * given application, using the position's payment scale rate.

@@ -188,6 +188,14 @@ class LecturerService {
         return this.workSessionRepository.getStudentIdFromSession(sessionId);
     }
 
+    async getSessionNotificationDetails(sessionId) {
+        return this.workSessionRepository.getSessionNotificationDetails(sessionId);
+    }
+
+    async getApplicationNotificationDetails(applicationId) {
+        return this.demiApplicationRepository.getApplicationNotificationDetails(applicationId);
+    }
+
     async getClaimsSummary(lecturerId) {
         const stats = await LecturerRepository.getClaimsMetrics(lecturerId);
         const claims = await LecturerRepository.getClaims(lecturerId);

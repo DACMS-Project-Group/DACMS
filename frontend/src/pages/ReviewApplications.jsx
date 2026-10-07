@@ -3,7 +3,7 @@ import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
-import { apiGet, apiPost, apiPatch } from '../api';
+import { apiGet, apiPatch } from '../api';
 import { useNavigate } from 'react-router-dom';
 
 const ReviewApplications = () => {
@@ -241,13 +241,6 @@ const filteredApplications = applications.filter((application) => {
             comment 
           } : currentApplication
       );
-
-      await apiPost('/notifications/send', {
-        recipientId: selectedApplication.studentId,
-        subject: `Application ${newStatus}`,
-        type: 'application_status',
-        message: `Your application has been ${newStatus.toLowerCase()}. Lecturer's comment: ${comment || 'No comment provided.'}`,
-      });
 
       setError('');
     } catch (err) {

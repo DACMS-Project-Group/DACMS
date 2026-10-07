@@ -127,6 +127,34 @@ class RemunerationClaimRepository extends BaseRepository {
         );
         return rows[0] || null;
     }
+
+    async findNotificationDetailsByClaimId(claimId) {
+        const rows = await this.query(
+            `
+            SELECT
+                c."ClaimID",
+                c."ClaimReferenceNumber",
+                c."PeriodStartDate",
+                c."PeriodEndDate",
+                c."TotalHoursClaimed",
+                c."TotalClaimAmount",
+                da."StudentID",
+                l."LecturerID",
+                s."StudentNumber",
+                CONCAT(au."FName", ' ', au."LName") AS "StudentName",
+                m."ModuleCode"
+            FROM "REMUNERATION_CLAIM" c
+            JOIN "DEMI_APPLICATION" da ON da."ApplicationID" = c."ApplicationID"
+            JOIN "DEMI_LISTING" l ON l."ListingID" = da."ListingID"
+            JOIN "STUDENT" s ON s."StudentID" = da."StudentID"
+            JOIN "APP_USER" au ON au."UserID" = s."StudentID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = c."ModuleID"
+            WHERE c."ClaimID" = $1
+            `,
+            [claimId]
+        );
+        return rows[0] || null;
+    }
 }
 
 export default RemunerationClaimRepository;

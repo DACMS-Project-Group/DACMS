@@ -626,7 +626,26 @@ class AdminRepository {
             throw new Error('Claim not found');
         }
 
-        return result.rows[0];
+        const details = await pool.query(
+            `
+            SELECT
+                c."ClaimID",
+                c."ClaimReferenceNumber",
+                c."ClaimStatus",
+                c."TotalHoursClaimed",
+                c."TotalClaimAmount",
+                da."StudentID",
+                dl."LecturerID",
+                m."ModuleCode"
+            FROM "REMUNERATION_CLAIM" c
+            JOIN "DEMI_APPLICATION" da ON da."ApplicationID" = c."ApplicationID"
+            JOIN "DEMI_LISTING" dl ON dl."ListingID" = da."ListingID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = c."ModuleID"
+            WHERE c."ClaimID" = $1
+            `,
+            [claim_id]
+        );
+        return details.rows[0];
     }
 
     static async getPositionById(position_id) {
@@ -744,14 +763,21 @@ class AdminRepository {
                 `
                 SELECT
                     da."ApplicationID",
+                    da."Reference" AS "ApplicationReference",
                     da."ApplicationStatus",
                     da."StudentID",
-                    dl."LecturerID"
+                    dl."LecturerID",
+                    s."StudentNumber",
+                    CONCAT(au."FName", ' ', au."LName") AS "StudentName",
+                    m."ModuleCode"
                 FROM "DEMI_APPLICATION" da
                 JOIN "DEMI_POSITION" dp
                     ON dp."ApplicationID" = da."ApplicationID"
                 JOIN "DEMI_LISTING" dl
                     ON dl."ListingID" = da."ListingID"
+                JOIN "STUDENT" s ON s."StudentID" = da."StudentID"
+                JOIN "APP_USER" au ON au."UserID" = s."StudentID"
+                JOIN "NWU_MODULE" m ON m."ModuleID" = dl."ModuleID"
                 WHERE dp."PositionID" = $1
                 FOR UPDATE OF da
                 `,
@@ -811,17 +837,21 @@ class AdminRepository {
                 throw new Error('Application is not approved for admin review');
             }
 
-            const notifQuery = `
-                INSERT INTO "NOTIFICATION" ("RecipientUserID", "NotificationType", "Subject", "Message")
-                VALUES ($1, 'Position Review', $2, $3);
-            `;
-            const message = `Your position request for Application #${current.ApplicationID} has been ${action.toLowerCase()}. Comment: ${comment || 'None'}`;
-
-            await client.query(notifQuery, [current.StudentID, 'Position Decision', message]);
-            await client.query(notifQuery, [current.LecturerID, 'Position Decision', message]);
-
             await client.query('COMMIT');
-            return { position_id, status: action, comment };
+            return {
+                position_id,
+                status: action,
+                comment,
+                notificationDetails: {
+                    applicationId: current.ApplicationID,
+                    applicationReference: current.ApplicationReference,
+                    studentId: current.StudentID,
+                    lecturerId: current.LecturerID,
+                    studentName: current.StudentName,
+                    studentNumber: current.StudentNumber,
+                    moduleCode: current.ModuleCode
+                }
+            };
         } catch (error) {
             await client.query('ROLLBACK');
             throw error;
