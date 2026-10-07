@@ -174,8 +174,20 @@ class AdminController {
                 data: data.data
             });
         } catch (error) {
-            if (error.message.startsWith('Invalid action') || error.message === 'Position not found') {
+            if (
+                error.message.startsWith('Invalid action') ||
+                error.message === 'Position ID must be a positive integer'
+            ) {
                 return res.status(400).json({ error: error.message });
+            }
+            if (error.message === 'Position not found') {
+                return res.status(404).json({ error: error.message });
+            }
+            if (
+                error.message === 'Position is not awaiting admin review' ||
+                error.message === 'Application is not approved for admin review'
+            ) {
+                return res.status(409).json({ error: error.message });
             }
             return res.status(500).json({ error: error.message });
         }

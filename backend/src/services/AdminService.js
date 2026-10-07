@@ -89,7 +89,23 @@ class AdminService {
             throw new Error(`Invalid action. Must be one of: ${validActions.join(', ')}`);
         }
 
-        const data = await AdminRepository.reviewPosition(position_id, action, comment);
+        const numericPositionId = Number(position_id);
+        if (!Number.isInteger(numericPositionId) || numericPositionId < 1) {
+            throw new Error('Position ID must be a positive integer');
+        }
+
+        const current = await AdminRepository.getPositionReviewState(numericPositionId);
+        if (!current) {
+            throw new Error('Position not found');
+        }
+        if (current.position_status !== 'Pending Admin Review') {
+            throw new Error('Position is not awaiting admin review');
+        }
+        if (current.application_status !== 'Approved') {
+            throw new Error('Application is not approved for admin review');
+        }
+
+        const data = await AdminRepository.reviewPosition(numericPositionId, action, comment);
         return { data };
     }
 

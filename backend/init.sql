@@ -396,7 +396,7 @@ COMMENT ON COLUMN "APP_USER"."PasswordHash" IS 'Password hashed with Bcrypt';
 COMMENT ON COLUMN "STUDENT"."AccountType" IS 'Savings or Cheque';
 COMMENT ON COLUMN "SUPPORTING_DOCUMENT"."DocumentType" IS 'Academic Transcript, Certified ID, Bank Letter, etc.';
 COMMENT ON COLUMN "SECURITY_TOKEN"."JWT_Token" IS 'Session authentication token';
-COMMENT ON COLUMN "DEMI_APPLICATION"."ApplicationStatus" IS 'Pending, In Review, Approved, Rejected';
+COMMENT ON COLUMN "DEMI_APPLICATION"."ApplicationStatus" IS 'Pending, In Review, Approved, Rejected, Returned';
 COMMENT ON COLUMN "DEMI_APPLICATION"."VerificationEligibilityStatus" IS 'Automated result check';
 COMMENT ON COLUMN "WORK_SESSION"."TotalHoursWorked" IS 'Duration calculated upon clock-out';
 COMMENT ON COLUMN "WORK_SESSION"."LecturerApproval" IS 'Session verification';
@@ -651,22 +651,22 @@ INSERT INTO "DEMI_APPLICATION" ("StudentID", "ListingID", "ApplicationStatus", "
 (20, 14, 'In Review', 'Eligible', '2026-10-07 08:25:00+02', 'Interested in assisting with EERI124 circuit lab demonstrations.', 'Checking timetable availability.'),
 (22, 19, 'Pending', 'Eligible', '2026-10-07 10:05:00+02', 'Can help students interpret fluid mechanics lab results.', NULL);
 
--- 13. Insert Active Positions (Linked to Approved Applications)
+-- 13. Insert Admin-Approved Active Positions (Linked to Approved Applications)
 -- ScaleID 1 = UG (86.75), ScaleID 2 = PG (107.80)
-INSERT INTO "DEMI_POSITION" ("ApplicationID", "PaymentScaleID", "TempBudgetPositionNo", "AccountingCombination", "TotalAllocatedHours", "StartDate", "TerminationDate") VALUES 
-(1, 1, 'TBF-2026-001', '8412-4101-2104', 160, '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'), -- PositionID 1: Student 1 (UG)
-(2, 1, 'TBF-2026-002', '8413-4101-2104', 160, '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'), -- PositionID 2: Student 2 (UG)
-(3, 2, 'TBF-2026-003', '8412-4101-2104', 160, '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'), -- PositionID 3: Student 3 (PG)
-(5, 2, 'TBF-2026-004', '8415-4101-2104', 100, '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'), -- PositionID 4: Student 5 (PG)
-(7, 2, 'TBF-2026-005', '8414-4101-2104', 160, '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'), -- PositionID 5: Student 7 (PG)
-(9, 2, 'TBF-2026-006', '8415-4101-2104', 40,  '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'), -- PositionID 6: Student 9 (PG)
-(10, 1, 'TBF-2026-007', '8414-4101-2104', 80,  '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'); -- PositionID 7: Student 10 (UG)
+INSERT INTO "DEMI_POSITION" ("ApplicationID", "PaymentScaleID", "TempBudgetPositionNo", "AccountingCombination", "TotalAllocatedHours", "PositionStatus", "StartDate", "TerminationDate") VALUES
+(1, 1, 'TBF-2026-001', '8412-4101-2104', 160, 'Approved', '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'), -- PositionID 1: Student 1 (UG)
+(2, 1, 'TBF-2026-002', '8413-4101-2104', 160, 'Approved', '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'), -- PositionID 2: Student 2 (UG)
+(3, 2, 'TBF-2026-003', '8412-4101-2104', 160, 'Approved', '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'), -- PositionID 3: Student 3 (PG)
+(5, 2, 'TBF-2026-004', '8415-4101-2104', 100, 'Approved', '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'), -- PositionID 4: Student 5 (PG)
+(7, 2, 'TBF-2026-005', '8414-4101-2104', 160, 'Approved', '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'), -- PositionID 5: Student 7 (PG)
+(9, 2, 'TBF-2026-006', '8415-4101-2104', 40,  'Approved', '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'), -- PositionID 6: Student 9 (PG)
+(10, 1, 'TBF-2026-007', '8414-4101-2104', 80,  'Approved', '2026-07-01 00:00:00+02', '2026-11-30 23:59:59+02'); -- PositionID 7: Student 10 (UG)
 
 INSERT INTO "DEMI_POSITION" ("ApplicationID", "PaymentScaleID", "TempBudgetPositionNo", "AccountingCombination", "TotalAllocatedHours", "PositionStatus", "StartDate", "TerminationDate", "AdminComment") VALUES
 (11, 1, 'TBF-2026-008', '8412-4101-2104', 120, 'Approved', '2026-10-01 00:00:00+02', '2026-11-30 23:59:59+02', 'Appointment confirmed for CMPG323 labs.'),
 (13, 2, 'TBF-2026-009', '8412-4101-2104', 100, 'Approved', '2026-10-01 00:00:00+02', '2026-11-30 23:59:59+02', 'Database lab and consultation support.'),
 (14, 1, 'TBF-2026-010', '8414-4101-2104', 80, 'Approved', '2026-10-02 00:00:00+02', '2026-11-30 23:59:59+02', 'Thermodynamics tutorials and marking.'),
-(16, 2, 'TBF-2026-011', '8415-4101-2104', 90, 'Pending Admin Review', '2026-10-02 00:00:00+02', '2026-11-30 23:59:59+02', 'Awaiting final position number.'),
+(16, 2, NULL, NULL, 0, 'Pending Admin Review', NULL, NULL, NULL),
 (20, 2, 'TBF-2026-012', '8415-4101-2104', 100, 'Approved', '2026-10-05 00:00:00+02', '2026-11-30 23:59:59+02', 'Laboratory support appointment.'),
 (21, 1, 'TBF-2026-013', '8413-4101-2104', 80, 'Approved', '2026-10-05 00:00:00+02', '2026-11-30 23:59:59+02', 'Signal processing practical assistance.'),
 (22, 2, 'TBF-2026-014', '8414-4101-2104', 100, 'Approved', '2026-10-06 00:00:00+02', '2026-11-30 23:59:59+02', 'Tutorial preparation and student consultations.'),

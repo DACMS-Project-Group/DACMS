@@ -150,7 +150,7 @@ const Applications = () => {
                         </p>
 
                         <p className="text-neutral mt-2">
-                          Application ID: {application.ApplicationID}
+                          Application Reference: {application.ApplicationReference || application.Reference || '—'}
                         </p>
 
                         <p className="text-sm text-neutral mt-1">

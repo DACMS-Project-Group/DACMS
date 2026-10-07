@@ -141,12 +141,17 @@ class LecturerService {
         return application;
     }
 
-    async lecturerReviewApplication(applicationId, decision) {
-        if (!decision) {
-            throw new Error('Decision is required');
+    async lecturerReviewApplication(lecturerId, applicationId, decision, comment) {
+        if (!['Approved', 'Rejected', 'Returned'].includes(decision)) {
+            throw new Error('Decision must be Approved, Rejected, or Returned');
         }
 
-        return this.demiApplicationRepository.lecturerReviewApplication(applicationId, decision);
+        return this.demiApplicationRepository.lecturerReviewApplication(
+            lecturerId,
+            applicationId,
+            decision,
+            comment
+        );
     }
 
     async fetchSessionsForLecturer(lecturerId) {
