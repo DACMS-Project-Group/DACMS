@@ -37,6 +37,9 @@ class StudentDashboardService {
             stats: this._buildStats(positions, applications, sessions, claims),
             monthlyHours: this._buildMonthlyHours(sessions),
             pendingApplications: this._buildPendingApplications(applications),
+            applications: this._buildApplications(applications),
+            claims: this._buildClaims(claims),
+            recentActivity: this._buildRecentActivity(applications, sessions, claims),
         };
     }
 
@@ -66,24 +69,23 @@ class StudentDashboardService {
         };
     }
 
-    /** Groups completed work sessions by month, summing hours. Last 6 months, oldest first. */
+    /** Groups completed work sessions by module, summing hours. */
     _buildMonthlyHours(sessions) {
-        const byMonth = new Map();
+        const byModule = new Map();
 
         for (const session of sessions) {
-            if (session.TotalHoursWorked == null) continue;
+            if (session.TotalHoursWorked == null || !session.ModuleCode) continue;
 
-            const start = new Date(session.StartTime);
-            const key = `${start.getFullYear()}-${String(start.getMonth() + 1).padStart(2, '0')}`;
-
-            byMonth.set(key, (byMonth.get(key) || 0) + Number(session.TotalHoursWorked));
+            byModule.set(
+                session.ModuleCode,
+                (byModule.get(session.ModuleCode) || 0) + Number(session.TotalHoursWorked)
+            );
         }
 
-        return Array.from(byMonth.entries())
-            .sort(([a], [b]) => (a > b ? 1 : -1))
-            .slice(-6)
-            .map(([month, totalHours]) => ({
-                month,
+        return Array.from(byModule.entries())
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([module, totalHours]) => ({
+                module,
                 total_hours: Math.round(totalHours * 100) / 100,
             }));
     }
@@ -99,6 +101,46 @@ class StudentDashboardService {
                 date_submitted: a.DateSubmitted,
                 module: a.ModuleCode,
             }));
+    }
+
+    _buildApplications(applications) {
+        return applications.slice(0, 5).map((application) => ({
+            application_id: application.ApplicationID,
+            status: application.ApplicationStatus,
+            date_submitted: application.DateSubmitted,
+            module: application.ModuleCode,
+        }));
+    }
+
+    _buildClaims(claims) {
+        return claims.slice(0, 5).map((claim) => ({
+            claim_id: claim.ClaimID,
+            reference: claim.ClaimReferenceNumber,
+            module: claim.ModuleCode,
+            amount: Number(claim.TotalClaimAmount ?? 0),
+            status: claim.ClaimStatus,
+            submitted_at: claim.SubmissionDate,
+        }));
+    }
+
+    _buildRecentActivity(applications, sessions, claims) {
+        return [
+            ...applications.map((application) => ({
+                text: `Application for ${application.ModuleCode}: ${application.ApplicationStatus}`,
+                date: application.DateSubmitted,
+            })),
+            ...sessions.map((session) => ({
+                text: `Work session for ${session.ModuleCode} recorded`,
+                date: session.StartTime,
+            })),
+            ...claims.map((claim) => ({
+                text: `Claim for ${claim.ModuleCode}: ${claim.ClaimStatus}`,
+                date: claim.SubmissionDate,
+            })),
+        ]
+            .filter((activity) => activity.date)
+            .sort((a, b) => new Date(b.date) - new Date(a.date))
+            .slice(0, 5);
     }
 }
 

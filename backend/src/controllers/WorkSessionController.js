@@ -31,12 +31,20 @@ class WorkSessionController {
             const reviewedStatus = req.body.decision;
             const reviewedSession  = await workSessionService.reviewSessionByLecturer(sessionId, reviewedStatus);
             const studentId = await workSessionService.getStudentIdBySession(sessionId);
-            const notification = await NotificationService.sendNotification( {
-                recipientId : studentId, 
-                title : "Session Status Updated", 
-                type : reviewedStatus,
-                message : `The status of your session ${sessionId} has been updated to ${reviewedStatus}` 
-            } )
+            const details = await workSessionService.getSessionNotificationDetails(sessionId);
+            const rejectionReason = req.body.reason ?? req.body.comment;
+            const decision = reviewedStatus ? 'verified' : 'rejected';
+            await NotificationService.sendNotification({
+                recipientId: studentId,
+                subject: `Work session ${decision}`,
+                type: `Work Session ${reviewedStatus ? 'Verified' : 'Rejected'}`,
+                message:
+                    `Your ${details.ModuleCode} work session on ${details.SessionDate} ` +
+                    `from ${details.StartTime} to ${details.EndTime} ` +
+                    `(${details.ActivityDescription}, ${details.TotalHoursWorked} hours) was ${decision}.` +
+                    (rejectionReason ? ` Reason: ${rejectionReason}` : '') +
+                    ` View /session-detail/${details.SessionID}.`
+            });
             return res.status(200).json( {reviewedSession} );
         } catch (error) {
             return res.status(500).json(error.message);
@@ -64,6 +72,18 @@ class WorkSessionController {
                 activity,
                 startTime,
                 endTime,
+            });
+
+            const details = await workSessionService.getSessionNotificationDetails(session.session_id);
+            await NotificationService.sendNotification({
+                recipientId: details.LecturerID,
+                subject: 'Work session awaiting verification',
+                type: 'Work Session Review',
+                message:
+                    `${details.StudentName} (${details.StudentNumber}) recorded ` +
+                    `${details.TotalHoursWorked} hours on ${details.SessionDate} for ` +
+                    `${details.ModuleCode}: ${details.ActivityDescription}. ` +
+                    `Review session #${details.SessionID} at /verify-hours.`
             });
 
             res.status(201).json({ session });

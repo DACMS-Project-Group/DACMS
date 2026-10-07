@@ -40,3 +40,28 @@ export const apiPatch = (path, body) =>
   request(path, { method: 'PATCH', body: JSON.stringify(body ?? {}) });
 
 export const apiDelete = (path) => request(path, { method: 'DELETE' });
+export const apiUpload = async (path, formData) => {
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method: 'POST',
+    credentials: 'include', // same auth as everything else
+    // IMPORTANT: do NOT set Content-Type — the browser sets it with
+    // the multipart boundary. Setting it breaks req.file on the backend.
+    body: formData,
+  });
+
+  if (!res.ok) {
+    let message = `Upload failed (${res.status})`;
+    try {
+      const data = await res.json();
+      if (data?.message) message = data.message;
+      else if (data?.error) message = data.error;
+    } catch {
+      // response wasn't JSON
+    }
+    throw new Error(message);
+  }
+
+  if (res.status === 204) return null;
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+};

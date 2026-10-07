@@ -141,7 +141,7 @@ class AdminRepository {
         const query = `
             SELECT
                 dp."PositionID" AS position_id,
-                -- da."ReferenceNumber" AS reference,
+                da."Reference" AS reference,
                 CONCAT(
                     COALESCE(au_stud."Title", ''), ' ', COALESCE(au_stud."FName", ''), ' ', COALESCE(au_stud."LName", '')
                 ) AS student,
@@ -168,7 +168,7 @@ class AdminRepository {
 
         return result.rows.map((row) => ({
             position_id: row.position_id,
-            reference: '!! update data model: add ReferenceNumber to DEMI_APPLICATION',
+            reference: row.reference,
             student: row.student,
             student_number: row.student_number,
             module_code: row.module_code,
@@ -182,7 +182,7 @@ class AdminRepository {
         const query = `
             SELECT
                 dp."PositionID" AS position_id,
-                -- da."ReferenceNumber" AS reference,
+                da."Reference" AS reference,
                 CONCAT(
                     COALESCE(au_stud."Title", ''), ' ', COALESCE(au_stud."FName", ''), ' ', COALESCE(au_stud."LName", '')
                 ) AS student,
@@ -215,7 +215,7 @@ class AdminRepository {
 
         return result.rows.map((row) => ({
             position_id: row.position_id,
-            reference: '!! update data model: add ReferenceNumber to DEMI_APPLICATION',
+            reference: row.reference,
             student: row.student,
             module: row.module,
             lecturer: row.lecturer,
@@ -277,10 +277,13 @@ class AdminRepository {
         const query = `
             SELECT
                 b."BudgetID",
+                b."ModuleID",
                 l."LecturerID",
                 u."Title", u."FName", u."LName", u."Email",
                 m."ModuleCode", m."Description",
                 b."AllocatedBudget", b."CurrentBudgetUsage",
+                b."MaxAllowableWorkHours",
+                b."AcademicYear",
                 (b."AllocatedBudget" - b."CurrentBudgetUsage") AS "RemainingBudget"
             FROM "MODULE_BUDGET" b
             JOIN "NWU_MODULE" m
@@ -297,6 +300,7 @@ class AdminRepository {
 
         return result.rows.map((row) => ({
             budget_id: row.BudgetID,
+            module_id: row.ModuleID,
             lecturer_id: row.LecturerID,
             lecturer: `${row.Title} ${row.FName} ${row.LName} - ${row.Email}`,
             lecturer_email: row.Email,
@@ -305,6 +309,8 @@ class AdminRepository {
             allocated_budget: Number(row.AllocatedBudget ?? 0),
             current_budget_usage: Number(row.CurrentBudgetUsage ?? 0),
             remaining_budget: Number(row.RemainingBudget ?? 0),
+            max_allowable_work_hours: Number(row.MaxAllowableWorkHours ?? 0),
+            academic_year: Number(row.AcademicYear),
         }));
     }
 
@@ -495,6 +501,8 @@ class AdminRepository {
                 s."BankName" AS "bank",
                 s."AccountNumber" AS "accountNumber",
                 s."BranchCode" AS "branchCode",
+                s."AccountHolderName" AS "accountHolderName",
+                s."AccountType" AS "accountType",
                 da."ApplicationID"
             FROM "REMUNERATION_CLAIM" c
             JOIN "DEMI_APPLICATION" da
@@ -585,11 +593,11 @@ class AdminRepository {
             status: claimRow.status,
             banking: {
                 bank: claimRow.bank || 'Not provided',
-                accountHolder: claimRow.studentName,
+                accountHolder: claimRow.accountHolderName,
                 accountNumber: claimRow.accountNumber
                     ? `**** **** ${String(claimRow.accountNumber).slice(-4)}`
                     : 'Not provided',
-                accountType: 'Bank account',
+                accountType: claimRow.accountType,
                 status: 'Verified'
             },
             sessions: sessionsResult.rows.map((session) => ({
@@ -618,15 +626,34 @@ class AdminRepository {
             throw new Error('Claim not found');
         }
 
-        return result.rows[0];
+        const details = await pool.query(
+            `
+            SELECT
+                c."ClaimID",
+                c."ClaimReferenceNumber",
+                c."ClaimStatus",
+                c."TotalHoursClaimed",
+                c."TotalClaimAmount",
+                da."StudentID",
+                dl."LecturerID",
+                m."ModuleCode"
+            FROM "REMUNERATION_CLAIM" c
+            JOIN "DEMI_APPLICATION" da ON da."ApplicationID" = c."ApplicationID"
+            JOIN "DEMI_LISTING" dl ON dl."ListingID" = da."ListingID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = c."ModuleID"
+            WHERE c."ClaimID" = $1
+            `,
+            [claim_id]
+        );
+        return details.rows[0];
     }
 
     static async getPositionById(position_id) {
         const query = `
             SELECT
                 dp."PositionID" AS position_id, dp."PositionStatus" AS position_status, dp."AdminComment" AS admin_comment,
-                da."ApplicationID" AS application_id, 
-                -- da."ReferenceNumber" AS reference, 
+                da."ApplicationID" AS application_id,
+                da."Reference" AS reference,
                 da."ApplicationStatus" AS status, da."DateSubmitted" AS submitted_date,
                 s."StudentNumber" AS student_number,
                 CONCAT(
@@ -674,7 +701,7 @@ class AdminRepository {
             LEFT JOIN "RESPONSIBILITY" r ON r."PositionID" = dp."PositionID"
             WHERE dp."PositionID" = $1
             GROUP BY
-                da."ApplicationID", da."ApplicationStatus", da."DateSubmitted",
+                da."ApplicationID", da."Reference", da."ApplicationStatus", da."DateSubmitted",
                 s."StudentNumber", au."Email", au."Title", au."FName", au."LName",
                 m."ModuleCode", m."ModuleName", lect_au."Title", lect_au."FName", lect_au."LName",
                 ps."RoleLevel", dp."TotalAllocatedHours", dp."PositionID", dp."PositionStatus", dp."AdminComment";
@@ -690,7 +717,7 @@ class AdminRepository {
             positionStatus: row.position_status,
             position: row.position || 'Student Assistant',
             application_id: Number(row.application_id),
-            reference: String('!! update data model: add ReferenceNumber to DEMI_APPLICATION'),
+            reference: row.reference,
             status: row.status,
             submittedDate: row.submitted_date
                 ? new Date(row.submitted_date).toLocaleDateString('en-ZA', {
@@ -710,51 +737,121 @@ class AdminRepository {
         };
     }
 
+    static async getPositionReviewState(position_id) {
+        const result = await pool.query(
+            `
+            SELECT
+                dp."PositionStatus" AS position_status,
+                da."ApplicationStatus" AS application_status
+            FROM "DEMI_POSITION" dp
+            JOIN "DEMI_APPLICATION" da
+                ON da."ApplicationID" = dp."ApplicationID"
+            WHERE dp."PositionID" = $1
+            `,
+            [position_id]
+        );
+
+        return result.rows[0] || null;
+    }
+
     static async reviewPosition(position_id, action, comment) {
         const client = await pool.connect();
         try {
             await client.query('BEGIN');
 
-            // 1. Update position status and admin comment
-            const posQuery = `
+            const applicationResult = await client.query(
+                `
+                SELECT
+                    da."ApplicationID",
+                    da."Reference" AS "ApplicationReference",
+                    da."ApplicationStatus",
+                    da."StudentID",
+                    dl."LecturerID",
+                    s."StudentNumber",
+                    CONCAT(au."FName", ' ', au."LName") AS "StudentName",
+                    m."ModuleCode"
+                FROM "DEMI_APPLICATION" da
+                JOIN "DEMI_POSITION" dp
+                    ON dp."ApplicationID" = da."ApplicationID"
+                JOIN "DEMI_LISTING" dl
+                    ON dl."ListingID" = da."ListingID"
+                JOIN "STUDENT" s ON s."StudentID" = da."StudentID"
+                JOIN "APP_USER" au ON au."UserID" = s."StudentID"
+                JOIN "NWU_MODULE" m ON m."ModuleID" = dl."ModuleID"
+                WHERE dp."PositionID" = $1
+                FOR UPDATE OF da
+                `,
+                [position_id]
+            );
+
+            if (applicationResult.rows.length === 0) {
+                throw new Error('Position not found');
+            }
+
+            const current = applicationResult.rows[0];
+            const positionResult = await client.query(
+                `
+                SELECT "PositionStatus"
+                FROM "DEMI_POSITION"
+                WHERE "PositionID" = $1
+                FOR UPDATE
+                `,
+                [position_id]
+            );
+
+            if (
+                positionResult.rows.length === 0 ||
+                positionResult.rows[0].PositionStatus !== 'Pending Admin Review'
+            ) {
+                throw new Error('Position is not awaiting admin review');
+            }
+            if (current.ApplicationStatus !== 'Approved') {
+                throw new Error('Application is not approved for admin review');
+            }
+
+            const positionUpdate = await client.query(
+                `
                 UPDATE "DEMI_POSITION"
                 SET "PositionStatus" = $1,
                     "AdminComment" = $2
                 WHERE "PositionID" = $3
-                RETURNING "PositionID", "ApplicationID";
-            `;
-            const posRes = await client.query(posQuery, [action, comment || null, position_id]);
-            if (posRes.rows.length === 0) throw new Error('Position not found');
+                  AND "PositionStatus" = 'Pending Admin Review'
+                `,
+                [action, comment || null, position_id]
+            );
+            if (positionUpdate.rowCount !== 1) {
+                throw new Error('Position is not awaiting admin review');
+            }
 
-            const { ApplicationID } = posRes.rows[0];
-
-            // 2. Sync corresponding application status
-            let appStatus = action === 'Approved' ? 'Approved' : (action === 'Rejected' ? 'Rejected' : 'Returned');
-            const appQuery = `
+            const appStatus = action;
+            const applicationUpdate = await client.query(
+                `
                 UPDATE "DEMI_APPLICATION"
                 SET "ApplicationStatus" = $1
                 WHERE "ApplicationID" = $2
-                RETURNING "StudentID", "ListingID";
-            `;
-            const appRes = await client.query(appQuery, [appStatus, ApplicationID]);
-            const { StudentID, ListingID } = appRes.rows[0];
-
-            // Fetch LecturerID via Listing
-            const listRes = await client.query(`SELECT "LecturerID" FROM "DEMI_LISTING" WHERE "ListingID" = $1`, [ListingID]);
-            const lecturerId = listRes.rows[0].LecturerID;
-
-            // 3. Dispatch notifications to Student and Lecturer
-            const notifQuery = `
-                INSERT INTO "NOTIFICATION" ("RecipientUserID", "NotificationType", "Subject", "Message")
-                VALUES ($1, 'Position Review', $2, $3);
-            `;
-            const message = `Your position request for Application #${ApplicationID} has been ${action.toLowerCase()}. Comment: ${comment || 'None'}`;
-
-            await client.query(notifQuery, [StudentID, 'Position Decision', message]);
-            await client.query(notifQuery, [lecturerId, 'Position Decision', message]);
+                  AND "ApplicationStatus" = 'Approved'
+                `,
+                [appStatus, current.ApplicationID]
+            );
+            if (applicationUpdate.rowCount !== 1) {
+                throw new Error('Application is not approved for admin review');
+            }
 
             await client.query('COMMIT');
-            return { position_id, status: action, comment };
+            return {
+                position_id,
+                status: action,
+                comment,
+                notificationDetails: {
+                    applicationId: current.ApplicationID,
+                    applicationReference: current.ApplicationReference,
+                    studentId: current.StudentID,
+                    lecturerId: current.LecturerID,
+                    studentName: current.StudentName,
+                    studentNumber: current.StudentNumber,
+                    moduleCode: current.ModuleCode
+                }
+            };
         } catch (error) {
             await client.query('ROLLBACK');
             throw error;
@@ -794,6 +891,11 @@ class AdminRepository {
                 ) AS student_name,
                 m."ModuleCode" AS module_code,
                 m."ModuleName" AS module_name,
+                s."BankName",
+                s."AccountNumber",
+                s."AccountType",
+                s."BranchCode",
+                s."AccountHolderName",
                 da."ApplicationID"
             FROM "REMUNERATION_CLAIM" c
             JOIN "DEMI_APPLICATION" da
@@ -816,6 +918,7 @@ class AdminRepository {
                 SELECT
                     ws."SessionID" AS id,
                     ws."StartTime" AS date,
+                    ws."ActivityDescription" AS description,
                     TO_CHAR(ws."StartTime", 'HH24:MI') AS start_time,
                     TO_CHAR(ws."EndTime", 'HH24:MI') AS end_time,
                     ROUND(COALESCE(ws."TotalHoursWorked", 0), 2) AS hours,
@@ -851,6 +954,13 @@ class AdminRepository {
                     student_number: claim.StudentNumber,
                     name: claim.student_name
                 },
+                banking: {
+                    bank: claim.BankName,
+                    account_holder: claim.AccountHolderName || claim.student_name.trim(),
+                    account_number: claim.AccountNumber,
+                    account_type: claim.AccountType,
+                    branch_code: claim.BranchCode
+                },
                 module: {
                     id: claim.ModuleID,
                     code: claim.module_code,
@@ -870,6 +980,7 @@ class AdminRepository {
                 sessions: sessionResult.rows.map((row) => ({
                     id: row.id,
                     date: row.date ? new Date(row.date).toISOString().slice(0, 10) : null,
+                    description: row.description,
                     start_time: row.start_time,
                     end_time: row.end_time,
                     hours: Number(row.hours ?? 0),

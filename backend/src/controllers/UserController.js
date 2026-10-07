@@ -5,6 +5,7 @@ import User from '../models/User.js';
 import Student from '../models/Student.js';
 import Lecturer from '../models/Lecturer.js';
 import Administrator from '../models/Administrator.js';
+import { writeAuditLog } from '../utils/auditLogger.js';
 
 const BCRYPT_SALT_ROUNDS = 10;
 
@@ -313,6 +314,19 @@ class UserController {
                 sameSite: 'strict',
                 maxAge: 3600000
             });
+
+            if (user.role_id === 3) {
+                await writeAuditLog({
+                    userId: user.user_id,
+                    role: 'admin',
+                    action: 'ADMIN_LOGIN',
+                    recordType: 'user',
+                    recordId: user.user_id,
+                    event: {
+                        success: true
+                    }
+                });
+            }
 
             res.status(200).json({
                 message: 'Login Successful',

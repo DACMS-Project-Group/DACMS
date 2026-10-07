@@ -4,12 +4,6 @@ import { authenticate } from '../middlewares/authMiddleware.js';
 
 const router = express.Router();
 
-router.post(
-    '/send', 
-    authenticate, 
-    NotificationController.sendNotification.bind(NotificationController)
-);
-
 router.get(
     '/fetch', 
     authenticate, 

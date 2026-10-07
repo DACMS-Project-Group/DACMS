@@ -13,72 +13,46 @@ const Applications = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // ---- Fetch applications on mount ----
   useEffect(() => {
     let cancelled = false;
 
-    const load = async () => {
+    const loadApplications = async () => {
       try {
         setLoading(true);
+        setError('');
+
         const data = await apiGet('/student/applications');
 
-        // Backend returns { applications: [...] }
-        const list = Array.isArray(data)
-          ? data
-          : data?.applications || [];
-
         if (!cancelled) {
-          setApplications(list);
-          setError('');
+          setApplications(data?.applications || []);
         }
       } catch (err) {
-        if (!cancelled) setError(err.message);
+        if (!cancelled) {
+          setError(err.message || 'Failed to load applications.');
+        }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
-    load();
+    loadApplications();
 
     return () => {
       cancelled = true;
     };
   }, []);
 
-  // ---- Field mapping (defensive: backend shape may vary) ----
-  const mapApplication = (app) => ({
-    id:
-      app.application_id ??
-      app.ApplicationID ??
-      app.listingId ??
-      app.id ??
-      Math.random(),
-    moduleCode:
-      app.moduleCode ??
-      app.module_code ??
-      app.ModuleCode ??
-      '—',
-    moduleName:
-      app.moduleName ??
-      app.module_name ??
-      app.ModuleName ??
-      '—',
-    lecturer:
-      app.lecturer ??
-      app.lecturerName ??
-      app.LecturerName ??
-      '—',
-    status:
-      app.status ??
-      app.applicationStatus ??
-      app.ApplicationStatus ??
-      'Pending',
-    dateSubmitted:
-      app.date_submitted ??
-      app.dateSubmitted ??
-      app.submission_date ??
-      '',
-  });
+  const formatDate = (date) => {
+    if (!date) return '—';
+
+    return new Date(date).toLocaleDateString('en-ZA', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -120,21 +94,23 @@ const Applications = () => {
               </button>
             </div>
 
-            {/* ===== STATES ===== */}
+            {/* ===== LOADING STATE ===== */}
             {loading && (
               <Card>
                 <p className="py-6 text-center text-neutral font-inter">
-                  Loading applications…
+                  Loading applications...
                 </p>
               </Card>
             )}
 
+            {/* ===== ERROR STATE ===== */}
             {!loading && error && (
               <Card>
                 <div className="py-6 text-center">
                   <p className="font-semibold text-error font-inter">
                     Could not load applications
                   </p>
+
                   <p className="mt-1 text-sm text-neutral font-inter">
                     {error}
                   </p>
@@ -142,12 +118,14 @@ const Applications = () => {
               </Card>
             )}
 
+            {/* ===== EMPTY STATE ===== */}
             {!loading && !error && applications.length === 0 && (
               <Card>
                 <div className="py-10 text-center">
                   <p className="font-medium text-dark font-inter">
                     No applications yet
                   </p>
+
                   <p className="mt-1 text-sm text-neutral font-inter">
                     Apply for an Assistant position to see it here.
                   </p>
@@ -158,53 +136,53 @@ const Applications = () => {
             {/* ===== APPLICATION CARDS ===== */}
             {!loading && !error && applications.length > 0 && (
               <div className="space-y-6">
-                {applications.map((raw) => {
-                  const application = mapApplication(raw);
+                {applications.map((application) => (
+                  <Card key={application.ApplicationID}>
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      {/* ===== APPLICATION INFORMATION ===== */}
+                      <div>
+                        <h3 className="text-2xl font-poppins font-semibold text-dark">
+                          {application.ModuleCode}
+                        </h3>
 
-                  return (
-                    <Card key={application.id}>
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                        {/* ===== APPLICATION INFORMATION ===== */}
-                        <div>
-                          <h3 className="text-2xl font-poppins font-semibold text-dark">
-                            {application.moduleCode}
-                          </h3>
+                        <p className="text-lg text-dark mt-1">
+                          {application.ModuleName}
+                        </p>
 
-                          <p className="text-lg text-dark mt-1">
-                            {application.moduleName}
-                          </p>
+                        <p className="text-neutral mt-2">
+                          Application Reference: {application.ApplicationReference || application.Reference || '—'}
+                        </p>
 
-                          <p className="text-neutral mt-2">
-                            Lecturer: {application.lecturer}
-                          </p>
-
-                          {application.dateSubmitted && (
-                            <p className="text-sm text-neutral mt-1">
-                              Submitted: {application.dateSubmitted}
-                            </p>
-                          )}
-                        </div>
-
-                        {/* ===== STATUS + DETAILS ===== */}
-                        <div className="flex flex-col items-start md:items-end gap-4">
-                          <StatusBadge status={application.status} />
-
-                          <button
-                            onClick={() =>
-                              navigate(
-                                `/application-detail/${application.id}`,
-                                { state: { application } }
-                              )
-                            }
-                            className="text-primary font-semibold hover:underline"
-                          >
-                            View Details →
-                          </button>
-                        </div>
+                        <p className="text-sm text-neutral mt-1">
+                          Submitted: {formatDate(application.DateSubmitted)}
+                        </p>
                       </div>
-                    </Card>
-                  );
-                })}
+
+                      {/* ===== STATUS + DETAILS ===== */}
+                      <div className="flex flex-col items-start md:items-end gap-4">
+                        <StatusBadge
+                          status={
+                            application.ApplicationStatus || 'Pending'
+                          }
+                        />
+
+                        <button
+                          onClick={() =>
+                            navigate(
+                              `/application-detail/${application.ApplicationID}`,
+                              {
+                                state: { application },
+                              }
+                            )
+                          }
+                          className="text-primary font-semibold hover:underline"
+                        >
+                          View Details →
+                        </button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
               </div>
             )}
           </div>

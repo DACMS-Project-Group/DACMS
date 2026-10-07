@@ -1,61 +1,51 @@
-import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { apiGet, apiPatch } from '../api';
 
 const AppointmentReview = () => {
   const navigate = useNavigate();
-  const location = useLocation();
+  const { id: position_id } = useParams();
 
-  const appointment = location.state?.appointment;
-
-  const defaultAppointment = {
-    id: 1,
-    reference: 'APP-2026-001',
-    studentNumber: '12345678',
-    studentName: 'Tswarelo Motloung',
-    email: 'student@nwu.ac.za',
-    moduleCode: 'CMPG311',
-    moduleName: 'Databases',
-    lecturer: 'Dr. M. Mokoena',
-    position: 'Student Assistant',
-    hoursLimit: 10,
-    submittedDate: '13 September 2026',
-    status: 'Pending',
-  };
-
-  const currentAppointment = appointment || defaultAppointment;
-
+  const [appointment, setAppointment] = useState(null);
   const [decision, setDecision] = useState('');
   const [comments, setComments] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
-  const supportingDocuments = [
-    {
-      id: 1,
-      name: 'Student Application',
-      type: 'Application Form',
-    },
-    {
-      id: 2,
-      name: 'Academic Record',
-      type: 'Supporting Document',
-    },
-    {
-      id: 3,
-      name: 'Lecturer Recommendation',
-      type: 'Recommendation',
-    },
-  ];
+  useEffect(() => {
+    const fetchAppointment = async () => {
+      try {
+        setLoading(true);
+        setError('');
 
-  const responsibilities = [
-    'Assist students during scheduled consultations',
-    'Provide tutorial assistance where required',
-    'Assist with practical sessions and coursework',
-    'Provide feedback to the module lecturer',
-  ];
+        const response = await apiGet(
+          `/admin/appointments/fetch/${position_id}`
+        );
+
+        if (!response?.position) {
+          setError('Appointment not found.');
+          return;
+        }
+
+        setAppointment(response.position);
+      } catch (err) {
+        console.error('Failed to fetch appointment:', err);
+        setError(err.message || 'Failed to load appointment.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (position_id) {
+      fetchAppointment();
+    }
+  }, [position_id]);
 
   const handleBack = () => {
     navigate('/appointment-approvals');
@@ -65,14 +55,39 @@ const AppointmentReview = () => {
     setDecision(selectedDecision);
   };
 
-  const handleSubmitDecision = (event) => {
+  const handleSubmitDecision = async (event) => {
     event.preventDefault();
 
-    if (!decision) {
+    if (!decision || !position_id) {
       return;
     }
 
-    setSubmitted(true);
+    try {
+      setSubmitting(true);
+      setError('');
+
+      await apiPatch(
+        `/admin/appointments/review/${position_id}`,
+        {
+          action: decision,
+          comment: comments,
+        }
+      );
+
+      setSubmitted(true);
+
+      setAppointment((current) => ({
+        ...current,
+        positionStatus: decision,
+        status: decision,
+        adminComment: comments,
+      }));
+    } catch (err) {
+      console.error('Failed to submit appointment decision:', err);
+      setError(err.message || 'Failed to submit appointment decision.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const getDecisionText = () => {
@@ -91,6 +106,82 @@ const AppointmentReview = () => {
     return '';
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-off-white">
+        <Navbar />
+
+        <div className="flex">
+          <Sidebar userRole="admin" />
+
+          <main className="flex-1">
+            <div className="bg-primary px-8 py-4">
+              <h1 className="text-2xl font-semibold text-white font-poppins">
+                Appointment Review
+              </h1>
+            </div>
+
+            <div className="p-8">
+              <Card>
+                <p className="font-inter text-neutral">
+                  Loading appointment details...
+                </p>
+              </Card>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !appointment) {
+    return (
+      <div className="min-h-screen bg-off-white">
+        <Navbar />
+
+        <div className="flex">
+          <Sidebar userRole="admin" />
+
+          <main className="flex-1">
+            <div className="bg-primary px-8 py-4">
+              <h1 className="text-2xl font-semibold text-white font-poppins">
+                Appointment Review
+              </h1>
+            </div>
+
+            <div className="p-8">
+              <Card>
+                <p className="font-inter text-red-600">
+                  {error}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={handleBack}
+                  className="mt-4 rounded-lg bg-primary px-5 py-2.5 font-inter font-medium text-white transition hover:bg-primary-dark"
+                >
+                  Back to Appointment Approvals
+                </button>
+              </Card>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  const currentAppointment = appointment;
+
+  const supportingDocuments =
+    Array.isArray(currentAppointment.documents)
+      ? currentAppointment.documents
+      : [];
+
+  const responsibilities =
+    Array.isArray(currentAppointment.responsibilities)
+      ? currentAppointment.responsibilities
+      : [];
+
   return (
     <div className="min-h-screen bg-off-white">
       <Navbar />
@@ -106,6 +197,15 @@ const AppointmentReview = () => {
           </div>
 
           <div className="p-8">
+            {/* Error message */}
+            {error && (
+              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
+                <p className="text-sm font-inter text-red-600">
+                  {error}
+                </p>
+              </div>
+            )}
+
             {/* Appointment Overview */}
             <Card className="mb-6">
               <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -119,7 +219,12 @@ const AppointmentReview = () => {
                   </h2>
                 </div>
 
-                <StatusBadge status={currentAppointment.status} />
+                <StatusBadge
+                  status={
+                    currentAppointment.positionStatus ||
+                    currentAppointment.status
+                  }
+                />
               </div>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
@@ -139,7 +244,12 @@ const AppointmentReview = () => {
                   </p>
 
                   <div className="mt-2">
-                    <StatusBadge status={currentAppointment.status} />
+                    <StatusBadge
+                      status={
+                        currentAppointment.positionStatus ||
+                        currentAppointment.status
+                      }
+                    />
                   </div>
                 </div>
 
@@ -258,31 +368,46 @@ const AppointmentReview = () => {
                 </p>
               </div>
 
-              <div className="space-y-3">
-                {supportingDocuments.map((document) => (
-                  <div
-                    key={document.id}
-                    className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 md:flex-row md:items-center md:justify-between"
-                  >
-                    <div>
-                      <p className="font-inter font-medium text-dark">
-                        {document.name}
-                      </p>
-
-                      <p className="mt-1 text-sm font-inter text-neutral">
-                        {document.type}
-                      </p>
-                    </div>
-
-                    <button
-                      type="button"
-                      className="font-inter font-medium text-primary transition hover:text-primary-dark"
+              {supportingDocuments.length === 0 ? (
+                <p className="text-sm font-inter text-neutral">
+                  No supporting documents available.
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {supportingDocuments.map((document, index) => (
+                    <div
+                      key={document.id || index}
+                      className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 md:flex-row md:items-center md:justify-between"
                     >
-                      View Document
-                    </button>
-                  </div>
-                ))}
-              </div>
+                      <div>
+                        <p className="font-inter font-medium text-dark">
+                          {document.name}
+                        </p>
+
+                        <p className="mt-1 text-sm font-inter text-neutral">
+                          {document.type}
+                        </p>
+                      </div>
+
+                      {document.documentUrl && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            window.open(
+                              document.documentUrl,
+                              '_blank',
+                              'noopener,noreferrer'
+                            )
+                          }
+                          className="font-inter font-medium text-primary transition hover:text-primary-dark"
+                        >
+                          View Document
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </Card>
 
             {/* Lecturer Recommendation */}
@@ -299,11 +424,11 @@ const AppointmentReview = () => {
 
               <div className="rounded-lg bg-off-white p-5">
                 <p className="text-sm font-inter leading-6 text-dark">
-                  The student is recommended for appointment as a Student
-                  Assistant for {currentAppointment.moduleCode}. The student
-                  demonstrated good academic performance and is considered
-                  suitable to assist with student consultations, tutorials,
-                  and practical activities.
+                  The student is recommended for appointment as a{' '}
+                  {currentAppointment.position || 'Student Assistant'} for{' '}
+                  {currentAppointment.moduleCode}. The student is considered
+                  suitable for the responsibilities associated with this
+                  appointment.
                 </p>
               </div>
             </Card>
@@ -347,7 +472,8 @@ const AppointmentReview = () => {
                   </p>
 
                   <p className="mt-1 font-inter font-semibold text-dark">
-                    Pending Administrator Approval
+                    {currentAppointment.positionStatus ||
+                      currentAppointment.status}
                   </p>
                 </div>
               </div>
@@ -357,16 +483,22 @@ const AppointmentReview = () => {
                   Assigned Responsibilities
                 </p>
 
-                <ul className="space-y-2">
-                  {responsibilities.map((responsibility, index) => (
-                    <li
-                      key={index}
-                      className="rounded-lg bg-off-white px-4 py-3 text-sm font-inter text-dark"
-                    >
-                      • {responsibility}
-                    </li>
-                  ))}
-                </ul>
+                {responsibilities.length === 0 ? (
+                  <p className="text-sm font-inter text-neutral">
+                    No responsibilities available.
+                  </p>
+                ) : (
+                  <ul className="space-y-2">
+                    {responsibilities.map((responsibility, index) => (
+                      <li
+                        key={responsibility.id || index}
+                        className="rounded-lg bg-off-white px-4 py-3 text-sm font-inter text-dark"
+                      >
+                        • {responsibility.description}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
             </Card>
 
@@ -389,7 +521,7 @@ const AppointmentReview = () => {
                   </p>
 
                   <p className="mt-2 text-sm font-inter text-neutral">
-                    The relevant student and lecturer would be notified of
+                    The relevant student and lecturer have been notified of
                     this decision.
                   </p>
 
@@ -499,17 +631,18 @@ const AppointmentReview = () => {
                     <button
                       type="button"
                       onClick={handleBack}
-                      className="rounded-lg border border-gray-300 px-5 py-2.5 font-inter font-medium text-dark transition hover:bg-gray-100"
+                      disabled={submitting}
+                      className="rounded-lg border border-gray-300 px-5 py-2.5 font-inter font-medium text-dark transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Cancel
                     </button>
 
                     <button
                       type="submit"
-                      disabled={!decision}
+                      disabled={!decision || submitting}
                       className="rounded-lg bg-primary px-5 py-2.5 font-inter font-medium text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                      Submit Decision
+                      {submitting ? 'Submitting...' : 'Submit Decision'}
                     </button>
                   </div>
                 </form>

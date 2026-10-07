@@ -1,5 +1,6 @@
 import BaseRepository from './BaseRepository.js';
 import DemiApplication from '../models/DemiApplication.js';
+import pool from '../config/db.js';
 
 class DemiApplicationRepository extends BaseRepository {
     constructor() {
@@ -77,19 +78,151 @@ class DemiApplicationRepository extends BaseRepository {
         return studentId[0].StudentID;
     }
 
+    async getApplicationNotificationDetails(applicationId) {
+        const rows = await this.query(
+            `
+            SELECT
+                a."ApplicationID",
+                a."Reference" AS "ApplicationReference",
+                a."StudentID",
+                l."LecturerID",
+                CONCAT(au."FName", ' ', au."LName") AS "StudentName",
+                s."StudentNumber",
+                m."ModuleCode"
+            FROM "DEMI_APPLICATION" a
+            JOIN "STUDENT" s ON s."StudentID" = a."StudentID"
+            JOIN "APP_USER" au ON au."UserID" = s."StudentID"
+            JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+            WHERE a."ApplicationID" = $1
+            `,
+            [applicationId]
+        );
+        return rows[0] || null;
+    }
+
     /** Lecturer reviews assistant application */
 
-    async lecturerReviewApplication(applicationId, lecturerDecision, reviewComment) {
-        return await this.query(
+    async ensurePositionForApprovedApplication(client, applicationId, studyLevel) {
+        const positionResult = await client.query(
             `
-            UPDATE "DEMI_APPLICATION"
-            SET "ApplicationStatus" = $1,
-                "ReviewComment" = $3
-            WHERE "ApplicationID" = $2
-            RETURNING *
+            SELECT "PositionID", "PositionStatus"
+            FROM "DEMI_POSITION"
+            WHERE "ApplicationID" = $1
+            ORDER BY "PositionID"
+            FOR UPDATE
+            `,
+            [applicationId]
+        );
+
+        if (positionResult.rows.length > 1) {
+            throw new Error('Multiple positions found for application');
+        }
+
+        const existingPosition = positionResult.rows[0];
+        if (existingPosition) {
+            if (existingPosition.PositionStatus !== 'Pending Admin Review') {
+                throw new Error('Position has already been reviewed by admin');
+            }
+            return;
+        }
+
+        const scaleResult = await client.query(
             `
-            , [lecturerDecision, applicationId, reviewComment]
-        )
+            SELECT ps."ScaleID"
+            FROM "PAYMENT_SCALE" ps
+            WHERE ps."RoleLevel" = CASE
+                WHEN LOWER(BTRIM($1)) = 'postgraduate' THEN 'Postgraduate Demi'
+                WHEN LOWER(BTRIM($1)) = 'undergraduate' THEN 'Undergraduate Demi'
+                ELSE NULL
+            END
+              AND ps."EffectiveYear" <= EXTRACT(YEAR FROM CURRENT_DATE)
+            ORDER BY ps."EffectiveYear" DESC
+            LIMIT 1
+            `,
+            [studyLevel]
+        );
+
+        if (scaleResult.rows.length === 0) {
+            throw new Error(
+                `No current payment scale found for study level "${studyLevel}"`
+            );
+        }
+
+        await client.query(
+            `
+            INSERT INTO "DEMI_POSITION"
+                ("ApplicationID", "PaymentScaleID", "PositionStatus",
+                 "TotalAllocatedHours", "AdminComment")
+            VALUES ($1, $2, 'Pending Admin Review', 0, NULL)
+            `,
+            [applicationId, scaleResult.rows[0].ScaleID]
+        );
+    }
+
+    async lecturerReviewApplication(lecturerId, applicationId, lecturerDecision, reviewComment) {
+        const client = await pool.connect();
+
+        try {
+            await client.query('BEGIN');
+
+            const applicationResult = await client.query(
+                `
+                SELECT
+                    a."ApplicationID",
+                    a."ApplicationStatus",
+                    a."StudentID",
+                    s."StudyLevel",
+                    a."Reference" AS "ApplicationReference",
+                    l."LecturerID",
+                    CONCAT(student_user."FName", ' ', student_user."LName") AS "StudentName",
+                    s."StudentNumber",
+                    m."ModuleCode"
+                FROM "DEMI_APPLICATION" a
+                JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
+                JOIN "STUDENT" s ON s."StudentID" = a."StudentID"
+                JOIN "APP_USER" student_user ON student_user."UserID" = s."StudentID"
+                JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+                WHERE a."ApplicationID" = $1
+                  AND l."LecturerID" = $2
+                FOR UPDATE OF a
+                `,
+                [applicationId, lecturerId]
+            );
+
+            if (applicationResult.rows.length === 0) {
+                throw new Error('Application not found');
+            }
+
+            const application = applicationResult.rows[0];
+
+            if (lecturerDecision === 'Approved') {
+                await this.ensurePositionForApprovedApplication(
+                    client,
+                    applicationId,
+                    application.StudyLevel
+                );
+            }
+
+            const updatedApplication = await client.query(
+                `
+                UPDATE "DEMI_APPLICATION"
+                SET "ApplicationStatus" = $1,
+                    "ReviewComment" = $2
+                WHERE "ApplicationID" = $3
+                RETURNING *
+                `,
+                [lecturerDecision, reviewComment ?? null, applicationId]
+            );
+
+            await client.query('COMMIT');
+            return updatedApplication.rows;
+        } catch (error) {
+            await client.query('ROLLBACK');
+            throw error;
+        } finally {
+            client.release();
+        }
     }
 
     /** All applications submitted by a student, with listing/module context. */
@@ -97,6 +230,7 @@ class DemiApplicationRepository extends BaseRepository {
         const sql = `
             SELECT
                 a.*,
+                a."Reference" AS "ApplicationReference",
                 l."ModuleID",
                 l."Deadline",
                 l."MinimumGrade",

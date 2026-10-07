@@ -1,6 +1,5 @@
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { liveNotifs } from '../contexts/NotificationContext'
 
 const Sidebar = ({ userRole = 'student' }) => {
   // Normalise the role so that Lecturer, LECTURER, lecturer, etc.
@@ -8,7 +7,7 @@ const Sidebar = ({ userRole = 'student' }) => {
   const role = userRole?.toLowerCase().trim();
 
   const { logout } = useAuth();
-  const { unreadCount } = liveNotifs();
+
   // Student Navigation
   const studentNavItems = [
     { name: 'Dashboard', href: '/student-dashboard' },
@@ -16,18 +15,16 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Work Tracking', href: '/work-tracking' },
     { name: 'Claims', href: '/claims' },
     { name: 'Profile', href: '/profile' },
-    { name: 'Notifications', href: '/notifications' },
   ];
 
   // Lecturer Navigation
   const lecturerNavItems = [
     { name: 'Dashboard', href: '/lecturer-dashboard' },
-    { name: 'Assistant Positions', href: '/assistant-positions' },
+    { name: 'Assistant Listings', href: '/assistant-listings' },
     { name: 'Review Applications', href: '/review-applications' },
     { name: 'Assign Duties', href: '/assign-responsibilities' },
     { name: 'Review Claims', href: '/review-claims' },
     { name: 'Verify Hours', href: '/verify-hours' },
-    { name: 'Notifications', href: '/notifications' },
   ];
 
   // Administrator Navigation
@@ -36,7 +33,6 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Budget Management', href: '/budget-management' },
     { name: 'Appointment Approvals', href: '/appointment-approvals' },
     { name: 'Claims Verification', href: '/claims-verification' },
-    { name: 'Notifications', href: '/notifications' },
   ];
 
   const navItems =
@@ -47,10 +43,10 @@ const Sidebar = ({ userRole = 'student' }) => {
         : studentNavItems;
 
   return (
-    <aside className="w-64 bg-primary-dark text-white flex flex-col min-h-screen">
+    <aside className="sticky top-24 flex h-[calc(100vh-6rem)] w-64 shrink-0 flex-col bg-primary-dark text-white">
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 pt-6">
+      <nav className="min-h-0 flex-1 overflow-y-auto p-4 pt-6">
         {navItems.map((item) => (
           <NavLink
             key={item.href}
@@ -67,60 +63,13 @@ const Sidebar = ({ userRole = 'student' }) => {
               `
             }
           >
-            <span>{item.name}</span>
-
-            {item.name === 'Notifications'  && (
-              <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-0.5 rounded-full ml-2">
-                {unreadCount > 99 ? '99+' : unreadCount}
-              </span>
-            )}
+            {item.name}
           </NavLink>
         ))}
       </nav>
 
       {/* Bottom Navigation */}
       <div className="p-4">
-
-        {/* Profile is strictly for students */}
-        {role === 'student' && (
-          <NavLink
-            to="/profile"
-            className={({ isActive }) =>
-              `
-              block px-4 py-3 rounded-xl
-              transition-colors duration-200 mb-2
-              ${
-                isActive
-                  ? 'bg-primary-light font-semibold'
-                  : 'hover:bg-primary-light'
-              }
-              `
-            }
-          >
-            Profile
-          </NavLink>
-        )}
-
-        {/* Profile is strictly for students */}
-        {role === 'student' && (
-          <NavLink
-            to="/profile"
-            className={({ isActive }) =>
-              `
-              block px-4 py-3 rounded-xl
-              transition-colors duration-200 mb-2
-              ${
-                isActive
-                  ? 'bg-primary-light font-semibold'
-                  : 'hover:bg-primary-light'
-              }
-              `
-            }
-          >
-            Profile
-          </NavLink>
-        )}
-
         <button
           type="button"
           onClick={logout}
