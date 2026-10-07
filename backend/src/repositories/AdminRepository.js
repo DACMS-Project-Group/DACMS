@@ -182,7 +182,7 @@ class AdminRepository {
         const query = `
             SELECT
                 dp."PositionID" AS position_id,
-                -- da."ReferenceNumber" AS reference,
+                da."Reference" AS reference,
                 CONCAT(
                     COALESCE(au_stud."Title", ''), ' ', COALESCE(au_stud."FName", ''), ' ', COALESCE(au_stud."LName", '')
                 ) AS student,
@@ -215,7 +215,7 @@ class AdminRepository {
 
         return result.rows.map((row) => ({
             position_id: row.position_id,
-            reference: '!! update data model: add ReferenceNumber to DEMI_APPLICATION',
+            reference: row.reference,
             student: row.student,
             module: row.module,
             lecturer: row.lecturer,
@@ -277,10 +277,13 @@ class AdminRepository {
         const query = `
             SELECT
                 b."BudgetID",
+                b."ModuleID",
                 l."LecturerID",
                 u."Title", u."FName", u."LName", u."Email",
                 m."ModuleCode", m."Description",
                 b."AllocatedBudget", b."CurrentBudgetUsage",
+                b."MaxAllowableWorkHours",
+                b."AcademicYear",
                 (b."AllocatedBudget" - b."CurrentBudgetUsage") AS "RemainingBudget"
             FROM "MODULE_BUDGET" b
             JOIN "NWU_MODULE" m
@@ -297,6 +300,7 @@ class AdminRepository {
 
         return result.rows.map((row) => ({
             budget_id: row.BudgetID,
+            module_id: row.ModuleID,
             lecturer_id: row.LecturerID,
             lecturer: `${row.Title} ${row.FName} ${row.LName} - ${row.Email}`,
             lecturer_email: row.Email,
@@ -305,6 +309,8 @@ class AdminRepository {
             allocated_budget: Number(row.AllocatedBudget ?? 0),
             current_budget_usage: Number(row.CurrentBudgetUsage ?? 0),
             remaining_budget: Number(row.RemainingBudget ?? 0),
+            max_allowable_work_hours: Number(row.MaxAllowableWorkHours ?? 0),
+            academic_year: Number(row.AcademicYear),
         }));
     }
 
@@ -495,6 +501,8 @@ class AdminRepository {
                 s."BankName" AS "bank",
                 s."AccountNumber" AS "accountNumber",
                 s."BranchCode" AS "branchCode",
+                s."AccountHolderName" AS "accountHolderName",
+                s."AccountType" AS "accountType",
                 da."ApplicationID"
             FROM "REMUNERATION_CLAIM" c
             JOIN "DEMI_APPLICATION" da
@@ -585,11 +593,11 @@ class AdminRepository {
             status: claimRow.status,
             banking: {
                 bank: claimRow.bank || 'Not provided',
-                accountHolder: claimRow.studentName,
+                accountHolder: claimRow.accountHolderName,
                 accountNumber: claimRow.accountNumber
                     ? `**** **** ${String(claimRow.accountNumber).slice(-4)}`
                     : 'Not provided',
-                accountType: 'Bank account',
+                accountType: claimRow.accountType,
                 status: 'Verified'
             },
             sessions: sessionsResult.rows.map((session) => ({
@@ -625,8 +633,8 @@ class AdminRepository {
         const query = `
             SELECT
                 dp."PositionID" AS position_id, dp."PositionStatus" AS position_status, dp."AdminComment" AS admin_comment,
-                da."ApplicationID" AS application_id, 
-                -- da."ReferenceNumber" AS reference, 
+                da."ApplicationID" AS application_id,
+                da."Reference" AS reference,
                 da."ApplicationStatus" AS status, da."DateSubmitted" AS submitted_date,
                 s."StudentNumber" AS student_number,
                 CONCAT(
@@ -674,7 +682,7 @@ class AdminRepository {
             LEFT JOIN "RESPONSIBILITY" r ON r."PositionID" = dp."PositionID"
             WHERE dp."PositionID" = $1
             GROUP BY
-                da."ApplicationID", da."ApplicationStatus", da."DateSubmitted",
+                da."ApplicationID", da."Reference", da."ApplicationStatus", da."DateSubmitted",
                 s."StudentNumber", au."Email", au."Title", au."FName", au."LName",
                 m."ModuleCode", m."ModuleName", lect_au."Title", lect_au."FName", lect_au."LName",
                 ps."RoleLevel", dp."TotalAllocatedHours", dp."PositionID", dp."PositionStatus", dp."AdminComment";
@@ -690,7 +698,7 @@ class AdminRepository {
             positionStatus: row.position_status,
             position: row.position || 'Student Assistant',
             application_id: Number(row.application_id),
-            reference: String('!! update data model: add ReferenceNumber to DEMI_APPLICATION'),
+            reference: row.reference,
             status: row.status,
             submittedDate: row.submitted_date
                 ? new Date(row.submitted_date).toLocaleDateString('en-ZA', {
