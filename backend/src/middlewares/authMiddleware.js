@@ -40,4 +40,21 @@ export function authorize(allowedRoles) {
     };
 }
 
-export default authenticate;
+export function authenticatePending2FA(req, res, next) {
+    const token = req.cookies?.twofa_token;
+    if (!token) {
+        return res.status(401).json({ message: 'Access Denied' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your_super_secret_key');
+        if (decoded.purpose !== '2fa' || !decoded.user_id) {
+            return res.status(401).json({ message: 'Invalid Token' });
+        }
+        req.pending2fa = { user_id: decoded.user_id };
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Invalid Token' });
+    }
+}
+export default { authenticate, authorize, authenticatePending2FA };

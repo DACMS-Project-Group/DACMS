@@ -5,6 +5,7 @@ import User from '../models/User.js';
 import Student from '../models/Student.js';
 import Lecturer from '../models/Lecturer.js';
 import Administrator from '../models/Administrator.js';
+import { issueSessionCookie, issuePendingCookie } from '../utils/sessionCookies.js';
 import { writeAuditLog } from '../utils/auditLogger.js';
 
 const BCRYPT_SALT_ROUNDS = 10;
@@ -301,20 +302,13 @@ class UserController {
                 return res.status(401).json({ message: 'Invalid password'});
             }
 
-            // Generate session token
-            const token = jwt.sign(
-                { user_id: user.user_id, role_id: user.role_id },
-                process.env.JWT_SECRET || 'your_super_secret_key',
-                { expiresIn: '1h' }
-            );
-
-            //Send token via HTTP-only cookie
-            res.cookie('token', token, {
-                httpOnly: true,
-                sameSite: 'strict',
-                secure: process.env.NODE_ENV === 'production',
-                maxAge: 3600000
-            });
+            if(user.role_id !== 3) {
+                 // Generate session token for non-admin users
+                const token = issueSessionCookie(res, { user_id: user.user_id, role_id: user.role_id });
+            } else {
+                //generate pending token for Admin 2FA
+                const pendingToken = issuePendingCookie(res, user.user_id);
+            }
 
             if (user.role_id === 3) {
                 await writeAuditLog({
@@ -327,6 +321,11 @@ class UserController {
                         success: true
                     }
                 });
+            }
+
+            // Return pending token for Admin 2FA
+            if(user.role_id === 3) {
+                return res.status(202).json({ message: 'Admin 2FA required', requiresSetup: true });
             }
 
             res.status(200).json({

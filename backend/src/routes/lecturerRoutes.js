@@ -81,6 +81,13 @@ router.get(
     LecturerController.lecturerFetchApplicationById.bind(LecturerController)
 )
 
+router.get(
+    '/applications/:applicationId/documents/:documentId',
+    authenticate,
+    authorize([2]),
+    LecturerController.lecturerFetchApplicationDocument.bind(LecturerController)
+);
+
 router.patch(
     '/applications/review/:id',
     authenticate,
