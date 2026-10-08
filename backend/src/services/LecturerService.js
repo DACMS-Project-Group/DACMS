@@ -1,6 +1,16 @@
 import LecturerRepository from '../repositories/LecturerRepository.js';
 import DemiApplicationRepository from '../repositories/DemiApplicationRepository.js';
 import WorkSessionRepository from '../repositories/WorkSessionRepository.js';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const DOCUMENTS_DIRECTORY = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    '..',
+    '..',
+    'documents'
+);
 
 const RESPONSIBILITY_LABELS = {
     tutoring: 'Tutoring',
@@ -139,6 +149,42 @@ class LecturerService {
         }
 
         return application;
+    }
+
+    async lecturerFetchApplicationDocument(lecturerId, applicationId, documentId) {
+        const document = await this.demiApplicationRepository.lecturerFetchApplicationDocument(
+            lecturerId,
+            applicationId,
+            documentId
+        );
+
+        if (!document) {
+            return null;
+        }
+
+        const storedPath = String(document.FilePath ?? '').trim().replace(/\\/g, '/');
+        const documentsMarker = '/documents/';
+        const markerIndex = storedPath.toLowerCase().lastIndexOf(documentsMarker);
+        const relativePath = markerIndex >= 0
+            ? storedPath.slice(markerIndex + documentsMarker.length)
+            : storedPath.replace(/^\/+/, '');
+        const filePath = path.resolve(DOCUMENTS_DIRECTORY, ...relativePath.split('/'));
+        const relativeToDocuments = path.relative(DOCUMENTS_DIRECTORY, filePath);
+
+        if (
+            !relativePath ||
+            relativeToDocuments === '..' ||
+            relativeToDocuments.startsWith(`..${path.sep}`) ||
+            path.isAbsolute(relativeToDocuments)
+        ) {
+            throw new Error('Stored supporting document path is invalid.');
+        }
+
+        const content = await fs.readFile(filePath);
+        return {
+            content,
+            fileName: path.basename(filePath)
+        };
     }
 
     async lecturerReviewApplication(lecturerId, applicationId, decision, comment) {

@@ -133,6 +133,31 @@ const ApplicationReview = ({
     setMessage('Comment saved successfully.');
   };
 
+  const handleViewDocument = (document) => {
+    const documentId =
+      document.DocumentID ??
+      document.documentId ??
+      document.document_id ??
+      document.id;
+    const applicationId =
+      application.id ?? application.ApplicationID ?? application.application_id;
+
+    if (!applicationId || !documentId) {
+      setMessage('Document not found.');
+      return;
+    }
+
+    const link = window.document.createElement('a');
+    link.href =
+      `/api/lecturer/applications/${encodeURIComponent(applicationId)}` +
+      `/documents/${encodeURIComponent(documentId)}`;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    window.document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+
   return (
     <div className="min-h-screen bg-off-white">
       {/* Top Navbar */}
@@ -301,7 +326,10 @@ const ApplicationReview = ({
                       >
                         <div>
                           <p className="font-semibold text-gray-900">
-                            {document.name}
+                            {document.name ??
+                              document.DocumentType ??
+                              document.documentType ??
+                              'Supporting document'}
                           </p>
 
                           <p className="text-sm text-gray-500">
@@ -311,11 +339,7 @@ const ApplicationReview = ({
 
                         <button
                           type="button"
-                          onClick={() =>
-                            setMessage(
-                              `${document.name} selected for viewing.`
-                            )
-                          }
+                          onClick={() => handleViewDocument(document)}
                           className="border-2 border-primary text-primary px-4 py-2 rounded-lg font-semibold hover:bg-primary-lightest transition"
                         >
                           View Document

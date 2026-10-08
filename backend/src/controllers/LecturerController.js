@@ -1,3 +1,4 @@
+import path from 'path';
 import LecturerService from '../services/LecturerService.js';
 import NotificationService from '../services/NotificationService.js';
 import getAuthUserId from '../utils/getAuthUserId.js';
@@ -93,6 +94,50 @@ class LecturerController {
             res.status(200).json( { application : application } );
         } catch (error) {
             res.status(500).json( { error : error.message });
+        }
+    }
+
+    static async lecturerFetchApplicationDocument(req, res, next) {
+        const lecturerId = getAuthUserId(req);
+        const applicationId = Number(req.params.applicationId);
+        const documentId = Number(req.params.documentId);
+
+        if (!lecturerId) {
+            return res.status(401).json({ message: 'Authenticated lecturer ID is required.' });
+        }
+
+        if (
+            !Number.isInteger(applicationId) ||
+            applicationId < 1 ||
+            !Number.isInteger(documentId) ||
+            documentId < 1
+        ) {
+            return res.status(400).json({ message: 'Application and document IDs must be positive integers.' });
+        }
+
+        try {
+            const document = await LecturerService.lecturerFetchApplicationDocument(
+                lecturerId,
+                applicationId,
+                documentId
+            );
+
+            if (!document) {
+                return res.status(404).json({ message: 'Document not found.' });
+            }
+
+            res.type(path.extname(document.fileName));
+            res.setHeader(
+                'Content-Disposition',
+                `inline; filename*=UTF-8''${encodeURIComponent(document.fileName)}`
+            );
+            res.setHeader('X-Content-Type-Options', 'nosniff');
+            return res.send(document.content);
+        } catch (error) {
+            if (error.code === 'ENOENT') {
+                return res.status(404).json({ message: 'The document file is no longer available.' });
+            }
+            return next(error);
         }
     }
 

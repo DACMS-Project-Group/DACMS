@@ -72,12 +72,15 @@ const ReviewApplications = () => {
     documents:
       (app.Documents ?? app.documents ?? []).map((document) => ({
         ...document,
-        type: 
-          document.DocumentType ?? 
-          document.documentType,
-        path: 
-          document.FilePath ?? 
-          document.filePath,
+      id:
+        document.DocumentID ??
+        document.documentId ??
+        document.document_id ??
+        document.id,
+      type:
+        document.DocumentType ??
+        document.documentType ??
+        document.document_type,
       })),
     reason:
       app.DecisionReason ?? 
@@ -182,22 +185,17 @@ const filteredApplications = applications.filter((application) => {
 
   //File download function
   const viewDocument = (document) => {
-    const filePath = document.path ?? document.FilePath;
-
-    if (!filePath) {
-      setError('Document not found.');
-      return;
-    }
-
-    const fileName = String(filePath).replace(/\\/g, '/').split('/').pop();
-    if (!fileName) {
+    if (!selectedApplication?.id || !document.id) {
       setError('Document not found.');
       return;
     }
 
     const link = window.document.createElement('a');
-    link.href = `/backend/documents/${encodeURIComponent(fileName)}`;
-    link.download = fileName;
+    link.href =
+      `/api/lecturer/applications/${encodeURIComponent(selectedApplication.id)}` +
+      `/documents/${encodeURIComponent(document.id)}`;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
     window.document.body.appendChild(link);
     link.click();
     link.remove();
