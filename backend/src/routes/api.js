@@ -5,6 +5,7 @@ import studentRoutes from './studentRoutes.js';
 import lecturerRoutes from './lecturerRoutes.js';
 import adminRoutes from './adminRoutes.js';
 import notificationRoutes from './notificationRoutes.js';
+import twoFactorRoutes from './twoFactorRoutes.js';
 
 const router = Router();
 
@@ -14,5 +15,6 @@ router.use('/admin', adminRoutes);
 router.use('/lecturer', lecturerRoutes);
 router.use('/student', studentRoutes);
 router.use('/notifications', notificationRoutes);
+router.use('/2fa', twoFactorRoutes);
 
 export default router;

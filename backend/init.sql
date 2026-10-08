@@ -202,7 +202,10 @@ CREATE TABLE "LECTURER_MODULE" (
 -- 11. CREATE ADMINISTRATOR SUBTYPE TABLE
 CREATE TABLE "ADMINISTRATOR" (
     "AdminID" int NOT NULL,
-    "MFA_Enabled" boolean DEFAULT true,
+    "TFASecret" text DEFAULT NULL,
+    "TFABackupCodes" text[] NOT NULL DEFAULT '{}',
+    "TFALastStep" bigint DEFAULT NULL,
+    "TFAConfirmedAt" timestamptz default NULL,
     "BudgetAllocationRights" boolean DEFAULT true,
     CONSTRAINT "PK_ADMINISTRATOR" PRIMARY KEY ("AdminID"),
     CONSTRAINT "FK_ADMINISTRATOR_APP_USER" FOREIGN KEY ("AdminID") REFERENCES "APP_USER" ("UserID") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
@@ -507,9 +510,9 @@ INSERT INTO "LECTURER" ("LecturerID", "Department", "OE_ID") VALUES
 (13, 'School of Mechanical Engineering', 3),
 (14, 'School of Chemical Engineering', 4);
 
-INSERT INTO "ADMINISTRATOR" ("AdminID", "MFA_Enabled", "BudgetAllocationRights") VALUES 
-(15, TRUE, TRUE), 
-(16, TRUE, TRUE);
+INSERT INTO "ADMINISTRATOR" ("AdminID", "TFASecret", "TFABackupCodes", "TFALastStep", "TFAConfirmedAt", "BudgetAllocationRights") VALUES
+(15, NULL, '{}', NULL, NULL, TRUE),
+(16, NULL, '{}', NULL, NULL, TRUE);
 
 -- 7. Insert Supporting Documents
 INSERT INTO "SUPPORTING_DOCUMENT" ("StudentID", "DocumentType", "FilePath", "UploadTimestamp") VALUES 
