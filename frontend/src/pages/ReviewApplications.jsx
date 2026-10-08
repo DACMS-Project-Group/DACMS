@@ -7,7 +7,7 @@ import { apiGet, apiPatch } from '../api';
 import { useNavigate } from 'react-router-dom';
 
 const ReviewApplications = () => {
-  
+  document.title = 'AACMS - Review Applications';
   const navigate = useNavigate();
   
   const [applications, setApplications] = useState([]);
@@ -293,7 +293,7 @@ const filteredApplications = applications.filter((application) => {
 
             {/* Page Title */}
             <div className="bg-primary text-white px-8 py-5">
-              <h1 className="text-2xl font-bold">
+              <h1 className="text-2xl font-poppins font-semibold text-white">
                 Application Review
               </h1>
             </div>

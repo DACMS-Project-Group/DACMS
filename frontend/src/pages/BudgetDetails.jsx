@@ -7,6 +7,7 @@ import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
 
 const BudgetDetails = () => {
+  document.title = 'AACMS - Budget Details';
   const { id } = useParams();
 
   const [budget, setBudget] = useState(null);
@@ -75,7 +76,7 @@ const BudgetDetails = () => {
 
           <main className="flex-1">
             <div className="bg-primary px-8 py-4">
-              <h1 className="text-2xl font-semibold text-white font-poppins">
+              <h1 className="text-2xl font-poppins font-semibold text-white">
                 Budget Details
               </h1>
             </div>
