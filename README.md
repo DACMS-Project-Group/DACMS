@@ -21,3 +21,7 @@ Once you have pulled the image from the repository, the following can be done to
 - http://localhost:5173/
 ### Backend:
 - Runs on port 5000
+
+## Deployment
+
+For production deployment on Render, follow [DEPLOY_RENDER.md](./DEPLOY_RENDER.md).

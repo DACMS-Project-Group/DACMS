@@ -1,10 +1,12 @@
 import multer from 'multer';
 import path from 'path';
+import { mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'url';
 
 // backend/src/middlewares/upload.js -> backend/documents
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const DOCUMENTS_DIR = path.join(__dirname, '..', '..', 'documents');
+mkdirSync(DOCUMENTS_DIR, { recursive: true });
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {

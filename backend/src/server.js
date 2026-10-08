@@ -1,17 +1,22 @@
+import 'dotenv/config';
 import app from './app.js';
 import { Server } from 'socket.io';
 import { configureSocketIO } from './services/NotificationService.js';
 import http from 'node:http';
 import jwt from 'jsonwebtoken';
-import env from 'dotenv';
 
-env.config();
+const PORT = Number(process.env.PORT) || 5000;
 
-const PORT = process.env.PORT || 5000;
+if (process.env.NODE_ENV === 'production' && (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32)) {
+    throw new Error('JWT_SECRET must contain at least 32 characters in production.');
+}
 
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: { origin: true, credentials: true }
+    cors: {
+        origin: process.env.NODE_ENV === 'production' ? false : true,
+        credentials: true
+    }
 });
 const userSockets = new Map();
 configureSocketIO(io, userSockets);
@@ -54,7 +59,7 @@ io.on('connection', (socket) => {
     });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Backend running on port ${PORT}`);
 });
 
