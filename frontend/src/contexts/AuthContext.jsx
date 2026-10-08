@@ -42,6 +42,14 @@ export const AuthProvider = ({ children }) => {
       throw new Error(data.message || 'Login failed');
     }
 
+    // Handle 202: Admin needs 2FA
+    if (response.status === 202) {
+      const data = await response.json();
+      // Don't set user yet; redirect to 2FA page
+      navigate('/2fa', { replace: true, state: { from: data.requiresSetup ? 'setup' : 'login' } });
+      return null; // Login not complete
+    }
+
     // Backend returns { message, user: { id, email, role_id } }
     const data = await response.json();
 

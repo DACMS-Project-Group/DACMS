@@ -26,6 +26,7 @@ import VerifyWorkHours from './pages/VerifyWorkHours';
 import AssistantListings from './pages/AssistantListings';
 
 // ===== ADMIN PAGES =====
+import TwoFactorAuth from './pages/TwoFactorAuth';
 import AdminDashboard from './pages/AdminDashboard';
 import BudgetManagement from './pages/BudgetManagement';
 import CreateBudget from './pages/CreateBudget';
@@ -94,6 +95,7 @@ function App() {
 
             {/* ===== ADMIN ROUTES ===== */}
             <Route element={<ProtectedRoute requiredRoles={['admin']} />}>
+              <Route path="/2fa" element={<TwoFactorAuth />} />
               <Route path="/admin-dashboard" element={<AdminDashboard />} />
               <Route path="/budget-management" element={<BudgetManagement />} />
               <Route path="/create-budget" element={<CreateBudget />} />
