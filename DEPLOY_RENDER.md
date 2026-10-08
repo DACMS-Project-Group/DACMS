@@ -28,17 +28,37 @@ creating the Blueprint.
 4. Wait for the first build and deploy to finish. The service health check is
    available at `/healthz`.
 5. In the Render dashboard, open the `dacms-web` service and choose **Shell**.
-   Initialize the new, empty database once:
+   Run the following commands from the **web service shell** so they use the
+   same `DATABASE_URL` as the running backend. First check whether the DACMS
+   tables already exist:
 
    ```sh
-   psql "$DATABASE_URL" -f /app/backend/init.sql
+   psql "$DATABASE_URL" -c '\dt'
    ```
 
-   `backend/init.sql` drops existing DACMS tables before recreating them and
-   inserts its bundled seed data. Run it only once against a new, empty
-   database. **Do not rerun it on a database containing data** or it will erase
-   those tables and records. Review the seeded demo/test records and replace
-   them before opening the application to real users.
+   If the database is new and the DACMS tables are absent, initialize it once:
+
+   ```sh
+   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /app/backend/init.sql
+   ```
+
+   Verify that initialization created the tables:
+
+   ```sh
+   psql "$DATABASE_URL" -c '\dt'
+   ```
+
+   The login error `relation "APP_USER" does not exist` means the connected
+   database has not been initialized with the DACMS schema. If `\dt` shows no
+   DACMS tables, initialize that database using the command above. The database
+   name in Render may differ from the configured base name; using
+   `"$DATABASE_URL"` ensures the command targets the same database as the app.
+
+   **Important:** `backend/init.sql` drops existing DACMS tables before
+   recreating them and inserts bundled seed data. Run it only against a new,
+   empty database. Do not run it on a database containing data, because it will
+   erase those tables and records. Review the seeded demo/test records and
+   replace them before opening the application to real users.
 
 6. Open the service URL shown in the Render dashboard and test registration,
    login, document uploads, notifications, and PDF export.
