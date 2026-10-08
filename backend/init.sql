@@ -202,10 +202,10 @@ CREATE TABLE "LECTURER_MODULE" (
 -- 11. CREATE ADMINISTRATOR SUBTYPE TABLE
 CREATE TABLE "ADMINISTRATOR" (
     "AdminID" int NOT NULL,
-    "TFASecret" text DEFAULT 'nosetup',
+    "TFASecret" text DEFAULT NULL,
     "TFABackupCodes" text[] NOT NULL DEFAULT '{}',
-    "TFALastStep" bigint,
-    "TFAConfirmedAt" timestamptz,
+    "TFALastStep" bigint DEFAULT NULL,
+    "TFAConfirmedAt" timestamptz default NULL,
     "BudgetAllocationRights" boolean DEFAULT true,
     CONSTRAINT "PK_ADMINISTRATOR" PRIMARY KEY ("AdminID"),
     CONSTRAINT "FK_ADMINISTRATOR_APP_USER" FOREIGN KEY ("AdminID") REFERENCES "APP_USER" ("UserID") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
