@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const Login = () => {
+  document.title = 'AACMS - Login';
   const { login } = useAuth();
 
   const [email, setEmail] = useState('');

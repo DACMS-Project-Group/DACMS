@@ -6,6 +6,7 @@ import Card from '../components/Card';
 import { apiGet, apiPut } from '../api';
 
 const EditBudget = () => {
+  document.title = 'AACMS - Edit Budget';
   const navigate = useNavigate();
   const { id } = useParams();
   const currentYear = new Date().getFullYear();
@@ -263,7 +264,7 @@ const EditBudget = () => {
 
           {/* Page Header */}
           <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white font-poppins">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Edit Budget
             </h1>
           </div>

@@ -2,13 +2,9 @@ import { NavLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Sidebar = ({ userRole = 'student' }) => {
-  // Normalise the role so that Lecturer, LECTURER, lecturer, etc.
-  // are treated the same way.
   const role = userRole?.toLowerCase().trim();
-
   const { logout } = useAuth();
 
-  // Student Navigation
   const studentNavItems = [
     { name: 'Dashboard', href: '/student-dashboard' },
     { name: 'Applications', href: '/applications' },
@@ -17,7 +13,6 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Profile', href: '/profile' },
   ];
 
-  // Lecturer Navigation
   const lecturerNavItems = [
     { name: 'Dashboard', href: '/lecturer-dashboard' },
     { name: 'Assistant Listings', href: '/assistant-listings' },
@@ -27,7 +22,6 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Verify Hours', href: '/verify-hours' },
   ];
 
-  // Administrator Navigation
   const adminNavItems = [
     { name: 'Dashboard', href: '/admin-dashboard' },
     { name: 'Budget Management', href: '/budget-management' },
@@ -43,9 +37,8 @@ const Sidebar = ({ userRole = 'student' }) => {
         : studentNavItems;
 
   return (
-    <aside className="sticky top-24 flex h-[calc(100vh-6rem)] w-64 shrink-0 flex-col bg-primary-dark text-white">
+    <aside className="flex h-[calc(100vh-6rem)] w-64 shrink-0 flex-col bg-primary-dark text-white">
 
-      {/* Navigation */}
       <nav className="min-h-0 flex-1 overflow-y-auto p-4 pt-6">
         {navItems.map((item) => (
           <NavLink
@@ -68,7 +61,6 @@ const Sidebar = ({ userRole = 'student' }) => {
         ))}
       </nav>
 
-      {/* Bottom Navigation */}
       <div className="p-4">
         <button
           type="button"

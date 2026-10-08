@@ -8,6 +8,7 @@ import { apiGet, apiPatch } from '../api';
 
 const AppointmentReview = () => {
   const navigate = useNavigate();
+  document.title = 'AACMS - Appointment Review';
   const { id: position_id } = useParams();
 
   const [appointment, setAppointment] = useState(null);
@@ -191,7 +192,7 @@ const AppointmentReview = () => {
 
         <main className="flex-1">
           <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white font-poppins">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Appointment Review
             </h1>
           </div>

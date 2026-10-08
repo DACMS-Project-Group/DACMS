@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 
 const LandingPage = () => {
   const navigate = useNavigate();
-
+  document.title = 'AACMS - Landing Page';
   const handleLogin = () => {
     navigate('/login');
   };

@@ -133,6 +133,10 @@ const StudentProfile = () => {
 
   const [agreed, setAgreed] = useState(false);
   const [signature, setSignature] = useState('');
+// ---- Browser tab title ----
+  useEffect(() => {
+    document.title = 'AACMS - Student Profile';
+  }, []);  
 
   // ---- Load profile ----
   useEffect(() => {
@@ -564,7 +568,7 @@ const StudentProfile = () => {
 
         <main className="flex-1">
           <div className="bg-primary text-white px-8 py-5 flex items-center justify-between">
-            <h1 className="text-2xl font-bold">Student Profile</h1>
+            <h1 className="text-2xl font-poppins font-semibold text-white">Student Profile</h1>
           </div>
 
           {loading && (

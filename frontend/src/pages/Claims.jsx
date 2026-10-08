@@ -7,6 +7,7 @@ import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
 
 const Claims = () => {
+  document.title = 'AACMS - Claims';
   const navigate = useNavigate();
 
   const [claims, setClaims] = useState([]);
@@ -99,7 +100,7 @@ const Claims = () => {
 
         <main className="flex-1">
           <div className="bg-primary h-16 flex items-center px-8">
-            <h1 className="text-3xl font-poppins font-bold text-white">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Claims
             </h1>
           </div>

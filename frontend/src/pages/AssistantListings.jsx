@@ -6,6 +6,7 @@ import { apiGet, apiPost, apiPatch } from '../api';
 
 
 const AssistantListings = () => {
+  document.title = 'AACMS - Assistant Listings';
   const [listings, setListings] = useState([]);
   const [modules, setModules] = useState([]);
 
@@ -306,7 +307,7 @@ const AssistantListings = () => {
         <main className="flex-1">
           {/* Page Header */}
           <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Assistant Listings
             </h1>
           </div>

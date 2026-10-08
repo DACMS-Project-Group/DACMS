@@ -7,6 +7,7 @@ import { apiGet, apiPost } from '../api';
 
 const ApplyForAssistant = () => {
   const navigate = useNavigate();
+  document.title = 'AACMS - Apply For Assistant';
 
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -80,7 +81,7 @@ const ApplyForAssistant = () => {
         <main className="flex-1">
           {/* ===== PAGE TITLE BAR ===== */}
           <div className="bg-primary h-16 flex items-center px-8">
-            <h1 className="text-3xl font-poppins font-bold text-white">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Assistant Applications
             </h1>
           </div>

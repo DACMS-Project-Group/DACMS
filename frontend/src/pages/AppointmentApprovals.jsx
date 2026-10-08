@@ -9,7 +9,7 @@ import { apiGet } from '../api';
 
 const AppointmentApprovals = () => {
   const navigate = useNavigate();
-
+  document.title = 'AACMS - Appointment Approvals';
   const [pendingAppointments, setPendingAppointments] = useState([]);
   const [historyAppointments, setHistoryAppointments] = useState([]);
 
@@ -82,7 +82,7 @@ const AppointmentApprovals = () => {
 
         <main className="flex-1">
           <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white font-poppins">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Appointment Approvals
             </h1>
           </div>

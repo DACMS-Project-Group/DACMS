@@ -6,6 +6,7 @@ import Card from '../components/Card';
 import { apiGet, apiPost } from '../api';
 
 const GenerateNewClaim = () => {
+  document.title = 'AACMS - Generate New Claim';
   const navigate = useNavigate();
 
   const [applications, setApplications] = useState([]);
@@ -546,7 +547,7 @@ const GenerateNewClaim = () => {
 
           {/* Page Header */}
           <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Generate New Claim
             </h1>
           </div>

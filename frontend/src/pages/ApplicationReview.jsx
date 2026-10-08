@@ -12,6 +12,7 @@ const ApplicationReview = ({
   onUpdateApplication,
 }) => {
   const navigate = useNavigate();
+  document.title = 'AACMS - Application Review';
 
   const [revStatus, setRevStatus] = useState(
     application?.status || ''
@@ -33,7 +34,7 @@ const ApplicationReview = ({
 
           <main className="flex-1">
             <div className="bg-primary text-white px-8 py-5">
-              <h1 className="text-2xl font-bold">
+              <h1 className="text-2xl font-poppins font-semibold text-white">
                 Application Review
               </h1>
             </div>
