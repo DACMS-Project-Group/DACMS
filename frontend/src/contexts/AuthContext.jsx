@@ -44,10 +44,9 @@ export const AuthProvider = ({ children }) => {
 
     // Handle 202: Admin needs 2FA
     if (response.status === 202) {
-      const data = await response.json();
+      const tfadata = await response.json();
       // Don't set user yet; redirect to 2FA page
-      navigate('/2fa', { replace: true, state: { from: data.requiresSetup ? 'setup' : 'login' } });
-      return null; // Login not complete
+      navigate('/2fa', { replace: true, state: { from: tfadata.requiresSetup ? 'setup' : 'login', user: tfadata.user } });
     }
 
     // Backend returns { message, user: { id, email, role_id } }
