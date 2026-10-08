@@ -136,7 +136,7 @@ const AdminDashboard = () => {
               {/* Monthly Claims */}
               <section className="min-w-0 h-full flex flex-col">
                 <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                  Monthly Work Summary
+                  Monthly Claims Summary
                 </h3>
 
                 <Card className="h-full flex flex-col justify-between">
@@ -169,7 +169,7 @@ const AdminDashboard = () => {
               {/* Work Sessions */}
               <section className="min-w-0 h-full flex flex-col">
                 <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                  Work Sessions
+                  Monthly Work Sessions
                 </h3>
 
                 <Card className="h-full flex flex-col justify-between">
@@ -189,13 +189,6 @@ const AdminDashboard = () => {
                       </div>
                     ))}
                   </div>
-
-                  <button
-                    onClick={() => navigate('/claims-verification')}
-                    className="text-primary font-semibold hover:underline mt-4 font-inter"
-                  >
-                    View claims →
-                  </button>
                 </Card>
               </section>
 

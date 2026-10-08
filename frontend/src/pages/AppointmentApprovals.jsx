@@ -364,7 +364,7 @@ const AppointmentApprovals = () => {
                             </td>
 
                             <td className="p-4 font-inter text-dark">
-                              {appointment.module_code}
+                              {appointment.module_code || appointment.module}
                             </td>
 
                             <td className="p-4 font-inter text-dark">
@@ -372,7 +372,7 @@ const AppointmentApprovals = () => {
                             </td>
 
                             <td className="p-4 text-sm font-inter text-neutral">
-                              {formatDate(appointment.date_submitted)}
+                              {formatDate(appointment.date_submitted || appointment.date)}
                             </td>
 
                             <td className="p-4">

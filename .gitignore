@@ -2,7 +2,8 @@
 **/node_modules/
 
 # Local Environment Variables
-**/node_modules/.env
+**/.env
+!**/.env.example
 
 # Build outputs
 **/dist/

@@ -45,12 +45,27 @@ class DemiApplicationRepository extends BaseRepository {
                 s."StudentNumber",
                 s."ContactDetails",
                 (
-                    SELECT JSON_AGG(JSON_BUILD_OBJECT(
-                        'DocumentType', d."DocumentType",
-                        'FilePath', d."FilePath"
-                    ))
-                    FROM "SUPPORTING_DOCUMENT" d
-                    WHERE d."StudentID" = s."StudentID"
+                    SELECT JSON_AGG(
+                        JSON_BUILD_OBJECT(
+                            'DocumentID', latest."DocumentID",
+                            'DocumentType', latest."DocumentType"
+                        )
+                        ORDER BY latest."UploadTimestamp" DESC, latest."DocumentID" DESC
+                    )
+                    FROM (
+                        SELECT DISTINCT ON (
+                            lower(regexp_replace(d."DocumentType", '[^[:alnum:]]', '', 'g'))
+                        )
+                            d."DocumentID",
+                            d."DocumentType",
+                            d."UploadTimestamp"
+                        FROM "SUPPORTING_DOCUMENT" d
+                        WHERE d."StudentID" = s."StudentID"
+                        ORDER BY
+                            lower(regexp_replace(d."DocumentType", '[^[:alnum:]]', '', 'g')),
+                            d."UploadTimestamp" DESC,
+                            d."DocumentID" DESC
+                    ) latest
                 ) AS "Documents",
                 m."ModuleCode",
                 m."ModuleName"
@@ -63,6 +78,24 @@ class DemiApplicationRepository extends BaseRepository {
             `
             , [applicationId]
         )
+    }
+
+    async lecturerFetchApplicationDocument(lecturerId, applicationId, documentId) {
+        const rows = await this.query(
+            `
+            SELECT d."FilePath"
+            FROM "DEMI_APPLICATION" a
+            JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
+            JOIN "SUPPORTING_DOCUMENT" d ON d."StudentID" = a."StudentID"
+            WHERE a."ApplicationID" = $1
+              AND d."DocumentID" = $2
+              AND l."LecturerID" = $3
+            LIMIT 1
+            `,
+            [applicationId, documentId, lecturerId]
+        );
+
+        return rows[0] ?? null;
     }
 
     async getStudentIdFromApplication(applicationId) {
@@ -353,7 +386,17 @@ class DemiApplicationRepository extends BaseRepository {
 
     async findDocumentsByStudentId(studentId) {
         return this.query(
-            `SELECT * FROM "SUPPORTING_DOCUMENT" WHERE "StudentID" = $1 ORDER BY "UploadTimestamp" DESC`,
+            `
+            SELECT DISTINCT ON (
+                lower(regexp_replace("DocumentType", '[^[:alnum:]]', '', 'g'))
+            ) *
+            FROM "SUPPORTING_DOCUMENT"
+            WHERE "StudentID" = $1
+            ORDER BY
+                lower(regexp_replace("DocumentType", '[^[:alnum:]]', '', 'g')),
+                "UploadTimestamp" DESC,
+                "DocumentID" DESC
+            `,
             [studentId]
         );
     }

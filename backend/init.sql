@@ -530,21 +530,21 @@ INSERT INTO "SUPPORTING_DOCUMENT" ("StudentID", "DocumentType", "FilePath", "Upl
 (10, 'Academic Transcript', '/app/documents/exampleDoc.jpg', '2026-08-10 18:00:00+02');
 
 INSERT INTO "SUPPORTING_DOCUMENT" ("StudentID", "DocumentType", "FilePath", "UploadTimestamp") VALUES
-(17, 'Academic Transcript', '/app/documents/demo/naledi-transcript.pdf', '2026-09-28 09:10:00+02'),
-(17, 'Bank Confirmation', '/app/documents/demo/naledi-bank-letter.pdf', '2026-09-28 09:18:00+02'),
-(18, 'Academic Transcript', '/app/documents/demo/thabo-transcript.pdf', '2026-09-29 11:20:00+02'),
-(19, 'Academic Transcript', '/app/documents/demo/amara-transcript.pdf', '2026-09-30 08:45:00+02'),
-(19, 'Certified ID', '/app/documents/demo/amara-id.pdf', '2026-09-30 08:52:00+02'),
-(20, 'Academic Transcript', '/app/documents/demo/kagiso-transcript.pdf', '2026-10-01 13:05:00+02'),
-(21, 'Academic Transcript', '/app/documents/demo/elize-transcript.pdf', '2026-10-01 14:30:00+02'),
-(22, 'Academic Transcript', '/app/documents/demo/musa-transcript.pdf', '2026-10-02 10:12:00+02'),
-(23, 'Academic Transcript', '/app/documents/demo/ayesha-transcript.pdf', '2026-10-02 15:42:00+02'),
-(24, 'Academic Transcript', '/app/documents/demo/bokang-transcript.pdf', '2026-10-03 09:25:00+02'),
-(24, 'Bank Confirmation', '/app/documents/demo/bokang-bank-letter.pdf', '2026-10-03 09:31:00+02'),
-(25, 'Academic Transcript', '/app/documents/demo/liam-transcript.pdf', '2026-10-04 12:14:00+02'),
-(26, 'Academic Transcript', '/app/documents/demo/rethabile-transcript.pdf', '2026-10-05 08:58:00+02'),
-(27, 'Academic Transcript', '/app/documents/demo/mia-transcript.pdf', '2026-10-05 16:22:00+02'),
-(28, 'Academic Transcript', '/app/documents/demo/andile-transcript.pdf', '2026-10-06 10:40:00+02');
+(17, 'Academic Transcript', '/app/documents/testPDF.pdf', '2026-09-28 09:10:00+02'),
+(17, 'Bank Confirmation', '/app/documents/testPDF.pdf', '2026-09-28 09:18:00+02'),
+(18, 'Academic Transcript', '/app/documents/testPDF.pdf', '2026-09-29 11:20:00+02'),
+(19, 'Academic Transcript', '/app/documents/testPDF.pdf', '2026-09-30 08:45:00+02'),
+(19, 'Certified ID', '/app/documents/exampleDoc.jpg', '2026-09-30 08:52:00+02'),
+(20, 'Academic Transcript', '/app/documents/testPDF.pdf', '2026-10-01 13:05:00+02'),
+(21, 'Academic Transcript', '/app/documents/exampleDoc.jpg', '2026-10-01 14:30:00+02'),
+(22, 'Academic Transcript', '/app/documents/testPDF.pdf', '2026-10-02 10:12:00+02'),
+(23, 'Academic Transcript', '/app/documents/exampleDoc.jpg', '2026-10-02 15:42:00+02'),
+(24, 'Academic Transcript', '/app/documents/exampleDoc.jpg', '2026-10-03 09:25:00+02'),
+(24, 'Bank Confirmation', '/app/documents/testPDF.pdf', '2026-10-03 09:31:00+02'),
+(25, 'Academic Transcript', '/app/documents/exampleDoc.jpg', '2026-10-04 12:14:00+02'),
+(26, 'Academic Transcript', '/app/documents/exampleDoc.jpg', '2026-10-05 08:58:00+02'),
+(27, 'Academic Transcript', '/app/documents/exampleDoc.jpg', '2026-10-05 16:22:00+02'),
+(28, 'Academic Transcript', '/app/documents/exampleDoc.jpg', '2026-10-06 10:40:00+02');
 
 -- 8. Insert Lecturer Module Mapping
 INSERT INTO "LECTURER_MODULE" ("LecturerID", "ModuleID") VALUES 
