@@ -312,6 +312,7 @@ class UserController {
             res.cookie('token', token, {
                 httpOnly: true,
                 sameSite: 'strict',
+                secure: process.env.NODE_ENV === 'production',
                 maxAge: 3600000
             });
 
@@ -342,7 +343,8 @@ class UserController {
         try {
             res.clearCookie('token', {
                 httpOnly: true,
-                sameSite: 'strict'
+                sameSite: 'strict',
+                secure: process.env.NODE_ENV === 'production'
             });
             res.status(200).json({ message: 'Logout Successful' });
         } catch (error) {
