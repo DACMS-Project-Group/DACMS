@@ -80,6 +80,35 @@ class WorkSessionRepository extends BaseRepository {
         return studentId[0]?.StudentID ?? null;
     }
 
+    async getSessionNotificationDetails(sessionId) {
+        const rows = await this.query(
+            `
+            SELECT
+                w."SessionID",
+                TO_CHAR(w."StartTime", 'YYYY-MM-DD') AS "SessionDate",
+                TO_CHAR(w."StartTime", 'HH24:MI') AS "StartTime",
+                TO_CHAR(w."EndTime", 'HH24:MI') AS "EndTime",
+                w."ActivityDescription",
+                w."TotalHoursWorked",
+                a."StudentID",
+                l."LecturerID",
+                s."StudentNumber",
+                CONCAT(au."FName", ' ', au."LName") AS "StudentName",
+                m."ModuleCode"
+            FROM "WORK_SESSION" w
+            JOIN "DEMI_POSITION" p ON p."PositionID" = w."PositionID"
+            JOIN "DEMI_APPLICATION" a ON a."ApplicationID" = p."ApplicationID"
+            JOIN "DEMI_LISTING" l ON l."ListingID" = a."ListingID"
+            JOIN "STUDENT" s ON s."StudentID" = a."StudentID"
+            JOIN "APP_USER" au ON au."UserID" = s."StudentID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = l."ModuleID"
+            WHERE w."SessionID" = $1
+            `,
+            [sessionId]
+        );
+        return rows[0] || null;
+    }
+
     /**
      * Active Demi positions held by a student (approved application, not yet
      * terminated), including lecturer name, allocated hours cap, and hours

@@ -607,7 +607,28 @@ class LecturerRepository {
             [claimId, lecturerId, status, comment]
         );
 
-        return result.rows[0] || null;
+        if (!result.rows[0]) {
+            return null;
+        }
+
+        const details = await pool.query(
+            `
+            SELECT
+                c."ClaimID",
+                c."ClaimReferenceNumber",
+                c."ClaimStatus",
+                c."LecturerComment",
+                c."SubmissionDate",
+                da."StudentID",
+                m."ModuleCode"
+            FROM "REMUNERATION_CLAIM" c
+            JOIN "DEMI_APPLICATION" da ON da."ApplicationID" = c."ApplicationID"
+            JOIN "NWU_MODULE" m ON m."ModuleID" = c."ModuleID"
+            WHERE c."ClaimID" = $1
+            `,
+            [claimId]
+        );
+        return details.rows[0] || null;
     }
 
 }

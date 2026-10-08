@@ -15,7 +15,6 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Work Tracking', href: '/work-tracking' },
     { name: 'Claims', href: '/claims' },
     { name: 'Profile', href: '/profile' },
-    { name: 'Notifications', href: '/notifications' },
   ];
 
   // Lecturer Navigation
@@ -26,7 +25,6 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Assign Duties', href: '/assign-responsibilities' },
     { name: 'Review Claims', href: '/review-claims' },
     { name: 'Verify Hours', href: '/verify-hours' },
-    { name: 'Notifications', href: '/notifications' },
   ];
 
   // Administrator Navigation
@@ -35,7 +33,6 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Budget Management', href: '/budget-management' },
     { name: 'Appointment Approvals', href: '/appointment-approvals' },
     { name: 'Claims Verification', href: '/claims-verification' },
-    { name: 'Notifications', href: '/notifications' },
   ];
 
   const navItems =
@@ -46,10 +43,10 @@ const Sidebar = ({ userRole = 'student' }) => {
         : studentNavItems;
 
   return (
-    <aside className="w-64 bg-primary-dark text-white flex flex-col min-h-screen">
+    <aside className="sticky top-24 flex h-[calc(100vh-6rem)] w-64 shrink-0 flex-col bg-primary-dark text-white">
 
       {/* Navigation */}
-      <nav className="flex-1 p-4 pt-6">
+      <nav className="min-h-0 flex-1 overflow-y-auto p-4 pt-6">
         {navItems.map((item) => (
           <NavLink
             key={item.href}
@@ -73,27 +70,6 @@ const Sidebar = ({ userRole = 'student' }) => {
 
       {/* Bottom Navigation */}
       <div className="p-4">
-
-        {/* Profile is strictly for students */}
-        {role === 'student' && (
-          <NavLink
-            to="/profile"
-            className={({ isActive }) =>
-              `
-              block px-4 py-3 rounded-xl
-              transition-colors duration-200 mb-2
-              ${
-                isActive
-                  ? 'bg-primary-light font-semibold'
-                  : 'hover:bg-primary-light'
-              }
-              `
-            }
-          >
-            Profile
-          </NavLink>
-        )}
-
         <button
           type="button"
           onClick={logout}

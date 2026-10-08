@@ -1,32 +1,6 @@
 import NotificationService from '../services/NotificationService.js';
-import getAuthUserId from '../utils/getAuthUserId.js';
 
 class NotificationController {
-    static async sendNotification(req, res) {
-        try {
-            const { subject, type, message } = req.body;
-            const recipientId = req.body.recipientId; /*?? req.user?.user_id; --causes notification to loop back to sender--**/
-            const senderId = getAuthUserId(req);
-
-            if (!recipientId) {
-                return res.status(400).json({ error: 'Recipient user is required' });
-            }
-
-            const notification = await NotificationService.sendNotification({
-                senderId,
-                recipientId,
-                subject,
-                type,
-                message
-            });
-
-            return res.status(201).json(notification);
-        } catch (error) {
-            console.error('Error sending notification:', error);
-            return res.status(500).json({ error: 'Failed to send notification' });
-        }
-    }
-
     static async getNotifications(req, res) {
         try {
             const notifications = await NotificationService.getNotifications(req, res);

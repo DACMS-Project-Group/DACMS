@@ -105,6 +105,19 @@ const AssistantListings = () => {
   const getDeadline = (raw) =>
     raw.Deadline ?? raw.deadline ?? '';
 
+  const getDateInputValue = (value) => {
+    if (!value) return '';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const getDeadlineTimestamp = (date) =>
+    new Date(`${date}T23:59:59`).toISOString();
+
 
   const getMinimumGrade = (raw) =>
     raw.MinimumGrade ??
@@ -187,9 +200,7 @@ const AssistantListings = () => {
   const handleOpenEdit = (listing) => {
     setFormData({
       moduleId: listing.moduleId ?? '',
-      deadline: listing.deadline
-        ? new Date(listing.deadline).toISOString().slice(0, 10)
-        : '',
+      deadline: getDateInputValue(listing.deadline),
       minimumGrade:
         listing.minimumGrade !== null &&
         listing.minimumGrade !== undefined
@@ -246,7 +257,7 @@ const AssistantListings = () => {
 
     const payload = {
       moduleId: Number(formData.moduleId),
-      deadline: formData.deadline,
+      deadline: getDeadlineTimestamp(formData.deadline),
       minimumGrade: Number(formData.minimumGrade),
     };
 
@@ -256,41 +267,23 @@ const AssistantListings = () => {
 
 
       if (editingId) {
-        const updated = await apiPatch(
+        await apiPatch(
           `/lecturer/listings/edit/${editingId}`,
           payload
         );
-
-
-        const mapped = mapListing(updated || payload);
-
-
-        setListings((current) =>
-          current.map((listing) =>
-            getListingId(listing) === editingId
-              ? {
-                  ...listing,
-                  ...mapped,
-                }
-              : listing
-          )
-        );
       } else {
-        const created = await apiPost(
+        await apiPost(
           '/lecturer/listings/create',
           payload
         );
-
-
-        const mapped = mapListing(created || payload);
-
-
-        setListings((current) => [
-          mapped,
-          ...current,
-        ]);
       }
 
+      const refreshedListings = await apiGet('/lecturer/listings');
+      setListings(
+        Array.isArray(refreshedListings)
+          ? refreshedListings
+          : refreshedListings?.listings || []
+      );
 
       handleCancel();
     } catch (err) {
@@ -499,7 +492,7 @@ const AssistantListings = () => {
             <Card>
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-primary-dark">
-                  Current Assistant Listings
+                  Your Assistant Listings
                 </h2>
 
 

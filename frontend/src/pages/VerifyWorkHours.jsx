@@ -133,16 +133,47 @@ const VerifyWorkHours = () => {
     }
   };
 
-  const handleUnverifyOne = (id) => {
-    setSessions((current) =>
-      current.map((session) =>
-        session.id === id
-          ? { ...session, status: 'Pending' }
-          : session
-      )
-    );
+  const handleUnverifyOne = async (id) => {
+    const session = sessions.find((item) => item.id === id);
 
-    setError('');
+    if (!session?.sessionId) {
+      setError(
+        'A session ID is missing. The work session cannot be unverified.'
+      );
+      return;
+    }
+
+    try {
+      setError('');
+      const response = await fetch(
+        `/api/lecturer/sessions/review/${session.sessionId}`,
+        {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ decision: false }),
+        }
+      );
+
+      if (!response.ok) {
+        const result = await response.json();
+        throw new Error(
+          result.error || result.message || 'Failed to unverify the work session.'
+        );
+      }
+
+      setSessions((current) =>
+        current.map((item) =>
+          item.id === id ? { ...item, status: 'Pending' } : item
+        )
+      );
+      flashSaved(`Session #${session.sessionId} unverified successfully.`);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Failed to unverify the work session.');
+    }
   };
 
   const handleApprove = async () => {
@@ -164,43 +195,7 @@ const VerifyWorkHours = () => {
       return;
     }
 
-    try {
-      for (const session of sessions) {
-        if (!session.sessionId) {
-          throw new Error(
-            'A session ID is missing. The work session cannot be approved.'
-          );
-        }
-
-        const response = await fetch(
-          `/api/lecturer/sessions/review/${session.sessionId}`,
-          {
-            method: 'PATCH',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            credentials: 'include',
-            body: JSON.stringify({
-              decision: true,
-            }),
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error(
-            'Failed to approve one or more work sessions.'
-          );
-        }
-      }
-
-      flashSaved('All work hours have been approved.');
-    } catch (err) {
-      console.error(err);
-      setError(
-        err.message ||
-          'Failed to approve the work hours.'
-      );
-    }
+    flashSaved('All work hours have been approved.');
   };
 
   const handleReject = () => {
@@ -389,7 +384,7 @@ const VerifyWorkHours = () => {
               </div>
             </Card>
 
-            <Card>
+            {/* <Card>
               <div className="mb-5">
                 <h2 className="text-lg font-semibold text-primary-dark">
                   Verification Decision
@@ -469,7 +464,7 @@ const VerifyWorkHours = () => {
                   </button>
                 )}
               </div>
-            </Card>
+            </Card> */}
           </div>
         </main>
       </div>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
@@ -10,6 +10,8 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   const [dashboardData, setDashboardData] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [notificationError, setNotificationError] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -39,21 +41,44 @@ const Dashboard = () => {
     };
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadNotifications = async () => {
+      try {
+        const data = await apiGet('/notifications/fetch');
+        if (!cancelled) {
+          setNotifications(Array.isArray(data) ? data.slice(0, 3) : []);
+          setNotificationError('');
+        }
+      } catch (err) {
+        if (!cancelled) setNotificationError(err.message);
+      }
+    };
+
+    loadNotifications();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   // ---- Derived values from the API response ----
   const profile = dashboardData?.profile || {};
   const stats = dashboardData?.stats || {};
   const monthlyHours = dashboardData?.monthlyHours || [];
-  const pendingApplications = dashboardData?.pendingApplications || [];
+  const applications = dashboardData?.applications || [];
+  const claims = dashboardData?.claims || [];
+  const recentActivity = dashboardData?.recentActivity || [];
 
-  // These stay as placeholder mock data until the backend exposes the endpoints.
-  // Remove the arrays and use real data when endpoints exist.
-  const claims = [
-    { module: '—', amount: '—', status: 'Pending', claimNo: '—' },
-  ];
-
-  const recentActivity = [
-    { text: 'No recent activity', time: '' },
-  ];
+  const formatDate = (value) => {
+    if (!value) return '';
+    return new Date(value).toLocaleDateString('en-ZA', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  };
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -125,9 +150,24 @@ const Dashboard = () => {
                 </h3>
 
                 <div className="space-y-4">
-                  <p className="text-neutral font-inter text-sm">
-                    Notifications will appear here once available.
-                  </p>
+                  {notificationError ? (
+                    <p className="text-error font-inter text-sm">
+                      Could not load notifications: {notificationError}
+                    </p>
+                  ) : notifications.length === 0 ? (
+                    <p className="text-neutral font-inter text-sm">
+                      No notifications yet.
+                    </p>
+                  ) : notifications.map((notification) => (
+                    <div key={notification.NotificationID}>
+                      <p className="font-semibold text-dark font-inter">
+                        {notification.Subject}
+                      </p>
+                      <p className="text-sm text-neutral font-inter">
+                        {notification.Message}
+                      </p>
+                    </div>
+                  ))}
 
                   <button
                     onClick={() => navigate('/notifications')}
@@ -189,7 +229,7 @@ const Dashboard = () => {
                   <thead>
                     <tr className="bg-light-grey">
                       <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
-                        Modules
+                        Module
                       </th>
                       <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
                         Hours worked
@@ -223,7 +263,7 @@ const Dashboard = () => {
                           className="border-b border-neutral last:border-0"
                         >
                           <td className="py-3 px-4 text-dark font-inter">
-                            {row.module || row.moduleCode || '—'}
+                            {row.module || '—'}
                           </td>
                           <td className="py-3 px-4 text-dark font-inter">
                             {row.hours ?? row.total_hours ?? 0}
@@ -267,7 +307,7 @@ const Dashboard = () => {
                             Loading…
                           </td>
                         </tr>
-                      ) : pendingApplications.length === 0 ? (
+                      ) : applications.length === 0 ? (
                         <tr>
                           <td
                             colSpan="2"
@@ -277,7 +317,7 @@ const Dashboard = () => {
                           </td>
                         </tr>
                       ) : (
-                        pendingApplications.map((app, index) => (
+                        applications.map((app, index) => (
                           <tr
                             key={index}
                             className="border-b border-neutral last:border-0"
@@ -303,7 +343,7 @@ const Dashboard = () => {
                 </Card>
               </div>
 
-              {/* Claims — mock until backend exposes endpoint */}
+              {/* Claims */}
               <div>
                 <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
                   Claims
@@ -329,22 +369,43 @@ const Dashboard = () => {
                     </thead>
 
                     <tbody>
-                      {claims.map((claim, index) => (
+                      {loading ? (
+                        <tr>
+                          <td
+                            colSpan="4"
+                            className="py-6 text-center text-neutral font-inter"
+                          >
+                            Loading…
+                          </td>
+                        </tr>
+                      ) : claims.length === 0 ? (
+                        <tr>
+                          <td
+                            colSpan="4"
+                            className="py-6 text-center text-neutral font-inter"
+                          >
+                            No claims yet
+                          </td>
+                        </tr>
+                      ) : claims.map((claim) => (
                         <tr
-                          key={index}
+                          key={claim.claim_id}
                           className="border-b border-neutral last:border-0"
                         >
                           <td className="py-3 px-4 text-dark font-inter">
                             {claim.module}
                           </td>
                           <td className="py-3 px-4 text-dark font-inter">
-                            {claim.amount}
+                            {`R ${Number(claim.amount).toLocaleString('en-ZA', {
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}`}
                           </td>
                           <td className="py-3 px-4">
                             <StatusBadge status={claim.status} />
                           </td>
                           <td className="py-3 px-4 text-dark font-inter">
-                            {claim.claimNo}
+                            {claim.reference}
                           </td>
                         </tr>
                       ))}
@@ -389,14 +450,18 @@ const Dashboard = () => {
 
                 <Card>
                   <div className="space-y-4">
-                    {recentActivity.map((activity, index) => (
+                    {recentActivity.length === 0 ? (
+                      <p className="text-neutral font-inter">
+                        No recent activity.
+                      </p>
+                    ) : recentActivity.map((activity, index) => (
                       <div key={index}>
                         <p className="font-semibold text-dark font-inter">
                           {activity.text}
                         </p>
-                        {activity.time && (
+                        {activity.date && (
                           <p className="text-sm text-neutral font-inter">
-                            {activity.time}
+                            {formatDate(activity.date)}
                           </p>
                         )}
                       </div>

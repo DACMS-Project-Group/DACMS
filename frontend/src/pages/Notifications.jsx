@@ -1,10 +1,30 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import { useAuth } from '../contexts/AuthContext';
-import { apiGet, apiPatch } from '../api';
-import { liveNotifs } from '../contexts/NotificationContext';
+import { apiPatch } from '../api';
+import { liveNotifs } from '../contexts/notificationContext';
+
+const renderMessage = (message) => {
+  const path = message.match(
+    /(\/(?:application-review\/\d+|application-detail\/\d+|appointment-approvals|verify-hours|session-detail\/\d+|review-claims|review-claim\/\d+|claim-detail\/\d+|appointment-review\/\d+|review-applications))\.?$/
+  )?.[1];
+
+  if (!path) {
+    return message;
+  }
+
+  return (
+    <>
+      {message.slice(0, message.length - path.length).replace(/[.\s]+$/, '')}{' '}
+      <Link className="font-semibold text-primary underline" to={path}>
+        Open related page
+      </Link>
+    </>
+  );
+};
 
 const Notifications = () => {
   const { user } = useAuth();
@@ -12,73 +32,27 @@ const Notifications = () => {
 
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [expandedId, setExpandedId] = useState(null);
 
-  const { fetchNotifications } = liveNotifs();
+  const {
+    fetchNotifications,
+    notifications: sharedNotifications,
+    loading: sharedLoading,
+    error
+  } = liveNotifs();
 
-  // ---- Load notifications on mount ----
   useEffect(() => {
-    let cancelled = false;
-
-    const load = async () => {
-      try {
-        setLoading(true);
-        const data = await apiGet('/notifications/fetch');
-
-        const list = Array.isArray(data)
-          ? data
-          : data?.notification || data?.notifications || [];
-
-        if (!cancelled) {
-          setNotifications(
-            list.map((n) => ({
-              id: n.NotificationID ?? 
-                  n.notificationID ?? 
-                  n.id, 
-              title: 
-                n.Subject ?? 
-                n.subject ?? 
-                n.title ?? 
-                'No Subject',
-              type: 
-                n.NotificationType ?? 
-                n.notificationType ?? 
-                n.type ?? 
-                'info',
-              message: 
-                n.Message ??
-                n.message ??
-                'No message',
-              timestamp: 
-                n.CreatedTimestamp ?? 
-                n.createdTimestamp ??
-                n.created_at ?? 
-                n.timestamp,
-              read: Boolean(
-                n.IsRead ?? 
-                n.is_read ?? 
-                n.read
-              ),
-              type: n.type || 'info',
-              category: n.category || 'General',
-            }))
-          );
-          setError('');
-        }
-      } catch (err) {
-        if (!cancelled) setError(err.message);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-
-    load();
-
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+    setLoading(sharedLoading);
+    setNotifications(sharedNotifications.map((n) => ({
+      id: n.NotificationID ?? n.notificationID ?? n.id,
+      title: n.Subject ?? n.subject ?? n.title ?? 'No Subject',
+      type: n.NotificationType ?? n.notificationType ?? n.type ?? 'info',
+      message: n.Message ?? n.message ?? 'No message',
+      timestamp: n.CreatedTimestamp ?? n.createdTimestamp ?? n.created_at ?? n.timestamp,
+      read: n.read ?? Boolean(n.IsRead ?? n.is_read),
+      category: n.NotificationType ?? n.notificationType ?? n.type ?? 'General',
+    })));
+  }, [sharedLoading, sharedNotifications]);
 
   const toggleExpand = async (id) => {
     const opening = expandedId !== id;
@@ -96,6 +70,7 @@ const Notifications = () => {
         await fetchNotifications();
 
       } catch (err) {
+        console.error('Failed to mark notification as read:', err);
       }
     }
   };
@@ -344,7 +319,7 @@ const Notifications = () => {
                         {expandedId === notification.id && (
                           <div className="border-t border-neutral/20 px-4 pb-4 pt-3">
                             <p className="text-sm leading-relaxed text-dark font-inter">
-                              {notification.message}
+                              {renderMessage(notification.message)}
                             </p>
 
                             <div className="mt-3 flex items-center gap-4">
