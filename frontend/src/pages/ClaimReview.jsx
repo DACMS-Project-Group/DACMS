@@ -7,6 +7,7 @@ import StatusBadge from '../components/StatusBadge';
 import { apiGet, apiPatch } from '../api';
 
 const ClaimReview = () => {
+  document.title = 'AACMS - Claim Review';
   const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
@@ -237,7 +238,7 @@ const ClaimReview = () => {
 
         <main className="flex-1">
           <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white font-poppins">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               {isLecturerReview ? 'Claim Verification' : 'Claim Review'}
             </h1>
           </div>

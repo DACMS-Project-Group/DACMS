@@ -6,6 +6,7 @@ import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
 
 const ExportPayments = () => {
+  document.title = 'AACMS - Export Payments';
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('Approved');
   const [dateFrom, setDateFrom] = useState('');
@@ -198,7 +199,7 @@ const ExportPayments = () => {
 
           {/* Page Header */}
           <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white font-poppins">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Export Payments
             </h1>
           </div>

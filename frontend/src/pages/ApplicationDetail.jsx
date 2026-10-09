@@ -101,6 +101,7 @@ function mapApplication(app, lecturerFromPosition = '') {
 
 const ApplicationDetail = () => {
   const navigate = useNavigate();
+  document.title = 'AACMS - Application Detail';
   const location = useLocation();
   const { id } = useParams();
 
@@ -239,7 +240,7 @@ const ApplicationDetail = () => {
 
           <main className="flex-1">
             <div className="bg-primary h-16 flex items-center px-8">
-              <h1 className="text-4xl font-poppins font-bold text-white">
+              <h1 className="text-2xl font-poppins font-semibold text-white">
                 Application Details
               </h1>
             </div>

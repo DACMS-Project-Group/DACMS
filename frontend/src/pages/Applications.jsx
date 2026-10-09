@@ -8,6 +8,7 @@ import { apiGet } from '../api';
 
 const Applications = () => {
   const navigate = useNavigate();
+  document.title = 'AACMS - Applications';
 
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -67,7 +68,7 @@ const Applications = () => {
         <main className="flex-1">
           {/* ===== PAGE TITLE BAR ===== */}
           <div className="bg-primary h-16 flex items-center px-8">
-            <h1 className="text-3xl font-poppins font-bold text-white">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Applications
             </h1>
           </div>

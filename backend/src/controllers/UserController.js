@@ -156,17 +156,15 @@ class UserController {
                 await databaseClient.query(
                     `
                         INSERT INTO "STUDENT"
-                            ("StudentID", "StudentNumber", "StudyLevel", "ContactDetails", "BankName", "AccountNumber", "BranchCode")
-                        VALUES ($1, $2, $3, $4, $5, $6, $7);
+                            ("StudentID", "StudentNumber", "StudyLevel", "ContactDetails")
+                        VALUES ($1, $2, $3, $4);
                     `,
                     [
                         userId,
                         userModel.student_number,
                         userModel.study_level,
                         userModel.contact_details,
-                        userModel.bank_name,
-                        userModel.account_number,
-                        userModel.branch_code
+
                     ]
                 );
             } else if (roleId === ROLE_IDS.LECTURER) {
@@ -182,10 +180,10 @@ class UserController {
                 userModel.admin_id = userId;
                 await databaseClient.query(
                     `
-                        INSERT INTO "ADMINISTRATOR" ("AdminID", "MFA_Enabled", "BudgetAllocationRights")
-                        VALUES ($1, $2, $3);
+                        INSERT INTO "ADMINISTRATOR" ("AdminID")
+                        VALUES ($1);
                     `,
-                    [userId, userModel.mfa_enabled, userModel.budget_allocation_rights]
+                    [userId]
                 );
             }
 
@@ -274,7 +272,7 @@ class UserController {
         try {
             const { email, password } = req.body;
             const { sign, verify } = jwt;
-            
+
             // Query email to find user
             const result = await pool.query(
                 `
@@ -299,11 +297,11 @@ class UserController {
             // Authenticate password
             const isMatch = await bcrypt.compare(password, user.password_hash);
             if (!isMatch) {
-                return res.status(401).json({ message: 'Invalid password'});
+                return res.status(401).json({ message: 'Invalid password' });
             }
 
-            if(user.role_id !== 3) {
-                 // Generate session token for non-admin users
+            if (user.role_id !== 3) {
+                // Generate session token for non-admin users
                 const token = issueSessionCookie(res, { user_id: user.user_id, role_id: user.role_id });
             } else {
                 //generate pending token for Admin 2FA
@@ -324,7 +322,7 @@ class UserController {
             }
 
             // Return pending token for Admin 2FA
-            if(user.role_id === 3) {
+            if (user.role_id === 3) {
                 return res.status(202).json({ message: 'Admin 2FA required', requiresSetup: true });
             }
 
@@ -358,7 +356,7 @@ class UserController {
 
             const result = await pool.query(` SELECT u."RoleID" FROM "APP_USER" u WHERE u."UserID" = $1 `, [user_id]);
             const user = User.fromDb(result.rows[0]);
-            
+
             if (user.role_id < required_role) {
                 return res.status(403).json({ message: 'Insufficient Permissions' });
             } else {

@@ -41,6 +41,7 @@ const mapSession = (session, moduleCode) => ({
 });
 
 const WorkTracking = () => {
+  document.title = 'AACMS - Work Tracking';
   const navigate = useNavigate();
 
   const [appointments, setAppointments] = useState([]);
@@ -284,7 +285,7 @@ const WorkTracking = () => {
 
           <div className="p-8">
             <div className="mb-8">
-              <h2 className="text-2xl font-semibold text-primary-dark">
+              <h2 className="text-2xl font-poppins font-semibold text-white">
                 Work Tracking
               </h2>
               <p className="mt-2 text-neutral">

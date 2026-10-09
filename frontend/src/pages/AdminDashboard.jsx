@@ -8,6 +8,7 @@ import { apiGet } from '../api';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  document.title = 'AACMS - Admin Dashboard';
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -82,8 +83,9 @@ const AdminDashboard = () => {
         <Sidebar userRole="admin" />
 
         <main className="flex-1">
+          {/* PAGE HEADING */}
           <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Administrator Dashboard
             </h1>
           </div>

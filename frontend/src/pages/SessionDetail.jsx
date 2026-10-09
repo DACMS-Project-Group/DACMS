@@ -27,6 +27,7 @@ const getLocalTime = (value) => {
 };
 
 const SessionDetail = () => {
+  document.title = 'AACMS - Session Detail';
   const navigate = useNavigate();
   const location = useLocation();
   const { id: sessionId } = useParams();
@@ -129,7 +130,7 @@ const SessionDetail = () => {
         <main className="flex-1">
           {/* Page Header */}
           <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Session Detail
             </h1>
           </div>

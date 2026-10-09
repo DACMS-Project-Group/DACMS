@@ -27,6 +27,7 @@ const renderMessage = (message) => {
 };
 
 const Notifications = () => {
+  document.title = 'Notifications';
   const { user } = useAuth();
   const userRole = user?.role || 'student';
 
@@ -134,7 +135,7 @@ const Notifications = () => {
         <main className="flex-1">
           <div className="bg-primary px-8 py-4">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-              <h1 className="text-2xl font-semibold text-white font-poppins">
+              <h1 className="text-2xl font-poppins font-semibold text-white">
                 Notifications
               </h1>
 
