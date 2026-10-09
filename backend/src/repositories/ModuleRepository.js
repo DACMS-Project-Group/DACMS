@@ -39,6 +39,21 @@ class ModuleRepository {
             }))
         };
     }
+
+    static async getModuleById(moduleId) {
+        const sql = `
+            SELECT
+                "ModuleID" AS module_id,
+                "ModuleCode" AS module_code,
+                "ModuleName" AS module_name,
+                "Description" AS description,
+                "MinAcademicRequirement" AS min_academic_requirement
+            FROM "NWU_MODULE"
+            WHERE "ModuleID" = $1
+        `;
+        const { rows } = await pool.query(sql, [moduleId]);
+        return rows[0] || null;
+    }
 }
 
 export default ModuleRepository;

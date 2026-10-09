@@ -7,6 +7,7 @@ import WorkSessionController from '../controllers/WorkSessionController.js';
 import RemunerationClaimController from '../controllers/RemunerationClaimController.js';
 import StudentController from '../controllers/StudentController.js';
 import StudentDashboardController from '../controllers/StudentDashboardController.js';
+import StudentGradeController from '../controllers/StudentGradeController.js';
 
 const router = express.Router();
 
@@ -111,6 +112,31 @@ router.patch(
     '/profile/edit',
     authenticate,
     StudentController.updateProfile.bind(StudentController)
+);
+
+// -- Academic Modules & Grades ----------------------------------------------
+router.get(
+    '/modules',
+    authenticate,
+    StudentGradeController.getAvailableModules.bind(StudentGradeController)
+);
+
+router.get(
+    '/grades',
+    authenticate,
+    StudentGradeController.getMyGrades.bind(StudentGradeController)
+);
+
+router.post(
+    '/grades',
+    authenticate,
+    StudentGradeController.saveGrade.bind(StudentGradeController)
+);
+
+router.delete(
+    '/grades/:gradeId',
+    authenticate,
+    StudentGradeController.deleteGrade.bind(StudentGradeController)
 );
 
 export default router;
