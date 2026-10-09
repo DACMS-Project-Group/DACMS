@@ -5,10 +5,13 @@ import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 
 const BudgetDetails = () => {
   document.title = 'AACMS - Budget Details';
   const { id } = useParams();
+  const { user } = useAuth();
+  const isLecturer = user?.role === 'lecturer';
 
   const [budget, setBudget] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -20,7 +23,10 @@ const BudgetDetails = () => {
         setLoading(true);
         setError('');
 
-        const response = await apiGet(`/admin/budgets/fetch/${id}`);
+        const endpoint = isLecturer
+          ? `/lecturer/budgets/fetch/${id}`
+          : `/admin/budgets/fetch/${id}`;
+        const response = await apiGet(endpoint);
 
         const budgetData = response?.data?.[0];
 
@@ -42,7 +48,7 @@ const BudgetDetails = () => {
     if (id) {
       fetchBudget();
     }
-  }, [id]);
+  }, [id, isLecturer]);
 
   const formatCurrency = (amount) =>
     `R ${Number(amount || 0).toLocaleString('en-ZA', {
@@ -72,7 +78,7 @@ const BudgetDetails = () => {
         <Navbar />
 
         <div className="flex">
-          <Sidebar userRole="admin" />
+          <Sidebar userRole={user?.role || 'admin'} />
 
           <main className="flex-1">
             <div className="bg-primary px-8 py-4">
@@ -100,7 +106,7 @@ const BudgetDetails = () => {
         <Navbar />
 
         <div className="flex">
-          <Sidebar userRole="admin" />
+          <Sidebar userRole={user?.role || 'admin'} />
 
           <main className="flex-1">
             <div className="bg-primary px-8 py-4">
@@ -130,7 +136,7 @@ const BudgetDetails = () => {
       <Navbar />
 
       <div className="flex">
-        <Sidebar userRole="admin" />
+        <Sidebar userRole={user?.role || 'admin'} />
 
         <main className="flex-1">
           <div className="bg-primary px-8 py-4">
@@ -345,21 +351,23 @@ const BudgetDetails = () => {
               </Card>
             </section>
 
-            {/* Audit History */}
-            <section>
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                Budget Audit History
-              </h3>
+            {/* Audit History — admin only */}
+            {!isLecturer && (
+              <section>
+                <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                  Budget Audit History
+                </h3>
 
-              <Card>
-                <div className="p-6">
-                  <p className="text-neutral font-inter">
-                    Audit history is not currently provided by the budget
-                    details API.
-                  </p>
-                </div>
-              </Card>
-            </section>
+                <Card>
+                  <div className="p-6">
+                    <p className="text-neutral font-inter">
+                      Audit history is not currently provided by the budget
+                      details API.
+                    </p>
+                  </div>
+                </Card>
+              </section>
+            )}
           </div>
         </main>
       </div>

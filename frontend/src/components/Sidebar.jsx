@@ -21,6 +21,7 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Assign Duties', href: '/assign-responsibilities' },
     { name: 'Review Claims', href: '/review-claims' },
     { name: 'Verify Hours', href: '/verify-hours' },
+    { name: 'Budgets', href: '/lecturer-budgets' },
   ];
 
   const adminNavItems = [

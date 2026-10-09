@@ -92,6 +92,8 @@ function App() {
                 element={<AssistantListings />}
               />
               <Route path="/verify-hours" element={<VerifyWorkHours />} />
+              <Route path="/lecturer-budgets" element={<BudgetManagement />} />
+              <Route path="/lecturer-budget-details/:id" element={<BudgetDetails />} />
               <Route path="/notifications" element={<Notifications />} />
             </Route>
 

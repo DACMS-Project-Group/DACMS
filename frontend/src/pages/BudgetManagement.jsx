@@ -1,12 +1,14 @@
- import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 
 const BudgetManagement = () => {
+  const { user } = useAuth();
   document.title = 'AACMS - Budget Management';
   const navigate = useNavigate();
 
@@ -27,9 +29,10 @@ const BudgetManagement = () => {
         setLoading(true);
         setError('');
 
-        const data = await apiGet('/admin/budgets');
+        const endpoint = user?.role === 'lecturer' ? '/lecturer/budgets' : '/admin/budgets';
+        const data = await apiGet(endpoint);
 
-        setBudgets(data.module_budgets || []);
+        setBudgets(data.module_budgets || data.budgets || []);
         setStats(
           data.stats || {
             total_allocated: 0,
@@ -47,7 +50,7 @@ const BudgetManagement = () => {
     };
 
     fetchBudgets();
-  }, []);
+  }, [user]);
 
   const formatCurrency = (amount) => {
     return `R ${Number(amount || 0).toLocaleString('en-ZA', {
@@ -83,7 +86,7 @@ const BudgetManagement = () => {
       <Navbar />
 
       <div className="flex">
-        <Sidebar userRole="admin" />
+        <Sidebar userRole={user?.role || 'admin'} />
 
         <main className="flex-1">
           <div className="bg-primary px-8 py-4">
@@ -126,22 +129,24 @@ const BudgetManagement = () => {
                 />
               </div>
 
-              <button
-                onClick={() => navigate('/create-budget')}
-                className="
-                  bg-primary
-                  text-white
-                  px-6
-                  py-3
-                  rounded-xl
-                  font-semibold
-                  hover:bg-primary-dark
-                  transition
-                  font-inter
-                "
-              >
-                + Create Budget
-              </button>
+              {user?.role !== 'lecturer' && (
+                <button
+                  onClick={() => navigate('/create-budget')}
+                  className="
+                    bg-primary
+                    text-white
+                    px-6
+                    py-3
+                    rounded-xl
+                    font-semibold
+                    hover:bg-primary-dark
+                    transition
+                    font-inter
+                  "
+                >
+                  + Create Budget
+                </button>
+              )}
             </div>
 
             <section className="mb-8">
@@ -180,11 +185,10 @@ const BudgetManagement = () => {
                   </p>
 
                   <p
-                    className={`text-3xl font-poppins font-bold mt-3 ${
-                      Number(stats.total_remaining) < 0
+                    className={`text-3xl font-poppins font-bold mt-3 ${Number(stats.total_remaining) < 0
                         ? 'text-red-600'
                         : 'text-primary'
-                    }`}
+                      }`}
                   >
                     {loading
                       ? 'Loading...'
@@ -307,11 +311,10 @@ const BudgetManagement = () => {
                                 </td>
 
                                 <td
-                                  className={`px-5 py-5 font-medium font-inter ${
-                                    Number(budget.remaining_budget) < 0
+                                  className={`px-5 py-5 font-medium font-inter ${Number(budget.remaining_budget) < 0
                                       ? 'text-red-600'
                                       : 'text-dark'
-                                  }`}
+                                    }`}
                                 >
                                   {formatCurrency(budget.remaining_budget)}
                                 </td>
@@ -325,13 +328,12 @@ const BudgetManagement = () => {
 
                                   <div className="w-full h-2 bg-gray-200 rounded-full">
                                     <div
-                                      className={`h-2 rounded-full ${
-                                        percentage >= 100
+                                      className={`h-2 rounded-full ${percentage >= 100
                                           ? 'bg-red-500'
                                           : percentage >= 80
-                                          ? 'bg-yellow-500'
-                                          : 'bg-green-500'
-                                      }`}
+                                            ? 'bg-yellow-500'
+                                            : 'bg-green-500'
+                                        }`}
                                       style={{
                                         width: `${Math.min(
                                           percentage,
@@ -351,7 +353,9 @@ const BudgetManagement = () => {
                                     <button
                                       onClick={() =>
                                         navigate(
-                                          `/budget-details/${budget.budget_id}`
+                                          user?.role === 'lecturer'
+                                            ? `/lecturer-budget-details/${budget.budget_id}`
+                                            : `/budget-details/${budget.budget_id}`
                                         )
                                       }
                                       className="
@@ -364,21 +368,23 @@ const BudgetManagement = () => {
                                       View
                                     </button>
 
-                                    <button
-                                      onClick={() =>
-                                        navigate(
-                                          `/edit-budget/${budget.budget_id}`
-                                        )
-                                      }
-                                      className="
-                                        text-neutral
-                                        font-semibold
-                                        hover:underline
-                                        font-inter
-                                      "
-                                    >
-                                      Edit
-                                    </button>
+                                    {user?.role === 'admin' && (
+                                      <button
+                                        onClick={() =>
+                                          navigate(
+                                            `/edit-budget/${budget.budget_id}`
+                                          )
+                                        }
+                                        className="
+                                          text-neutral
+                                          font-semibold
+                                          hover:underline
+                                          font-inter
+                                        "
+                                      >
+                                        Edit
+                                      </button>
+                                    )}
                                   </div>
                                 </td>
                               </tr>
