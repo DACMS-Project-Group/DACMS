@@ -18,13 +18,15 @@ class StudentGradeRepository extends BaseRepository {
                 g."StudentID" AS student_id,
                 g."ModuleID" AS module_id,
                 g."GradeAchieved" AS grade_achieved,
+                COALESCE(g."AcademicYear", EXTRACT(YEAR FROM CURRENT_DATE)::int) AS academic_year,
                 m."ModuleCode" AS module_code,
                 m."ModuleName" AS module_name,
+                m."Description" AS description,
                 m."MinAcademicRequirement" AS min_academic_requirement
             FROM "STUDENT_MODULE_GRADE" g
             JOIN "NWU_MODULE" m ON m."ModuleID" = g."ModuleID"
             WHERE g."StudentID" = $1
-            ORDER BY m."ModuleCode" ASC
+            ORDER BY COALESCE(g."AcademicYear", EXTRACT(YEAR FROM CURRENT_DATE)::int) DESC, m."ModuleCode" ASC
             `,
             [studentId]
         );
@@ -41,7 +43,8 @@ class StudentGradeRepository extends BaseRepository {
                 "GradeID" AS grade_id,
                 "StudentID" AS student_id,
                 "ModuleID" AS module_id,
-                "GradeAchieved" AS grade_achieved
+                "GradeAchieved" AS grade_achieved,
+                "AcademicYear" AS academic_year
             FROM "STUDENT_MODULE_GRADE"
             WHERE "StudentID" = $1 AND "ModuleID" = $2
             `,
@@ -60,7 +63,8 @@ class StudentGradeRepository extends BaseRepository {
                 "GradeID" AS grade_id,
                 "StudentID" AS student_id,
                 "ModuleID" AS module_id,
-                "GradeAchieved" AS grade_achieved
+                "GradeAchieved" AS grade_achieved,
+                "AcademicYear" AS academic_year
             FROM "STUDENT_MODULE_GRADE"
             WHERE "GradeID" = $1 AND "StudentID" = $2
             `,
@@ -70,39 +74,60 @@ class StudentGradeRepository extends BaseRepository {
     }
 
     // Insert or update a grade for a student and module.
-    async upsertGrade(studentId, moduleId, gradeAchieved) {
+    async upsertGrade(studentId, moduleId, gradeAchieved, academicYear = new Date().getFullYear()) {
         const existing = await this.findByStudentAndModule(studentId, moduleId);
 
         if (existing) {
             const rows = await this.query(
                 `
                 UPDATE "STUDENT_MODULE_GRADE"
-                SET "GradeAchieved" = $1
-                WHERE "GradeID" = $2
+                SET "GradeAchieved" = $1, "AcademicYear" = $2
+                WHERE "GradeID" = $3
                 RETURNING
                     "GradeID" AS grade_id,
                     "StudentID" AS student_id,
                     "ModuleID" AS module_id,
-                    "GradeAchieved" AS grade_achieved
+                    "GradeAchieved" AS grade_achieved,
+                    "AcademicYear" AS academic_year
                 `,
-                [gradeAchieved, existing.grade_id]
+                [gradeAchieved, academicYear, existing.grade_id]
             );
             return rows[0];
         }
 
         const rows = await this.query(
             `
-            INSERT INTO "STUDENT_MODULE_GRADE" ("StudentID", "ModuleID", "GradeAchieved")
-            VALUES ($1, $2, $3)
+            INSERT INTO "STUDENT_MODULE_GRADE" ("StudentID", "ModuleID", "GradeAchieved", "AcademicYear")
+            VALUES ($1, $2, $3, $4)
             RETURNING
                 "GradeID" AS grade_id,
                 "StudentID" AS student_id,
                 "ModuleID" AS module_id,
-                "GradeAchieved" AS grade_achieved
+                "GradeAchieved" AS grade_achieved,
+                "AcademicYear" AS academic_year
             `,
-            [studentId, moduleId, gradeAchieved]
+            [studentId, moduleId, gradeAchieved, academicYear]
         );
         return rows[0];
+    }
+
+    // Update an existing grade record by GradeID for a student.
+    async updateGradeById(gradeId, studentId, gradeAchieved, academicYear) {
+        const rows = await this.query(
+            `
+            UPDATE "STUDENT_MODULE_GRADE"
+            SET "GradeAchieved" = $1, "AcademicYear" = $2
+            WHERE "GradeID" = $3 AND "StudentID" = $4
+            RETURNING
+                "GradeID" AS grade_id,
+                "StudentID" AS student_id,
+                "ModuleID" AS module_id,
+                "GradeAchieved" AS grade_achieved,
+                "AcademicYear" AS academic_year
+            `,
+            [gradeAchieved, academicYear, gradeId, studentId]
+        );
+        return rows[0] || null;
     }
 
     // Delete a student's module grade record.

@@ -34,11 +34,12 @@ class StudentGradeController {
     async saveGrade(req, res, next) {
         try {
             const studentId = getAuthUserId(req);
-            const { moduleId, gradeAchieved } = req.body;
+            const { moduleId, gradeAchieved, academicYear } = req.body;
 
             const saved = await studentGradeService.saveGrade(studentId, {
                 moduleId,
                 gradeAchieved,
+                academicYear,
             });
 
             return res.status(200).json({
@@ -48,11 +49,47 @@ class StudentGradeController {
         } catch (err) {
             if (
                 err.message.includes('required') ||
-                err.message.includes('percentage between 0 and 100')
+                err.message.includes('percentage between 0 and 100') ||
+                err.message.includes('valid year')
             ) {
                 return res.status(400).json({ message: err.message });
             }
-            if (err.message.includes('Module not found')) {
+            if (err.message.includes('Module not found') || err.message.includes('Student profile not found')) {
+                return res.status(404).json({ message: err.message });
+            }
+            next(err);
+        }
+    }
+
+
+    // PUT /api/student/grades/:gradeId
+    // Update an existing module grade for the authenticated student
+
+    async updateGrade(req, res, next) {
+        try {
+            const studentId = getAuthUserId(req);
+            const { gradeId } = req.params;
+            const { gradeAchieved, academicYear } = req.body;
+
+            const updated = await studentGradeService.updateGrade(studentId, gradeId, {
+                gradeAchieved,
+                academicYear,
+            });
+
+            return res.status(200).json({
+                message: 'Grade updated successfully.',
+                grade: updated,
+            });
+        } catch (err) {
+            if (
+                err.message.includes('required') ||
+                err.message.includes('percentage between 0 and 100') ||
+                err.message.includes('valid year') ||
+                err.message.includes('Valid Grade ID')
+            ) {
+                return res.status(400).json({ message: err.message });
+            }
+            if (err.message.includes('not found') || err.message.includes('unauthorized')) {
                 return res.status(404).json({ message: err.message });
             }
             next(err);

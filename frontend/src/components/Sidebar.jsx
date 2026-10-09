@@ -8,6 +8,7 @@ const Sidebar = ({ userRole = 'student' }) => {
   const studentNavItems = [
     { name: 'Dashboard', href: '/student-dashboard' },
     { name: 'Applications', href: '/applications' },
+    { name: 'Modules', href: '/modules' },
     { name: 'Work Tracking', href: '/work-tracking' },
     { name: 'Claims', href: '/claims' },
     { name: 'Profile', href: '/profile' },
@@ -37,7 +38,7 @@ const Sidebar = ({ userRole = 'student' }) => {
         : studentNavItems;
 
   return (
-    <aside className="flex h-[calc(100vh-6rem)] w-64 shrink-0 flex-col bg-primary-dark text-white">
+    <aside className="sticky top-24 flex h-[calc(100vh-6rem)] w-64 shrink-0 flex-col bg-primary-dark text-white">
 
       <nav className="min-h-0 flex-1 overflow-y-auto p-4 pt-6">
         {navItems.map((item) => (

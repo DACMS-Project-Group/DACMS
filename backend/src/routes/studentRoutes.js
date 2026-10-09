@@ -133,6 +133,12 @@ router.post(
     StudentGradeController.saveGrade.bind(StudentGradeController)
 );
 
+router.put(
+    '/grades/:gradeId',
+    authenticate,
+    StudentGradeController.updateGrade.bind(StudentGradeController)
+);
+
 router.delete(
     '/grades/:gradeId',
     authenticate,

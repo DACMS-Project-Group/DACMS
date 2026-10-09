@@ -16,6 +16,7 @@ import SessionDetail from './pages/SessionDetail';
 import Claims from './pages/Claims';
 import GenerateNewClaim from './pages/GenerateNewClaim';
 import ClaimDetail from './pages/ClaimDetail';
+import StudentModules from './pages/StudentModules';
 
 // ===== LECTURER PAGES =====
 import LectureDashboard from './pages/LectureDashboard';
@@ -72,6 +73,7 @@ function App() {
               <Route path="/claims" element={<Claims />} />
               <Route path="/generate-new-claim" element={<GenerateNewClaim />} />
               <Route path="/claim-detail/:id" element={<ClaimDetail />} />
+              <Route path="/modules" element={<StudentModules />} />
             </Route>
 
             {/* ===== LECTURER ROUTES ===== */}

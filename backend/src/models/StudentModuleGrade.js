@@ -2,11 +2,13 @@ class StudentModuleGrade {
     constructor ({
         module_id,
         student_id,
-        grade_achieved
+        grade_achieved,
+        academic_year = new Date().getFullYear()
     }) {
         this.module_id = module_id;
         this.student_id = student_id;
         this.grade_achieved = grade_achieved;
+        this.academic_year = academic_year;
     }
 
     static fromDb(row) {
@@ -14,6 +16,7 @@ class StudentModuleGrade {
             module_id: row.ModuleID,
             student_id: row.StudentID,
             grade_achieved: row.GradeAchieved,
+            academic_year: row.AcademicYear,
         });
     }
 
@@ -22,6 +25,7 @@ class StudentModuleGrade {
             ModuleID: this.module_id,
             StudentID: this.student_id,
             GradeAchieved: this.grade_achieved,
+            AcademicYear: this.academic_year,
         };
     }
 
