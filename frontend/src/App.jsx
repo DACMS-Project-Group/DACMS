@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { SidebarProvider } from './contexts/SidebarContext';
 
 // ===== PUBLIC PAGES =====
 import LandingPage from './pages/LandingPage';
@@ -16,6 +17,7 @@ import SessionDetail from './pages/SessionDetail';
 import Claims from './pages/Claims';
 import GenerateNewClaim from './pages/GenerateNewClaim';
 import ClaimDetail from './pages/ClaimDetail';
+import StudentModules from './pages/StudentModules';
 
 // ===== LECTURER PAGES =====
 import LectureDashboard from './pages/LectureDashboard';
@@ -53,6 +55,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <NotificationProvider>
+          <SidebarProvider>
           <Routes>
 
             {/* ===== PUBLIC ROUTES ===== */}
@@ -72,6 +75,7 @@ function App() {
               <Route path="/claims" element={<Claims />} />
               <Route path="/generate-new-claim" element={<GenerateNewClaim />} />
               <Route path="/claim-detail/:id" element={<ClaimDetail />} />
+              <Route path="/modules" element={<StudentModules />} />
             </Route>
 
             {/* ===== LECTURER ROUTES ===== */}
@@ -90,6 +94,8 @@ function App() {
                 element={<AssistantListings />}
               />
               <Route path="/verify-hours" element={<VerifyWorkHours />} />
+              <Route path="/lecturer-budgets" element={<BudgetManagement />} />
+              <Route path="/lecturer-budget-details/:id" element={<BudgetDetails />} />
               <Route path="/notifications" element={<Notifications />} />
             </Route>
 
@@ -125,6 +131,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
 
           </Routes>
+          </SidebarProvider>
         </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>

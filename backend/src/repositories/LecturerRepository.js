@@ -311,10 +311,16 @@ class LecturerRepository {
                 b."MaxAllowableWorkHours",
                 b."AcademicYear",
                 (b."AllocatedBudget" - b."CurrentBudgetUsage")
-                    AS "RemainingBudget"
+                    AS "RemainingBudget",
+                u."Title",
+                u."FName",
+                u."LName",
+                u."Email"
             FROM "MODULE_BUDGET" b
             JOIN "NWU_MODULE" m
                 ON m."ModuleID" = b."ModuleID"
+            LEFT JOIN "APP_USER" u
+                ON u."UserID" = b."LecturerID"
             WHERE b."BudgetID" = $1
               AND (
                     b."LecturerID" = $2
@@ -347,6 +353,8 @@ class LecturerRepository {
         return {
             budget_id: row.BudgetID,
             lecturer_id: row.LecturerID,
+            lecturer: `${row.Title ?? ''} ${row.FName ?? ''} ${row.LName ?? ''}`.trim(),
+            lecturer_email: row.Email ?? '',
             module_code: row.ModuleCode,
             module_name: row.ModuleName,
             module_description: row.Description,

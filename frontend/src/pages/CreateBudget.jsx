@@ -6,6 +6,7 @@ import Card from '../components/Card';
 import { apiGet, apiPost } from '../api';
 
 const CreateBudget = () => {
+  document.title = 'AACMS - Create Budget';
   const navigate = useNavigate();
   const currentYear = new Date().getFullYear();
 
@@ -184,7 +185,7 @@ const CreateBudget = () => {
 
           {/* PAGE HEADER */}
           <div className="bg-[#6C3D91] px-8 py-5">
-            <h1 className="text-2xl font-semibold text-white">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Create New Budget
             </h1>
           </div>

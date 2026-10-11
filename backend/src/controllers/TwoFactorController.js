@@ -45,7 +45,7 @@ class TwoFactorController {
             const user = await twoFactorService.verifyLogin(req.pending2fa.user_id, req.body?.token);
 
             clearPendingCookie(res);
-            issueSessionCookie(res, user);
+            issueSessionCookie(res, { user_id: user.user_id, role_id: user.role_id } );
 
             res.status(200).json({
                 message: 'Login Successful',

@@ -382,7 +382,7 @@ class LecturerController {
                 });
             }
 
-            return res.status(200).json({ data });
+            return res.status(200).json({ data: [data] });
         } catch (error) {
             console.error('Lecturer budget fetch error:', error);
             return res.status(500).json({ error: error.message });

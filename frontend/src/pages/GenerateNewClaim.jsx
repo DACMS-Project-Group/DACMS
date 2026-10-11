@@ -6,6 +6,7 @@ import Card from '../components/Card';
 import { apiGet, apiPost } from '../api';
 
 const GenerateNewClaim = () => {
+  document.title = 'AACMS - Generate New Claim';
   const navigate = useNavigate();
 
   const [applications, setApplications] = useState([]);
@@ -537,23 +538,20 @@ const GenerateNewClaim = () => {
 
       {/* Sidebar + Main Content */}
       <div className="flex">
-
         {/* Sidebar */}
         <Sidebar />
 
         {/* Main Content */}
-        <main className="flex-1">
-
+        <main className="flex-1 min-w-0">
           {/* Page Header */}
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white">
+          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Generate New Claim
             </h1>
           </div>
 
           {/* Page Content */}
-          <div className="p-8">
-
+          <div className="p-4 md:p-8">
             {/* Back Button */}
             <div className="mb-6">
               <button
@@ -576,12 +574,12 @@ const GenerateNewClaim = () => {
 
             {/* Error Message */}
             {error && (
-              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-5 py-4">
+              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-4">
                 <h3 className="font-semibold text-red-800">
                   Unable to continue
                 </h3>
 
-                <p className="mt-1 text-sm text-red-700">
+                <p className="mt-1 text-sm text-red-700 break-words">
                   {error}
                 </p>
               </div>
@@ -589,7 +587,7 @@ const GenerateNewClaim = () => {
 
             {/* Success Message */}
             {claimSubmitted && (
-              <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-5 py-4">
+              <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-4">
                 <h3 className="font-semibold text-green-800">
                   Claim Submitted Successfully
                 </h3>
@@ -644,7 +642,7 @@ const GenerateNewClaim = () => {
             {/* Student Information */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-lg font-semibold text-primary-dark">
+                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
                   Student Information
                 </h2>
 
@@ -655,20 +653,19 @@ const GenerateNewClaim = () => {
               </div>
 
               {!student ? (
-                <div className="rounded-lg border border-gray-200 bg-off-white px-5 py-4">
+                <div className="rounded-lg border border-gray-200 bg-off-white px-4 py-4">
                   <p className="text-sm text-neutral">
                     Loading student information...
                   </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-
                   <div>
                     <p className="text-sm text-neutral">
                       Student Name
                     </p>
 
-                    <p className="mt-1 font-semibold text-gray-800">
+                    <p className="mt-1 font-semibold text-gray-800 break-words">
                       {studentName}
                     </p>
                   </div>
@@ -683,12 +680,12 @@ const GenerateNewClaim = () => {
                     </p>
                   </div>
 
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-sm text-neutral">
                       Email
                     </p>
 
-                    <p className="mt-1 font-semibold text-gray-800">
+                    <p className="mt-1 font-semibold text-gray-800 break-all">
                       {studentEmail}
                     </p>
                   </div>
@@ -702,7 +699,6 @@ const GenerateNewClaim = () => {
                       {studentStudyLevel}
                     </p>
                   </div>
-
                 </div>
               )}
             </Card>
@@ -710,7 +706,7 @@ const GenerateNewClaim = () => {
             {/* Account Details */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-lg font-semibold text-primary-dark">
+                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
                   Account Details
                 </h2>
 
@@ -721,14 +717,13 @@ const GenerateNewClaim = () => {
               </div>
 
               {!student ? (
-                <div className="rounded-lg border border-gray-200 bg-off-white px-5 py-4">
+                <div className="rounded-lg border border-gray-200 bg-off-white px-4 py-4">
                   <p className="text-sm text-neutral">
                     Loading account details...
                   </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-
                   <div>
                     <p className="text-sm text-neutral">
                       Bank Name
@@ -758,7 +753,6 @@ const GenerateNewClaim = () => {
                       {branchCode}
                     </p>
                   </div>
-
                 </div>
               )}
             </Card>
@@ -766,7 +760,7 @@ const GenerateNewClaim = () => {
             {/* Claim Period */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-lg font-semibold text-primary-dark">
+                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
                   Claim Period
                 </h2>
 
@@ -777,7 +771,6 @@ const GenerateNewClaim = () => {
               </div>
 
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-
                 <div>
                   <p className="text-sm text-neutral">
                     Period Start
@@ -797,14 +790,13 @@ const GenerateNewClaim = () => {
                     {formatDate(periodEnd)}
                   </p>
                 </div>
-
               </div>
             </Card>
 
             {/* Assistant Appointments */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-lg font-semibold text-primary-dark">
+                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
                   Assistant Appointments
                 </h2>
 
@@ -815,9 +807,8 @@ const GenerateNewClaim = () => {
               </div>
 
               {applications.length === 0 ? (
-
-                <div className="rounded-lg border border-dashed border-gray-300 px-6 py-10 text-center">
-                  <h3 className="text-lg font-semibold text-gray-700">
+                <div className="rounded-lg border border-dashed border-gray-300 px-4 py-10 text-center">
+                  <h3 className="text-base md:text-lg font-semibold text-gray-700">
                     No Applications Found
                   </h3>
 
@@ -826,15 +817,11 @@ const GenerateNewClaim = () => {
                     remuneration claims.
                   </p>
                 </div>
-
               ) : (
-
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[850px]">
-
                     <thead>
                       <tr className="border-b border-gray-200 text-left">
-
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Select
                         </th>
@@ -854,7 +841,6 @@ const GenerateNewClaim = () => {
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Approved Hours
                         </th>
-
                       </tr>
                     </thead>
 
@@ -918,7 +904,6 @@ const GenerateNewClaim = () => {
                               isSelected ? 'bg-purple-50' : ''
                             }`}
                           >
-
                             <td className="px-4 py-4">
                               <input
                                 type="radio"
@@ -942,7 +927,7 @@ const GenerateNewClaim = () => {
                               {applicationLecturer}
                             </td>
 
-                            <td className="px-4 py-4 text-sm text-gray-700">
+                            <td className="px-4 py-4 text-sm text-gray-700 whitespace-nowrap">
                               {position
                                 ? formatAmount(applicationRate)
                                 : '-'}
@@ -953,22 +938,19 @@ const GenerateNewClaim = () => {
                                 ? totalHours.toFixed(2)
                                 : '-'}
                             </td>
-
                           </tr>
                         );
                       })}
                     </tbody>
-
                   </table>
                 </div>
-
               )}
             </Card>
 
             {/* Approved Work Sessions */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-lg font-semibold text-primary-dark">
+                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
                   Approved Work Sessions
                 </h2>
 
@@ -979,18 +961,14 @@ const GenerateNewClaim = () => {
               </div>
 
               {sessionsLoading ? (
-
-                <div className="rounded-lg border border-dashed border-gray-300 px-6 py-10 text-center">
+                <div className="rounded-lg border border-dashed border-gray-300 px-4 py-10 text-center">
                   <p className="text-sm text-neutral">
                     Loading approved work sessions...
                   </p>
                 </div>
-
               ) : approvedSessions.length === 0 ? (
-
-                <div className="rounded-lg border border-dashed border-gray-300 px-6 py-10 text-center">
-
-                  <h3 className="text-lg font-semibold text-gray-700">
+                <div className="rounded-lg border border-dashed border-gray-300 px-4 py-10 text-center">
+                  <h3 className="text-base md:text-lg font-semibold text-gray-700">
                     No Approved Work Sessions
                   </h3>
 
@@ -999,17 +977,12 @@ const GenerateNewClaim = () => {
                     approved by your lecturer and available for
                     claiming.
                   </p>
-
                 </div>
-
               ) : (
-
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[850px]">
-
                     <thead>
                       <tr className="border-b border-gray-200 text-left">
-
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Date
                         </th>
@@ -1033,7 +1006,6 @@ const GenerateNewClaim = () => {
                         <th className="px-4 py-3 text-sm font-semibold text-gray-700">
                           Status
                         </th>
-
                       </tr>
                     </thead>
 
@@ -1067,12 +1039,11 @@ const GenerateNewClaim = () => {
                             key={sessionId}
                             className="border-b border-gray-100 last:border-b-0"
                           >
-
-                            <td className="px-4 py-4 text-sm text-gray-700">
+                            <td className="px-4 py-4 text-sm text-gray-700 whitespace-nowrap">
                               {formatSessionDate(startTime)}
                             </td>
 
-                            <td className="px-4 py-4 text-sm font-medium text-primary-dark">
+                            <td className="px-4 py-4 text-sm font-medium text-primary-dark whitespace-nowrap">
                               {moduleCode || '-'}
                             </td>
 
@@ -1080,7 +1051,7 @@ const GenerateNewClaim = () => {
                               {activity}
                             </td>
 
-                            <td className="px-4 py-4 text-sm text-gray-700">
+                            <td className="px-4 py-4 text-sm text-gray-700 whitespace-nowrap">
                               {formatTime(startTime)} -{' '}
                               {formatTime(endTime)}
                             </td>
@@ -1090,26 +1061,23 @@ const GenerateNewClaim = () => {
                             </td>
 
                             <td className="px-4 py-4">
-                              <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                              <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700 whitespace-nowrap">
                                 Verified
                               </span>
                             </td>
-
                           </tr>
                         );
                       })}
                     </tbody>
-
                   </table>
                 </div>
-
               )}
             </Card>
 
             {/* Claim Calculation */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-lg font-semibold text-primary-dark">
+                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
                   Claim Calculation
                 </h2>
 
@@ -1121,52 +1089,47 @@ const GenerateNewClaim = () => {
               </div>
 
               <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-
-                <div className="rounded-lg bg-off-white p-5">
+                <div className="rounded-lg bg-off-white p-4 md:p-5">
                   <p className="text-sm text-neutral">
                     Total Approved Hours
                   </p>
 
-                  <p className="mt-2 text-2xl font-bold text-primary-dark">
+                  <p className="mt-2 text-xl md:text-2xl font-bold text-primary-dark">
                     {totalHours.toFixed(2)}
                   </p>
                 </div>
 
-                <div className="rounded-lg bg-off-white p-5">
+                <div className="rounded-lg bg-off-white p-4 md:p-5">
                   <p className="text-sm text-neutral">
                     Hourly Rate
                   </p>
 
-                  <p className="mt-2 text-2xl font-bold text-primary-dark">
+                  <p className="mt-2 text-xl md:text-2xl font-bold text-primary-dark">
                     {formatAmount(hourlyRate)}
                   </p>
                 </div>
 
-                <div className="rounded-lg bg-off-white p-5">
+                <div className="rounded-lg bg-off-white p-4 md:p-5">
                   <p className="text-sm text-neutral">
                     Total Claim Amount
                   </p>
 
-                  <p className="mt-2 text-2xl font-bold text-primary-dark">
+                  <p className="mt-2 text-xl md:text-2xl font-bold text-primary-dark">
                     {formatAmount(totalClaimAmount)}
                   </p>
                 </div>
-
               </div>
 
               {/* Claim Breakdown */}
-              <div className="mt-5 rounded-lg border border-gray-200 bg-white p-5">
-
+              <div className="mt-5 rounded-lg border border-gray-200 bg-white p-4 md:p-5">
                 <p className="mb-4 text-sm font-semibold text-primary-dark">
                   Claim Breakdown
                 </p>
 
                 <div className="space-y-3">
-
                   <div className="flex flex-col justify-between gap-2 border-b border-gray-100 pb-3 sm:flex-row">
-
-                    <div>
-                      <p className="font-medium text-gray-800">
+                    <div className="min-w-0">
+                      <p className="font-medium text-gray-800 break-words">
                         {moduleCode || 'Selected Module'}
                       </p>
 
@@ -1176,39 +1139,33 @@ const GenerateNewClaim = () => {
                       </p>
                     </div>
 
-                    <p className="font-semibold text-gray-800">
+                    <p className="font-semibold text-gray-800 whitespace-nowrap">
                       {formatAmount(totalClaimAmount)}
                     </p>
-
                   </div>
-
                 </div>
               </div>
 
               {/* Total Calculation */}
               <div className="mt-5 rounded-lg border border-gray-200 bg-white p-4">
-
                 <p className="text-sm text-neutral">
                   Total Calculation
                 </p>
 
-                <p className="mt-1 font-semibold text-gray-800">
+                <p className="mt-1 font-semibold text-gray-800 break-words">
                   {totalHours.toFixed(2)} hours ×{' '}
                   {formatAmount(hourlyRate)} ={' '}
                   {formatAmount(totalClaimAmount)}
                 </p>
-
               </div>
             </Card>
 
             {/* Submit Claim */}
             {!claimSubmitted && (
               <Card>
-
-                <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
-
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <h2 className="text-lg font-semibold text-primary-dark">
+                    <h2 className="text-base md:text-lg font-semibold text-primary-dark">
                       Submit Remuneration Claim
                     </h2>
 
@@ -1227,18 +1184,15 @@ const GenerateNewClaim = () => {
                       !selectedPosition ||
                       approvedSessions.length === 0
                     }
-                    className="rounded-lg bg-primary px-6 py-3 font-medium text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
+                    className="rounded-lg bg-primary px-6 py-3 font-medium text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50 w-full md:w-auto"
                   >
                     {submitting
                       ? 'Submitting...'
                       : 'Submit Claim'}
                   </button>
-
                 </div>
-
               </Card>
             )}
-
           </div>
         </main>
       </div>

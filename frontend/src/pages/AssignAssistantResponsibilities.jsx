@@ -5,6 +5,7 @@ import Card from '../components/Card';
 import { apiGet, apiPut } from '../api';
 
 const AssignAssistantResponsibilities = () => {
+  document.title = 'AACMS - Assign Duties';
   const [assistants, setAssistants] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
@@ -116,7 +117,7 @@ const AssignAssistantResponsibilities = () => {
         <main className="flex-1">
           {/* ===== PAGE TITLE BAR ===== */}
           <div className="bg-primary h-16 flex items-center px-8">
-            <h1 className="text-3xl font-poppins font-bold text-white">
+            <h1 className="text-2xl font-poppins font-semibold text-white">
               Assign Assistant Responsibilities
             </h1>
           </div>

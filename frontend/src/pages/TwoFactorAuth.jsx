@@ -8,6 +8,7 @@ const TwoFactorAuth = () => {
   const location = useLocation();
 
   const [step, setStep] = useState('setup'); // 'setup' | 'confirm' | 'backup' | 'login'
+  const [user, setUser] = useState(null);
   const [qrCode, setQrCode] = useState('');
   const [manualKey, setManualKey] = useState('');
   const [code, setCode] = useState('');
@@ -100,9 +101,24 @@ const TwoFactorAuth = () => {
     setLoading(true);
 
     try {
-      await apiPost('/2fa/verify', { token: code });
-      // Backend has set session cookie; redirect to dashboard
-      navigate('/admin-dashboard', { replace: true });
+      const response = await apiPost('/2fa/verify', { token: code });
+
+      // Handle both nested ({ user: {...} }) and flat ({ id, email, role_id }) shapes
+      const u = response.user || response;
+
+      const userData = {
+        id: u.id,
+        email: u.email,
+        role_id: u.role_id,
+        role: 'admin',
+      };
+
+      setUser(userData);
+      localStorage.setItem('user', JSON.stringify(userData));
+
+      window.location.replace('/admin-dashboard');
+
+      return userData;
     } catch (err) {
       setError(err.message || 'Invalid code. Try again.');
     } finally {

@@ -11,7 +11,6 @@ const pad = (value) => String(value).padStart(2, '0');
 const getLocalDate = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
-
   return [
     date.getFullYear(),
     pad(date.getMonth() + 1),
@@ -22,7 +21,6 @@ const getLocalDate = (value) => {
 const getLocalTime = (value) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
-
   return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
 };
 
@@ -41,6 +39,7 @@ const mapSession = (session, moduleCode) => ({
 });
 
 const WorkTracking = () => {
+  document.title = 'AACMS - Work Tracking';
   const navigate = useNavigate();
 
   const [appointments, setAppointments] = useState([]);
@@ -141,7 +140,6 @@ const WorkTracking = () => {
       String(selectedAppointment.id) === String(appointmentId)
     ) {
       if (sessionsLoading) return appointment?.workedHours ?? 0;
-
       return getAppointmentSessions(appointmentId).reduce(
         (total, session) => total + session.hours,
         0
@@ -153,19 +151,14 @@ const WorkTracking = () => {
 
   const calculateHours = (startTime, endTime) => {
     if (!startTime || !endTime) return 0;
-
     const [startHour, startMinute] = startTime.split(':').map(Number);
     const [endHour, endMinute] = endTime.split(':').map(Number);
     const difference =
       endHour * 60 + endMinute - (startHour * 60 + startMinute);
-
     return difference > 0 ? difference / 60 : 0;
   };
 
-  const calculatedHours = calculateHours(
-    formData.startTime,
-    formData.endTime
-  );
+  const calculatedHours = calculateHours(formData.startTime, formData.endTime);
 
   const remainingHours = selectedAppointment
     ? selectedAppointment.maxHours -
@@ -173,12 +166,7 @@ const WorkTracking = () => {
     : 0;
 
   const resetForm = () => {
-    setFormData({
-      date: '',
-      activity: '',
-      startTime: '',
-      endTime: '',
-    });
+    setFormData({ date: '', activity: '', startTime: '', endTime: '' });
   };
 
   const handleAppointmentChange = (appointment) => {
@@ -231,16 +219,11 @@ const WorkTracking = () => {
         formData
       );
 
-      const savedSession = mapSession(
-        session,
-        selectedAppointment.moduleCode
-      );
-
+      const savedSession = mapSession(session, selectedAppointment.moduleCode);
       setSessions((previous) => [...previous, savedSession]);
 
       const updatedWorkedHours =
-        getAppointmentTotalHours(selectedAppointment.id) +
-        savedSession.hours;
+        getAppointmentTotalHours(selectedAppointment.id) + savedSession.hours;
 
       const updatedAppointment = {
         ...selectedAppointment,
@@ -277,14 +260,17 @@ const WorkTracking = () => {
       <div className="flex">
         <Sidebar />
 
-        <main className="flex-1">
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white">Work Tracking</h1>
+        <main className="flex-1 min-w-0">
+          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
+              Work Tracking
+            </h1>
           </div>
 
-          <div className="p-8">
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold text-primary-dark">
+          <div className="p-4 md:p-8">
+            <div className="mb-6 md:mb-8">
+              {/* FIXED: was text-white on off-white background */}
+              <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-primary">
                 Work Tracking
               </h2>
               <p className="mt-2 text-neutral">
@@ -336,29 +322,29 @@ const WorkTracking = () => {
                           key={appointment.id}
                           type="button"
                           onClick={() => handleAppointmentChange(appointment)}
-                          className={`rounded-lg border p-5 text-left transition ${
+                          className={`rounded-lg border p-4 md:p-5 text-left transition ${
                             isSelected
                               ? 'border-primary bg-purple-50'
                               : 'border-gray-200 bg-white hover:border-primary'
                           }`}
                         >
-                          <div className="flex items-start justify-between">
-                            <div>
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
                               <h3 className="font-semibold text-primary-dark">
                                 {appointment.moduleCode}
                               </h3>
-                              <p className="mt-1 text-sm text-gray-700">
+                              <p className="mt-1 text-sm text-gray-700 break-words">
                                 {appointment.moduleName}
                               </p>
                             </div>
                             {isSelected && (
-                              <span className="text-sm font-medium text-primary">
+                              <span className="text-sm font-medium text-primary whitespace-nowrap">
                                 Selected
                               </span>
                             )}
                           </div>
 
-                          <div className="mt-4 grid grid-cols-3 gap-3 text-sm">
+                          <div className="mt-4 grid grid-cols-3 gap-2 md:gap-3 text-sm">
                             <div>
                               <p className="text-neutral">Worked</p>
                               <p className="mt-1 font-semibold text-gray-800">
@@ -388,15 +374,15 @@ const WorkTracking = () => {
                   <>
                     <Card className="mb-6">
                       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                        <div>
+                        <div className="min-w-0">
                           <p className="text-sm text-neutral">
                             Selected Assistant Appointment
                           </p>
-                          <h2 className="mt-1 text-xl font-semibold text-primary-dark">
+                          <h2 className="mt-1 text-lg md:text-xl font-semibold text-primary-dark break-words">
                             {selectedAppointment.moduleCode} -{' '}
                             {selectedAppointment.moduleName}
                           </h2>
-                          <p className="mt-1 text-sm text-neutral">
+                          <p className="mt-1 text-sm text-neutral break-words">
                             Lecturer: {selectedAppointment.lecturer}
                           </p>
                         </div>
@@ -408,7 +394,7 @@ const WorkTracking = () => {
                               setError('');
                               setShowForm(true);
                             }}
-                            className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark"
+                            className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark w-full md:w-auto"
                           >
                             Record Work Session
                           </button>
@@ -434,7 +420,7 @@ const WorkTracking = () => {
                               Assistant Appointment
                             </label>
                             <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
-                              <p className="font-semibold text-primary-dark">
+                              <p className="font-semibold text-primary-dark break-words">
                                 {selectedAppointment.moduleCode} -{' '}
                                 {selectedAppointment.moduleName}
                               </p>
@@ -539,7 +525,7 @@ const WorkTracking = () => {
                             <button
                               type="submit"
                               disabled={saving}
-                              className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60"
+                              className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 w-full sm:w-auto"
                             >
                               {saving ? 'Saving...' : 'Save Work Session'}
                             </button>
@@ -556,7 +542,7 @@ const WorkTracking = () => {
                                   endTime: '',
                                 });
                               }}
-                              className="rounded-lg border border-gray-300 px-5 py-3 font-medium text-gray-700 transition hover:bg-gray-50"
+                              className="rounded-lg border border-gray-300 px-5 py-3 font-medium text-gray-700 transition hover:bg-gray-50 w-full sm:w-auto"
                             >
                               Cancel
                             </button>
@@ -565,34 +551,39 @@ const WorkTracking = () => {
                       </Card>
                     )}
 
-                    <div className="mb-6 grid grid-cols-1 gap-5 md:grid-cols-4">
+                    {/* Stats grid: 2×2 on phone, 4 across on desktop */}
+                    <div className="mb-6 grid grid-cols-2 gap-3 md:gap-5 md:grid-cols-4">
                       <Card>
-                        <p className="text-sm text-neutral">
+                        <p className="text-xs md:text-sm text-neutral">
                           Total Hours Worked
                         </p>
-                        <p className="mt-2 text-2xl font-semibold text-primary-dark">
+                        <p className="mt-2 text-xl md:text-2xl font-semibold text-primary-dark">
                           {getAppointmentTotalHours(
                             selectedAppointment.id
                           ).toFixed(1)}
                         </p>
                       </Card>
                       <Card>
-                        <p className="text-sm text-neutral">Maximum Hours</p>
-                        <p className="mt-2 text-2xl font-semibold text-primary-dark">
+                        <p className="text-xs md:text-sm text-neutral">
+                          Maximum Hours
+                        </p>
+                        <p className="mt-2 text-xl md:text-2xl font-semibold text-primary-dark">
                           {selectedAppointment.maxHours}
                         </p>
                       </Card>
                       <Card>
-                        <p className="text-sm text-neutral">Remaining Hours</p>
-                        <p className="mt-2 text-2xl font-semibold text-primary-dark">
+                        <p className="text-xs md:text-sm text-neutral">
+                          Remaining Hours
+                        </p>
+                        <p className="mt-2 text-xl md:text-2xl font-semibold text-primary-dark">
                           {Math.max(remainingHours, 0).toFixed(1)}
                         </p>
                       </Card>
                       <Card>
-                        <p className="text-sm text-neutral">
+                        <p className="text-xs md:text-sm text-neutral">
                           Estimated Earnings
                         </p>
-                        <p className="mt-2 text-2xl font-semibold text-primary-dark">
+                        <p className="mt-2 text-xl md:text-2xl font-semibold text-primary-dark">
                           R{' '}
                           {(
                             getAppointmentTotalHours(
@@ -660,19 +651,19 @@ const WorkTracking = () => {
                                   key={session.id}
                                   className="border-b border-gray-100"
                                 >
-                                  <td className="px-4 py-4 text-sm text-gray-700">
+                                  <td className="px-4 py-4 text-sm text-gray-700 whitespace-nowrap">
                                     {session.date}
                                   </td>
-                                  <td className="px-4 py-4 text-sm font-medium text-primary-dark">
+                                  <td className="px-4 py-4 text-sm font-medium text-primary-dark whitespace-nowrap">
                                     {session.moduleCode}
                                   </td>
                                   <td className="px-4 py-4 text-sm text-gray-700">
                                     {session.activity}
                                   </td>
-                                  <td className="px-4 py-4 text-sm text-gray-700">
+                                  <td className="px-4 py-4 text-sm text-gray-700 whitespace-nowrap">
                                     {session.startTime} - {session.endTime}
                                   </td>
-                                  <td className="px-4 py-4 text-sm font-medium text-gray-700">
+                                  <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
                                     {session.hours.toFixed(1)} hrs
                                   </td>
                                   <td className="px-4 py-4">

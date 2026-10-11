@@ -7,6 +7,7 @@ import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
 
 const Dashboard = () => {
+  document.title = 'AACMS - Dashboard';
   const navigate = useNavigate();
 
   const [dashboardData, setDashboardData] = useState(null);
@@ -15,7 +16,6 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  // ---- Fetch dashboard data on mount ----
   useEffect(() => {
     let cancelled = false;
 
@@ -63,7 +63,6 @@ const Dashboard = () => {
     };
   }, []);
 
-  // ---- Derived values from the API response ----
   const profile = dashboardData?.profile || {};
   const stats = dashboardData?.stats || {};
   const monthlyHours = dashboardData?.monthlyHours || [];
@@ -87,18 +86,18 @@ const Dashboard = () => {
       <div className="flex">
         <Sidebar userRole="student" />
 
-        <main className="flex-1">
+        <main className="flex-1 min-w-0">
           {/* Page Title Bar */}
-          <div className="bg-primary h-16 flex items-center px-8">
-            <h1 className="text-4xl font-poppins font-bold text-white">
+          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Dashboard
             </h1>
           </div>
 
-          <div className="p-8">
+          <div className="p-4 md:p-8">
             {/* Welcome Message */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-poppins font-semibold text-primary">
+            <div className="mb-6 md:mb-8">
+              <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-primary">
                 {loading
                   ? 'Welcome!'
                   : `Welcome ${profile.name || 'Student'}!`}
@@ -115,7 +114,7 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* Quick Actions */}
               <Card>
-                <h3 className="text-2xl font-poppins font-semibold text-dark mb-4">
+                <h3 className="text-xl md:text-2xl font-poppins font-semibold text-dark mb-4">
                   Quick Actions
                 </h3>
 
@@ -145,7 +144,7 @@ const Dashboard = () => {
 
               {/* Notifications */}
               <Card>
-                <h3 className="text-2xl font-poppins font-semibold text-dark mb-4">
+                <h3 className="text-xl md:text-2xl font-poppins font-semibold text-dark mb-4">
                   Notifications
                 </h3>
 
@@ -179,45 +178,45 @@ const Dashboard = () => {
               </Card>
             </div>
 
-            {/* Stats Overview — uses real API stats */}
+            {/* Stats Overview */}
             <div className="mb-8">
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              <h3 className="text-xl md:text-2xl font-poppins font-semibold text-primary mb-4">
                 Overview
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
                 <Card>
-                  <p className="text-sm text-neutral font-inter">
+                  <p className="text-xs md:text-sm text-neutral font-inter">
                     Active Positions
                   </p>
-                  <p className="mt-2 text-3xl font-bold text-primary-dark font-poppins">
+                  <p className="mt-2 text-2xl md:text-3xl font-bold text-primary-dark font-poppins">
                     {loading ? '—' : stats.active_positions ?? 0}
                   </p>
                 </Card>
 
                 <Card>
-                  <p className="text-sm text-neutral font-inter">
+                  <p className="text-xs md:text-sm text-neutral font-inter">
                     Pending Applications
                   </p>
-                  <p className="mt-2 text-3xl font-bold text-primary-dark font-poppins">
+                  <p className="mt-2 text-2xl md:text-3xl font-bold text-primary-dark font-poppins">
                     {loading ? '—' : stats.pending_applications ?? 0}
                   </p>
                 </Card>
 
                 <Card>
-                  <p className="text-sm text-neutral font-inter">
+                  <p className="text-xs md:text-sm text-neutral font-inter">
                     Hours This Month
                   </p>
-                  <p className="mt-2 text-3xl font-bold text-primary-dark font-poppins">
+                  <p className="mt-2 text-2xl md:text-3xl font-bold text-primary-dark font-poppins">
                     {loading ? '—' : stats.hours_this_month ?? 0}
                   </p>
                 </Card>
 
                 <Card>
-                  <p className="text-sm text-neutral font-inter">
+                  <p className="text-xs md:text-sm text-neutral font-inter">
                     Pending Claims
                   </p>
-                  <p className="mt-2 text-3xl font-bold text-primary-dark font-poppins">
+                  <p className="mt-2 text-2xl md:text-3xl font-bold text-primary-dark font-poppins">
                     {loading ? '—' : stats.pending_claims ?? 0}
                   </p>
                 </Card>
@@ -225,7 +224,7 @@ const Dashboard = () => {
 
               {/* Monthly Hours table */}
               <Card className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full min-w-[320px]">
                   <thead>
                     <tr className="bg-light-grey">
                       <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
@@ -240,19 +239,13 @@ const Dashboard = () => {
                   <tbody>
                     {loading ? (
                       <tr>
-                        <td
-                          colSpan="2"
-                          className="py-6 text-center text-neutral font-inter"
-                        >
+                        <td colSpan="2" className="py-6 text-center text-neutral font-inter">
                           Loading…
                         </td>
                       </tr>
                     ) : monthlyHours.length === 0 ? (
                       <tr>
-                        <td
-                          colSpan="2"
-                          className="py-6 text-center text-neutral font-inter"
-                        >
+                        <td colSpan="2" className="py-6 text-center text-neutral font-inter">
                           No hours recorded yet
                         </td>
                       </tr>
@@ -280,12 +273,12 @@ const Dashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* Application Status */}
               <div>
-                <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                <h3 className="text-xl md:text-2xl font-poppins font-semibold text-primary mb-4">
                   Application Status
                 </h3>
 
                 <Card className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full min-w-[280px]">
                     <thead>
                       <tr className="bg-light-grey">
                         <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
@@ -300,19 +293,13 @@ const Dashboard = () => {
                     <tbody>
                       {loading ? (
                         <tr>
-                          <td
-                            colSpan="2"
-                            className="py-6 text-center text-neutral font-inter"
-                          >
+                          <td colSpan="2" className="py-6 text-center text-neutral font-inter">
                             Loading…
                           </td>
                         </tr>
                       ) : applications.length === 0 ? (
                         <tr>
-                          <td
-                            colSpan="2"
-                            className="py-6 text-center text-neutral font-inter"
-                          >
+                          <td colSpan="2" className="py-6 text-center text-neutral font-inter">
                             No applications yet
                           </td>
                         </tr>
@@ -345,12 +332,12 @@ const Dashboard = () => {
 
               {/* Claims */}
               <div>
-                <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                <h3 className="text-xl md:text-2xl font-poppins font-semibold text-primary mb-4">
                   Claims
                 </h3>
 
                 <Card className="overflow-x-auto">
-                  <table className="w-full">
+                  <table className="w-full min-w-[480px]">
                     <thead>
                       <tr className="bg-light-grey">
                         <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
@@ -371,19 +358,13 @@ const Dashboard = () => {
                     <tbody>
                       {loading ? (
                         <tr>
-                          <td
-                            colSpan="4"
-                            className="py-6 text-center text-neutral font-inter"
-                          >
+                          <td colSpan="4" className="py-6 text-center text-neutral font-inter">
                             Loading…
                           </td>
                         </tr>
                       ) : claims.length === 0 ? (
                         <tr>
-                          <td
-                            colSpan="4"
-                            className="py-6 text-center text-neutral font-inter"
-                          >
+                          <td colSpan="4" className="py-6 text-center text-neutral font-inter">
                             No claims yet
                           </td>
                         </tr>
@@ -425,7 +406,7 @@ const Dashboard = () => {
             {/* Generate Claim & Recent Activity */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                <h3 className="text-xl md:text-2xl font-poppins font-semibold text-primary mb-4">
                   Generate Claim
                 </h3>
 
@@ -444,7 +425,7 @@ const Dashboard = () => {
               </div>
 
               <div>
-                <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                <h3 className="text-xl md:text-2xl font-poppins font-semibold text-primary mb-4">
                   Recent Activity
                 </h3>
 

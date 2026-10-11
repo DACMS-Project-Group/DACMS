@@ -361,13 +361,13 @@ class Student extends User {
             throw new Error("Contact details are required.");
         }
 
-        if (!this.account_number || this.account_number.trim() === "") {
-            throw new Error("Account number is required.");
-        }
+        // if (!this.account_number || this.account_number.trim() === "") {
+        //     throw new Error("Account number is required.");
+        // }
 
-        if (!this.branch_code || this.branch_code.trim() === "") {
-            throw new Error("Branch code is required.");
-        }
+        // if (!this.branch_code || this.branch_code.trim() === "") {
+        //     throw new Error("Branch code is required.");
+        // }
 
         // The many additional profile fields are intentionally NOT required
         // here - the profile fills in progressively, not all at once.

@@ -100,10 +100,10 @@ CREATE TABLE "STUDENT" (
     "NextOfKinMobile" varchar(20),
     "HighestQualification" varchar(100),
     "ContactDetails" varchar(50) NOT NULL,
-    "BankName" varchar(50) NOT NULL,
-    "AccountNumber" varchar(30) NOT NULL,
+    "BankName" varchar(50),
+    "AccountNumber" varchar(30),
     "AccountType" varchar(20) DEFAULT 'Savings',
-    "BranchCode" varchar(10) NOT NULL,
+    "BranchCode" varchar(10),
     "AccountHolderName" varchar(100),
     -- Added for StudentProfile.jsx (P&C122F) full-form coverage. Additive
     -- only: the blob columns above (ResidentialAddress/PostalAddress/
@@ -242,6 +242,7 @@ CREATE TABLE "STUDENT_MODULE_GRADE" (
     "StudentID" int NOT NULL,
     "ModuleID" int NOT NULL,
     "GradeAchieved" decimal(5,2) NOT NULL,
+    "AcademicYear" int NOT NULL DEFAULT 2026,
     CONSTRAINT "PK_STUDENT_MODULE_GRADE" PRIMARY KEY ("GradeID"),
     CONSTRAINT "FK_STUDENT_MODULE_GRADE_STUDENT" FOREIGN KEY ("StudentID") REFERENCES "STUDENT" ("StudentID") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE,
     CONSTRAINT "FK_STUDENT_MODULE_GRADE_NWU_MODULE" FOREIGN KEY ("ModuleID") REFERENCES "NWU_MODULE" ("ModuleID") ON DELETE CASCADE DEFERRABLE INITIALLY IMMEDIATE
