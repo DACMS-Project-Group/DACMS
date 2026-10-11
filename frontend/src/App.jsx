@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import { SidebarProvider } from './contexts/SidebarContext';
 
 // ===== PUBLIC PAGES =====
 import LandingPage from './pages/LandingPage';
@@ -54,6 +55,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <NotificationProvider>
+          <SidebarProvider>
           <Routes>
 
             {/* ===== PUBLIC ROUTES ===== */}
@@ -129,6 +131,7 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
 
           </Routes>
+          </SidebarProvider>
         </NotificationProvider>
       </AuthProvider>
     </BrowserRouter>

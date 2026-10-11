@@ -30,11 +30,9 @@ const Login = () => {
 
   const [view, setView] = useState('login'); // 'login' | 'register'
 
-  // ---- login state ----
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // ---- register state ----
   const [regForm, setRegForm] = useState(emptyRegister);
 
   const [error, setError] = useState('');
@@ -52,7 +50,6 @@ const Login = () => {
     setSuccess('');
   };
 
-  // ---- LOGIN ----
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
@@ -61,7 +58,6 @@ const Login = () => {
 
     try {
       await login(email, password);
-      // AuthContext handles the redirect based on role
     } catch (err) {
       setError(err.message || 'Login failed. Please try again.');
     } finally {
@@ -69,7 +65,6 @@ const Login = () => {
     }
   };
 
-  // ---- REGISTER ----
   const handleRegister = async (e) => {
     e.preventDefault();
     setError('');
@@ -87,7 +82,6 @@ const Login = () => {
     setSubmitting(true);
 
     try {
-      // Build payload — only include role-specific fields the backend needs
       const payload = {
         title: regForm.title,
         first_name: regForm.first_name,
@@ -101,7 +95,6 @@ const Login = () => {
         payload.student_number = regForm.student_number;
         payload.study_level = regForm.study_level;
         payload.contact_details = regForm.contact_details;
-        // bank_name / account_number / branch_code are optional at signup
       }
 
       if (Number(regForm.role_id) === 2) {
@@ -113,12 +106,10 @@ const Login = () => {
       setSuccess('Account created. Signing you in…');
       setRegForm(emptyRegister);
 
-      // Auto-login with the credentials they just typed
       setTimeout(async () => {
         try {
           await login(regForm.email, regForm.password);
         } catch {
-          // If auto-login fails for any reason, drop them back on the login form
           setView('login');
           setEmail(regForm.email);
           setPassword('');
@@ -134,17 +125,30 @@ const Login = () => {
   const roleId = Number(regForm.role_id);
 
   return (
-    <div className="flex w-full h-screen">
-      {/* LEFT: 40% WHITE SIDE */}
-      <div className="w-2/5 bg-white h-full flex flex-col items-center justify-center p-8 relative overflow-y-auto">
-        <img
-          src="/NWU-Acronym-Logo-Purple-Digital.png"
-          alt="NWU Logo"
-          className="h-16 w-auto mb-6"
-        />
+    <div className="min-h-screen w-full flex flex-col md:flex-row">
+      {/* ============ FORM COLUMN ============ */}
+      <div
+        className="
+          w-full md:w-2/5
+          bg-white
+          flex flex-col items-center
+          md:h-screen md:overflow-y-auto
+          px-5 py-6 md:p-8
+          order-2 md:order-1
+          flex-1 md:flex-initial
+        "
+      >
+        {/* Centered form block */}
+        <div className="w-full max-w-sm my-auto">
+          <div className="flex justify-center mb-4 md:mb-6">
+            <img
+              src="/NWU-Acronym-Logo-Purple-Digital.png"
+              alt="NWU Logo"
+              className="h-12 md:h-16 w-auto"
+            />
+          </div>
 
-        <div className="max-w-sm w-full">
-          <h2 className="text-2xl font-poppins font-bold text-primary-dark text-center">
+          <h2 className="text-xl md:text-2xl font-poppins font-bold text-primary-dark text-center">
             {isRegister ? 'Create Account' : 'Welcome Back'}
           </h2>
 
@@ -155,13 +159,13 @@ const Login = () => {
           </p>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm text-center">
+            <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm text-center break-words">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-xl text-sm text-center">
+            <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-xl text-sm text-center break-words">
               {success}
             </div>
           )}
@@ -277,7 +281,6 @@ const Login = () => {
                 ))}
               </select>
 
-              {/* Student-only fields */}
               {roleId === 1 && (
                 <>
                   <input
@@ -312,7 +315,6 @@ const Login = () => {
                 </>
               )}
 
-              {/* Lecturer-only fields */}
               {roleId === 2 && (
                 <input
                   type="text"
@@ -368,15 +370,26 @@ const Login = () => {
           )}
         </div>
 
-        <div className="absolute bottom-6 text-center">
+        {/* Copyright — flow element, no longer absolute */}
+        <div className="w-full text-center pt-6 mt-6 md:mt-8">
           <p className="text-xs text-neutral/50 font-inter">
             © 2026 North-West University • AACMS
           </p>
         </div>
       </div>
 
-      {/* RIGHT: 60% VIDEO SIDE */}
-      <div className="w-3/5 h-full relative overflow-hidden">
+      {/* ============ VIDEO COLUMN ============ */}
+      {/* Mobile: slim hero band at the top. Hidden on very short screens. */}
+      {/* Desktop: 60% full-height column. */}
+      <div
+        className="
+          order-1 md:order-2
+          w-full md:w-3/5
+          h-40 sm:h-56 md:h-screen
+          relative overflow-hidden
+          bg-primary
+        "
+      >
         <video
           autoPlay
           loop

@@ -57,28 +57,24 @@ const Applications = () => {
 
   return (
     <div className="min-h-screen bg-off-white">
-      {/* ===== NAVBAR ===== */}
       <Navbar />
 
       <div className="flex">
-        {/* ===== SIDEBAR ===== */}
         <Sidebar userRole="student" />
 
-        {/* ===== MAIN CONTENT ===== */}
-        <main className="flex-1">
-          {/* ===== PAGE TITLE BAR ===== */}
-          <div className="bg-primary h-16 flex items-center px-8">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
+        <main className="flex-1 min-w-0">
+          {/* Page title bar */}
+          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Applications
             </h1>
           </div>
 
-          {/* ===== PAGE CONTENT ===== */}
-          <div className="p-8">
-            {/* ===== PAGE INTRO ===== */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+          <div className="p-4 md:p-8">
+            {/* Page intro */}
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6 md:mb-8">
               <div>
-                <h2 className="text-2xl font-poppins font-semibold text-primary">
+                <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-primary">
                   My Applications
                 </h2>
 
@@ -89,13 +85,12 @@ const Applications = () => {
 
               <button
                 onClick={() => navigate('/apply-for-assistant')}
-                className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition"
+                className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition w-full md:w-auto"
               >
                 + Apply for Assistant
               </button>
             </div>
 
-            {/* ===== LOADING STATE ===== */}
             {loading && (
               <Card>
                 <p className="py-6 text-center text-neutral font-inter">
@@ -104,14 +99,12 @@ const Applications = () => {
               </Card>
             )}
 
-            {/* ===== ERROR STATE ===== */}
             {!loading && error && (
               <Card>
                 <div className="py-6 text-center">
                   <p className="font-semibold text-error font-inter">
                     Could not load applications
                   </p>
-
                   <p className="mt-1 text-sm text-neutral font-inter">
                     {error}
                   </p>
@@ -119,14 +112,12 @@ const Applications = () => {
               </Card>
             )}
 
-            {/* ===== EMPTY STATE ===== */}
             {!loading && !error && applications.length === 0 && (
               <Card>
                 <div className="py-10 text-center">
                   <p className="font-medium text-dark font-inter">
                     No applications yet
                   </p>
-
                   <p className="mt-1 text-sm text-neutral font-inter">
                     Apply for an Assistant position to see it here.
                   </p>
@@ -134,24 +125,25 @@ const Applications = () => {
               </Card>
             )}
 
-            {/* ===== APPLICATION CARDS ===== */}
             {!loading && !error && applications.length > 0 && (
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 {applications.map((application) => (
                   <Card key={application.ApplicationID}>
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-                      {/* ===== APPLICATION INFORMATION ===== */}
                       <div>
-                        <h3 className="text-2xl font-poppins font-semibold text-dark">
+                        <h3 className="text-xl md:text-2xl font-poppins font-semibold text-dark">
                           {application.ModuleCode}
                         </h3>
 
-                        <p className="text-lg text-dark mt-1">
+                        <p className="text-base md:text-lg text-dark mt-1">
                           {application.ModuleName}
                         </p>
 
-                        <p className="text-neutral mt-2">
-                          Application Reference: {application.ApplicationReference || application.Reference || '—'}
+                        <p className="text-neutral mt-2 text-sm md:text-base break-words">
+                          Application Reference:{' '}
+                          {application.ApplicationReference ||
+                            application.Reference ||
+                            '—'}
                         </p>
 
                         <p className="text-sm text-neutral mt-1">
@@ -159,24 +151,19 @@ const Applications = () => {
                         </p>
                       </div>
 
-                      {/* ===== STATUS + DETAILS ===== */}
-                      <div className="flex flex-col items-start md:items-end gap-4">
+                      <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-4">
                         <StatusBadge
-                          status={
-                            application.ApplicationStatus || 'Pending'
-                          }
+                          status={application.ApplicationStatus || 'Pending'}
                         />
 
                         <button
                           onClick={() =>
                             navigate(
                               `/application-detail/${application.ApplicationID}`,
-                              {
-                                state: { application },
-                              }
+                              { state: { application } }
                             )
                           }
-                          className="text-primary font-semibold hover:underline"
+                          className="text-primary font-semibold hover:underline whitespace-nowrap"
                         >
                           View Details →
                         </button>

@@ -127,16 +127,16 @@ const SessionDetail = () => {
         <Sidebar />
 
         {/* Main Content */}
-        <main className="flex-1">
+        <main className="flex-1 min-w-0">
           {/* Page Header */}
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
+          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Session Detail
             </h1>
           </div>
 
           {/* Page Content */}
-          <div className="p-8">
+          <div className="p-4 md:p-8">
             {/* Back Button */}
             <div className="mb-6">
               <button
@@ -166,7 +166,7 @@ const SessionDetail = () => {
                 <Card className="mb-6">
                   <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <h2 className="text-lg font-semibold text-primary-dark">
+                      <h2 className="text-base md:text-lg font-semibold text-primary-dark">
                         Work Session
                       </h2>
 
@@ -188,10 +188,10 @@ const SessionDetail = () => {
                       </p>
                     </div>
 
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm text-neutral">Activity</p>
 
-                      <p className="mt-1 font-semibold text-gray-800">
+                      <p className="mt-1 font-semibold text-gray-800 break-words">
                         {currentSession.activity}
                       </p>
                     </div>
@@ -199,7 +199,7 @@ const SessionDetail = () => {
                     <div>
                       <p className="text-sm text-neutral">Session Time</p>
 
-                      <p className="mt-1 font-semibold text-gray-800">
+                      <p className="mt-1 font-semibold text-gray-800 whitespace-nowrap">
                         {currentSession.startTime} - {currentSession.endTime}
                       </p>
                     </div>
@@ -212,19 +212,19 @@ const SessionDetail = () => {
                       </p>
                     </div>
 
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm text-neutral">Module</p>
 
-                      <p className="mt-1 font-semibold text-gray-800">
+                      <p className="mt-1 font-semibold text-gray-800 break-words">
                         {currentAppointment.moduleCode} -{' '}
                         {currentAppointment.moduleName}
                       </p>
                     </div>
 
-                    <div>
+                    <div className="min-w-0">
                       <p className="text-sm text-neutral">Lecturer</p>
 
-                      <p className="mt-1 font-semibold text-gray-800">
+                      <p className="mt-1 font-semibold text-gray-800 break-words">
                         {currentAppointment.lecturer}
                       </p>
                     </div>
@@ -234,7 +234,7 @@ const SessionDetail = () => {
                 {/* Remuneration Information */}
                 <Card className="mb-6">
                   <div className="mb-5">
-                    <h2 className="text-lg font-semibold text-primary-dark">
+                    <h2 className="text-base md:text-lg font-semibold text-primary-dark">
                       Remuneration
                     </h2>
 
@@ -247,7 +247,7 @@ const SessionDetail = () => {
                     <div>
                       <p className="text-sm text-neutral">Hours Worked</p>
 
-                      <p className="mt-1 text-xl font-bold text-primary-dark">
+                      <p className="mt-1 text-lg md:text-xl font-bold text-primary-dark">
                         {currentSession.hours.toFixed(2)}
                       </p>
                     </div>
@@ -255,7 +255,7 @@ const SessionDetail = () => {
                     <div>
                       <p className="text-sm text-neutral">Hourly Rate</p>
 
-                      <p className="mt-1 text-xl font-bold text-primary-dark">
+                      <p className="mt-1 text-lg md:text-xl font-bold text-primary-dark">
                         {formatAmount(currentAppointment.hourlyRate)}
                       </p>
                     </div>
@@ -265,7 +265,7 @@ const SessionDetail = () => {
                         Estimated Remuneration
                       </p>
 
-                      <p className="mt-1 text-xl font-bold text-primary-dark">
+                      <p className="mt-1 text-lg md:text-xl font-bold text-primary-dark">
                         {formatAmount(estimatedRemuneration)}
                       </p>
                     </div>
@@ -275,7 +275,7 @@ const SessionDetail = () => {
                 {/* Verification Information */}
                 <Card>
                   <div className="mb-5">
-                    <h2 className="text-lg font-semibold text-primary-dark">
+                    <h2 className="text-base md:text-lg font-semibold text-primary-dark">
                       Verification
                     </h2>
 

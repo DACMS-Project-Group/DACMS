@@ -12,7 +12,7 @@ const StudentModules = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
-  const [editingGrade, setEditingGrade] = useState(null); // grade object being edited
+  const [editingGrade, setEditingGrade] = useState(null);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [showAddSection, setShowAddSection] = useState(false);
@@ -47,7 +47,6 @@ const StudentModules = () => {
     loadData();
   }, []);
 
-  // KPIs
   const kpis = useMemo(() => {
     const totalModules = grades.length;
     if (totalModules === 0) {
@@ -85,10 +84,7 @@ const StudentModules = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSaveGrade = async (e) => {
@@ -198,23 +194,23 @@ const StudentModules = () => {
       <div className="flex">
         <Sidebar userRole="student" />
 
-        <main className="flex-1">
-          {/* Top Title Banner */}
-          <div className="bg-primary h-16 flex items-center px-8">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
+        <main className="flex-1 min-w-0">
+          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Academic Modules
             </h1>
           </div>
 
-          <div className="p-8">
-            {/* Page Header and Add Module Button */}
-            <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div className="p-4 md:p-8">
+            {/* Header + Add button */}
+            <div className="mb-6 md:mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <h2 className="text-3xl font-poppins font-semibold text-primary">
+                <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-primary">
                   My Modules & Grades
                 </h2>
                 <p className="text-neutral mt-2">
-                  Manage your completed modules, academic marks, and graduation records.
+                  Manage your completed modules, academic marks, and graduation
+                  records.
                 </p>
               </div>
 
@@ -235,13 +231,12 @@ const StudentModules = () => {
                     setShowAddSection(true);
                   }
                 }}
-                className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark shadow-sm"
+                className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark shadow-sm w-full md:w-auto"
               >
                 {showAddSection ? 'Close Form' : '+ Add Module'}
               </button>
             </div>
 
-            {/* Alert Messages */}
             {successMessage && (
               <div className="mb-6 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 font-medium">
                 {successMessage}
@@ -254,38 +249,45 @@ const StudentModules = () => {
               </div>
             )}
 
-            {/* KPI Cards Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* KPI cards: 2×2 on phone */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
               <Card>
-                <p className="text-sm text-neutral font-inter">Total Modules</p>
-                <p className="text-3xl font-poppins font-bold text-primary mt-2">
+                <p className="text-xs md:text-sm text-neutral font-inter">
+                  Total Modules
+                </p>
+                <p className="text-2xl md:text-3xl font-poppins font-bold text-primary mt-2">
                   {kpis.totalModules}
                 </p>
               </Card>
 
               <Card>
-                <p className="text-sm text-neutral font-inter">Average Mark</p>
-                <p className="text-3xl font-poppins font-bold text-primary mt-2">
+                <p className="text-xs md:text-sm text-neutral font-inter">
+                  Average Mark
+                </p>
+                <p className="text-2xl md:text-3xl font-poppins font-bold text-primary mt-2">
                   {kpis.averageGrade}
                 </p>
               </Card>
 
               <Card>
-                <p className="text-sm text-neutral font-inter">Distinctions (≥ 75%)</p>
-                <p className="text-3xl font-poppins font-bold text-primary mt-2">
+                <p className="text-xs md:text-sm text-neutral font-inter">
+                  Distinctions (≥ 75%)
+                </p>
+                <p className="text-2xl md:text-3xl font-poppins font-bold text-primary mt-2">
                   {kpis.distinctions}
                 </p>
               </Card>
 
               <Card>
-                <p className="text-sm text-neutral font-inter">Assistant Eligible</p>
-                <p className="text-3xl font-poppins font-bold text-primary mt-2">
+                <p className="text-xs md:text-sm text-neutral font-inter">
+                  Assistant Eligible
+                </p>
+                <p className="text-2xl md:text-3xl font-poppins font-bold text-primary mt-2">
                   {kpis.eligibleCount}
                 </p>
               </Card>
             </div>
 
-            {/* Add/Edit Module Collapsible Section */}
             {showAddSection && (
               <Card className="mb-8 border border-purple-100 shadow-sm">
                 <div className="border-b border-gray-100 pb-4 mb-6">
@@ -301,7 +303,6 @@ const StudentModules = () => {
 
                 <form onSubmit={handleSaveGrade}>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                    {/* Module Selection */}
                     <div>
                       <label className="block text-sm font-medium text-neutral mb-2">
                         Module <span className="text-red-500">*</span>
@@ -322,11 +323,12 @@ const StudentModules = () => {
                         ))}
                       </select>
                       {editingGrade && (
-                        <p className="text-xs text-neutral mt-1">Module cannot be changed when editing.</p>
+                        <p className="text-xs text-neutral mt-1">
+                          Module cannot be changed when editing.
+                        </p>
                       )}
                     </div>
 
-                    {/* Grade Achieved */}
                     <div>
                       <label className="block text-sm font-medium text-neutral mb-2">
                         Grade Achieved (%) <span className="text-red-500">*</span>
@@ -346,7 +348,6 @@ const StudentModules = () => {
                       />
                     </div>
 
-                    {/* Academic Year */}
                     <div>
                       <label className="block text-sm font-medium text-neutral mb-2">
                         Year Taken <span className="text-red-500">*</span>
@@ -365,20 +366,19 @@ const StudentModules = () => {
                     </div>
                   </div>
 
-                  {/* Form Action Buttons */}
-                  <div className="flex items-center justify-end gap-3">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
                     <button
                       type="button"
                       onClick={handleCancelForm}
                       disabled={saving}
-                      className="px-5 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition"
+                      className="px-5 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition w-full sm:w-auto"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
                       disabled={saving}
-                      className="px-6 py-2.5 rounded-lg bg-primary text-sm font-medium text-white hover:bg-primary-dark transition disabled:opacity-50"
+                      className="px-6 py-2.5 rounded-lg bg-primary text-sm font-medium text-white hover:bg-primary-dark transition disabled:opacity-50 w-full sm:w-auto"
                     >
                       {saving
                         ? 'Saving...'
@@ -391,13 +391,12 @@ const StudentModules = () => {
               </Card>
             )}
 
-            {/* List Table of Modules */}
-            <Card>
+            <Card className="overflow-x-auto">
               <div className="border-b border-gray-100 pb-4 mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-poppins font-semibold text-primary">
                   Recorded Modules
                 </h3>
-                <span className="text-sm font-inter text-neutral">
+                <span className="text-sm font-inter text-neutral whitespace-nowrap">
                   {grades.length} {grades.length === 1 ? 'record' : 'records'}
                 </span>
               </div>
@@ -412,26 +411,31 @@ const StudentModules = () => {
                     No academic module marks recorded yet.
                   </p>
                   <p className="mt-1 text-sm text-neutral font-inter">
-                    Click the "+ Add Module" button above to add your completed modules.
+                    Click the "+ Add Module" button above to add your completed
+                    modules.
                   </p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse">
+                  <table className="w-full text-left border-collapse min-w-[720px]">
                     <thead>
                       <tr className="border-b border-gray-200 text-xs font-semibold uppercase tracking-wider text-neutral">
                         <th className="py-3 px-4">Year</th>
                         <th className="py-3 px-4">Module Code</th>
                         <th className="py-3 px-4">Module Description</th>
-                        <th className="py-3 px-4 text-center">Grade Achieved</th>
+                        <th className="py-3 px-4 text-center">Grade</th>
                         <th className="py-3 px-4 text-center">Status</th>
                         <th className="py-3 px-4 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100 text-sm">
                       {grades.map((item) => {
-                        const gradeVal = parseFloat(item.grade_achieved || 0);
-                        const minReq = parseFloat(item.min_academic_requirement || 65);
+                        const gradeVal = parseFloat(
+                          item.grade_achieved || 0
+                        );
+                        const minReq = parseFloat(
+                          item.min_academic_requirement || 65
+                        );
                         const isEligible = gradeVal >= minReq;
                         const isDistinction = gradeVal >= 75;
 
@@ -440,10 +444,10 @@ const StudentModules = () => {
                             key={item.grade_id}
                             className="hover:bg-gray-50/80 transition-colors"
                           >
-                            <td className="py-4 px-4 font-medium text-gray-800">
+                            <td className="py-4 px-4 font-medium text-gray-800 whitespace-nowrap">
                               {item.academic_year || '—'}
                             </td>
-                            <td className="py-4 px-4 font-semibold text-primary">
+                            <td className="py-4 px-4 font-semibold text-primary whitespace-nowrap">
                               {item.module_code}
                             </td>
                             <td className="py-4 px-4 text-gray-600 max-w-md">
@@ -456,7 +460,7 @@ const StudentModules = () => {
                                 </p>
                               )}
                             </td>
-                            <td className="py-4 px-4 text-center font-bold">
+                            <td className="py-4 px-4 text-center font-bold whitespace-nowrap">
                               <span
                                 className={
                                   isDistinction
@@ -469,7 +473,7 @@ const StudentModules = () => {
                                 {Number(gradeVal).toFixed(2)}%
                               </span>
                             </td>
-                            <td className="py-4 px-4 text-center">
+                            <td className="py-4 px-4 text-center whitespace-nowrap">
                               {isDistinction ? (
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                   Distinction
@@ -484,7 +488,7 @@ const StudentModules = () => {
                                 </span>
                               )}
                             </td>
-                            <td className="py-4 px-4 text-right">
+                            <td className="py-4 px-4 text-right whitespace-nowrap">
                               <div className="flex items-center justify-end gap-3">
                                 <button
                                   type="button"
@@ -497,12 +501,17 @@ const StudentModules = () => {
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    handleDeleteGrade(item.grade_id, item.module_code)
+                                    handleDeleteGrade(
+                                      item.grade_id,
+                                      item.module_code
+                                    )
                                   }
                                   disabled={deletingId === item.grade_id}
                                   className="text-sm font-medium text-red-600 hover:text-red-800 transition disabled:opacity-50"
                                 >
-                                  {deletingId === item.grade_id ? 'Removing...' : 'Delete'}
+                                  {deletingId === item.grade_id
+                                    ? 'Removing...'
+                                    : 'Delete'}
                                 </button>
                               </div>
                             </td>

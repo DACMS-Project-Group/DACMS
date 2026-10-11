@@ -39,20 +39,27 @@ const Notifications = () => {
     fetchNotifications,
     notifications: sharedNotifications,
     loading: sharedLoading,
-    error
+    error,
   } = liveNotifs();
 
   useEffect(() => {
     setLoading(sharedLoading);
-    setNotifications(sharedNotifications.map((n) => ({
-      id: n.NotificationID ?? n.notificationID ?? n.id,
-      title: n.Subject ?? n.subject ?? n.title ?? 'No Subject',
-      type: n.NotificationType ?? n.notificationType ?? n.type ?? 'info',
-      message: n.Message ?? n.message ?? 'No message',
-      timestamp: n.CreatedTimestamp ?? n.createdTimestamp ?? n.created_at ?? n.timestamp,
-      read: n.read ?? Boolean(n.IsRead ?? n.is_read),
-      category: n.NotificationType ?? n.notificationType ?? n.type ?? 'General',
-    })));
+    setNotifications(
+      sharedNotifications.map((n) => ({
+        id: n.NotificationID ?? n.notificationID ?? n.id,
+        title: n.Subject ?? n.subject ?? n.title ?? 'No Subject',
+        type: n.NotificationType ?? n.notificationType ?? n.type ?? 'info',
+        message: n.Message ?? n.message ?? 'No message',
+        timestamp:
+          n.CreatedTimestamp ??
+          n.createdTimestamp ??
+          n.created_at ??
+          n.timestamp,
+        read: n.read ?? Boolean(n.IsRead ?? n.is_read),
+        category:
+          n.NotificationType ?? n.notificationType ?? n.type ?? 'General',
+      }))
+    );
   }, [sharedLoading, sharedNotifications]);
 
   const toggleExpand = async (id) => {
@@ -65,11 +72,9 @@ const Notifications = () => {
         current.map((n) => (n.id === id ? { ...n, read: true } : n))
       );
 
-
       try {
         await apiPatch(`/notifications/read/${id}`);
         await fetchNotifications();
-
       } catch (err) {
         console.error('Failed to mark notification as read:', err);
       }
@@ -80,9 +85,7 @@ const Notifications = () => {
     const unread = notifications.filter((n) => !n.read);
     if (unread.length === 0) return;
 
-    setNotifications((current) =>
-      current.map((n) => ({ ...n, read: true }))
-    );
+    setNotifications((current) => current.map((n) => ({ ...n, read: true })));
 
     try {
       await Promise.all(
@@ -91,38 +94,44 @@ const Notifications = () => {
       await fetchNotifications();
     } catch (err) {
       console.error('Some notifications failed to mark as read:', err);
-    }   
+    }
   };
 
   const unreadCount = notifications.filter((n) => !n.read).length;
   const readCount = notifications.filter((n) => n.read).length;
 
-  const categoryCount = [
-    ...new Set(notifications.map((n) => n.category)),
-  ].length;
+  const categoryCount = [...new Set(notifications.map((n) => n.category))]
+    .length;
 
-  const getTypeColor = (type) => {
+  // Returns a Tailwind border-left color class based on the category/type text.
+  const getTypeBorder = (type) => {
     const t = (type || '').toLowerCase();
 
-    if (t.includes('success') || t.includes('approved') || t.includes('verified')) {
-      return 'bg-success';
+    if (
+      t.includes('success') ||
+      t.includes('approved') ||
+      t.includes('verified')
+    ) {
+      return 'border-l-success';
     }
-    if (t.includes('error') || t.includes('reject') || t.includes('denied')) {
-      return 'bg-error';
+    if (
+      t.includes('error') ||
+      t.includes('reject') ||
+      t.includes('denied')
+    ) {
+      return 'border-l-error';
     }
-    if (t.includes('warning') || t.includes('pending') || t.includes('review')) {
-      return 'bg-warning';
+    if (
+      t.includes('warning') ||
+      t.includes('pending') ||
+      t.includes('review')
+    ) {
+      return 'border-l-warning';
     }
-    if (t.includes('application')) {
-      return 'bg-primary';
-    }
-    if (t.includes('claim')) {
-      return 'bg-warning';
-    }
-    if (t.includes('work') || t.includes('session')) {
-      return 'bg-success';
-    }
-    return 'bg-neutral';
+    if (t.includes('application')) return 'border-l-primary';
+    if (t.includes('claim')) return 'border-l-warning';
+    if (t.includes('work') || t.includes('session')) return 'border-l-success';
+    return 'border-l-neutral';
   };
 
   return (
@@ -132,14 +141,14 @@ const Notifications = () => {
       <div className="flex">
         <Sidebar userRole={userRole} />
 
-        <main className="flex-1">
-          <div className="bg-primary px-8 py-4">
+        <main className="flex-1 min-w-0">
+          <div className="bg-primary px-4 md:px-8 py-4">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-              <h1 className="text-2xl font-poppins font-semibold text-white">
+              <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
                 Notifications
               </h1>
 
-              <div className="flex items-center gap-4">
+              <div className="flex flex-wrap items-center gap-3 md:gap-4">
                 <span className="text-sm text-white/80 font-inter">
                   {unreadCount} unread
                 </span>
@@ -157,51 +166,57 @@ const Notifications = () => {
             </div>
           </div>
 
-          <div className="p-8">
-            <section className="mb-8">
-              <h2 className="mb-4 text-xl font-semibold text-primary font-poppins">
+          <div className="p-4 md:p-8">
+            <section className="mb-6 md:mb-8">
+              <h2 className="mb-4 text-lg md:text-xl font-semibold text-primary font-poppins">
                 Notification Summary
               </h2>
 
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6">
                 <Card>
-                  <p className="font-medium text-neutral font-inter">Total</p>
-                  <p className="mt-3 text-3xl font-bold text-primary font-poppins">
+                  <p className="text-xs md:text-sm font-medium text-neutral font-inter">
+                    Total
+                  </p>
+                  <p className="mt-2 text-2xl md:text-3xl font-bold text-primary font-poppins">
                     {notifications.length}
                   </p>
-                  <p className="mt-1 text-sm text-neutral font-inter">
+                  <p className="mt-1 text-xs md:text-sm text-neutral font-inter">
                     All notifications
                   </p>
                 </Card>
 
                 <Card>
-                  <p className="font-medium text-neutral font-inter">Unread</p>
-                  <p className="mt-3 text-3xl font-bold text-primary font-poppins">
+                  <p className="text-xs md:text-sm font-medium text-neutral font-inter">
+                    Unread
+                  </p>
+                  <p className="mt-2 text-2xl md:text-3xl font-bold text-primary font-poppins">
                     {unreadCount}
                   </p>
-                  <p className="mt-1 text-sm text-neutral font-inter">
-                    Notifications requiring attention
+                  <p className="mt-1 text-xs md:text-sm text-neutral font-inter">
+                    Requiring attention
                   </p>
                 </Card>
 
                 <Card>
-                  <p className="font-medium text-neutral font-inter">Read</p>
-                  <p className="mt-3 text-3xl font-bold text-primary font-poppins">
+                  <p className="text-xs md:text-sm font-medium text-neutral font-inter">
+                    Read
+                  </p>
+                  <p className="mt-2 text-2xl md:text-3xl font-bold text-primary font-poppins">
                     {readCount}
                   </p>
-                  <p className="mt-1 text-sm text-neutral font-inter">
+                  <p className="mt-1 text-xs md:text-sm text-neutral font-inter">
                     Previously viewed
                   </p>
                 </Card>
 
                 <Card>
-                  <p className="font-medium text-neutral font-inter">
+                  <p className="text-xs md:text-sm font-medium text-neutral font-inter">
                     Categories
                   </p>
-                  <p className="mt-3 text-3xl font-bold text-primary font-poppins">
+                  <p className="mt-2 text-2xl md:text-3xl font-bold text-primary font-poppins">
                     {categoryCount}
                   </p>
-                  <p className="mt-1 text-sm text-neutral font-inter">
+                  <p className="mt-1 text-xs md:text-sm text-neutral font-inter">
                     Notification categories
                   </p>
                 </Card>
@@ -209,7 +224,7 @@ const Notifications = () => {
             </section>
 
             <section>
-              <h2 className="mb-4 text-xl font-semibold text-primary font-poppins">
+              <h2 className="mb-4 text-lg md:text-xl font-semibold text-primary font-poppins">
                 All Notifications
               </h2>
 
@@ -241,36 +256,39 @@ const Notifications = () => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {notifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className={`rounded-xl border transition-all duration-300 ${
-                          expandedId === notification.id
-                            ? 'border-primary shadow-md'
-                            : 'border-neutral/30 hover:border-neutral'
-                        } ${
-                          !notification.read
-                            ? 'bg-primary-lightest/30'
-                            : 'bg-white'
-                        }`}
-                      >
-                        <div
-                          className="flex cursor-pointer items-center justify-between p-4"
-                          onClick={() => toggleExpand(notification.id)}
-                        >
-                          <div className="flex min-w-0 flex-1 items-center gap-4">
-                            <div
-                              className={`h-2 w-2 flex-shrink-0 rounded-full ${
-                                !notification.read
-                                  ? 'bg-primary'
-                                  : 'bg-neutral/30'
-                              }`}
-                            />
+                    {notifications.map((notification) => {
+                      const isOpen = expandedId === notification.id;
 
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-center gap-3">
+                      return (
+                        <div
+                          key={notification.id}
+                          className={[
+                            'rounded-xl border border-l-4 transition-all duration-300',
+                            getTypeBorder(notification.type),
+                            isOpen
+                              ? 'border-primary shadow-md'
+                              : 'border-neutral/30 hover:border-neutral',
+                            !notification.read
+                              ? 'bg-primary-lightest/30'
+                              : 'bg-white',
+                          ].join(' ')}
+                        >
+                          <div
+                            className="flex cursor-pointer items-start justify-between gap-3 p-3 md:p-4"
+                            onClick={() => toggleExpand(notification.id)}
+                          >
+                            <div className="flex min-w-0 flex-1 items-start gap-3">
+                              <div
+                                className={`mt-2 h-2 w-2 flex-shrink-0 rounded-full ${
+                                  !notification.read
+                                    ? 'bg-primary'
+                                    : 'bg-neutral/30'
+                                }`}
+                              />
+
+                              <div className="min-w-0 flex-1">
                                 <p
-                                  className={`truncate font-inter text-dark ${
+                                  className={`font-inter text-dark break-words ${
                                     !notification.read
                                       ? 'font-bold'
                                       : 'font-semibold'
@@ -279,67 +297,45 @@ const Notifications = () => {
                                   {notification.title}
                                 </p>
 
-                                <span
-                                  className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs text-white font-inter ${getTypeColor(
-                                    notification.type
-                                  )}`}
-                                >
-                                  {notification.category}
-                                </span>
+                                <p className="mt-1 text-xs text-neutral font-inter">
+                                  {notification.timestamp
+                                    ? new Date(
+                                        notification.timestamp
+                                      ).toLocaleString('en-ZA', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })
+                                    : ''}
+                                </p>
                               </div>
+                            </div>
 
-                              <p className="mt-0.5 text-xs text-neutral font-inter">
-                                {notification.timestamp
-                                  ? new Date(
-                                      notification.timestamp
-                                    ).toLocaleString('en-ZA', {
-                                      day: '2-digit',
-                                      month: '2-digit',
-                                      year: 'numeric',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })
-                                  : ''}
+                            <div className="flex flex-shrink-0 items-center gap-2">
+                              {!notification.read && (
+                                <span className="rounded-full bg-primary-lightest px-2 py-0.5 text-xs text-primary font-inter whitespace-nowrap">
+                                  New
+                                </span>
+                              )}
+
+                              <span className="text-sm text-neutral/50">
+                                {isOpen ? '▲' : '▼'}
+                              </span>
+                            </div>
+                          </div>
+
+                          {isOpen && (
+                            <div className="border-t border-neutral/20 px-3 md:px-4 pb-4 pt-3">
+                              <p className="text-sm leading-relaxed text-dark font-inter break-words">
+                                {renderMessage(notification.message)}
                               </p>
                             </div>
-                          </div>
-
-                          <div className="flex flex-shrink-0 items-center gap-3">
-                            {!notification.read && (
-                              <span className="rounded-full bg-primary-lightest px-2 py-0.5 text-xs text-primary font-inter">
-                                New
-                              </span>
-                            )}
-
-                            <span className="text-sm text-neutral/50">
-                              {expandedId === notification.id ? '▲' : '▼'}
-                            </span>
-                          </div>
+                          )}
                         </div>
-
-                        {expandedId === notification.id && (
-                          <div className="border-t border-neutral/20 px-4 pb-4 pt-3">
-                            <p className="text-sm leading-relaxed text-dark font-inter">
-                              {renderMessage(notification.message)}
-                            </p>
-
-                            <div className="mt-3 flex items-center gap-4">
-                              <span
-                                className={`rounded-full px-2 py-0.5 text-xs text-white font-inter ${getTypeColor(
-                                  notification.type
-                                )}`}
-                              >
-                                {notification.type.toUpperCase()}
-                              </span>
-
-                              <span className="text-xs text-neutral/50 font-inter">
-                                ID: #{notification.id}
-                              </span>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </Card>

@@ -78,18 +78,16 @@ const ApplyForAssistant = () => {
       <div className="flex">
         <Sidebar userRole="student" />
 
-        <main className="flex-1">
-          {/* ===== PAGE TITLE BAR ===== */}
-          <div className="bg-primary h-16 flex items-center px-8">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
+        <main className="flex-1 min-w-0">
+          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Assistant Applications
             </h1>
           </div>
 
-          <div className="p-8">
-            {/* ===== PAGE INTRO ===== */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-poppins font-semibold text-primary">
+          <div className="p-4 md:p-8">
+            <div className="mb-6 md:mb-8">
+              <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-primary">
                 Available Assistant Positions
               </h2>
 
@@ -99,14 +97,12 @@ const ApplyForAssistant = () => {
               </p>
             </div>
 
-            {/* ===== ERROR STATE ===== */}
             {error && (
               <Card>
                 <div className="py-6 text-center">
                   <p className="font-semibold text-error font-inter">
                     Something went wrong
                   </p>
-
                   <p className="mt-1 text-sm text-neutral font-inter">
                     {error}
                   </p>
@@ -114,7 +110,6 @@ const ApplyForAssistant = () => {
               </Card>
             )}
 
-            {/* ===== LOADING STATE ===== */}
             {loading && !error && (
               <Card>
                 <p className="py-8 text-center text-neutral font-inter">
@@ -123,14 +118,12 @@ const ApplyForAssistant = () => {
               </Card>
             )}
 
-            {/* ===== EMPTY STATE ===== */}
             {!loading && !error && listings.length === 0 && (
               <Card>
                 <div className="py-10 text-center">
                   <p className="font-medium text-dark font-inter">
                     No assistant positions available
                   </p>
-
                   <p className="mt-1 text-sm text-neutral font-inter">
                     There are currently no Assistant positions that you are
                     eligible to apply for.
@@ -139,19 +132,17 @@ const ApplyForAssistant = () => {
               </Card>
             )}
 
-            {/* ===== AVAILABLE POSITIONS ===== */}
             {!loading && !error && listings.length > 0 && (
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 {listings.map((listing) => (
                   <Card key={listing.ListingID}>
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
-                      {/* ===== POSITION INFORMATION ===== */}
-                      <div>
-                        <h3 className="text-2xl font-poppins font-semibold text-dark">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
+                      <div className="min-w-0">
+                        <h3 className="text-xl md:text-2xl font-poppins font-semibold text-dark break-words">
                           {listing.ModuleCode}
                         </h3>
 
-                        <p className="text-lg text-dark mt-1">
+                        <p className="text-base md:text-lg text-dark mt-1 break-words">
                           {listing.ModuleName}
                         </p>
 
@@ -160,21 +151,19 @@ const ApplyForAssistant = () => {
                         </p>
 
                         <p className="text-sm text-neutral mt-1">
-                          Application deadline:{' '}
-                          {formatDate(listing.Deadline)}
+                          Application deadline: {formatDate(listing.Deadline)}
                         </p>
                       </div>
 
-                      {/* ===== ELIGIBILITY + APPLY ===== */}
-                      <div className="flex flex-col items-start md:items-end gap-3">
-                        <span className="px-4 py-2 rounded-full text-sm font-semibold bg-primary-lightest text-primary">
+                      <div className="flex flex-row md:flex-col items-center md:items-end justify-between md:justify-start gap-3">
+                        <span className="px-4 py-2 rounded-full text-sm font-semibold bg-primary-lightest text-primary whitespace-nowrap">
                           Eligible
                         </span>
 
                         <button
                           onClick={() => handleApply(listing)}
                           disabled={applyingId === listing.ListingID}
-                          className="px-6 py-3 rounded-xl font-semibold bg-primary text-white hover:bg-primary-dark transition disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="px-6 py-3 rounded-xl font-semibold bg-primary text-white hover:bg-primary-dark transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                         >
                           {applyingId === listing.ListingID
                             ? 'Applying...'
@@ -187,8 +176,7 @@ const ApplyForAssistant = () => {
               </div>
             )}
 
-            {/* ===== BACK BUTTON ===== */}
-            <div className="mt-8">
+            <div className="mt-6 md:mt-8">
               <button
                 onClick={() => navigate('/applications')}
                 className="text-primary font-semibold hover:underline"
