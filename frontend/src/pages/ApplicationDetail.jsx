@@ -6,11 +6,218 @@ import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
 
-// ... formatDate and mapApplication stay identical ...
+// ---------------------------------------------------------
+// Format date
+// ---------------------------------------------------------
+const formatDate = (date) => {
+  if (!date) return '—';
+
+  const datePart = String(date).substring(0, 10);
+  const [year, month, day] = datePart.split('-');
+
+  if (!year || !month || !day) {
+    return String(date);
+  }
+
+  return new Date(
+    Number(year),
+    Number(month) - 1,
+    Number(day)
+  ).toLocaleDateString('en-ZA', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+};
+
+// ---------------------------------------------------------
+// Map backend application response
+// ---------------------------------------------------------
+function mapApplication(app, lecturerFromPosition = '') {
+  const firstName =
+    app.LecturerFName ??
+    app.lecturerFName ??
+    '';
+
+  const lastName =
+    app.LecturerLName ??
+    app.lecturerLName ??
+    '';
+
+  const lecturerName =
+    app.lecturer ??
+    app.lecturerName ??
+    app.LecturerName ??
+    lecturerFromPosition ??
+    (`${firstName} ${lastName}`.trim() || '');
+
+  const dateSubmitted =
+    app.date_submitted ??
+    app.dateSubmitted ??
+    app.DateSubmitted ??
+    app.submission_date ??
+    app.SubmissionDate ??
+    '';
+
+  return {
+    id:
+      app.application_id ??
+      app.ApplicationID ??
+      app.id ??
+      '',
+
+    reference:
+      app.reference ??
+      app.ApplicationReference ??
+      app.Reference ??
+      app.application_reference ??
+      '',
+
+    moduleCode:
+      app.moduleCode ??
+      app.module_code ??
+      app.ModuleCode ??
+      '—',
+
+    moduleName:
+      app.moduleName ??
+      app.module_name ??
+      app.ModuleName ??
+      '—',
+
+    lecturer: lecturerName || '—',
+
+    status:
+      app.status ??
+      app.application_status ??
+      app.ApplicationStatus ??
+      app.verificationEligibilityStatus ??
+      'Pending',
+
+    dateSubmitted: formatDate(dateSubmitted),
+  };
+}
 
 const ApplicationDetail = () => {
-  // ... all your state + useEffect stay identical ...
-  // (I'm only rewriting the JSX — nothing above the `if (loading)` block changes)
+  const navigate = useNavigate();
+  document.title = 'AACMS - Application Detail';
+  const location = useLocation();
+  const { id } = useParams();
+
+  const [application, setApplication] = useState(
+    location.state?.application
+      ? mapApplication(location.state.application)
+      : null
+  );
+
+  const [loading, setLoading] = useState(!location.state?.application);
+  const [error, setError] = useState('');
+
+  // ---------------------------------------------------------
+  // Load application and lecturer information
+  // ---------------------------------------------------------
+  useEffect(() => {
+    let cancelled = false;
+
+    const loadApplication = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        const [applicationsData, positionsData] = await Promise.all([
+          apiGet('/student/applications'),
+          apiGet('/student/positions'),
+        ]);
+
+        const applications = Array.isArray(applicationsData)
+          ? applicationsData
+          : applicationsData?.applications || [];
+
+        const positions = Array.isArray(positionsData)
+          ? positionsData
+          : positionsData?.positions || [];
+
+        const foundApplication = applications.find((app) => {
+          const applicationId =
+            app.application_id ??
+            app.ApplicationID ??
+            app.id;
+
+          return String(applicationId) === String(id);
+        });
+
+        const applicationSource =
+          foundApplication ||
+          location.state?.application;
+
+        if (!applicationSource) {
+          if (!cancelled) {
+            setApplication(null);
+            setError('Application not found.');
+          }
+
+          return;
+        }
+
+        const applicationId =
+          applicationSource.application_id ??
+          applicationSource.ApplicationID ??
+          applicationSource.id ??
+          id;
+
+        const matchingPosition = positions.find((position) => {
+          const positionApplicationId =
+            position.application_id ??
+            position.ApplicationID ??
+            position.applicationId;
+
+          return (
+            String(positionApplicationId) ===
+            String(applicationId)
+          );
+        });
+
+        const lecturerFirstName =
+          matchingPosition?.lecturer_f_name ??
+          matchingPosition?.LecturerFName ??
+          '';
+
+        const lecturerLastName =
+          matchingPosition?.lecturer_l_name ??
+          matchingPosition?.LecturerLName ??
+          '';
+
+        const lecturerFromPosition =
+          `${lecturerFirstName} ${lecturerLastName}`.trim();
+
+        const mappedApplication = mapApplication(
+          applicationSource,
+          lecturerFromPosition
+        );
+
+        if (!cancelled) {
+          setApplication(mappedApplication);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setApplication(null);
+          setError(
+            err.message || 'Could not load application.'
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadApplication();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, location.state]);
 
   // ---------------------------------------------------------
   // Loading state
@@ -60,10 +267,12 @@ const ApplicationDetail = () => {
                 <h2 className="text-xl md:text-2xl font-poppins font-semibold text-dark">
                   Application Not Found
                 </h2>
+
                 <p className="text-neutral mt-2">
                   {error ||
                     'Please return to your applications and select an application to view its details.'}
                 </p>
+
                 <button
                   onClick={() => navigate('/applications')}
                   className="mt-6 bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition w-full md:w-auto"
@@ -172,29 +381,24 @@ const ApplicationDetail = () => {
               <div className="mt-8">
                 <div className="flex items-center">
                   <div
-                    className={`w-6 h-6 rounded-full ${
-                      progress >= 1 ? 'bg-primary' : 'bg-light-grey'
-                    }`}
+                    className={`w-6 h-6 rounded-full ${progress >= 1 ? 'bg-primary' : 'bg-light-grey'
+                      }`}
                   />
                   <div
-                    className={`flex-1 h-1 ${
-                      progress >= 2 ? 'bg-primary' : 'bg-light-grey'
-                    }`}
+                    className={`flex-1 h-1 ${progress >= 2 ? 'bg-primary' : 'bg-light-grey'
+                      }`}
                   />
                   <div
-                    className={`w-6 h-6 rounded-full ${
-                      progress >= 2 ? 'bg-primary' : 'bg-light-grey'
-                    }`}
+                    className={`w-6 h-6 rounded-full ${progress >= 2 ? 'bg-primary' : 'bg-light-grey'
+                      }`}
                   />
                   <div
-                    className={`flex-1 h-1 ${
-                      progress >= 3 ? 'bg-primary' : 'bg-light-grey'
-                    }`}
+                    className={`flex-1 h-1 ${progress >= 3 ? 'bg-primary' : 'bg-light-grey'
+                      }`}
                   />
                   <div
-                    className={`w-6 h-6 rounded-full ${
-                      progress >= 3 ? 'bg-primary' : 'bg-light-grey'
-                    }`}
+                    className={`w-6 h-6 rounded-full ${progress >= 3 ? 'bg-primary' : 'bg-light-grey'
+                      }`}
                   />
                 </div>
 
