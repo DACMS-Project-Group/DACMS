@@ -24,6 +24,12 @@
 --    - Creates a new budget for EERI223 (Signal Processing)
 --    - Exports payments & opens Naledi's claim PDF voucher
 -- ============================================================================
+-- ============================================================================
+-- TO RUN ON RENDER (live database) — open the dacms-web Shell in Render dashboard:
+--
+--   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /app/backend/demo_presentation_seed.sql
+--
+-- ============================================================================
 
 BEGIN;
 
