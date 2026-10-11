@@ -552,9 +552,9 @@ class AdminRepository {
             JOIN "DEMI_POSITION" p
                 ON p."PositionID" = ws."PositionID"
             WHERE p."ApplicationID" = $1
-              AND ws."StartTime" >= $2
+              AND ($2::date IS NULL OR ws."StartTime" >= $2::date)
               AND ws."EndTime" IS NOT NULL
-              AND ws."EndTime" <= $3
+              AND ws."EndTime" < ($3::date + INTERVAL '1 day')
             ORDER BY ws."StartTime" ASC;
         `;
 
@@ -935,9 +935,9 @@ class AdminRepository {
                     ON dl."ListingID" = da."ListingID"
                 WHERE da."StudentID" = $1
                   AND dl."ModuleID" = $2
-                  AND ws."StartTime" >= $3
+                  AND ($3::date IS NULL OR ws."StartTime" >= $3::date)
                   AND ws."EndTime" IS NOT NULL
-                  AND ws."EndTime" <= $4
+                  AND ws."EndTime" < ($4::date + INTERVAL '1 day')
                 ORDER BY ws."StartTime" ASC;
             `;
 
