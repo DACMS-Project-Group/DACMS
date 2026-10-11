@@ -530,7 +530,7 @@ class LecturerRepository {
             JOIN "DEMI_POSITION" p
                 ON p."PositionID" = ws."PositionID"
             WHERE p."ApplicationID" = $1
-                AND ws."StartTime" >= $2::date
+                AND ($2::date IS NULL OR ws."StartTime" >= $2::date)
                 AND ws."EndTime" IS NOT NULL
                 AND ws."EndTime" < ($3::date + INTERVAL '1 day')
             ORDER BY ws."StartTime" ASC;

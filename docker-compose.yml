@@ -6,6 +6,8 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgrespassword
       POSTGRES_DB: app_db
+      TZ: Africa/Johannesburg
+      PGTZ: Africa/Johannesburg
     ports:
       - "5432:5432"
     volumes:
@@ -31,6 +33,7 @@ services:
       POSTGRES_PASSWORD: postgrespassword
       POSTGRES_DB: app_db
       POSTGRES_PORT: 5432
+      TZ: Africa/Johannesburg
     volumes:
       - ./backend:/app
       - /app/node_modules

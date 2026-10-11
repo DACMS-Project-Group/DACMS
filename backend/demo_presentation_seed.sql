@@ -6,13 +6,14 @@
 --    - Logs in as naledi.molefe@nwu.ac.za (Password123)
 --    - Applies live to open listing CMPG311 (Databases, Dr. Alan Smith)
 --    - Logs work session on active position CMPG323 (IT Developments)
+--          - Prompt Cole to verify the hours immediately 
+--          - Lecturer Reviews & approves Naledi's CMPG323 work session
 --    - Submits live claim for CMPG323 (demonstrating unverified sessions cannot be claimed)
 --
 -- 2. Lecturer (Cole):
 --    - Logs in as alan.smith@nwu.ac.za (Password123)
 --    - Reviews & approves NALEDI MOLEFE's live application for CMPG311
 --      (This automatically creates an appointment waiting for Neil in the next step!)
---    - Reviews & approves Naledi's CMPG323 work session
 --    - Endorses Naledi's waiting live CMPG323 claim
 --    - Views module budget summaries & list view
 --

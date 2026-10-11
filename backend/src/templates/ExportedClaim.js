@@ -6,7 +6,7 @@ class ExportedClaim {
         const moduleInfo = claimExport?.module || {};
         const sessions = Array.isArray(claimExport?.sessions) ? claimExport.sessions : [];
         const sessionsByMonth = new Map();
-        const generatedAt = this.escapeHtml(new Date().toLocaleString('en-ZA'));
+        const generatedAt = this.escapeHtml(new Date().toLocaleString('en-ZA', { timeZone: 'Africa/Johannesburg' }));
 
         for (const session of sessions) {
             const date = session.date ? new Date(session.date) : null;
