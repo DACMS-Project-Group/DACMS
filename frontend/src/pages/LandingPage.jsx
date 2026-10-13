@@ -8,6 +8,10 @@ const LandingPage = () => {
     navigate('/login');
   };
 
+  const handleRegister = () => {
+    navigate('/login?view=register');
+  };
+
   return (
     <div className="min-h-screen bg-white flex flex-col px-4 py-6 md:py-9">
       {/* Top-left logo */}
@@ -53,11 +57,17 @@ const LandingPage = () => {
               </div>
 
               <div className="mt-6 md:mt-8">
-                <button
+                <button style={{ marginRight: "20px" }}
                   onClick={handleLogin}
                   className="bg-white text-primary-dark px-10 md:px-12 py-3 md:py-4 rounded-xl font-semibold text-center hover:bg-primary-light hover:text-white transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.35)] min-w-[180px] md:min-w-[200px] cursor-pointer"
                 >
                   <span className="block text-base md:text-lg">Login</span>
+                </button>
+                <button style={{ marginLeft: "20px" }}
+                  onClick={handleRegister}
+                  className="bg-white text-primary-dark px-10 md:px-12 py-3 md:py-4 rounded-xl font-semibold text-center hover:bg-primary-light hover:text-white transition-all duration-300 shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:shadow-[0_12px_35px_rgba(0,0,0,0.35)] min-w-[180px] md:min-w-[200px] cursor-pointer"
+                >
+                  <span className="block text-base md:text-lg">Register</span>
                 </button>
               </div>
             </div>
@@ -69,7 +79,7 @@ const LandingPage = () => {
       <div className="text-neutral/60 text-xs md:text-sm font-inter text-center mt-4 md:mt-6">
         <p>© 2026 North-West University • AACMS</p>
       </div>
-    </div>
+    </div >
   );
 };
 
