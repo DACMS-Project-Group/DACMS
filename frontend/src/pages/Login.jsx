@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const ROLE_OPTIONS = [
   { value: 1, label: 'Student' },
@@ -27,8 +27,10 @@ const emptyRegister = {
 const Login = () => {
   const { login, register } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const [view, setView] = useState('login'); // 'login' | 'register'
+  const initialView = new URLSearchParams(location.search).get('view') === 'register' ? 'register' : 'login';
+  const [view, setView] = useState(initialView); // 'login' | 'register'
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

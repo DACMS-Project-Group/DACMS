@@ -61,8 +61,8 @@ const Sidebar = ({ userRole = 'student' }) => {
           'transform transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : '-translate-x-full',
 
-          // --- Desktop: in-flow column ---
-          'md:static md:z-auto md:h-auto md:translate-x-0',
+          // --- Desktop: sticky full-height column, never scrolls away ---
+          'md:sticky md:top-24 md:z-auto md:h-[calc(100vh-6rem)] md:translate-x-0',
         ].join(' ')}
       >
         <nav className="min-h-0 flex-1 overflow-y-auto p-4 pt-6">
