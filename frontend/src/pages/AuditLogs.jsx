@@ -1,22 +1,60 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
+import { CompactTable } from '../components/CompactTable';
+import { useDensity } from '../contexts/DensityContext';
 import { apiGet } from '../api';
 
-const ROLE_OPTIONS = ['All', 'admin', 'lecturer', 'student'];
-
 const ACTION_BADGE_CLASSES = {
-  ADMIN_LOGIN: 'bg-primary-lightest text-primary',
+  ADMIN_LOGIN: 'bg-primary-lightest text-primary border border-primary/20',
   ADMIN_CLAIM_APPROVAL: 'bg-success text-white',
   ADMIN_APPOINTMENT_REVIEW: 'bg-warning text-dark',
   ADMIN_CLAIM_EXPORT: 'bg-primary text-white',
 };
 
-const HEADER_CELL =
-  'px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-wide text-primary font-inter';
+const ROLE_OPTIONS = ['All', 'admin', 'lecturer', 'student'];
 
-const BODY_CELL = 'px-3 py-1.5 align-middle';
+const PRESETS = [
+  { label: 'Last 24h', days: 1 },
+  { label: 'Last 7 days', days: 7 },
+  { label: 'Last 30 days', days: 30 },
+  { label: 'Custom', days: null }
+];
+
+const escapeCsv = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
+
+const downloadFile = (blob, filename) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = filename;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+};
+
+const formatTimestamp = (value) => {
+  if (!value) {
+    return '—';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleString('en-ZA', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  });
+};
 
 const formatEvent = (event) => {
   if (!event || typeof event !== 'object') {
@@ -36,152 +74,157 @@ const formatEvent = (event) => {
   return parts.length ? parts.join(' · ') : '—';
 };
 
-const escapeCsv = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
+const relatedRecordRoute = (recordType, recordReference) => {
+  if (!recordReference) {
+    return null;
+  }
 
-const downloadFile = (blob, filename) => {
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  document.body.appendChild(link);
-  link.click();
-  link.remove();
-  URL.revokeObjectURL(url);
+  if (recordType === 'claim') {
+    return `/claims-verification?search=${encodeURIComponent(recordReference)}`;
+  }
+
+  if (recordType === 'appointment') {
+    return `/appointment-approvals?search=${encodeURIComponent(recordReference)}`;
+  }
+
+  return null;
 };
 
 const AuditLogs = () => {
-  document.title = 'AACMS - Audit Logs';
+  document.title = 'AACMS - Security Audit Logs';
+  const navigate = useNavigate();
+  const { density, toggle } = useDensity();
 
   const [logs, setLogs] = useState([]);
   const [stats, setStats] = useState({
     total_events: 0,
     unique_users: 0,
     admin_logins: 0,
+    bulk_exports: 0,
+    off_hours_activity: 0,
     last_activity: null,
-    log_files: 0,
+    log_files: 0
   });
-  const [selectedLogs, setSelectedLogs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  const [searchTerm, setSearchTerm] = useState('');
-  const [actionFilter, setActionFilter] = useState('All');
-  const [roleFilter, setRoleFilter] = useState('All');
+  // Filter state
+  const [preset, setPreset] = useState(PRESETS[1]); // Last 7 days default
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [actionFilter, setActionFilter] = useState('All');
+  const [userFilter, setUserFilter] = useState('');
+  const [recordTypeFilter, setRecordTypeFilter] = useState('All');
+  const [recordReferenceFilter, setRecordReferenceFilter] = useState('');
 
   useEffect(() => {
     let isMounted = true;
 
-    apiGet('/admin/audit-logs')
-      .then((result) => {
-        if (!Array.isArray(result?.logs)) {
+    const loadLogs = async () => {
+      try {
+        setLoading(true);
+        setError('');
+
+        // Build ISO date range from preset / manual inputs.
+        let from = dateFrom;
+        let to = dateTo;
+
+        if (preset.days !== null && !dateFrom && !dateTo) {
+          const toDate = new Date();
+          toDate.setUTCHours(23, 59, 59, 999);
+          to = toDate.toISOString().slice(0, 10);
+
+          const fromDate = new Date();
+          fromDate.setUTCDate(fromDate.getUTCDate() - (preset.days - 1));
+          fromDate.setUTCHours(0, 0, 0, 0);
+          from = fromDate.toISOString().slice(0, 10);
+        }
+
+        const params = new URLSearchParams();
+        if (from) params.set('from', from);
+        if (to) params.set('to', to);
+        if (actionFilter !== 'All') params.set('action', actionFilter);
+        if (userFilter) params.set('user', userFilter);
+        if (recordTypeFilter !== 'All') params.set('recordType', recordTypeFilter);
+        if (recordReferenceFilter) params.set('recordReference', recordReferenceFilter);
+
+        const response = await apiGet(`/admin/audit-logs?${params.toString()}`);
+
+        if (!Array.isArray(response?.logs)) {
           throw new Error('The server returned an invalid audit log response.');
         }
 
         if (isMounted) {
           setLogs(
-            result.logs.map((log, index) => ({
+            response.logs.map((log) => ({
               ...log,
-              log_key: `${log.source || 'log'}-${index}-${log.timestamp}`,
+              id: `${log.source || 'log'}::${log.timestamp}::${log.action}`
             }))
           );
           setStats(
-            result.stats || {
+            response.stats || {
               total_events: 0,
               unique_users: 0,
               admin_logins: 0,
+              bulk_exports: 0,
+              off_hours_activity: 0,
               last_activity: null,
-              log_files: 0,
+              log_files: 0
             }
           );
         }
-      })
-      .catch((requestError) => {
+      } catch (requestError) {
         console.error('Error loading audit logs:', requestError);
         if (isMounted) {
           setError(requestError.message || 'Could not load audit logs.');
         }
-      })
-      .finally(() => {
+      } finally {
         if (isMounted) {
           setLoading(false);
         }
-      });
+      }
+    };
+
+    loadLogs();
 
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [
+    preset,
+    dateFrom,
+    dateTo,
+    actionFilter,
+    userFilter,
+    recordTypeFilter,
+    recordReferenceFilter
+  ]);
 
+  // Distinct actions discovered in the data, for the filter dropdown.
   const actionOptions = useMemo(() => {
     const actions = logs.map((log) => log.action).filter(Boolean);
     return [...new Set(actions)].sort();
   }, [logs]);
 
-  const normalizedSearch = searchTerm.trim().toLowerCase();
-
-  const filteredLogs = useMemo(() => {
-    return logs.filter((log) => {
-      const matchesSearch = [
-        log.user_name,
-        log.user_email,
-        log.role,
-        log.action,
-        log.record_type,
-        log.record_reference,
-        formatEvent(log.event),
-      ].some((value) =>
-        String(value ?? '').toLowerCase().includes(normalizedSearch)
-      );
-
-      const logDate = String(log.timestamp || '').slice(0, 10);
-      const matchesAction =
-        actionFilter === 'All' || log.action === actionFilter;
-      const matchesRole =
-        roleFilter === 'All' || log.role === roleFilter;
-
-      return (
-        matchesSearch &&
-        matchesAction &&
-        matchesRole &&
-        (!dateFrom || logDate >= dateFrom) &&
-        (!dateTo || logDate <= dateTo)
-      );
-    });
-  }, [logs, normalizedSearch, actionFilter, roleFilter, dateFrom, dateTo]);
-
-  const filteredKeys = filteredLogs.map((log) => log.log_key);
-  const allVisibleSelected =
-    filteredKeys.length > 0 &&
-    filteredKeys.every((key) => selectedLogs.includes(key));
-
-  const toggleLog = (key) => {
-    setSelectedLogs((current) =>
-      current.includes(key)
-        ? current.filter((logKey) => logKey !== key)
-        : [...current, key]
-    );
-  };
-
-  const toggleAll = () => {
-    setSelectedLogs((current) => {
-      if (allVisibleSelected) {
-        return current.filter((key) => !filteredKeys.includes(key));
+  const distinctUsers = useMemo(() => {
+    const users = new Map();
+    for (const log of logs) {
+      const key = log.user_email || log.user_name || 'Unknown user';
+      if (!users.has(key)) {
+        users.set(key, { name: log.user_name, email: log.user_email });
       }
+    }
+    return Array.from(users.values());
+  }, [logs]);
 
-      return [...new Set([...current, ...filteredKeys])];
-    });
-  };
+  const offHoursLogs = logs.filter((log) => {
+    const hour = new Date(log.timestamp).getUTCHours();
+    return hour < 6 || hour >= 15;
+  });
 
-  const selectedLogData = useMemo(
-    () => logs.filter((log) => selectedLogs.includes(log.log_key)),
-    [logs, selectedLogs]
-  );
-
-  const exportCsv = () => {
-    if (!selectedLogData.length) {
-      setError('Please select at least one log entry to export.');
+  const handleExport = () => {
+    if (!logs.length) {
+      setError('No log entries to export.');
       return;
     }
 
@@ -193,48 +236,144 @@ const AuditLogs = () => {
       ['Action', (log) => log.action],
       ['Record Type', (log) => log.record_type],
       ['Record Reference', (log) => log.record_reference],
-      ['Details', (log) => formatEvent(log.event)],
-      ['Log File', (log) => log.source],
+      ['Event', (log) => JSON.stringify(log.event ?? {})],
+      ['Source', (log) => log.source]
     ];
 
     const rows = [
       columns.map(([heading]) => escapeCsv(heading)).join(','),
-      ...selectedLogData.map((log) =>
+      ...logs.map((log) =>
         columns.map(([, getValue]) => escapeCsv(getValue(log))).join(',')
-      ),
+      )
     ];
 
     setError('');
     downloadFile(
       new Blob([`\uFEFF${rows.join('\r\n')}`], {
-        type: 'text/csv;charset=utf-8',
+        type: 'text/csv;charset=utf-8'
       }),
       `audit-logs-${new Date().toISOString().slice(0, 10)}.csv`
     );
   };
 
-  const formatTimestamp = (value) => {
-    if (!value) {
-      return '—';
-    }
-
-    const date = new Date(value);
-
-    if (Number.isNaN(date.getTime())) {
-      return value;
-    }
-
-    return date.toLocaleString('en-ZA', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  const clearFilters = () => {
+    setPreset(PRESETS[1]);
+    setDateFrom('');
+    setDateTo('');
+    setActionFilter('All');
+    setUserFilter('');
+    setRecordTypeFilter('All');
+    setRecordReferenceFilter('');
   };
 
-  const actionBadgeClass = (action) =>
-    ACTION_BADGE_CLASSES[action] || 'bg-light-grey text-neutral';
+  const columns = [
+    {
+      key: 'timestamp',
+      label: 'Timestamp',
+      render: (log) => formatTimestamp(log.timestamp)
+    },
+    {
+      key: 'user',
+      label: 'User',
+      render: (log) => {
+        const label = [log.user_name, log.user_email]
+          .filter(Boolean)
+          .join(' · ') || 'Unknown user';
+        return (
+          <div className="max-w-[200px] truncate font-inter" title={label}>
+            <span className="font-semibold text-dark">
+              {log.user_name || log.user_email || 'Unknown user'}
+            </span>
+            {log.user_name && log.user_email && (
+              <span className="ml-1 text-[10px] text-neutral">
+                {log.user_email}
+              </span>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'role',
+      label: 'Role',
+      render: (log) => (
+        <span className="capitalize text-dark font-inter">{log.role}</span>
+      )
+    },
+    {
+      key: 'action',
+      label: 'Action',
+      render: (log) => (
+        <span
+          className={`inline-block whitespace-nowrap rounded px-2 py-0.5 text-[10px] font-semibold font-inter border ${ACTION_BADGE_CLASSES[log.action] || 'bg-light-grey text-neutral border-neutral/30'}`}
+        >
+          {log.action}
+        </span>
+      )
+    },
+    {
+      key: 'record',
+      label: 'Record',
+      render: (log) => {
+        const type = log.record_type;
+        const ref = log.record_reference;
+        const label = [type, ref].filter(Boolean).join(' · ') || '—';
+        const route = relatedRecordRoute(type, ref);
+
+        return (
+          <div className="max-w-[220px] truncate font-inter" title={label}>
+            {route ? (
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(route);
+                }}
+                className="flex items-center gap-1 text-primary text-[11px] font-medium underline underline-offset-2 hover:text-primary-dark"
+              >
+                {label}
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="h-3 w-3 ml-0.5"
+                >
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                  <polyline points="12 5 14 12 12 19" />
+                </svg>
+              </button>
+            ) : (
+              <span className="text-neutral">{label}</span>
+            )}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'event',
+      label: 'Details',
+      render: (log) => formatEvent(log.event)
+    }
+  ];
+
+  const rowExpansion = (log) => (
+    <div className="space-y-2">
+      <div className="flex items-baseline gap-2 mb-1">
+        <span className="text-[10px] font-semibold text-primary uppercase tracking-wider">
+          Event payload
+        </span>
+        <span className="text-[10px] text-neutral">
+          {log.source}
+        </span>
+      </div>
+      <pre className="p-2.5 text-[10px] bg-neutral/50 rounded border border-neutral/100 overflow-x-auto font-mono text-neutral max-w-full break-all whitespace-pre-wrap">
+        {JSON.stringify(log.event ?? {}, null, 2)}
+      </pre>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -245,137 +384,117 @@ const AuditLogs = () => {
 
         <main className="flex-1">
           {/* Page Header */}
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              Audit Logs
-            </h1>
+          <div className="bg-primary px-6 py-3">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h1 className="text-xl font-poppins font-semibold text-white">
+                  Security Audit Logs
+                </h1>
+                <p className="mt-0.5 text-xs text-primary-light/80 font-inter">
+                  Read-only trail of administrator actions for security review
+                  and compliance.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={toggle}
+                  className="px-3 py-1.5 rounded text-xs font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors border border-white/20"
+                >
+                  {density === 'compact' ? 'Comfortable view' : 'Compact view'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  disabled={loading || logs.length === 0}
+                  className="px-4 py-2 rounded bg-primary text-white text-xs font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-inter"
+                >
+                  Export CSV
+                </button>
+              </div>
+            </div>
           </div>
 
-          <div className="p-8">
-            {/* Page Introduction */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold text-primary font-poppins">
-                System Activity
-              </h2>
-
-              <p className="mt-2 text-neutral font-inter">
-                Review the audit trail written by the backend, including
-                administrator sign-ins, appointment decisions, claim approvals
-                and payment exports.
-              </p>
-            </div>
-
-            {/* KPI Cards */}
-            <section className="mb-8">
-              <h3 className="mb-4 text-xl font-semibold text-primary font-poppins">
-                Log Summary
-              </h3>
-
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                <Card>
-                  <p className="font-medium text-neutral font-inter">
-                    Total Events
-                  </p>
-
-                  <p className="mt-3 text-3xl font-bold text-primary font-poppins">
-                    {stats.total_events}
-                  </p>
-
-                  <p className="mt-1 text-sm text-neutral font-inter">
-                    Across {stats.log_files} log file
-                    {stats.log_files === 1 ? '' : 's'}
-                  </p>
-                </Card>
-
-                <Card>
-                  <p className="font-medium text-neutral font-inter">
-                    Unique Users
-                  </p>
-
-                  <p className="mt-3 text-3xl font-bold text-primary font-poppins">
-                    {stats.unique_users}
-                  </p>
-
-                  <p className="mt-1 text-sm text-neutral font-inter">
-                    Distinct users recorded
-                  </p>
-                </Card>
-
-                <Card>
-                  <p className="font-medium text-neutral font-inter">
-                    Admin Logins
-                  </p>
-
-                  <p className="mt-3 text-3xl font-bold text-primary font-poppins">
-                    {stats.admin_logins}
-                  </p>
-
-                  <p className="mt-1 text-sm text-neutral font-inter">
-                    Successful admin sign-ins
-                  </p>
-                </Card>
-
-                <Card>
-                  <p className="font-medium text-neutral font-inter">
-                    Last Activity
-                  </p>
-
-                  <p className="mt-3 text-xl font-bold text-primary font-poppins">
-                    {formatTimestamp(stats.last_activity)}
-                  </p>
-
-                  <p className="mt-1 text-sm text-neutral font-inter">
-                    Most recent logged event
-                  </p>
-                </Card>
+          <div className="p-4">
+            {/* Time-range presets */}
+            <section className="mb-4">
+              <div className="flex flex-wrap gap-2">
+                {PRESETS.map((p) => {
+                  const isActive = preset === p;
+                  return (
+                    <button
+                      key={p.label}
+                      onClick={() => {
+                        setPreset(p);
+                        if (!p.days) {
+                          // Custom: enable manual date inputs
+                        } else {
+                          setDateFrom('');
+                          setDateTo('');
+                        }
+                      }}
+                      className={`px-3 py-1.5 rounded-md text-xs font-medium border transition-colors ${
+                        isActive
+                          ? 'bg-primary text-white border-primary'
+                          : 'bg-white text-neutral border-neutral/30 hover:bg-primary-lightest'
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
               </div>
             </section>
 
-            {/* Filters */}
-            <section className="mb-8">
-              <h3 className="mb-4 text-xl font-semibold text-primary font-poppins">
-                Filter Logs
-              </h3>
-
-              <Card>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                  <div className="lg:col-span-2">
-                    <label
-                      htmlFor="audit-search"
-                      className="mb-2 block text-sm font-medium text-neutral font-inter"
-                    >
-                      Search
-                    </label>
-
-                    <input
-                      id="audit-search"
-                      type="text"
-                      value={searchTerm}
-                      onChange={(event) =>
-                        setSearchTerm(event.target.value)
-                      }
-                      placeholder="User, action, record or details"
-                      className="h-11 w-full rounded-xl border border-neutral px-4 font-inter focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
-                    />
+            {/* Custom date + facet filters */}
+            <section className="mb-6">
+              <Card className="p-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-6">
+                  <div className="sm:col-span-2 lg:col-span-3">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-semibold text-neutral mb-1 uppercase">
+                          From
+                        </label>
+                        <input
+                          type="date"
+                          value={dateFrom}
+                          onChange={(e) => {
+                            setDateFrom(e.target.value);
+                            setPreset(PRESETS[3]); // Custom
+                          }}
+                          className="h-9 w-full rounded border border-neutral bg-white text-xs px-2 focus:border-primary focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-semibold text-neutral mb-1 uppercase">
+                          To
+                        </label>
+                        <input
+                          type="date"
+                          value={dateTo}
+                          onChange={(e) => {
+                            setDateTo(e.target.value);
+                            setPreset(PRESETS[3]); // Custom
+                          }}
+                          className="h-9 w-full rounded border border-neutral bg-white text-xs px-2 focus:border-primary focus:outline-none"
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="audit-action-filter"
-                      className="mb-2 block text-sm font-medium text-neutral font-inter"
-                    >
+                    <label className="block text-[10px] font-semibold text-neutral mb-1 uppercase">
                       Action
                     </label>
-
                     <select
-                      id="audit-action-filter"
                       value={actionFilter}
-                      onChange={(event) =>
-                        setActionFilter(event.target.value)
-                      }
-                      className="h-11 w-full rounded-xl border border-neutral px-4 font-inter focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+                      onChange={(e) => setActionFilter(e.target.value)}
+                      className="h-9 w-full rounded border border-neutral bg-white text-xs px-2 focus:border-primary focus:outline-none"
                     >
-                      <option value="All">All Actions</option>
+                      <option value="All">All actions</option>
                       {actionOptions.map((action) => (
                         <option key={action} value={action}>
                           {action}
@@ -385,263 +504,166 @@ const AuditLogs = () => {
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="audit-role-filter"
-                      className="mb-2 block text-sm font-medium text-neutral font-inter"
-                    >
-                      Role
+                    <label className="block text-[10px] font-semibold text-neutral mb-1 uppercase">
+                      User
                     </label>
-
                     <select
-                      id="audit-role-filter"
-                      value={roleFilter}
-                      onChange={(event) =>
-                        setRoleFilter(event.target.value)
-                      }
-                      className="h-11 w-full rounded-xl border border-neutral px-4 font-inter focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+                      value={userFilter}
+                      onChange={(e) => setUserFilter(e.target.value)}
+                      className="h-9 w-full rounded border border-neutral bg-white text-xs px-2 focus:border-primary focus:outline-none"
                     >
-                      {ROLE_OPTIONS.map((role) => (
-                        <option key={role} value={role}>
-                          {role === 'All' ? 'All Roles' : role}
-                        </option>
-                      ))}
+                      <option value="">All users</option>
+                      {distinctUsers.map(({ name, email }, i) => {
+                        const label = email || name || 'Unknown user';
+                        return (
+                          <option key={`${label}-${i}`} value={label}>
+                            {label}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="audit-date-from"
-                      className="mb-2 block text-sm font-medium text-neutral font-inter"
-                    >
-                      Date From
+                    <label className="block text-[10px] font-semibold text-neutral mb-1 uppercase">
+                      Record type
                     </label>
-
-                    <input
-                      id="audit-date-from"
-                      type="date"
-                      value={dateFrom}
-                      onChange={(event) =>
-                        setDateFrom(event.target.value)
-                      }
-                      className="h-11 w-full rounded-xl border border-neutral px-4 font-inter focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
-                    />
+                    <select
+                      value={recordTypeFilter}
+                      onChange={(e) => setRecordTypeFilter(e.target.value)}
+                      className="h-9 w-full rounded border border-neutral bg-white text-xs px-2 focus:border-primary focus:outline-none"
+                    >
+                      <option value="All">All types</option>
+                      <option value="claim">Claim</option>
+                      <option value="appointment">Appointment</option>
+                      <option value="claim_export">Claim export</option>
+                      <option value="account">Account</option>
+                    </select>
                   </div>
 
                   <div>
-                    <label
-                      htmlFor="audit-date-to"
-                      className="mb-2 block text-sm font-medium text-neutral font-inter"
-                    >
-                      Date To
+                    <label className="block text-[10px] font-semibold text-neutral mb-1 uppercase">
+                      Record reference
                     </label>
-
                     <input
-                      id="audit-date-to"
-                      type="date"
-                      value={dateTo}
-                      onChange={(event) => setDateTo(event.target.value)}
-                      className="h-11 w-full rounded-xl border border-neutral px-4 font-inter focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25"
+                      type="text"
+                      value={recordReferenceFilter}
+                      onChange={(e) => setRecordReferenceFilter(e.target.value)}
+                      placeholder="Claim no. / reference"
+                      className="h-9 w-full rounded border border-neutral bg-white text-xs px-2 focus:border-primary focus:outline-none"
                     />
                   </div>
 
                   <div className="flex items-end">
                     <button
                       type="button"
-                      onClick={() => {
-                        setSearchTerm('');
-                        setActionFilter('All');
-                        setRoleFilter('All');
-                        setDateFrom('');
-                        setDateTo('');
-                      }}
-                      className="h-11 w-full rounded-xl border-2 border-primary px-4 font-semibold text-primary transition hover:bg-primary-lightest font-inter"
+                      onClick={clearFilters}
+                      className="w-full h-9 rounded border-2 border-primary text-primary text-xs font-semibold hover:bg-primary-lightest transition-colors font-inter"
                     >
-                      Clear Filters
+                      Clear
                     </button>
                   </div>
                 </div>
               </Card>
             </section>
 
-            {/* Log Table */}
-            <section className="mb-8">
-              <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div>
-                  <h3 className="text-xl font-semibold text-primary font-poppins">
-                    Log Entries
-                  </h3>
+            {/* Security summary cards */}
+            <section className="mb-6">
+              <h2 className="mb-3 text-xs font-poppins font-semibold text-primary uppercase tracking-wider">
+                Security summary
+              </h2>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                  <p className="text-[10px] font-medium text-neutral mb-1">
+                    Total events
+                  </p>
+                  <p className="text-xl font-poppins font-bold text-dark">
+                    {stats.total_events}
+                  </p>
+                  <p className="mt-1 text-[10px] text-neutral">
+                    Across {stats.log_files} log file
+                    {stats.log_files === 1 ? '' : 's'}
+                  </p>
+                </Card>
 
-                  <span className="text-sm text-neutral font-inter">
-                    {filteredLogs.length} of {logs.length} entries ·{' '}
-                    {selectedLogs.length} selected
-                  </span>
+                <Card>
+                  <p className="text-[10px] font-medium text-neutral mb-1">
+                    Admin logins
+                  </p>
+                  <p className="text-xl font-poppins font-bold text-dark">
+                    {stats.admin_logins}
+                  </p>
+                  <p className="mt-1 text-[10px] text-neutral">
+                    Successful administrator sign-ins
+                  </p>
+                </Card>
+
+                <Card>
+                  <p className="text-[10px] font-medium text-neutral mb-1">
+                    Bulk exports
+                  </p>
+                  <p className="text-xl font-poppins font-bold text-dark">
+                    {stats.bulk_exports}
+                  </p>
+                  <p className="mt-1 text-[10px] text-neutral">
+                    Claim data export events
+                  </p>
+                </Card>
+
+                <Card>
+                  <p className="text-[10px] font-medium text-neutral mb-1">
+                    Off-hours activity
+                  </p>
+                  <p className="text-xl font-poppins font-bold text-dark">
+                    {stats.off_hours_activity}
+                  </p>
+                  <p className="mt-1 text-[10px] text-neutral">
+                    Events outside 08:00–17:00 SAST
+                  </p>
+                </Card>
+              </div>
+            </section>
+
+            {/* Audit table */}
+            <section>
+              <div className="mb-3 flex items-center justify-between">
+                <div>
+                  <h2 className="text-xs font-poppins font-semibold text-primary uppercase tracking-wider">
+                    Log entries
+                  </h2>
+                  <p className="text-[10px] text-neutral">
+                    {logs.length} entr{'y' + (logs.length === 1 ? '' : 'ies')}
+                  </p>
                 </div>
 
-                <button
-                  type="button"
-                  onClick={exportCsv}
-                  disabled={loading || selectedLogs.length === 0}
-                  className="rounded-xl bg-primary px-6 py-3 font-semibold text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50 font-inter"
-                >
-                  Export CSV
-                </button>
+                {error && (
+                  <p role="alert" className="text-[10px] text-error font-inter">
+                    {error}
+                  </p>
+                )}
               </div>
 
-              <Card>
-                <div className="overflow-x-auto">
-                  {loading ? (
-                    <div className="px-6 py-10 text-center">
-                      <p className="text-neutral font-inter">
-                        Loading audit logs...
-                      </p>
-                    </div>
-                  ) : error && logs.length === 0 ? (
-                    <div className="px-6 py-10 text-center">
-                      <h3 className="text-lg font-semibold text-dark font-poppins">
-                        Unable to Load Audit Logs
-                      </h3>
+              <CompactTable
+                columns={columns}
+                rows={logs}
+                renderRowExpansion={rowExpansion}
+              />
 
-                      <p className="mt-2 text-sm text-neutral font-inter">
-                        {error}
-                      </p>
-                    </div>
-                  ) : (
-                    <table className="w-full min-w-[980px] text-xs">
-                      <thead className="bg-primary-lightest">
-                        <tr>
-                          <th className="w-10 px-3 py-2 text-left">
-                            <input
-                              type="checkbox"
-                              aria-label="Select all visible log entries"
-                              checked={allVisibleSelected}
-                              onChange={toggleAll}
-                              className="h-3.5 w-3.5 accent-primary"
-                            />
-                          </th>
-
-                          <th className={HEADER_CELL}>Timestamp</th>
-                          <th className={HEADER_CELL}>User</th>
-                          <th className={HEADER_CELL}>Role</th>
-                          <th className={HEADER_CELL}>Action</th>
-                          <th className={HEADER_CELL}>Record</th>
-                          <th className={HEADER_CELL}>Details</th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {filteredLogs.map((log) => {
-                          const userLabel =
-                            [log.user_name, log.user_email]
-                              .filter(Boolean)
-                              .join(' · ') || 'Unknown user';
-                          const recordLabel =
-                            [log.record_type, log.record_reference]
-                              .filter(Boolean)
-                              .join(' · ') || '—';
-                          const eventLabel = formatEvent(log.event);
-
-                          return (
-                            <tr
-                              key={log.log_key}
-                              className="border-t border-neutral/20 transition-colors odd:bg-white even:bg-off-white/70 hover:bg-primary-lightest/40"
-                            >
-                              <td className={BODY_CELL}>
-                                <input
-                                  type="checkbox"
-                                  aria-label={`Select log entry ${log.action} at ${log.timestamp}`}
-                                  checked={selectedLogs.includes(log.log_key)}
-                                  onChange={() => toggleLog(log.log_key)}
-                                  className="h-3.5 w-3.5 accent-primary"
-                                />
-                              </td>
-
-                              <td
-                                className={`${BODY_CELL} whitespace-nowrap tabular-nums text-neutral font-inter`}
-                              >
-                                {formatTimestamp(log.timestamp)}
-                              </td>
-
-                              <td className={BODY_CELL}>
-                                {log.user_name || log.user_email ? (
-                                  <div
-                                    className="max-w-[240px] truncate font-inter"
-                                    title={userLabel}
-                                  >
-                                    <span className="font-semibold text-dark">
-                                      {log.user_name || log.user_email}
-                                    </span>
-
-                                    {log.user_name && log.user_email && (
-                                      <span className="text-neutral">
-                                        {' · '}
-                                        {log.user_email}
-                                      </span>
-                                    )}
-                                  </div>
-                                ) : (
-                                  <span className="text-neutral font-inter">
-                                    Unknown user
-                                  </span>
-                                )}
-                              </td>
-
-                              <td
-                                className={`${BODY_CELL} capitalize text-dark font-inter`}
-                              >
-                                {log.role}
-                              </td>
-
-                              <td className={BODY_CELL}>
-                                <span
-                                  className={`inline-block whitespace-nowrap rounded px-2 py-0.5 text-[11px] font-semibold font-inter ${actionBadgeClass(log.action)}`}
-                                >
-                                  {log.action}
-                                </span>
-                              </td>
-
-                              <td className={BODY_CELL}>
-                                <div
-                                  className="max-w-[200px] truncate text-dark font-inter"
-                                  title={recordLabel}
-                                >
-                                  {recordLabel}
-                                </div>
-                              </td>
-
-                              <td className={BODY_CELL}>
-                                <div
-                                  className="max-w-[340px] truncate text-neutral font-inter"
-                                  title={eventLabel}
-                                >
-                                  {eventLabel}
-                                </div>
-                              </td>
-                            </tr>
-                          );
-                        })}
-
-                        {filteredLogs.length === 0 && (
-                          <tr>
-                            <td
-                              colSpan="7"
-                              className="px-3 py-6 text-center text-xs text-neutral font-inter"
-                            >
-                              {logs.length === 0
-                                ? 'No audit log entries have been recorded yet.'
-                                : 'No log entries match your filters.'}
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  )}
+              {loading && (
+                <div className="mt-4 px-4 py-6 text-center text-[10px] text-neutral font-inter">
+                  Loading audit log entries…
                 </div>
-              </Card>
+              )}
 
-              {error && logs.length > 0 && (
-                <p role="alert" className="mt-4 text-sm text-error font-inter">
-                  {error}
-                </p>
+              {!loading && logs.length === 0 && (
+                <div className="mt-4 px-4 py-10 text-center">
+                  <h3 className="text-sm font-semibold text-dark font-poppins">
+                    No matching entries
+                  </h3>
+                  <p className="mt-1 text-[10px] text-neutral font-inter">
+                    Try adjusting the time range or filters.
+                  </p>
+                </div>
               )}
             </section>
           </div>

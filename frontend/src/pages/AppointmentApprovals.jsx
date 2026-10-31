@@ -1,6 +1,6 @@
 
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
@@ -9,6 +9,7 @@ import { apiGet } from '../api';
 
 const AppointmentApprovals = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   document.title = 'AACMS - Appointment Approvals';
   const [pendingAppointments, setPendingAppointments] = useState([]);
   const [historyAppointments, setHistoryAppointments] = useState([]);
@@ -22,6 +23,20 @@ const AppointmentApprovals = () => {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
+
+  const filteredPendingAppointments = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    if (!term) return pendingAppointments;
+
+    return pendingAppointments.filter((appointment) => [
+      appointment.reference,
+      appointment.student,
+      appointment.student_number,
+      appointment.module_code,
+      appointment.lecturer
+    ].some((value) => String(value ?? '').toLowerCase().includes(term)));
+  }, [pendingAppointments, searchTerm]);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -168,13 +183,23 @@ const AppointmentApprovals = () => {
             {/* Pending Appointments */}
             <section className="mb-8">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-2xl font-poppins font-semibold text-primary">
-                  Pending Appointment Approvals
-                </h3>
-
-                <span className="text-sm font-inter text-neutral">
-                  {pendingAppointments.length} pending
-                </span>
+                <div>
+                  <h3 className="text-xl font-poppins font-semibold text-primary">
+                    Pending Appointment Approvals
+                  </h3>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Search reference, student, module…"
+                    className="h-10 w-64 rounded border border-neutral px-3 text-sm focus:border-primary focus:outline-none"
+                  />
+                  <span className="text-sm font-inter text-neutral">
+                    {filteredPendingAppointments.length} pending
+                  </span>
+                </div>
               </div>
 
               <Card>
@@ -195,7 +220,7 @@ const AppointmentApprovals = () => {
                         {error}
                       </p>
                     </div>
-                  ) : pendingAppointments.length === 0 ? (
+                  ) : filteredPendingAppointments.length === 0 ? (
                     <div className="px-6 py-10 text-center">
                       <h3 className="text-lg font-semibold text-dark font-poppins">
                         No Pending Appointments
@@ -240,7 +265,7 @@ const AppointmentApprovals = () => {
                       </thead>
 
                       <tbody>
-                        {pendingAppointments.map((appointment) => (
+                        {filteredPendingAppointments.map((appointment) => (
                           <tr
                             key={appointment.position_id}
                             className="border-t border-neutral/30 transition hover:bg-primary-lightest/30"

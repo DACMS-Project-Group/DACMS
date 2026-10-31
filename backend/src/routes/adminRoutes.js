@@ -3,6 +3,7 @@ import AdminController from '../controllers/AdminController.js';
 import ModuleController from '../controllers/ModuleController.js';
 import {authenticate, authorize} from '../middlewares/authMiddleware.js'
 import LecturerController from '../controllers/LecturerController.js';
+import AuditLogController from '../controllers/AuditLogController.js';
 
 const router = express.Router();
 
@@ -93,6 +94,12 @@ router.get('/modules/:moduleId/lecturers',
     authenticate,
     authorize([3]),
     LecturerController.getLecturersByModule
+)
+
+router.get('/audit-logs',
+    authenticate,
+    authorize([3]),
+    AuditLogController.getAuditLogs
 )
 
 export default router;

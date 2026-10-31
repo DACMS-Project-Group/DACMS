@@ -5,7 +5,6 @@ import { useNavigate, useLocation } from 'react-router-dom';
 const ROLE_OPTIONS = [
   { value: 1, label: 'Student' },
   { value: 2, label: 'Lecturer' },
-  { value: 3, label: 'Administrator' },
 ];
 
 const emptyRegister = {

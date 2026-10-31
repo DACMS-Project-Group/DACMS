@@ -6,20 +6,18 @@ import { logDirectory } from '../utils/auditLogger.js';
 const MAX_LOG_FILES = 20;
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
-function toNullableString(value) {
-    return value === null || value === undefined ? null : String(value);
-}
-
 function sanitizeText(value) {
-    const text = toNullableString(value);
-
-    if (text === null) {
+    if (value === null || value === undefined) {
         return null;
     }
 
-    const trimmed = text.trim();
+    const trimmed = String(value).trim();
 
-    return !trimmed || /\bundefined\b/i.test(trimmed) ? null : trimmed;
+    if (!trimmed || /\bundefined\b/i.test(trimmed)) {
+        return null;
+    }
+
+    return trimmed;
 }
 
 function parseLogLine(line, source) {
@@ -44,16 +42,14 @@ function parseLogLine(line, source) {
             user_email: sanitizeText(entry.user_email),
             role: entry.role || 'unknown',
             action: entry.action || 'UNKNOWN_ACTION',
-            record_type: toNullableString(entry.record_type),
-            record_reference: toNullableString(entry.record_reference),
+            record_type: sanitizeText(entry.record_type),
+            record_reference: sanitizeText(entry.record_reference),
             event:
                 entry.event && typeof entry.event === 'object'
                     ? entry.event
                     : {},
             source,
-            // Older log lines stored numeric identifiers. They are resolved to
-            // names below and never returned by the API.
-            legacy_user_id: toNullableString(entry.user_id)
+            legacy_user_id: sanitizeText(entry.user_id)
         };
     } catch {
         // Ignore malformed lines so one bad entry cannot break the log view.
@@ -166,8 +162,8 @@ class AuditLogService {
                     return [
                         row.UserID,
                         {
-                            name: name || null,
-                            email: row.Email || null
+                            name: sanitizeText(name),
+                            email: sanitizeText(row.Email)
                         }
                     ];
                 })
@@ -178,9 +174,11 @@ class AuditLogService {
         }
     }
 
-    static buildStats(entries) {
+    static buildStats(entries, fileCount) {
         const users = new Set();
         let adminLogins = 0;
+        let exports = 0;
+        let offHours = 0;
 
         for (const entry of entries) {
             const identity = entry.user_email || entry.user_name;
@@ -192,21 +190,44 @@ class AuditLogService {
             if (entry.action === 'ADMIN_LOGIN') {
                 adminLogins += 1;
             }
+
+            if (entry.action === 'ADMIN_CLAIM_EXPORT') {
+                exports += 1;
+            }
+
+            // Flag activity outside 08:00–17:00 SAST as potential off-hours review.
+            const hour = new Date(entry.timestamp).getUTCHours();
+            // SAST is UTC+2, so 08:00 SAST = 06:00 UTC, 17:00 SAST = 15:00 UTC.
+            if (hour < 6 || hour >= 15) {
+                offHours += 1;
+            }
         }
 
         return {
             total_events: entries.length,
             unique_users: users.size,
             admin_logins: adminLogins,
-            last_activity: entries.length ? entries[0].timestamp : null
+            bulk_exports: exports,
+            off_hours_activity: offHours,
+            last_activity: entries.length ? entries[0].timestamp : null,
+            log_files: fileCount
         };
     }
 
-    static async getAuditLogs() {
+    static async getAuditLogs(filters = {}) {
+        const {
+            from,
+            to,
+            action,
+            user,
+            recordType,
+            recordReference
+        } = filters;
+
         const { entries, fileCount } = await this.readAllEntries();
         const legacyIdentities = await this.resolveLegacyIdentities(entries);
 
-        const logs = entries.map((entry) => {
+        let logs = entries.map((entry) => {
             const legacy = legacyIdentities.get(
                 Number(entry.legacy_user_id)
             );
@@ -224,11 +245,51 @@ class AuditLogService {
             };
         });
 
+        // --- Time range filter ---
+        if (from) {
+            const fromMs = new Date(from).setUTCHours(0, 0, 0, 0);
+            logs = logs.filter((log) => Date.parse(log.timestamp) >= fromMs);
+        }
+
+        if (to) {
+            const toMs = new Date(to).setUTCHours(23, 59, 59, 999);
+            logs = logs.filter((log) => Date.parse(log.timestamp) <= toMs);
+        }
+
+        // --- Facet filters ---
+        if (action) {
+            logs = logs.filter((log) => log.action === action);
+        }
+
+        if (user) {
+            const u = user.toLowerCase();
+            logs = logs.filter(
+                (log) =>
+                    (log.user_name || '').toLowerCase().includes(u) ||
+                    (log.user_email || '').toLowerCase().includes(u)
+            );
+        }
+
+        if (recordType) {
+            logs = logs.filter((log) => log.record_type === recordType);
+        }
+
+        if (recordReference) {
+            const r = recordReference.toLowerCase();
+            logs = logs.filter(
+                (log) => (log.record_reference || '').toLowerCase().includes(r)
+            );
+        }
+
+        // Default sort: newest first.
+        logs.sort(
+            (first, second) =>
+                (Date.parse(second.timestamp) || 0) -
+                (Date.parse(first.timestamp) || 0)
+        );
+
         return {
-            stats: {
-                ...this.buildStats(logs),
-                log_files: fileCount
-            },
+            stats: this.buildStats(logs, fileCount),
             logs
         };
     }

@@ -84,11 +84,42 @@ const Sidebar = ({ userRole = 'student' }) => {
           ))}
         </nav>
 
-        <div className="p-4">
+        <div className="flex items-center gap-2 p-4">
+          {role === 'admin' && (
+            <NavLink
+              to="/audit-logs"
+              onClick={close}
+              aria-label="View audit logs"
+              title="Audit Logs"
+              className={({ isActive }) =>
+                `flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 ${
+                  isActive ? 'bg-primary-light' : 'hover:bg-primary-light'
+                }`
+              }
+            >
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.8"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-6 w-6"
+              >
+                <path d="M8 3h8l4 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h3Z" />
+                <path d="M16 3v4h4" />
+                <path d="M8 11h8" />
+                <path d="M8 15h8" />
+                <path d="M8 19h5" />
+              </svg>
+            </NavLink>
+          )}
+
           <button
             type="button"
             onClick={logout}
-            className="block w-full text-left px-4 py-3 rounded-xl hover:bg-primary-light transition-colors duration-200"
+            className="block flex-1 rounded-xl px-4 py-3 text-left transition-colors duration-200 hover:bg-primary-light"
           >
             Logout
           </button>

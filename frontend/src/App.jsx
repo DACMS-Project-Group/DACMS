@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { SidebarProvider } from './contexts/SidebarContext';
+import { DensityProvider } from './contexts/DensityContext';
 
 // ===== PUBLIC PAGES =====
 import LandingPage from './pages/LandingPage';
@@ -40,6 +41,7 @@ import ClaimReview from './pages/ClaimReview';
 import AppointmentApprovals from './pages/AppointmentApprovals';
 import AppointmentReview from './pages/AppointmentReview';
 import ReviewClaims from './pages/ReviewClaims';
+import AuditLogs from './pages/AuditLogs';
 
 // ===== NOTIFICATION BADGE =====
 import { NotificationProvider } from './contexts/notificationContext';
@@ -53,7 +55,8 @@ import './index.css';
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
+      <DensityProvider>
+        <AuthProvider>
         <NotificationProvider>
           <SidebarProvider>
           <Routes>
@@ -61,6 +64,8 @@ function App() {
             {/* ===== PUBLIC ROUTES ===== */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<Login />} />
+            {/* 2FA happens before a session exists, so it cannot sit behind ProtectedRoute */}
+            <Route path="/2fa" element={<TwoFactorAuth />} />
 
             {/* ===== STUDENT ROUTES ===== */}
             <Route element={<ProtectedRoute requiredRoles={['student']} />}>
@@ -101,7 +106,6 @@ function App() {
 
             {/* ===== ADMIN ROUTES ===== */}
             <Route element={<ProtectedRoute requiredRoles={['admin']} />}>
-              <Route path="/2fa" element={<TwoFactorAuth />} />
               <Route path="/admin-dashboard" element={<AdminDashboard />} />
               <Route path="/budget-management" element={<BudgetManagement />} />
               <Route path="/create-budget" element={<CreateBudget />} />
@@ -125,6 +129,7 @@ function App() {
                 element={<AppointmentReview />}
               />
               <Route path="/notifications" element={<Notifications />} />
+              <Route path="/audit-logs" element={<AuditLogs />} />
             </Route>
 
             {/* ===== FALLBACK ===== */}
@@ -134,6 +139,7 @@ function App() {
           </SidebarProvider>
         </NotificationProvider>
       </AuthProvider>
+      </DensityProvider>
     </BrowserRouter>
   );
 }

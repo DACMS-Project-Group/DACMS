@@ -279,6 +279,8 @@ class UserController {
                     SELECT 
                         u."UserID",
                         u."Title",
+                        u."FName",
+                        u."LName",
                         u."Email",
                         u."PasswordHash",
                         u."RoleID"
@@ -311,10 +313,14 @@ class UserController {
             if (user.role_id === 3) {
                 await writeAuditLog({
                     userId: user.user_id,
+                    user: {
+                        name: user.fullName,
+                        email: user.email
+                    },
                     role: 'admin',
                     action: 'ADMIN_LOGIN',
-                    recordType: 'user',
-                    recordId: user.user_id,
+                    recordType: 'account',
+                    recordReference: user.email,
                     event: {
                         success: true
                     }

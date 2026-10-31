@@ -17,11 +17,11 @@ export default defineConfig({
 
     proxy: {
       '/api': {
-        target: 'http://backend:5000',
+        target: process.env.VITE_API_TARGET || 'http://backend:5000',
         changeOrigin: true,
       },
       '/socket.io': {
-        target: 'http://backend:5000',
+        target: process.env.VITE_API_TARGET || 'http://backend:5000',
         changeOrigin: true,
         ws: true,
       },

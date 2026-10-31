@@ -1,6 +1,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
@@ -9,8 +9,9 @@ import { apiGet } from '../api';
 const ClaimsVerification = () => {
   document.title = 'AACMS - Claims Verification';
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('search') || '');
   const [statusFilter, setStatusFilter] = useState('All');
 
   const [claims, setClaims] = useState([]);

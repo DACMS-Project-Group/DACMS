@@ -133,7 +133,7 @@ class AdminController {
                     role: 'admin',
                     action: 'ADMIN_CLAIM_APPROVAL',
                     recordType: 'claim',
-                    recordId: claim_id,
+                    recordReference: claim.ClaimReferenceNumber,
                     event: {
                         result: 'approved'
                     }
@@ -212,7 +212,7 @@ class AdminController {
                     role: 'admin',
                     action: 'ADMIN_APPOINTMENT_REVIEW',
                     recordType: 'appointment',
-                    recordId: position_id,
+                    recordReference: details.applicationReference,
                     event: {
                         decision: action
                     }
@@ -269,14 +269,18 @@ class AdminController {
 
             const zipBuffer = zip.toBuffer();
 
+            const claimReferences = exportData.data
+                .map((item) => item.claim?.reference_number)
+                .filter(Boolean);
+
             await writeAuditLog({
                 userId: adminId,
                 role: 'admin',
                 action: 'ADMIN_CLAIM_EXPORT',
                 recordType: 'claim_export',
-                recordId: null,
+                recordReference: claimReferences.join(', ') || null,
                 event: {
-                    claim_ids: claims,
+                    claim_references: claimReferences,
                     record_count: exportData.data.length
                 }
             });

@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DACMS / AACMS — UI &amp; UX Audit</title>
+<style>
+  :root{
+    --purple:#6C3D91;
+    --purple-dark:#4A2565;
+    --purple-light:#8B5FA8;
+    --purple-tint:#F4EFF9;
+    --ink:#1F2430;
+    --muted:#5B6670;
+    --line:#E3E0E8;
+    --bg:#F6F5F8;
+    --red:#B42318;
+    --red-bg:#FEF3F2;
+    --amber:#8A5A00;
+    --amber-bg:#FFF8E6;
+    --green:#176B3A;
+    --green-bg:#EAF7EF;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:"Segoe UI",-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;
+    font-size:15px;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{
+    max-width:900px;
+    margin:28px auto 64px;
+    background:#fff;
+    padding:56px 64px 72px;
+    box-shadow:0 2px 4px rgba(24,21,18,.04),0 18px 50px rgba(74,37,101,.10);
+    border-radius:6px;
+  }
+  /* ---------- cover ---------- */
+  .cover{
+    background:linear-gradient(135deg,var(--purple-dark) 0%,var(--purple) 62%,var(--purple-light) 100%);
+    color:#fff;
+    margin:-56px -64px 40px;
+    padding:52px 64px 44px;
+    border-radius:6px 6px 0 0;
+  }
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:.18em;
+    font-size:11px;
+    font-weight:700;
+    opacity:.82;
+    margin:0 0 18px;
+  }
+  .cover h1{
+    font-size:38px;
+    line-height:1.12;
+    margin:0 0 10px;
+    font-weight:750;
+    letter-spacing:-.02em;
+  }
+  .cover .sub{
+    font-size:17px;
+    line-height:1.45;
+    max-width:640px;
+    margin:0 0 26px;
+    color:rgba(255,255,255,.9);
+  }
+  .meta{
+    display:table;
+    width:100%;
+    border-top:1px solid rgba(255,255,255,.22);
+    padding-top:18px;
+  }
+  .meta div{display:table-cell;padding-right:26px;vertical-align:top}
+  .meta dt{
+    font-size:10.5px;text-transform:uppercase;letter-spacing:.12em;
+    opacity:.7;margin:0 0 4px;font-weight:700;
+  }
+  .meta dd{margin:0;font-size:13.5px;line-height:1.4}
+  /* ---------- typography ---------- */
+  h2{
+    font-size:23px;
+    line-height:1.25;
+    color:var(--purple-dark);
+    margin:46px 0 6px;
+    padding-bottom:8px;
+    border-bottom:2px solid var(--purple-tint);
+    letter-spacing:-.01em;
+  }
+  h2 .num{
+    display:inline-block;
+    min-width:34px;
+    color:var(--purple-light);
+    font-variant-numeric:tabular-nums;
+  }
+  h3{
+    font-size:16.5px;
+    color:var(--ink);
+    margin:28px 0 6px;
+    letter-spacing:-.005em;
+  }
+  h4{
+    font-size:14px;
+    margin:20px 0 4px;
+    color:var(--purple-dark);
+  }
+  p{margin:0 0 12px}
+  ul,ol{margin:0 0 14px;padding-left:22px}
+  li{margin:0 0 6px}
+  strong{font-weight:650}
+  a{color:var(--purple);text-decoration:none;border-bottom:1px solid rgba(108,61,145,.28)}
+  a:hover{border-bottom-color:var(--purple)}
+  code{
+    font-family:"Cascadia Mono",Consolas,"SF Mono",Menlo,monospace;
+    font-size:12.5px;
+    background:#F4F2F6;
+    border:1px solid #E7E3EC;
+    border-radius:4px;
+    padding:1px 5px;
+    color:#4A2565;
+    white-space:nowrap;
+  }
+  pre{
+    font-family:"Cascadia Mono",Consolas,monospace;
+    font-size:12px;
+    line-height:1.55;
+    background:#F7F5FA;
+    border:1px solid var(--line);
+    border-left:3px solid var(--purple-light);
+    border-radius:4px;
+    padding:14px 16px;
+    overflow-x:auto;
+    margin:0 0 14px;
+    color:#33224A;
+  }
+  pre code{background:none;border:0;padding:0;white-space:pre}
+  /* ---------- callouts ---------- */
+  .verdict{
+    border:1px solid #D8CBE7;
+    background:var(--purple-tint);
+    border-left:4px solid var(--purple);
+    border-radius:4px;
+    padding:18px 20px;
+    margin:0 0 26px;
+  }
+  .verdict p{margin:0;font-size:15.5px;line-height:1.55}
+  .note{
+    background:#FAFAFB;
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:13px 16px;
+    margin:0 0 18px;
+    font-size:13.5px;
+    color:var(--muted);
+  }
+  .note strong{color:var(--ink)}
+  .warn{
+    background:var(--red-bg);
+    border:1px solid #F3C9C4;
+    border-left:4px solid var(--red);
+    border-radius:4px;
+    padding:14px 18px;
+    margin:0 0 18px;
+    font-size:13.5px;
+  }
+  /* ---------- tags ---------- */
+  .tag{
+    display:inline-block;
+    font-size:10.5px;
+    font-weight:700;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    padding:2px 7px;
+    border-radius:3px;
+    vertical-align:1px;
+    white-space:nowrap;
+  }
+  .p0{background:var(--red-bg);color:var(--red);border:1px solid #F3C9C4}
+  .p1{background:var(--amber-bg);color:var(--amber);border:1px solid #F0DFB0}
+  .p2{background:var(--green-bg);color:var(--green);border:1px solid #BFE3CD}
+  .b{background:#E7F6EC;color:#176B3A;border:1px solid #BFE3CD}
+  .r{background:#FDECEA;color:#B42318;border:1px solid #F3C9C4}
+  .n{background:#F1EFF4;color:#5B6670;border:1px solid #DDD8E4}
+  /* ---------- tables ---------- */
+  table{
+    width:100%;
+    border-collapse:collapse;
+    margin:0 0 22px;
+    font-size:13px;
+    line-height:1.45;
+  }
+  caption{
+    caption-side:top;
+    text-align:left;
+    font-size:12px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    color:var(--muted);
+    padding:0 0 8px;
+  }
+  thead th{
+    background:var(--purple-tint);
+    color:var(--purple-dark);
+    text-align:left;
+    font-weight:700;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    padding:9px 11px;
+    border-bottom:1.5px solid #D8CBE7;
+    vertical-align:bottom;
+  }
+  tbody td{
+    padding:9px 11px;
+    border-bottom:1px solid var(--line);
+    vertical-align:top;
+  }
+  tbody tr:nth-child(even){background:#FBFAFC}
+  tbody tr:last-child td{border-bottom:1.5px solid #D8CBE7}
+  td.num,th.num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .sprint td:nth-child(2){white-space:nowrap}
+  td.c,th.c{text-align:center}
+  /* ---------- score bars ---------- */
+  .score{display:flex;align-items:center;gap:10px;min-width:150px}
+  .bar{flex:1;height:6px;border-radius:3px;background:#EDE9F2;overflow:hidden}
+  .bar span{display:block;height:100%;border-radius:3px;background:var(--purple-light)}
+  .score b{font-variant-numeric:tabular-nums;font-size:13px;width:32px;text-align:right}
+  /* ---------- toc ---------- */
+  .toc{
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:18px 22px;
+    margin:0 0 8px;
+    background:#FCFBFD;
+  }
+  .toc h2{
+    border:0;margin:0 0 10px;padding:0;font-size:12px;
+    text-transform:uppercase;letter-spacing:.12em;color:var(--muted);
+  }
+  .toc ol{margin:0;padding-left:20px;columns:2;column-gap:36px;font-size:13.5px}
+  .toc li{margin:0 0 5px;break-inside:avoid}
+  /* ---------- misc ---------- */
+  .lede{font-size:16px;color:var(--muted);margin:0 0 22px}
+  .kpi-row{display:flex;gap:10px;margin:0 0 24px}
+  .kpi{flex:1 1 0;min-width:0;background:#FCFBFD;border:1px solid var(--line);border-radius:4px;padding:12px 14px;vertical-align:top}
+  .kpi b{display:block;font-size:22px;color:var(--purple-dark);line-height:1.1;margin-bottom:2px;font-variant-numeric:tabular-nums}
+  .kpi span{font-size:11.5px;color:var(--muted);line-height:1.35;display:block}
+  .footer{
+    margin-top:48px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:11.5px;color:var(--muted);
+  }
+  .pagebreak{break-before:page}
+  /* ---------- print ---------- */
+  @page{size:A4;margin:16mm 15mm 18mm}
+  @media print{
+    body{background:#fff;font-size:10.5pt;line-height:1.45}
+    .page{max-width:none;margin:0;padding:0;box-shadow:none;border-radius:0}
+    .cover{margin:0 0 22px;padding:30px 32px 24px;border-radius:0;print-color-adjust:exact;-webkit-print-color-adjust:exact}
+    .cover h1{font-size:28pt}
+    .cover .sub{font-size:12pt}
+    h2{font-size:15pt;margin-top:22pt;break-after:avoid}
+    #summary{break-before:page}
+    #primitives{break-before:page}
+    pre{break-inside:avoid;white-space:pre-wrap;overflow:visible}
+    pre code{white-space:pre-wrap}
+    .meta div{padding-right:18px}
+    .meta dd{font-size:12.5px}
+    h3{font-size:11.5pt;margin-top:14pt;break-after:avoid}
+    h4{break-after:avoid}
+    p,li{orphans:3;widows:3}
+    table{font-size:9pt;break-inside:auto}
+    thead{display:table-header-group}
+    thead th{padding:7px 10px}
+    tbody td{padding:6.5px 10px}
+    tr{break-inside:avoid}
+    .sprint{break-inside:avoid}
+    .toc ol{columns:2}
+    .toc,.verdict,.note,.kpi{break-inside:avoid}
+    pre{padding:10px 14px}
+    h4{margin-top:14px}
+    a{color:var(--ink);border:0}
+    code,pre{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+    .tag,.bar span,.cover,.verdict,.note,.warn,thead th,.kpi{print-color-adjust:exact;-webkit-print-color-adjust:exact}
+  }
+  @media screen and (max-width:760px){
+    .page{margin:0;padding:28px 20px 44px;border-radius:0}
+    .cover{margin:-28px -20px 28px;padding:34px 20px 28px;border-radius:0}
+    .cover h1{font-size:29px}
+    .meta div{display:block;padding:0 0 12px}
+    .toc ol{columns:1}
+    .kpi-row{display:block;margin:0 0 8px}
+    .kpi{margin:0 0 8px}
+  }
+</style>
+</head>
+<body>
+<main class="page">
+
+  <!-- ================= COVER ================= -->
+  <header class="cover">
+    <p class="eyebrow">Interface audit &middot; NWU &middot; 2026</p>
+    <h1>DACMS / AACMS</h1>
+    <p class="sub">Design consistency, duplicate interactions, dashboard value and information architecture across the Assistant Applications &amp; Claims Management System.</p>
+    <dl class="meta">
+      <div><dt>Prepared</dt><dd>30 October 2026</dd></div>
+      <div><dt>Scope</dt><dd>33 pages &middot; 3 roles</dd></div>
+      <div><dt>Method</dt><dd>Source review + live walkthrough</dd></div>
+      <div><dt>Changes</dt><dd>Read-only &middot; no code edited</dd></div>
+    </dl>
+  </header>
+
+  <div class="verdict">
+    <p><strong>Verdict:</strong> a broad, working prototype wearing product clothing. The domain coverage is real and the NWU palette is pleasant, but the interface behaves like 33 pages built by different people on different days. There is a design system in <code>index.css</code> that almost nothing follows, three status languages, 17 hand-built tables, and a dozen controls that lead to the same place. A user who knows Moodle, Workday, Jira or Stripe will not be lost because the domain is hard &mdash; they will be lost because the app breaks the conventions they rely on.</p>
+  </div>
+
+  <p class="lede">This document is ordered by leverage: what is inconsistent, what is duplicated, what the dashboards are actually worth, and how to restructure the system so that prior experience transfers.</p>
+
+  <div class="kpi-row">
+    <div class="kpi"><b>348</b><span>raw <code>gray-*</code> usages bypassing the theme</span></div>
+    <div class="kpi"><b>17</b><span>independent table implementations</span></div>
+    <div class="kpi"><b>13</b><span>duplicate interaction pairs with the same result</span></div>
+    <div class="kpi"><b>3</b><span>mutually incompatible status colour systems</span></div>
+  </div>
+
+  <nav class="toc" aria-label="Contents">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#summary">Executive summary</a></li>
+      <li><a href="#consistency">Design consistency</a></li>
+      <li><a href="#duplicates">Duplicate interactions</a></li>
+      <li><a href="#dashboards">Dashboard value</a></li>
+      <li><a href="#ia">Information architecture</a></li>
+      <li><a href="#plan">Action plan</a></li>
+      <li><a href="#evidence">Evidence index</a></li>
+      <li><a href="#primitives">Proposed primitives</a></li>
+    </ol>
+  </nav>
+
+  <!-- ================= 1. SUMMARY ================= -->
+  <h2 id="summary"><span class="num">1</span>Executive summary</h2>
+
+  <table>
+    <caption>Scorecard</caption>
+    <thead>
+      <tr><th style="width:22%">Dimension</th><th class="c" style="width:16%">Score</th><th>Justification</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Visual consistency</strong></td><td class="c"><div class="score"><div class="bar"><span style="width:30%"></span></div><b>3</b></div></td><td>Tokens declared, then bypassed 348 times; three page-header styles; three heading scales for one level.</td></tr>
+      <tr><td><strong>Component reuse</strong></td><td class="c"><div class="score"><div class="bar"><span style="width:40%"></span></div><b>4</b></div></td><td><code>Card</code> is used 178 times, but there are 17 native tables and three badge systems.</td></tr>
+      <tr><td><strong>Information architecture</strong></td><td class="c"><div class="score"><div class="bar"><span style="width:50%"></span></div><b>5</b></div></td><td>Sensible sections, undermined by hidden destinations, duplicate routes and unreachable pages.</td></tr>
+      <tr><td><strong>Dashboard value</strong></td><td class="c"><div class="score"><div class="bar"><span style="width:40%"></span></div><b>4</b></div></td><td>Mostly counts without denominators, no trends, actions below the fold or duplicated.</td></tr>
+      <tr><td><strong>Interaction integrity</strong></td><td class="c"><div class="score"><div class="bar"><span style="width:30%"></span></div><b>3</b></div></td><td>Several primary actions do nothing, or navigate somewhere other than their label promises.</td></tr>
+      <tr><td><strong>Accessibility</strong></td><td class="c"><div class="score"><div class="bar"><span style="width:40%"></span></div><b>4</b></div></td><td>White-on-yellow at 1.63:1, muted body text at 3.83:1, clipped form values.</td></tr>
+      <tr><td><strong>Familiarity</strong></td><td class="c"><div class="score"><div class="bar"><span style="width:40%"></span></div><b>4</b></div></td><td>No user menu, breadcrumbs, sortable or paginated tables, toasts, or global search.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Five findings that matter most</h3>
+  <ol>
+    <li><strong>The design system is advisory, not enforced.</strong> Every page re-decides typography, spacing, table styling and colour. Consistency is maintained by memory, and memory has failed.</li>
+    <li><strong>Status is not a shared language.</strong> The same claim is <em>Pending</em> in one place and <em>grey</em> in another, <em>Verified</em> on one screen and <em>Approved</em> on the next, and <em>yellow</em> on a third. One claim, four truths.</li>
+    <li><strong>Duplicate entry points hide the real flow.</strong> “Submit Claim”, “Generate New Claim” and “Generate Claim” all lead to a list, not to the wizard; two admin buttons lead to the same screen; two export buttons on one page do the same thing.</li>
+    <li><strong>Dashboards report, they do not direct.</strong> They answer “what exists” rather than “what needs me now”. Metrics have no period, denominator or delta; the work queue is either absent or below the fold.</li>
+    <li><strong>One review screen is unreachable.</strong> <code>ApplicationReview.jsx</code> (414 lines) is routed at <code>/application-review/:id</code> but nothing links to it; the live review lives inline in <code>ReviewApplications</code>.</li>
+  </ol>
+
+  <div class="note">
+    <strong>How this was assessed.</strong> All 33 pages in <code>frontend/src/pages</code> were read, then exercised live against the Docker stack as a student (Naledi), lecturer (Alan) and administrator (Eric). Findings below cite files and line numbers where the cause is unambiguous. Contrast ratios were computed from the theme tokens in <code>index.css</code>.
+  </div>
+
+  <!-- ================= 2. CONSISTENCY ================= -->
+  <h2 id="consistency" class="pagebreak"><span class="num">2</span>Design consistency</h2>
+
+  <h3>2.1 A design system exists on paper only</h3>
+  <p><code>frontend/src/index.css</code> defines <code>primary</code>, <code>neutral</code>, <code>success</code>, <code>warning</code>, <code>error</code>, <code>light-grey</code>, <code>off-white</code>, radii and font families. Page code then ignores it:</p>
+  <ul>
+    <li><strong>348 uses of raw <code>gray-*</code></strong> &mdash; 195 of them <code>text-gray-*</code> &mdash; against the theme’s <code>neutral</code>. <code>CreateBudget.jsx</code> hardcodes the palette six times: <code>bg-[#F8F9FA]</code>, <code>bg-[#6C3D91]</code>, <code>hover:bg-[#5A3280]</code>.</li>
+    <li><strong>Three page-header bars:</strong> <code>bg-primary px-8 py-4</code> on 17 pages, <code>bg-primary h-16 px-4 md:px-8</code> on 15, and <code>bg-primary h-16 px-8</code> on 2. Only the middle one is responsive; the others keep fixed <code>px-8</code> on phones.</li>
+    <li><strong>93 section headings across three sizes</strong> for one semantic level: 18&times; <code>text-3xl</code>, 44&times; <code>text-2xl</code>, 31&times; <code>text-xl</code>. “Overview” is 30px on the lecturer dashboard and 24px on the student dashboard.</li>
+    <li><strong>The title is printed twice.</strong> The page bar says “Work Tracking”, then the page repeats “Work Tracking” as an H2. Same pattern on Claims, Applications, Verify Hours and Appointment Approvals.</li>
+    <li><strong>Seventeen tables, one shared component.</strong> Only <code>AuditLogs</code> uses <code>CompactTable</code>; the other 16 pages build their own, with three header treatments, three row heights and three action styles.</li>
+    <li><strong>Cards look unfinished.</strong> <code>Card.jsx</code> applies <code>border border-dark</code> &mdash; a near-black outline on every surface &mdash; which fights the soft purple shadow and makes the UI read as a wireframe.</li>
+  </ul>
+
+  <h3>2.2 Status is the worst offender</h3>
+  <p>There is no single source of truth for what a status means or how it looks:</p>
+  <table>
+    <caption>One claim, four presentations</caption>
+    <thead>
+      <tr><th>Status</th><th><code>StatusBadge</code></th><th>Claims Verification</th><th>Lecturer Dashboard</th><th>Export Payments</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Pending</td><td><span class="tag p1">Amber</span></td><td><span class="tag n">Grey</span></td><td><span class="tag p1">Amber on white</span></td><td>&mdash;</td></tr>
+      <tr><td>Under Review</td><td><span class="tag n">Grey (missing key)</span></td><td><span class="tag r">Red</span></td><td><span class="tag p1">Amber on white</span></td><td>&mdash;</td></tr>
+      <tr><td>Verified</td><td><span class="tag n">Grey (missing key)</span></td><td><span class="tag b">Green</span></td><td>&mdash;</td><td><span class="tag b">Labelled “Approved”</span></td></tr>
+      <tr><td>Approved</td><td><span class="tag b">Green</span></td><td>&mdash;</td><td><span class="tag p1">Amber on white</span></td><td><span class="tag b">Green</span></td></tr>
+      <tr><td>Rejected</td><td><span class="tag r">Red</span></td><td><span class="tag r">Red</span></td><td><span class="tag p1">Amber on white</span></td><td>&mdash;</td></tr>
+    </tbody>
+  </table>
+  <ul>
+    <li><code>LectureDashboard.jsx:270</code> hardcodes <code>bg-warning text-white</code> for <em>every</em> application status. Approved, Rejected and In Review are visually identical, in white on yellow.</li>
+    <li>The same claim is <em>Verified</em> on Claims Verification and <em>Approved</em> on Export Payments. The lifecycle <em>verified &rarr; approved &rarr; paid</em> must be distinct and labelled once.</li>
+    <li>“Under Review” rendered as red (<code>bg-error</code>) reads as failure rather than progress.</li>
+  </ul>
+
+  <h3>2.3 Numbers and dates are formatted ad hoc</h3>
+  <p>Within a single session the same money appears five ways: <code>R&nbsp;45&nbsp;052,96</code> (lecturer), <code>R&nbsp;563,88</code> (student dashboard), <code>R&nbsp;260.25</code> (work tracking), <code>R&nbsp;107,8</code> (export) and <code>R&nbsp;1&nbsp;078</code> (dashboard). Dates appear as <em>07 Oct 2026</em>, <em>07 October 2026</em> and raw <em>2026-10-07</em> in the work-session table. Consolidate into one <code>formatMoney</code> and one <code>formatDate</code>; ban <code>toFixed</code> in page code.</p>
+
+  <h3>2.4 Feedback, loading and empty states</h3>
+  <ul>
+    <li><strong>No toast, modal, dialog or drawer primitives exist anywhere.</strong> Feedback is per-page banners; <code>StudentModules.jsx:169</code> falls back to <code>window.confirm</code>.</li>
+    <li>Summary cards render <strong>0 while loading</strong>, so the admin dashboard shows “Pending Claims 0” and then 4. Use skeletons, or <code>&mdash;</code> as the student dashboard sometimes does.</li>
+    <li>Fifteen “Loading…” states are plain text in cards; fifteen empty states are plain text with no call to action.</li>
+    <li>Submission does not consistently disable the trigger; the export page instead lets you click and then tells you to select a claim.</li>
+  </ul>
+
+  <h3>2.5 Accessibility is not optional here</h3>
+  <table>
+    <caption>Computed contrast against the theme tokens</caption>
+    <thead><tr><th>Colour pair</th><th class="num">Ratio</th><th>Verdict</th><th>Used for</th></tr></thead>
+    <tbody>
+      <tr><td>White on success <code>#28A745</code></td><td class="num">3.13:1</td><td><span class="tag r">Fails AA</span></td><td>Approved / Verified / Paid chips at 14px</td></tr>
+      <tr><td>White on warning <code>#FFC107</code></td><td class="num">1.63:1</td><td><span class="tag r">Unreadable</span></td><td>Every lecturer-dashboard badge</td></tr>
+      <tr><td><code>neutral #78848E</code> on white</td><td class="num">3.83:1</td><td><span class="tag r">Fails AA</span></td><td>All secondary and body copy</td></tr>
+      <tr><td><code>neutral</code> on off-white</td><td class="num">3.63:1</td><td><span class="tag r">Fails AA</span></td><td>Table meta, helper text</td></tr>
+      <tr><td>White on error <code>#DC3545</code></td><td class="num">4.53:1</td><td><span class="tag p1">Borderline</span></td><td>Rejected chips</td></tr>
+      <tr><td>White on primary <code>#6C3D91</code></td><td class="num">7.74:1</td><td><span class="tag b">Passes</span></td><td>Page bars, primary buttons</td></tr>
+    </tbody>
+  </table>
+  <p>Beyond colour: status is conveyed by colour alone; the landing hero autoplays video with no <code>prefers-reduced-motion</code>; and clipped form values (see &sect;2.6) remove information rather than merely truncating it.</p>
+
+  <h3>2.6 Brand and vocabulary</h3>
+  <ul>
+    <li>The repository and README say <strong>DACMS</strong>; the navbar, login, landing page and 30 document titles say <strong>AACMS</strong>; <code>StudentModules.jsx</code> says DACMS. Pick one.</li>
+    <li><strong>“Demi” and “Assistant”</strong> describe the same person (“Approved Demis”, “Total Assistants”, “Apply for Assistant”). A student outside NWU will not know “demi”.</li>
+    <li><strong>One destination, three names:</strong> sidebar “Assign Duties”, page “Assign Assistant Responsibilities”, route <code>/assign-responsibilities</code>. Same for “Verify Hours” versus “Verify Work Hours”.</li>
+    <li><strong>Singular/plural on one screen:</strong> H1 “Appointment Approvals”, H2 “Appointment Approval”.</li>
+    <li><strong>Truncated values:</strong> in Student Profile, “Person Type” and “Justifiable Reason” both display “Student Assis…” inside 3-column inputs at 802px, so the user cannot read their own selection.</li>
+  </ul>
+
+  <!-- ================= 3. DUPLICATES ================= -->
+  <h2 id="duplicates" class="pagebreak"><span class="num">3</span>Duplicate interactions</h2>
+  <p>These are pairs (or triples) where two different labels already produce the same result &mdash; or where the label promises a result the control does not deliver.</p>
+
+  <table>
+    <caption>Controls that lead to the same flow result</caption>
+    <thead><tr><th style="width:20%">Where</th><th style="width:30%">Duplicate controls</th><th>Destination / effect</th><th style="width:22%">Fix</th></tr></thead>
+    <tbody>
+      <tr><td>Student dashboard</td><td>“Submit Claim” + “Generate New Claim” card</td><td>Both go to <code>/claims</code>; neither opens the wizard</td><td>One “New claim” &rarr; <code>/claims/new</code></td></tr>
+      <tr><td>Claims page</td><td>“Generate New Claim”</td><td><code>/claims</code> &rarr; second button &rarr; <code>/generate-new-claim</code></td><td>Link directly; delete one hop</td></tr>
+      <tr><td>Student dashboard</td><td>“Apply to Assistant”</td><td>Goes to the applications list, not the apply page</td><td>&rarr; positions/apply page</td></tr>
+      <tr><td>Admin dashboard</td><td>“Review Recommendations” + “Approve Appointments”</td><td>Both &rarr; <code>/appointment-approvals</code></td><td>One action, or split real stages</td></tr>
+      <tr><td>Claims Verification</td><td>“Export Payments” (top) + “Export Approved Claims” (bottom)</td><td>Both &rarr; <code>/export-payments</code></td><td>One primary action</td></tr>
+      <tr><td>Claims Verification</td><td>“Claims Summary” + “Verification Summary”</td><td>The same four numbers twice on one page</td><td>Delete the second block</td></tr>
+      <tr><td>Export Payments</td><td>“Payment Summary” + “Payment Export Summary”</td><td>The same selected-claim figures twice</td><td>One summary; sticky export bar</td></tr>
+      <tr><td>Student dashboard</td><td>Notifications card + Recent Activity</td><td>Both “View all” &rarr; <code>/notifications</code></td><td>Keep one feed; make activity real audit data</td></tr>
+      <tr><td>Work Tracking</td><td>Appointment card stats + four KPI cards</td><td>Identical Worked / Max / Remaining numbers</td><td>Keep one</td></tr>
+      <tr><td>Applications</td><td><code>ReviewApplications</code> inline detail + <code>ApplicationReview</code> page</td><td>Two implementations of the same review screen</td><td>Delete the orphan; one pattern</td></tr>
+      <tr><td>Budgets</td><td><code>/budget-management</code> &amp; <code>/lecturer-budgets</code>; two detail routes</td><td>Same components under role-specific URLs</td><td>One role-aware route</td></tr>
+      <tr><td>App routing</td><td><code>/notifications</code> declared three times in <code>App.jsx</code></td><td>Same component</td><td>Declare once outside role groups</td></tr>
+      <tr><td>Navigation</td><td>Sidebar “Dashboard” + “&larr; Back to Dashboard”</td><td>Two ways back to the same page</td><td>Keep the sidebar; drop page-level back links</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.1 Orphaned pages and dead code</h3>
+  <table>
+    <caption>Code that ships but cannot be reached or used</caption>
+    <thead><tr><th>Artifact</th><th class="num">Size</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>pages/ApplicationReview.jsx</code></td><td class="num">414 lines</td><td>Routed at <code>/application-review/:id</code>; nothing links to it. The live review lives inline in <code>ReviewApplications</code>.</td></tr>
+      <tr><td><code>components/PageNavigation.jsx</code></td><td class="num">41 lines</td><td>Unused component.</td></tr>
+      <tr><td><code>data/claimsData.js</code></td><td class="num">208 lines</td><td>Mock claims, imported by nothing.</td></tr>
+      <tr><td><code>assets/hero.png</code>, <code>react.svg</code>, <code>vite.svg</code>, <code>App.css</code></td><td class="num">&mdash;</td><td>Unused.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>3.2 Interactions that appear to work but do not</h3>
+  <div class="warn">
+    <ul style="margin:0">
+      <li><code>VerifyWorkHours.handleApprove()</code> (lines 180&ndash;200) shows “All work hours have been approved” <strong>without calling any API</strong>. Reject is a message telling the user to ask the backend team.</li>
+      <li>Admin claim rejection is a “not currently available” message (<code>ClaimReview.jsx:228</code>); forgot password throws “not available yet”.</li>
+      <li>Admin login returns HTTP 202, then <code>AuthContext.login</code> calls <code>response.json()</code> twice (lines 46&ndash;53), so the 2FA flow throws before it can complete.</li>
+      <li><code>ProtectedRoute</code> is a no-op, and public registration offers “Administrator” as a self-service role &mdash; a security problem wearing a UI costume.</li>
+    </ul>
+  </div>
+
+  <!-- ================= 4. DASHBOARDS ================= -->
+  <h2 id="dashboards"><span class="num">4</span>Dashboard value</h2>
+
+  <h3>4.1 Student dashboard &mdash; 40% signal</h3>
+  <p><strong>Valuable:</strong> active positions, hours this month, pending claims, application statuses, monthly hours per module.</p>
+  <p><strong>Noise:</strong> the “Generate Claim” card duplicates quick actions and the Claims page; “Recent Activity” duplicates notifications; a two-column table is used for two modules.</p>
+  <p><strong>Missing:</strong> what needs attention <em>now</em> &mdash; unverified sessions that block a claim, a claim window closing, outstanding money, profile incompleteness.</p>
+  <p><strong>Replace with:</strong> four KPIs with deltas (hours this month vs last, unverified sessions, claims awaiting action, earnings paid/pending), a “Needs your attention” queue, at most two quick actions, then the claims table. Move monthly hours to the Work page.</p>
+
+  <h3>4.2 Lecturer dashboard &mdash; 55% signal</h3>
+  <p><strong>Valuable:</strong> applicants, pending applications, claims summary, sessions awaiting verification, budget utilisation.</p>
+  <p><strong>Noise:</strong> “Approved Demis”; “Hours Allocated 480h” with no cap or denominator; the full budget module list, which belongs on Budgets.</p>
+  <p><strong>Missing:</strong> one ordered approval queue (applications + hours + claims) with counts and age; cap warnings at 80/120 hours per assistant; projected budget overspend.</p>
+  <p><strong>Replace with:</strong> action queue first, portfolio KPIs second, budget health third. Fix the all-yellow badges before anything else.</p>
+
+  <h3>4.3 Admin dashboard &mdash; 30% signal</h3>
+  <p><strong>Valuable:</strong> pending claims (4), pending appointments, monthly claims spend.</p>
+  <p><strong>Noise:</strong> “Total Modules / Lecturers / Assistants” (vanity, never changes); <strong>six months of rows including four <code>R 0</code>s</strong>; “Monthly Work Sessions” with two months and no CTA; “Administrator Actions” (the sidebar already does this); “Claims Export” card (duplicates a nav destination); and a fifth stat card orphaned in a three-column grid.</p>
+  <p><strong>Missing:</strong> exceptions &mdash; budgets near limit, claims pending beyond N days, unverified sessions, payment batch status, spend versus allocated year-to-date, an “as of” timestamp.</p>
+  <p><strong>Replace with:</strong> an attention strip (“4 claims to verify &middot; 0 appointments &middot; 2 budgets near limit”), a KPI row with period selector and deltas, one spend trend chart, top-five budget burn, and recent admin activity from the audit log. Delete the action buttons and export card; make them navigation and header actions.</p>
+  <div class="note"><strong>Bug:</strong> <code>AdminDashboard.jsx:38&ndash;55</code> uses <code>?? 'null'</code>, so a missing value literally renders the string <em>null</em>.</div>
+
+  <h3>4.4 Rules for every dashboard</h3>
+  <ol>
+    <li>Every metric needs a <strong>period</strong> and a <strong>denominator</strong> (spent of allocated, hours of cap).</li>
+    <li>At most <strong>one chart</strong> per dashboard. A table of months with zeros is not a chart.</li>
+    <li>Anything clickable must be the <strong>only</strong> path to that destination, not a third one.</li>
+    <li>Put the <strong>work queue above analytics</strong>: people open dashboards to decide what to do next.</li>
+  </ol>
+
+  <!-- ================= 5. IA ================= -->
+  <h2 id="ia"><span class="num">5</span>Information architecture and familiarity</h2>
+  <p>The current navigation is close, but it hides important destinations and exposes implementation names.</p>
+
+  <table>
+    <caption>Navigation, before and after</caption>
+    <thead><tr><th style="width:12%">Role</th><th style="width:44%">Now</th><th>Proposed</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Student</strong></td><td>Dashboard, Applications, Modules, Work Tracking, Claims, Profile</td><td>Home, Applications, Work, Claims, Modules, Profile</td></tr>
+      <tr><td><strong>Lecturer</strong></td><td>Dashboard, Assistant Listings, Review Applications, Assign Duties, Review Claims, Verify Hours, Budgets</td><td>Home, Positions, Applicants, Assistants, Hours, Claims, Budget</td></tr>
+      <tr><td><strong>Admin</strong></td><td>Dashboard, Budget Management, Appointment Approvals, Claims Verification, <em>Audit hidden as an icon</em></td><td>Home (queue), Appointments, Claims, Budgets, Payments, Audit &mdash; all labelled; Export Payments surfaced</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.1 Conventions users already know</h3>
+  <p>The app omits the furniture that makes Workday, Moodle, Jira and Stripe predictable:</p>
+  <ul>
+    <li><strong>User menu</strong> with name, role, settings and logout in the top-right. Today the bar has only a bell; logout sits at the bottom of the side nav; admin audit logs are a mystery icon.</li>
+    <li><strong>Breadcrumbs</strong> on detail pages (<em>Claims / CLM-2026-01011</em>), not a “&larr; Back to Dashboard” link on one page only.</li>
+    <li><strong>Data tables</strong> with sort, pagination, bulk select, priority columns and a sticky action column. Today the Claims table hides Amount, Status and “View Details” off-screen; Export wraps Claim ID and Date onto three lines.</li>
+    <li><strong>One detail pattern</strong> &mdash; drawer or route &mdash; with a status stepper. <code>ApplicationDetail</code> already has “Approval Progress”; generalise it.</li>
+    <li><strong>Global search or command palette</strong> (Ctrl+K) for students, modules, claims and references.</li>
+    <li><strong>Toasts and confirm dialogs</strong> instead of banners and <code>window.confirm</code>.</li>
+    <li><strong>Settings in the user menu</strong>, not a “Comfortable view” button in the Audit Logs page header.</li>
+    <li><strong>Empty states with a CTA</strong> (“No applications yet &rarr; Apply for an assistant position”).</li>
+  </ul>
+
+  <!-- ================= 6. PLAN ================= -->
+  <h2 id="plan" class="pagebreak"><span class="num">6</span>Action plan</h2>
+
+  <p>The plan runs as a one-week hardening sprint followed by two two-week sprints. Each sprint ends with a demo against its exit criteria; nothing is &ldquo;done&rdquo; because the code merged.</p>
+
+  <table class="sprint">
+    <caption>Sprint sequence</caption>
+    <thead>
+      <tr><th style="width:11%">Sprint</th><th style="width:11%">When</th><th style="width:15%">Goal</th><th>Scope</th><th style="width:25%">Exit criteria</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>Sprint 0</strong></td><td>Week 1</td><td>Tell the truth</td><td>Six deletion-first steps: auth guard, one status language, honest CTAs, duplicate summaries, dead controls, dead code.</td><td>No primary action is a no-op; one status language; no unreachable route; every P0 check passes.</td></tr>
+      <tr><td><strong>Sprint 1</strong></td><td>Weeks 2&ndash;3</td><td>One system</td><td><code>ui/</code> primitives, <code>gray-*</code> codemod, one page header and heading scale, <code>DataTable</code> across all 17 tables, card restyle, formatters, one detail pattern and the merged claims workspace.</td><td>Zero raw <code>gray-*</code> in pages; one header component; every data table is a <code>DataTable</code>; no duplicated detail screens.</td></tr>
+      <tr><td><strong>Sprint 2</strong></td><td>Weeks 4&ndash;5</td><td>One product</td><td>Three dashboards rebuilt around the work queue, command palette / breadcrumbs / user menu, profile single-save, responsive pass.</td><td>Each dashboard answers &ldquo;what do I do now&rdquo;; 390 / 768 / 1280 pass; settings live in the user menu.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Sequencing.</strong> Sprint 0 ships in week one even if everything else slips: it removes the lies and the dead ends that make every other improvement look cosmetic. Sprint 1 must not start before the status model in Sprint 0 is settled, because <code>StatusBadge</code> and every Sprint 1 primitive consume it. The two-week sprints assume one frontend developer plus part-time design review; treat the ranges as indicative, double them for a solo effort, and split Sprint 1 across two developers only along the table/header seam.
+  </div>
+
+  <h3><span class="tag p0">P0</span> Sprint 0 &mdash; Correctness and trust</h3>
+
+  <p>Sprint 0 is a demolition sprint, not a design sprint. One rule governs every item: <strong>keep the implementation that is already wired to the API and delete the other one</strong>. Do not create a <code>ui/</code> folder, do not rename components, do not touch the 348 <code>gray-*</code> classes, do not restyle <code>Card</code>, and do not rebuild a dashboard. The sprint is roughly 22 developer-hours and should read as a small diff of deletions and one-line fixes.</p>
+
+  <h4>Step 1 &middot; Make the guard real <span class="tag n">4 h</span></h4>
+  <p><strong>Files:</strong> <code>routes/ProtectedRoute.jsx</code>, <code>contexts/AuthContext.jsx</code>, <code>pages/Login.jsx</code>.</p>
+  <ul>
+    <li>Replace the demo body of <code>ProtectedRoute</code> &mdash; currently <code>return &lt;Outlet /&gt;</code> &mdash; with the check below. Eight lines, no helper module, no new dependency.</li>
+  </ul>
+  <pre><code>const HOME = {
+  student: '/student-dashboard',
+  lecturer: '/lecturer-dashboard',
+  admin: '/admin-dashboard',
+};
+
+const ProtectedRoute = ({ requiredRoles = [] }) =&gt; {
+  const { user, loading } = useAuth();
+  if (loading) return null;
+  if (!user) return &lt;Navigate to="/login" replace /&gt;;
+  if (requiredRoles.length &amp;&amp; !requiredRoles.includes(user.role)) {
+    return &lt;Navigate to={HOME[user.role] ?? '/login'} replace /&gt;;
+  }
+  return &lt;Outlet /&gt;;
+};</code></pre>
+  <ul>
+    <li><code>AuthContext.login</code> reads the response body twice: the 202 branch calls <code>response.json()</code> at line 47 and line 53 calls it again, which throws. Read once, branch, return.</li>
+  </ul>
+  <pre><code>const data = await response.json();
+
+if (response.status === 202) {
+  navigate('/2fa', {
+    replace: true,
+    state: { from: data.requiresSetup ? 'setup' : 'login', user: data.user },
+  });
+  return null;
+}</code></pre>
+  <ul>
+    <li>Delete <code>{ value: 3, label: 'Administrator' }</code> from <code>ROLE_OPTIONS</code> in <code>Login.jsx</code> (line 8). Public registration must not mint admins.</li>
+    <li><strong>Known gap, do not hide it:</strong> <code>POST /users/create</code> still accepts <code>role_id: 3</code>, and <code>backend/tests/api-route-smoke-test.js</code> creates its admin through that public endpoint. The frontend change stops honest users, not attackers. Close it by seeding the test admin directly and rejecting role 3 on the public route; until then, registration is not actually locked down.</li>
+  </ul>
+  <p><strong>Done when:</strong> logged out, <code>/admin-dashboard</code> redirects to <code>/login</code>; logged in as a student, it redirects to <code>/student-dashboard</code>; admin login reaches <code>/2fa</code> instead of throwing.</p>
+
+  <h4>Step 2 &middot; One status language <span class="tag n">6 h</span></h4>
+  <p><strong>Files:</strong> <code>index.css</code>, <code>components/StatusBadge.jsx</code>, <code>pages/ClaimsVerification.jsx</code>, <code>pages/LectureDashboard.jsx</code>, <code>pages/ExportPayments.jsx</code>, <code>backend/src/repositories/AdminRepository.js</code>.</p>
+  <ul>
+    <li>Add four tint pairs to <code>@theme</code> in <code>index.css</code>. These are the only new tokens Sprint 0 may introduce; every existing status colour is replaced by them.</li>
+  </ul>
+  <pre><code>--color-status-amber: #8A5A00;      --color-status-amber-soft: #FFF4D6;
+--color-status-progress: #3B4E9B;   --color-status-progress-soft: #E8ECF9;
+--color-status-done: #176B3A;       --color-status-done-soft: #E7F6EC;
+--color-status-danger: #B42318;     --color-status-danger-soft: #FDECEA;</code></pre>
+  <ul>
+    <li>Rewrite <code>StatusBadge.jsx</code> in place. Keep the filename and default export so the 18 existing imports keep working. One map, one fallback, no inline colour logic anywhere else.</li>
+  </ul>
+  <pre><code>const TONES = {
+  pending: 'bg-status-amber-soft text-status-amber',
+  review: 'bg-status-progress-soft text-status-progress',
+  done: 'bg-status-done-soft text-status-done',
+  danger: 'bg-status-danger-soft text-status-danger',
+};
+
+const STATUS = {
+  Pending: 'pending',
+  'In Review': 'review',
+  'Under Review': 'review',
+  'Approved by Lecturer': 'done',
+  Verified: 'done',
+  Approved: 'done',
+  Paid: 'done',
+  Rejected: 'danger',
+  'Rejected by Lecturer': 'danger',
+};
+
+const StatusBadge = ({ status }) =&gt; {
+  const label = String(status ?? '').trim() || 'Unknown';
+  const tone = TONES[STATUS[label]] ?? 'bg-light-grey text-dark';
+  return (
+    &lt;span className={`rounded-full px-3 py-1 text-sm font-semibold ${tone}`}&gt;
+      {label}
+    &lt;/span&gt;
+  );
+};</code></pre>
+  <ul>
+    <li>Delete <code>claimStatusClass</code> in <code>ClaimsVerification.jsx</code> (lines 73&ndash;88) and the inline span at 391&ndash;395; use <code>&lt;StatusBadge status={claim.claim_status} /&gt;</code> and import it.</li>
+    <li>Replace the hardcoded yellow span in <code>LectureDashboard.jsx</code> (line 270) with <code>&lt;StatusBadge status={app.ApplicationStatus} /&gt;</code>; import it.</li>
+    <li><code>AdminRepository.getClaimsForExport</code> aliases <code>'Approved' AS status</code> (line 455) while selecting only <code>ClaimStatus = 'Verified'</code>. Return the real status: change the alias to <code>c."ClaimStatus" AS status</code>.</li>
+    <li>In <code>ExportPayments.jsx</code>, delete the status filter entirely: the state at line 11, the select at 250&ndash;265 and the <code>matchesStatus</code> clause at line 52. The endpoint only returns verified claims, so the filter can only hide everything.</li>
+  </ul>
+  <p><strong>Done when:</strong> the same claim shows the same word and the same tone on Claims Verification, Lecturer Dashboard, Review Claims and Export Payments; <code>grep -r "claimStatusClass\|bg-warning text-white" src</code> returns nothing.</p>
+
+  <h4>Step 3 &middot; CTAs land where they say <span class="tag n">2 h</span></h4>
+  <p><strong>Files:</strong> <code>pages/Dashboard.jsx</code>, <code>pages/AdminDashboard.jsx</code>.</p>
+  <ul>
+    <li><code>Dashboard.jsx:130</code> &ldquo;Apply to Assistant&rdquo; &rarr; <code>/apply-for-assistant</code>.</li>
+    <li><code>Dashboard.jsx:137</code> &ldquo;Submit Claim&rdquo; &rarr; <code>/generate-new-claim</code>.</li>
+    <li><code>Dashboard.jsx:419</code> &ldquo;Generate New Claim&rdquo; &rarr; <code>/generate-new-claim</code> (the card itself is deleted in Step 4).</li>
+    <li><code>AdminDashboard.jsx:328&ndash;333</code> delete &ldquo;Review Recommendations&rdquo;; &ldquo;Approve Appointments&rdquo; goes to the same page.</li>
+  </ul>
+  <p><strong>Done when:</strong> no button labelled Apply, Submit or Generate opens a list that requires a second click to reach the form.</p>
+
+  <h4>Step 4 &middot; Delete duplicated summaries <span class="tag n">5 h</span></h4>
+  <ul>
+    <li><code>ClaimsVerification.jsx:417&ndash;476</code>: delete the whole &ldquo;Verification Summary&rdquo; section. It repeats the four stat cards at 214&ndash;277 and contains the second Export button.</li>
+    <li><code>ExportPayments.jsx:299&ndash;350</code>: delete &ldquo;Payment Summary&rdquo;; keep &ldquo;Payment Export Summary&rdquo; (515+) as the single pre-export confirmation.</li>
+    <li><code>WorkTracking.jsx:554&ndash;605</code>: delete the four-card stats grid. Worked, Maximum and Remaining already appear in the appointment card at 347&ndash;366; move Estimated Earnings into that card as a fourth column instead of a second summary.</li>
+    <li><code>AdminDashboard.jsx</code>: delete the &ldquo;Administrator Actions&rdquo; section (315&ndash;348) and the &ldquo;Claims Export&rdquo; card (351 onward). The sidebar already owns navigation; the dashboard is not a second navigation.</li>
+    <li><code>Dashboard.jsx:406&ndash;470</code>: delete the &ldquo;Generate Claim&rdquo; and &ldquo;Recent Activity&rdquo; section. The quick action covers claim creation and the notifications card already covers activity.</li>
+  </ul>
+  <p><strong>Done when:</strong> each number and each action appears once per page.</p>
+
+  <h4>Step 5 &middot; Remove controls that cannot work <span class="tag n">3 h</span></h4>
+  <ul>
+    <li><code>VerifyWorkHours.jsx</code>: delete <code>handleApprove</code> (180&ndash;200), <code>handleReject</code> (202&ndash;213), the commented-out decision card (388 onward) and the state only they use (<code>rejectionReason</code>, <code>showRejectBox</code>). The per-row Verify/Unverify actions at 357&ndash;379 already call the API and are the only hours-approval UI.</li>
+    <li><code>ClaimReview.jsx</code>: wrap the &ldquo;Reject Claim&rdquo; button (693&ndash;700) in <code>{isLecturerReview &amp;&amp; ...}</code> and delete the admin branch of <code>handleReject</code> (227&ndash;229). Admin can verify a claim; it cannot reject one, so it must not offer the button or an &ldquo;ask the backend team&rdquo; message.</li>
+    <li><code>StudentModules.jsx:169</code> uses <code>window.confirm</code>. It is native, it works, and replacing it is polish. Leave it.</li>
+  </ul>
+  <p><strong>Done when:</strong> no visible control ends in a message that says the action is unavailable.</p>
+
+  <h4>Step 6 &middot; Delete dead code, declare one route <span class="tag n">2 h</span></h4>
+  <ul>
+    <li>Delete <code>pages/ApplicationReview.jsx</code> (414 lines), its import (<code>App.jsx:26</code>) and its route (line 88). The live review is inline in <code>ReviewApplications.jsx</code>.</li>
+    <li>Delete <code>components/PageNavigation.jsx</code>, <code>data/claimsData.js</code>, <code>assets/react.svg</code>, <code>assets/vite.svg</code>, <code>assets/hero.png</code> and <code>src/App.css</code>; nothing imports them.</li>
+    <li>Declare <code>/notifications</code> once in a shared group instead of three times (lines 75, 102, 130):</li>
+  </ul>
+  <pre><code>&lt;Route element={&lt;ProtectedRoute requiredRoles={['student', 'lecturer', 'admin']} /&gt;}&gt;
+  &lt;Route path="/notifications" element={&lt;Notifications /&gt;} /&gt;
+&lt;/Route&gt;</code></pre>
+  <p><strong>Keep</strong> <code>/review-claim/:id</code>. <code>ReviewClaims.jsx:93</code> navigates to it and <code>ClaimReview</code> serves both roles; it is not an orphan.</p>
+  <p><strong>Done when:</strong> nothing in <code>src</code> imports a deleted file and <code>npm run build</code> passes.</p>
+
+  <h3>One implementation per deliverable</h3>
+  <table class="sprint">
+    <caption>What survives Sprint 0</caption>
+    <thead>
+      <tr><th style="width:20%">Deliverable</th><th style="width:32%">Today</th><th style="width:22%">Keep</th><th>Delete</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Status rendering</td><td><code>StatusBadge</code>, <code>claimStatusClass</code>, hardcoded yellow span</td><td><code>StatusBadge.jsx</code></td><td>Both inline maps</td></tr>
+      <tr><td>Application review</td><td>Inline detail in <code>ReviewApplications</code> plus <code>ApplicationReview.jsx</code></td><td>Inline detail</td><td>414-line page, route, import</td></tr>
+      <tr><td>Claim review</td><td><code>ClaimReview</code> shared by lecturer and admin</td><td><code>ClaimReview</code> and <code>/review-claim/:id</code></td><td>Nothing</td></tr>
+      <tr><td>Hours approval</td><td>Per-row Verify/Unverify plus dead bulk handlers</td><td>Per-row actions</td><td>Bulk handlers and commented card</td></tr>
+      <tr><td>Payment export</td><td>Header link, bottom button, two summaries</td><td>Header link and export summary</td><td>Bottom button, Payment Summary</td></tr>
+      <tr><td>New claim</td><td>Quick action plus &ldquo;Generate Claim&rdquo; card</td><td>Quick action</td><td>Generate Claim card</td></tr>
+      <tr><td>Appointments</td><td>Two admin buttons, one destination</td><td>Approve Appointments</td><td>Review Recommendations</td></tr>
+      <tr><td>Notifications route</td><td>Declared three times</td><td>One shared route</td><td>Three declarations</td></tr>
+    </tbody>
+  </table>
+
+  <div class="note">
+    <strong>Out of scope on purpose.</strong> No <code>ui/</code> primitives, no <code>DataTable</code>, no <code>AppLayout</code>, no token codemod, no card restyle, no dashboard rebuild, no page merges, no new dependencies. Those are Sprint 1 and 2. If a Sprint 0 change starts to look like a refactor, stop and leave it for the next sprint.
+  </div>
+
+  <h4>Acceptance checklist</h4>
+  <ul>
+    <li>Logged out, every role route redirects to <code>/login</code>; cross-role access lands on the user&rsquo;s own dashboard.</li>
+    <li>One status word and one tone per state across all four screens; no white on warning or success.</li>
+    <li>Apply, Submit Claim and Export each reach their action in one click.</li>
+    <li>Approve and Reject exist only where the API supports them; no &ldquo;ask the backend team&rdquo; message remains.</li>
+    <li><code>ApplicationReview</code>, <code>PageNavigation</code>, <code>claimsData</code>, the unused assets and the commented decision card are gone, and every remaining route is reachable from the UI.</li>
+    <li><code>npm run build</code> passes and the diff contains no new components.</li>
+  </ul>
+
+  <h3><span class="tag p1">P1</span> Sprint 1 &mdash; Adopt the design system</h3>
+  <ol>
+    <li>Build <code>ui/</code> primitives: <code>AppLayout</code>, <code>PageHeader</code>, <code>Button</code>, <code>DataTable</code>, <code>Section</code>, <code>FormField</code>, <code>Toast</code>, <code>ConfirmDialog</code>, <code>Money</code>/<code>Date</code> formatters, <code>EmptyState</code>. <code>StatusBadge</code> already exists from Sprint 0; do not recreate it.</li>
+    <li><strong>Codemod <code>gray-*</code> to semantic tokens</strong>; remove hardcoded hex. One page-header component across all 33 pages; one heading scale (24 page, 18 section, 16 card, 14 body, 12 caption).</li>
+    <li>Replace all 17 tables with <code>DataTable</code>: nowrap IDs and currency, sortable columns, pagination, mobile card fallback.</li>
+    <li>Restyle <code>Card</code> (no black border; 1px <code>#E5E7EB</code>; 16/24 padding) and stop wrapping tables in padded cards.</li>
+    <li>Standardise currency and dates; remove <code>toFixed</code> from pages.</li>
+    <li>Replace duplicated list/detail implementations with one routed detail pattern; merge Create/Edit Budget into one form.</li>
+    <li>Merge Claims Verification and Export Payments into a “Claims” workspace with <em>Verify</em> / <em>Export</em> tabs, or keep them separate without duplicated summaries and cross-links.</li>
+  </ol>
+
+  <h3><span class="tag p2">P2</span> Sprint 2 &mdash; Product maturity</h3>
+  <ol>
+    <li>Rebuild the three dashboards around <strong>work queue &rarr; KPIs with deltas &rarr; one trend &rarr; recent activity</strong>, with a period selector.</li>
+    <li>Add command palette, breadcrumbs, user menu, saved filters, bulk approve, skeletons.</li>
+    <li>Profile: one form with section tabs and <strong>one</strong> save (today it is six independently saved sections), full-width fields, no truncation.</li>
+    <li>Responsive pass at 390 / 768 / 1280: fixed <code>px-8</code> headers, three-column forms at 768, clipped tables, and the landing page whose two 180px buttons plus 40px inline margins exceed a 375px viewport.</li>
+  </ol>
+
+  <!-- ================= APPENDIX ================= -->
+  <h2 id="evidence"><span class="num">A</span>Evidence index</h2>
+  <table>
+    <caption>Issues by file</caption>
+    <thead><tr><th style="width:34%">File</th><th style="width:14%">Line</th><th>Issue</th></tr></thead>
+    <tbody>
+      <tr><td><code>index.css</code></td><td>5&ndash;23</td><td>Theme tokens declared; bypassed throughout page code.</td></tr>
+      <tr><td><code>components/Card.jsx</code></td><td>5</td><td><code>border border-dark</code> produces a near-black outline on every card.</td></tr>
+      <tr><td><code>components/StatusBadge.jsx</code></td><td>5&ndash;12</td><td>Missing <code>Verified</code>, <code>Under Review</code>, <code>Pending Review</code>; white on success fails AA.</td></tr>
+      <tr><td><code>pages/ClaimsVerification.jsx</code></td><td>73&ndash;88</td><td>Local status map: Pending grey, Under Review red &mdash; conflicts with <code>StatusBadge</code>.</td></tr>
+      <tr><td><code>pages/LectureDashboard.jsx</code></td><td>270</td><td>All application statuses hardcoded <code>bg-warning text-white</code>.</td></tr>
+      <tr><td><code>pages/AdminDashboard.jsx</code></td><td>38&ndash;55</td><td><code>?? 'null'</code> renders the literal string “null”.</td></tr>
+      <tr><td><code>pages/AdminDashboard.jsx</code></td><td>328&ndash;340</td><td>Two buttons, one destination (<code>/appointment-approvals</code>).</td></tr>
+      <tr><td><code>pages/Dashboard.jsx</code></td><td>122&ndash;142, 418&ndash;423</td><td>Claim CTAs land on <code>/claims</code>, not the wizard; “Apply to Assistant” lands on the list.</td></tr>
+      <tr><td><code>pages/Claims.jsx</code></td><td>65&ndash;67, 196</td><td><code>toFixed</code> currency; <code>min-w-[900px]</code> table clips Amount, Status and action.</td></tr>
+      <tr><td><code>pages/VerifyWorkHours.jsx</code></td><td>180&ndash;213</td><td>Approve only flashes a message; Reject is unimplemented.</td></tr>
+      <tr><td><code>pages/ClaimReview.jsx</code></td><td>228</td><td>Admin rejection is an availability message.</td></tr>
+      <tr><td><code>contexts/AuthContext.jsx</code></td><td>46&ndash;53</td><td>HTTP 202 branch reads <code>response.json()</code> twice.</td></tr>
+      <tr><td><code>routes/ProtectedRoute.jsx</code></td><td>3&ndash;6</td><td>Authentication is a no-op in demo mode.</td></tr>
+      <tr><td><code>pages/Login.jsx</code></td><td>5&ndash;9, 274&ndash;284</td><td>Public registration lets anyone choose “Administrator”.</td></tr>
+      <tr><td><code>pages/StudentProfile.jsx</code></td><td>354</td><td>Six sections with independent saves; 3-column inputs truncate values.</td></tr>
+      <tr><td><code>pages/CreateBudget.jsx</code></td><td>172&ndash;443</td><td>Hardcoded hex colours duplicate theme tokens.</td></tr>
+      <tr><td><code>pages/StudentModules.jsx</code></td><td>169</td><td><code>window.confirm</code> used for a destructive action.</td></tr>
+      <tr><td><code>App.jsx</code></td><td>75, 102, 130</td><td><code>/notifications</code> declared three times.</td></tr>
+      <tr><td><code>App.jsx</code></td><td>88</td><td><code>/application-review/:id</code> has no inbound link.</td></tr>
+    </tbody>
+  </table>
+
+  <h2 id="primitives"><span class="num">B</span>Proposed component contracts</h2>
+  <p>The smallest set that removes most of the inconsistency, with the API shape the page code should consume:</p>
+  <pre><code>// One shell, one header, one title
+&lt;AppLayout role="admin" title="Claims" actions={&lt;Button&gt;New claim&lt;/Button&gt;}&gt;
+  &lt;PageHeader breadcrumbs={[...]} /&gt;
+  &lt;Section title="Awaiting verification"&gt;
+    &lt;DataTable
+      columns={columns} rows={claims}
+      sortable paginated selectable
+      empty={&lt;EmptyState action="Create the first claim" /&gt;}
+      loading={loading} />
+  &lt;/Section&gt;
+&lt;/AppLayout&gt;
+
+// One status vocabulary, one tone map
+&lt;StatusBadge status="Verified" /&gt;   // label + tone from STATUS
+
+// One money/date contract
+formatMoney(563.88)  // "R 563,88"
+formatDate(iso)      // "07 Oct 2026"</code></pre>
+  <p><strong>Migration order:</strong> tokens and typography &rarr; <code>Button</code> and <code>Card</code> &rarr; <code>StatusBadge</code> &rarr; <code>DataTable</code> &rarr; <code>AppLayout</code> and <code>PageHeader</code> &rarr; forms and feedback. Each step is independently shippable, and each reduces the diff of the next.</p>
+
+  <div class="footer">
+    <p><strong>Bottom line.</strong> The app has the right pages and the right data; it lacks a spine. Adopt a shell, a status model, a table and a feedback system; delete the duplicate entry points and dead review pages; rebuild the dashboards around “what do I need to do now” instead of “what can we count”. That alone moves it from “student project that works” to “system an NWU administrator can trust”.</p>
+    <p>Prepared 30 October 2026 &middot; Read-only audit &middot; No application code was modified.</p>
+  </div>
+
+</main>
+</body>
+</html>

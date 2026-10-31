@@ -43,15 +43,22 @@ export const AuthProvider = ({ children }) => {
     }
 
     // Handle 202: Admin needs 2FA
+    const data = await response.json();
+
     if (response.status === 202) {
-      const tfadata = await response.json();
       // Don't set user yet; redirect to 2FA page
-      navigate('/2fa', { replace: true, state: { from: tfadata.requiresSetup ? 'setup' : 'login', user: tfadata.user } });
+      navigate('/2fa', {
+        replace: true,
+        state: {
+          from: data.requiresSetup ? 'setup' : 'login',
+          user: data.user,
+        },
+      });
+
+      return null;
     }
 
     // Backend returns { message, user: { id, email, role_id } }
-    const data = await response.json();
-
     // Handle both nested ({ user: {...} }) and flat ({ id, email, role_id }) shapes
     const u = data.user || data;
 

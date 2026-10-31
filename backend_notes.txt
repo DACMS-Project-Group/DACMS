@@ -932,6 +932,44 @@ These routes are registered in the backend API router. All use the /api prefix.
             }
             response: ZIP file download
         }
+
+        /audit-logs {
+            type: GET
+            auth: true, admin
+            desc: Reads the .log files in the backend /logs directory and returns the parsed security audit trail, newest first. Numeric identifiers are never stored or returned.
+            query params {
+                "from": "YYYY-MM-DD - start of date range (inclusive)",
+                "to": "YYYY-MM-DD - end of date range (inclusive)",
+                "action": "filter by action (ADMIN_LOGIN, ADMIN_CLAIM_APPROVAL, ADMIN_APPOINTMENT_REVIEW, ADMIN_CLAIM_EXPORT)",
+                "user": "filter by user name or email (substring match)",
+                "recordType": "filter by record type (claim, appointment, claim_export, account)",
+                "recordReference": "filter by record reference (substring match)"
+            }
+            response body {
+                "stats": {
+                    "total_events": total parsed log entries in filtered set,
+                    "unique_users": distinct users (by email/name) in the logs,
+                    "admin_logins": count of ADMIN_LOGIN events,
+                    "bulk_exports": count of ADMIN_CLAIM_EXPORT events,
+                    "off_hours_activity": count of events outside 08:00-17:00 SAST,
+                    "last_activity": most recent timestamp (ISO 8601),
+                    "log_files": number of .log files read
+                },
+                "logs": [
+                    {
+                        "timestamp": "ISO 8601",
+                        "user_name": "First Last",
+                        "user_email": "user@example.com",
+                        "role": "admin/lecturer/student",
+                        "action": "ADMIN_LOGIN etc.",
+                        "record_type": affected record type,
+                        "record_reference": human-readable reference (claim/application number),
+                        "event": event detail object,
+                        "source": log file name
+                    }
+                ]
+            }
+        }
     }
 }
 
