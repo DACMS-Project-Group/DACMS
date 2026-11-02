@@ -1,29 +1,34 @@
-import React from 'react';
+const TONES = {
+  pending: 'bg-status-amber-soft text-status-amber',
+  review: 'bg-status-progress-soft text-status-progress',
+  done: 'bg-status-done-soft text-status-done',
+  danger: 'bg-status-danger-soft text-status-danger',
+};
+
+const STATUS = {
+  Pending: 'pending',
+  Returned: 'pending',
+  'In Review': 'review',
+  'Under Review': 'review',
+  'Approved by Lecturer': 'done',
+  Verified: 'done',
+  Approved: 'done',
+  Paid: 'done',
+  Rejected: 'danger',
+  'Rejected by Lecturer': 'danger',
+};
 
 const StatusBadge = ({ status }) => {
-  // This object maps each status to a color combination
-  const statusColors = {
-    'Approved': 'bg-success text-white',
-    'Approved by Lecturer': 'bg-success text-white',
-    'Rejected by Lecturer': 'bg-error text-white',
-    'Paid': 'bg-success text-white',
-    'Pending': 'bg-warning text-dark',
-    'Rejected': 'bg-error text-white'
-  };
+  const label = String(status ?? '').trim() || 'Unknown';
+  const tone = TONES[STATUS[label]] ?? 'bg-light-grey text-dark';
 
-  // Get the colors for this status, or use default if not found
-  const colors = statusColors[status] || 'bg-light-grey text-neutral';
-
-  // Return a styled span
   return (
-    <span className={`px-3 py-1 rounded-full text-sm font-semibold ${colors}`}>
-      {status}
+    <span
+      className={`inline-flex shrink-0 items-center rounded-full px-3 py-1 text-sm font-semibold ${tone}`}
+    >
+      {label}
     </span>
   );
 };
 
 export default StatusBadge;
-//e.g
-//<StatusBadge status="Approved" />  // Shows green badge
-//<StatusBadge status="Pending" />   // Shows yellow badge
-//<StatusBadge status="Rejected" />  // Shows red badge

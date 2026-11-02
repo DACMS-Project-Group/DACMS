@@ -223,10 +223,6 @@ const ClaimReview = () => {
 
       return;
     }
-
-    setActionError(
-      'Admin claim rejection is not currently available because the backend does not provide an admin rejection endpoint.'
-    );
   };
 
   const renderPageMessage = (message, showBackButton = false) => (
@@ -690,14 +686,16 @@ const ClaimReview = () => {
               )}
 
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  onClick={handleReject}
-                  disabled={isSubmitting}
-                  className="rounded-xl border border-red-500 px-5 py-3 font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 font-inter"
-                >
-                  Reject Claim
-                </button>
+                {isLecturerReview && (
+                  <button
+                    type="button"
+                    onClick={handleReject}
+                    disabled={isSubmitting}
+                    className="rounded-xl border border-red-500 px-5 py-3 font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 font-inter"
+                  >
+                    Reject Claim
+                  </button>
+                )}
 
                 <button
                   type="button"

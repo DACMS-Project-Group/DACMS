@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
+import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
 
 const ClaimsVerification = () => {
@@ -69,23 +70,6 @@ const ClaimsVerification = () => {
       return matchesSearch && matchesStatus;
     });
   }, [claims, searchTerm, statusFilter]);
-
-  const claimStatusClass = (status) => {
-    switch (status) {
-      case 'Pending':
-        return 'bg-light-grey text-neutral';
-      case 'Approved by Lecturer':
-        return 'bg-warning text-dark';
-      case 'Verified':
-        return 'bg-success text-white';
-      case 'Under Review':
-      case 'Rejected by Lecturer':
-      case 'Rejected':
-        return 'bg-error text-white';
-      default:
-        return 'bg-light-grey text-neutral';
-    }
-  };
 
   const formatAmount = (amount) => {
     return `R ${Number(amount || 0).toLocaleString('en-ZA', {
@@ -389,9 +373,7 @@ const ClaimsVerification = () => {
                             </td>
 
                             <td className="p-4">
-                              <span className={`rounded-full px-3 py-1 text-sm font-semibold ${claimStatusClass(claim.claim_status)}`}>
-                                {claim.claim_status}
-                              </span>
+                              <StatusBadge status={claim.claim_status} />
                             </td>
 
                             <td className="p-4">
@@ -410,67 +392,6 @@ const ClaimsVerification = () => {
                       </tbody>
                     </table>
                   )}
-                </div>
-              </Card>
-            </section>
-
-            {/* Verification Summary */}
-            <section>
-              <h3 className="mb-4 text-xl font-semibold text-primary font-poppins">
-                Verification Summary
-              </h3>
-
-              <Card>
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
-                  <div>
-                    <p className="text-sm text-neutral font-inter">
-                      Total Claims
-                    </p>
-
-                    <p className="mt-1 font-semibold text-dark font-inter">
-                      {stats.total_claims}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-neutral font-inter">
-                      Pending Verification
-                    </p>
-
-                    <p className="mt-1 font-semibold text-dark font-inter">
-                      {stats.total_pending}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-neutral font-inter">
-                      Under Review
-                    </p>
-
-                    <p className="mt-1 font-semibold text-dark font-inter">
-                      {stats.total_under_review}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-sm text-neutral font-inter">
-                      Verified Claims
-                    </p>
-
-                    <p className="mt-1 font-semibold text-dark font-inter">
-                      {stats.total_verified}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-8 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={handleExport}
-                    className="rounded-xl bg-primary px-6 py-3 font-semibold text-white transition hover:bg-primary-dark font-inter"
-                  >
-                    Export Approved Claims
-                  </button>
                 </div>
               </Card>
             </section>

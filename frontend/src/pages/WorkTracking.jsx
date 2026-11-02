@@ -344,7 +344,7 @@ const WorkTracking = () => {
                             )}
                           </div>
 
-                          <div className="mt-4 grid grid-cols-3 gap-2 md:gap-3 text-sm">
+                          <div className="mt-4 grid grid-cols-2 gap-2 md:gap-3 text-sm md:grid-cols-4">
                             <div>
                               <p className="text-neutral">Worked</p>
                               <p className="mt-1 font-semibold text-gray-800">
@@ -361,6 +361,12 @@ const WorkTracking = () => {
                               <p className="text-neutral">Remaining</p>
                               <p className="mt-1 font-semibold text-gray-800">
                                 {remaining.toFixed(1)} hrs
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-neutral">Estimated Earnings</p>
+                              <p className="mt-1 font-semibold text-gray-800">
+                                R {(totalHours * appointment.hourlyRate).toFixed(2)}
                               </p>
                             </div>
                           </div>
@@ -550,49 +556,6 @@ const WorkTracking = () => {
                         </form>
                       </Card>
                     )}
-
-                    {/* Stats grid: 2×2 on phone, 4 across on desktop */}
-                    <div className="mb-6 grid grid-cols-2 gap-3 md:gap-5 md:grid-cols-4">
-                      <Card>
-                        <p className="text-xs md:text-sm text-neutral">
-                          Total Hours Worked
-                        </p>
-                        <p className="mt-2 text-xl md:text-2xl font-semibold text-primary-dark">
-                          {getAppointmentTotalHours(
-                            selectedAppointment.id
-                          ).toFixed(1)}
-                        </p>
-                      </Card>
-                      <Card>
-                        <p className="text-xs md:text-sm text-neutral">
-                          Maximum Hours
-                        </p>
-                        <p className="mt-2 text-xl md:text-2xl font-semibold text-primary-dark">
-                          {selectedAppointment.maxHours}
-                        </p>
-                      </Card>
-                      <Card>
-                        <p className="text-xs md:text-sm text-neutral">
-                          Remaining Hours
-                        </p>
-                        <p className="mt-2 text-xl md:text-2xl font-semibold text-primary-dark">
-                          {Math.max(remainingHours, 0).toFixed(1)}
-                        </p>
-                      </Card>
-                      <Card>
-                        <p className="text-xs md:text-sm text-neutral">
-                          Estimated Earnings
-                        </p>
-                        <p className="mt-2 text-xl md:text-2xl font-semibold text-primary-dark">
-                          R{' '}
-                          {(
-                            getAppointmentTotalHours(
-                              selectedAppointment.id
-                            ) * selectedAppointment.hourlyRate
-                          ).toFixed(2)}
-                        </p>
-                      </Card>
-                    </div>
 
                     <Card>
                       <div className="mb-6">

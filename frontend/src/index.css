@@ -16,6 +16,15 @@
   --color-error: #DC3545;
   --color-warning: #FFC107;
 
+  --color-status-amber: #8A5A00;
+  --color-status-amber-soft: #FFF4D6;
+  --color-status-progress: #3B4E9B;
+  --color-status-progress-soft: #E8ECF9;
+  --color-status-done: #176B3A;
+  --color-status-done-soft: #E7F6EC;
+  --color-status-danger: #B42318;
+  --color-status-danger-soft: #FDECEA;
+
   --font-poppins: 'Poppins', sans-serif;
   --font-inter: 'Inter', sans-serif;
   --radius-xl: 12px;

@@ -452,7 +452,7 @@ class AdminRepository {
                 c."TotalHoursClaimed" AS hours,
                 c."HourlyRateApplied" AS rate,
                 c."TotalClaimAmount" AS amount,
-                'Approved' AS status,
+                c."ClaimStatus" AS status,
                 c."SubmissionDate" AS date
             FROM "REMUNERATION_CLAIM" c
             JOIN "DEMI_APPLICATION" da

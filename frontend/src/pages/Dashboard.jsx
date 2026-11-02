@@ -68,16 +68,6 @@ const Dashboard = () => {
   const monthlyHours = dashboardData?.monthlyHours || [];
   const applications = dashboardData?.applications || [];
   const claims = dashboardData?.claims || [];
-  const recentActivity = dashboardData?.recentActivity || [];
-
-  const formatDate = (value) => {
-    if (!value) return '';
-    return new Date(value).toLocaleDateString('en-ZA', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
 
   return (
     <div className="min-h-screen bg-off-white">
@@ -127,14 +117,14 @@ const Dashboard = () => {
                   </button>
 
                   <button
-                    onClick={() => navigate('/applications')}
+                    onClick={() => navigate('/apply-for-assistant')}
                     className="bg-primary-lightest text-dark px-6 py-3 rounded-xl font-semibold hover:bg-primary-light hover:text-white transition text-center"
                   >
                     Apply to Assistant
                   </button>
 
                   <button
-                    onClick={() => navigate('/claims')}
+                    onClick={() => navigate('/generate-new-claim')}
                     className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-lightest transition text-center"
                   >
                     Submit Claim
@@ -403,61 +393,6 @@ const Dashboard = () => {
               </div>
             </div>
 
-            {/* Generate Claim & Recent Activity */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h3 className="text-xl md:text-2xl font-poppins font-semibold text-primary mb-4">
-                  Generate Claim
-                </h3>
-
-                <Card>
-                  <p className="text-neutral mb-4 font-inter">
-                    Ready to submit a new claim?
-                  </p>
-
-                  <button
-                    onClick={() => navigate('/claims')}
-                    className="w-full bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
-                  >
-                    Generate New Claim
-                  </button>
-                </Card>
-              </div>
-
-              <div>
-                <h3 className="text-xl md:text-2xl font-poppins font-semibold text-primary mb-4">
-                  Recent Activity
-                </h3>
-
-                <Card>
-                  <div className="space-y-4">
-                    {recentActivity.length === 0 ? (
-                      <p className="text-neutral font-inter">
-                        No recent activity.
-                      </p>
-                    ) : recentActivity.map((activity, index) => (
-                      <div key={index}>
-                        <p className="font-semibold text-dark font-inter">
-                          {activity.text}
-                        </p>
-                        {activity.date && (
-                          <p className="text-sm text-neutral font-inter">
-                            {formatDate(activity.date)}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={() => navigate('/notifications')}
-                    className="text-primary font-semibold hover:underline block text-right mt-4 ml-auto font-inter"
-                  >
-                    View all →
-                  </button>
-                </Card>
-              </div>
-            </div>
           </div>
         </main>
       </div>

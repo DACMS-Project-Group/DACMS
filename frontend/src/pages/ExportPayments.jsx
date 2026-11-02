@@ -8,7 +8,6 @@ import { apiGet } from '../api';
 const ExportPayments = () => {
   document.title = 'AACMS - Export Payments';
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('Approved');
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [claims, setClaims] = useState([]);
@@ -49,10 +48,8 @@ const ExportPayments = () => {
       claim.module,
     ].some((value) => String(value ?? '').toLowerCase().includes(normalizedSearch));
     const claimDate = new Date(claim.date).toISOString().slice(0, 10);
-    const matchesStatus = statusFilter === 'All' || claim.status === statusFilter;
 
     return matchesSearch
-      && matchesStatus
       && (!dateFrom || claimDate >= dateFrom)
       && (!dateTo || claimDate <= dateTo);
   });
@@ -228,7 +225,7 @@ const ExportPayments = () => {
 
               <Card>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
                   {/* Search */}
                   <div>
@@ -245,23 +242,6 @@ const ExportPayments = () => {
                       }
                       className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
                     />
-                  </div>
-
-                  {/* Status */}
-                  <div>
-                    <label className="block text-sm text-neutral mb-2 font-inter font-medium">
-                      Status
-                    </label>
-
-                    <select
-                      value={statusFilter}
-                      onChange={(event) => setStatusFilter(event.target.value)}
-                      className="w-full h-11 px-4 border border-neutral rounded-xl focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/25 font-inter"
-                    >
-                      <option>Approved</option>
-                      <option>Paid</option>
-                      <option>All</option>
-                    </select>
                   </div>
 
                   {/* Date From */}
@@ -293,59 +273,6 @@ const ExportPayments = () => {
                 </div>
 
               </Card>
-
-            </section>
-
-            {/* Summary Statistics */}
-            <section className="mb-8">
-
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                Payment Summary
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-
-                <Card>
-                  <p className="text-neutral font-inter font-medium">
-                    Approved Claims
-                  </p>
-
-                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                    {claims.length}
-                  </p>
-                </Card>
-
-                <Card>
-                  <p className="text-neutral font-inter font-medium">
-                    Selected Claims
-                  </p>
-
-                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                    {selectedClaims.length}
-                  </p>
-                </Card>
-
-                <Card>
-                  <p className="text-neutral font-inter font-medium">
-                    Total Hours
-                  </p>
-
-                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                    {totalHours}
-                  </p>
-                </Card>
-
-                <Card>
-                  <p className="text-neutral font-inter font-medium">
-                    Total Payment
-                  </p>
-
-                  <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                    {formatCurrency(totalPayment)}
-                  </p>
-                </Card>
-
-              </div>
 
             </section>
 

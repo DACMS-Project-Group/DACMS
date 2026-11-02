@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Sidebar from '../components/Sidebar';
 import Navbar from '../components/Navbar';
 import Card from '../components/Card';
+import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
 
 const LectureDashboard = () => {
@@ -267,9 +268,7 @@ const LectureDashboard = () => {
                                 Submitted: {formatDate(app.DateSubmitted)}
                               </p>
                             </div>
-                            <span className="shrink-0 rounded-full bg-warning px-2 py-0.5 text-xs font-semibold text-white">
-                              {app.ApplicationStatus}
-                            </span>
+                            <StatusBadge status={app.ApplicationStatus} />
                           </div>
                         </div>
                       ))}

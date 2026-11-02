@@ -23,7 +23,6 @@ import StudentModules from './pages/StudentModules';
 // ===== LECTURER PAGES =====
 import LectureDashboard from './pages/LectureDashboard';
 import ReviewApplications from './pages/ReviewApplications';
-import ApplicationReview from './pages/ApplicationReview';
 import AssignAssistantResponsibilities from './pages/AssignAssistantResponsibilities';
 import VerifyWorkHours from './pages/VerifyWorkHours';
 import AssistantListings from './pages/AssistantListings';
@@ -67,6 +66,17 @@ function App() {
             {/* 2FA happens before a session exists, so it cannot sit behind ProtectedRoute */}
             <Route path="/2fa" element={<TwoFactorAuth />} />
 
+            {/* ===== SHARED ROUTES ===== */}
+            <Route
+              element={
+                <ProtectedRoute
+                  requiredRoles={['student', 'lecturer', 'admin']}
+                />
+              }
+            >
+              <Route path="/notifications" element={<Notifications />} />
+            </Route>
+
             {/* ===== STUDENT ROUTES ===== */}
             <Route element={<ProtectedRoute requiredRoles={['student']} />}>
               <Route path="/student-dashboard" element={<Dashboard />} />
@@ -74,7 +84,6 @@ function App() {
               <Route path="/applications" element={<Applications />} />
               <Route path="/apply-for-assistant" element={<ApplyForAssistant />} />
               <Route path="/application-detail/:id" element={<ApplicationDetail />} />
-              <Route path="/notifications" element={<Notifications />} />
               <Route path="/work-tracking" element={<WorkTracking />} />
               <Route path="/session-detail/:id" element={<SessionDetail />} />
               <Route path="/claims" element={<Claims />} />
@@ -87,7 +96,6 @@ function App() {
             <Route element={<ProtectedRoute requiredRoles={['lecturer']} />}>
               <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
               <Route path="/review-applications" element={<ReviewApplications />} />
-              <Route path="/application-review/:id" element={<ApplicationReview />} />
               <Route
                 path="/assign-responsibilities"
                 element={<AssignAssistantResponsibilities />}
@@ -101,7 +109,6 @@ function App() {
               <Route path="/verify-hours" element={<VerifyWorkHours />} />
               <Route path="/lecturer-budgets" element={<BudgetManagement />} />
               <Route path="/lecturer-budget-details/:id" element={<BudgetDetails />} />
-              <Route path="/notifications" element={<Notifications />} />
             </Route>
 
             {/* ===== ADMIN ROUTES ===== */}
@@ -128,7 +135,6 @@ function App() {
                 path="/appointment-review/:id"
                 element={<AppointmentReview />}
               />
-              <Route path="/notifications" element={<Notifications />} />
               <Route path="/audit-logs" element={<AuditLogs />} />
             </Route>
 
