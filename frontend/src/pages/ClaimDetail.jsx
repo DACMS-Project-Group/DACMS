@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { formatMoney, formatNumber } from '../lib/format';
 import { apiGet } from '../api';
 
 const ClaimDetail = () => {
@@ -69,27 +68,15 @@ const ClaimDetail = () => {
     return formatDate(startDate || endDate);
   };
 
-  const formatAmount = (amount) => {
-    return `R ${Number(amount || 0).toLocaleString('en-ZA', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-  };
-
   const handleBackToClaims = () => {
     navigate('/claims');
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-off-white">
-        <Navbar />
+      <>
 
-        <div className="flex">
-          <Sidebar userRole="student" />
-
-          <main className="flex-1 min-w-0">
-            <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+<div className="bg-primary h-16 flex items-center px-4 md:px-8">
               <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
                 Claim Detail
               </h1>
@@ -102,22 +89,16 @@ const ClaimDetail = () => {
                 </p>
               </Card>
             </div>
-          </main>
-        </div>
-      </div>
+
+      </>
     );
   }
 
   if (error || !claim) {
     return (
-      <div className="min-h-screen bg-off-white">
-        <Navbar />
+      <>
 
-        <div className="flex">
-          <Sidebar userRole="student" />
-
-          <main className="flex-1 min-w-0">
-            <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+<div className="bg-primary h-16 flex items-center px-4 md:px-8">
               <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
                 Claim Detail
               </h1>
@@ -144,21 +125,15 @@ const ClaimDetail = () => {
                 </div>
               </Card>
             </div>
-          </main>
-        </div>
-      </div>
+
+      </>
     );
   }
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole="student" />
-
-        <main className="flex-1 min-w-0">
-          {/* Page Header */}
+{/* Page Header */}
           <div className="bg-primary h-16 flex items-center px-4 md:px-8">
             <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Claim Detail
@@ -195,7 +170,7 @@ const ClaimDetail = () => {
                 <div>
                   <p className="text-sm text-neutral">Claim Period</p>
 
-                  <p className="mt-1 font-semibold text-gray-800 break-words">
+                  <p className="mt-1 font-semibold text-dark break-words">
                     {formatPeriod(
                       claim.PeriodStartDate,
                       claim.PeriodEndDate
@@ -206,7 +181,7 @@ const ClaimDetail = () => {
                 <div>
                   <p className="text-sm text-neutral">Submitted Date</p>
 
-                  <p className="mt-1 font-semibold text-gray-800">
+                  <p className="mt-1 font-semibold text-dark">
                     {formatDate(claim.SubmissionDate)}
                   </p>
                 </div>
@@ -237,7 +212,7 @@ const ClaimDetail = () => {
                 <div>
                   <p className="text-sm text-neutral">Claim ID</p>
 
-                  <p className="mt-1 font-semibold text-gray-800">
+                  <p className="mt-1 font-semibold text-dark">
                     {claim.ClaimID}
                   </p>
                 </div>
@@ -245,7 +220,7 @@ const ClaimDetail = () => {
                 <div>
                   <p className="text-sm text-neutral">Application ID</p>
 
-                  <p className="mt-1 font-semibold text-gray-800">
+                  <p className="mt-1 font-semibold text-dark">
                     {claim.ApplicationID}
                   </p>
                 </div>
@@ -253,7 +228,7 @@ const ClaimDetail = () => {
                 <div>
                   <p className="text-sm text-neutral">Student ID</p>
 
-                  <p className="mt-1 font-semibold text-gray-800">
+                  <p className="mt-1 font-semibold text-dark">
                     {claim.StudentID}
                   </p>
                 </div>
@@ -276,7 +251,7 @@ const ClaimDetail = () => {
                 <div className="min-w-0">
                   <p className="text-sm text-neutral">Module</p>
 
-                  <p className="mt-1 font-semibold text-gray-800 break-words">
+                  <p className="mt-1 font-semibold text-dark break-words">
                     {claim.ModuleCode} - {claim.ModuleName}
                   </p>
                 </div>
@@ -284,7 +259,7 @@ const ClaimDetail = () => {
                 <div>
                   <p className="text-sm text-neutral">Module ID</p>
 
-                  <p className="mt-1 font-semibold text-gray-800">
+                  <p className="mt-1 font-semibold text-dark">
                     {claim.ModuleID}
                   </p>
                 </div>
@@ -292,8 +267,8 @@ const ClaimDetail = () => {
                 <div>
                   <p className="text-sm text-neutral">Hourly Rate</p>
 
-                  <p className="mt-1 font-semibold text-gray-800">
-                    {formatAmount(claim.HourlyRateApplied)}
+                  <p className="mt-1 font-semibold text-dark">
+                    {formatMoney(claim.HourlyRateApplied)}
                   </p>
                 </div>
               </div>
@@ -313,7 +288,7 @@ const ClaimDetail = () => {
                 </p>
               </div>
 
-              <div className="rounded-lg border border-gray-200 bg-off-white p-4 md:p-5">
+              <div className="rounded-lg border border-border-subtle bg-off-white p-4 md:p-5">
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
                     <p className="text-sm text-neutral">
@@ -321,7 +296,7 @@ const ClaimDetail = () => {
                     </p>
 
                     <p className="mt-2 text-xl md:text-2xl font-bold text-primary-dark">
-                      {Number(claim.TotalHoursClaimed || 0).toFixed(2)}
+                      {formatNumber(claim.TotalHoursClaimed, 2)}
                     </p>
                   </div>
 
@@ -329,7 +304,7 @@ const ClaimDetail = () => {
                     <p className="text-sm text-neutral">Claim Amount</p>
 
                     <p className="mt-2 text-xl md:text-2xl font-bold text-primary-dark">
-                      {formatAmount(claim.TotalClaimAmount)}
+                      {formatMoney(claim.TotalClaimAmount)}
                     </p>
                   </div>
                 </div>
@@ -353,7 +328,7 @@ const ClaimDetail = () => {
                   <p className="text-sm text-neutral">Total Hours</p>
 
                   <p className="mt-2 text-xl md:text-2xl font-bold text-primary-dark">
-                    {Number(claim.TotalHoursClaimed || 0).toFixed(2)}
+                    {formatNumber(claim.TotalHoursClaimed, 2)}
                   </p>
                 </div>
 
@@ -361,7 +336,7 @@ const ClaimDetail = () => {
                   <p className="text-sm text-neutral">Hourly Rate</p>
 
                   <p className="mt-2 text-xl md:text-2xl font-bold text-primary-dark">
-                    {formatAmount(claim.HourlyRateApplied)}
+                    {formatMoney(claim.HourlyRateApplied)}
                   </p>
                 </div>
 
@@ -369,18 +344,18 @@ const ClaimDetail = () => {
                   <p className="text-sm text-neutral">Total Claim Amount</p>
 
                   <p className="mt-2 text-xl md:text-2xl font-bold text-primary-dark">
-                    {formatAmount(claim.TotalClaimAmount)}
+                    {formatMoney(claim.TotalClaimAmount)}
                   </p>
                 </div>
               </div>
 
-              <div className="mt-5 rounded-lg border border-gray-200 bg-white p-4">
+              <div className="mt-5 rounded-lg border border-border-subtle bg-white p-4">
                 <p className="text-sm text-neutral">Calculation</p>
 
-                <p className="mt-1 font-semibold text-gray-800 break-words">
-                  {Number(claim.TotalHoursClaimed || 0).toFixed(2)} hours ×{' '}
-                  {formatAmount(claim.HourlyRateApplied)} ={' '}
-                  {formatAmount(claim.TotalClaimAmount)}
+                <p className="mt-1 font-semibold text-dark break-words">
+                  {formatNumber(claim.TotalHoursClaimed, 2)} hours ×{' '}
+                  {formatMoney(claim.HourlyRateApplied)} ={' '}
+                  {formatMoney(claim.TotalClaimAmount)}
                 </p>
               </div>
             </Card>
@@ -411,7 +386,7 @@ const ClaimDetail = () => {
                 <div>
                   <p className="text-sm text-neutral">Next Step</p>
 
-                  <p className="mt-1 font-semibold text-gray-800">
+                  <p className="mt-1 font-semibold text-dark">
                     {claim.ClaimStatus === 'Pending'
                       ? 'Awaiting administrator verification.'
                       : claim.ClaimStatus === 'Approved' ||
@@ -425,9 +400,8 @@ const ClaimDetail = () => {
               </div>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

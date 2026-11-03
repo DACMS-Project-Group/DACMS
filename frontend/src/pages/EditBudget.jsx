@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
+import Toast from '../ui/Toast';
 import { apiGet, apiPut } from '../api';
 
 const EditBudget = () => {
@@ -252,17 +251,9 @@ const EditBudget = () => {
     : null;
 
   return (
-    <div className="min-h-screen bg-off-white">
+    <>
 
-      <Navbar />
-
-      <div className="flex">
-
-        <Sidebar userRole="admin" />
-
-        <main className="flex-1">
-
-          {/* Page Header */}
+{/* Page Header */}
           <div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-poppins font-semibold text-white">
               Edit Budget
@@ -298,19 +289,17 @@ const EditBudget = () => {
               </p>
             </div>
 
-            {/* Error */}
-            {error && (
-              <div className="mb-6 p-4 border border-red-300 bg-red-50 text-red-700 rounded-xl font-inter">
-                {error}
-              </div>
-            )}
+            <Toast
+              tone="error"
+              message={error}
+              onDismiss={() => setError('')}
+            />
 
-            {/* Success */}
-            {success && (
-              <div className="mb-6 p-4 border border-green-300 bg-green-50 text-green-700 rounded-xl font-inter">
-                {success}
-              </div>
-            )}
+            <Toast
+              tone="success"
+              message={success}
+              onDismiss={() => setSuccess('')}
+            />
 
             <form onSubmit={handleSubmit}>
 
@@ -601,7 +590,7 @@ const EditBudget = () => {
                               <button
                                 type="button"
                                 disabled
-                                className="text-red-600 font-semibold hover:underline font-inter disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="text-error font-semibold hover:underline font-inter disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 Remove
                               </button>
@@ -684,11 +673,7 @@ const EditBudget = () => {
 
           </div>
 
-        </main>
-
-      </div>
-
-    </div>
+    </>
   );
 };
 

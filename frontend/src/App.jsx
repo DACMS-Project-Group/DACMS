@@ -34,8 +34,7 @@ import BudgetManagement from './pages/BudgetManagement';
 import CreateBudget from './pages/CreateBudget';
 import EditBudget from './pages/EditBudget';
 import BudgetDetails from './pages/BudgetDetails';
-import ExportPayments from './pages/ExportPayments';
-import ClaimsVerification from './pages/ClaimsVerification';
+import ClaimsWorkspace from './pages/ClaimsWorkspace';
 import ClaimReview from './pages/ClaimReview';
 import AppointmentApprovals from './pages/AppointmentApprovals';
 import AppointmentReview from './pages/AppointmentReview';
@@ -49,6 +48,7 @@ import { NotificationProvider } from './contexts/notificationContext';
 import Notifications from './pages/Notifications';
 
 import ProtectedRoute from './routes/ProtectedRoute';
+import AppLayout from './components/AppLayout';
 import './index.css';
 
 function App() {
@@ -74,68 +74,82 @@ function App() {
                 />
               }
             >
-              <Route path="/notifications" element={<Notifications />} />
+              <Route element={<AppLayout />}>
+                <Route path="/notifications" element={<Notifications />} />
+              </Route>
             </Route>
 
             {/* ===== STUDENT ROUTES ===== */}
             <Route element={<ProtectedRoute requiredRoles={['student']} />}>
-              <Route path="/student-dashboard" element={<Dashboard />} />
-              <Route path="/profile" element={<StudentProfile />} />
-              <Route path="/applications" element={<Applications />} />
-              <Route path="/apply-for-assistant" element={<ApplyForAssistant />} />
-              <Route path="/application-detail/:id" element={<ApplicationDetail />} />
-              <Route path="/work-tracking" element={<WorkTracking />} />
-              <Route path="/session-detail/:id" element={<SessionDetail />} />
-              <Route path="/claims" element={<Claims />} />
-              <Route path="/generate-new-claim" element={<GenerateNewClaim />} />
-              <Route path="/claim-detail/:id" element={<ClaimDetail />} />
-              <Route path="/modules" element={<StudentModules />} />
+              <Route element={<AppLayout />}>
+                <Route path="/student-dashboard" element={<Dashboard />} />
+                <Route path="/profile" element={<StudentProfile />} />
+                <Route path="/applications" element={<Applications />} />
+                <Route path="/apply-for-assistant" element={<ApplyForAssistant />} />
+                <Route path="/application-detail/:id" element={<ApplicationDetail />} />
+                <Route path="/work-tracking" element={<WorkTracking />} />
+                <Route path="/session-detail/:id" element={<SessionDetail />} />
+                <Route path="/claims" element={<Claims />} />
+                <Route path="/generate-new-claim" element={<GenerateNewClaim />} />
+                <Route path="/claim-detail/:id" element={<ClaimDetail />} />
+                <Route path="/modules" element={<StudentModules />} />
+              </Route>
             </Route>
 
             {/* ===== LECTURER ROUTES ===== */}
             <Route element={<ProtectedRoute requiredRoles={['lecturer']} />}>
-              <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
-              <Route path="/review-applications" element={<ReviewApplications />} />
-              <Route
-                path="/assign-responsibilities"
-                element={<AssignAssistantResponsibilities />}
-              />
-              <Route path="/review-claims" element={<ReviewClaims />} />
-              <Route path="/review-claim/:id" element={<ClaimReview />} />
-              <Route
-                path="/assistant-listings"
-                element={<AssistantListings />}
-              />
-              <Route path="/verify-hours" element={<VerifyWorkHours />} />
-              <Route path="/lecturer-budgets" element={<BudgetManagement />} />
-              <Route path="/lecturer-budget-details/:id" element={<BudgetDetails />} />
+              <Route element={<AppLayout />}>
+                <Route path="/lecturer-dashboard" element={<LectureDashboard />} />
+                <Route path="/review-applications" element={<ReviewApplications />} />
+                <Route
+                  path="/assign-responsibilities"
+                  element={<AssignAssistantResponsibilities />}
+                />
+                <Route path="/review-claims" element={<ReviewClaims />} />
+                <Route path="/review-claim/:id" element={<ClaimReview />} />
+                <Route
+                  path="/assistant-listings"
+                  element={<AssistantListings />}
+                />
+                <Route path="/verify-hours" element={<VerifyWorkHours />} />
+                <Route path="/lecturer-budgets" element={<BudgetManagement />} />
+                <Route path="/lecturer-budget-details/:id" element={<BudgetDetails />} />
+              </Route>
             </Route>
 
             {/* ===== ADMIN ROUTES ===== */}
             <Route element={<ProtectedRoute requiredRoles={['admin']} />}>
-              <Route path="/admin-dashboard" element={<AdminDashboard />} />
-              <Route path="/budget-management" element={<BudgetManagement />} />
-              <Route path="/create-budget" element={<CreateBudget />} />
-              <Route path="/edit-budget/:id" element={<EditBudget />} />
-              <Route path="/budget-details/:id" element={<BudgetDetails />} />
-              <Route
-                path="/claims-verification"
-                element={<ClaimsVerification />}
-              />
-              <Route
-                path="/claim-review/:id"
-                element={<ClaimReview />}
-              />
-              <Route path="/export-payments" element={<ExportPayments />} />
-              <Route
-                path="/appointment-approvals"
-                element={<AppointmentApprovals />}
-              />
-              <Route
-                path="/appointment-review/:id"
-                element={<AppointmentReview />}
-              />
-              <Route path="/audit-logs" element={<AuditLogs />} />
+              <Route element={<AppLayout />}>
+                <Route path="/admin-dashboard" element={<AdminDashboard />} />
+                <Route path="/budget-management" element={<BudgetManagement />} />
+                <Route path="/create-budget" element={<CreateBudget />} />
+                <Route path="/edit-budget/:id" element={<EditBudget />} />
+                <Route path="/budget-details/:id" element={<BudgetDetails />} />
+                <Route path="/admin/claims" element={<ClaimsWorkspace />} />
+                <Route
+                  path="/claims-verification"
+                  element={<Navigate to="/admin/claims" replace />}
+                />
+                <Route
+                  path="/claim-review/:id"
+                  element={<ClaimReview />}
+                />
+                <Route
+                  path="/export-payments"
+                  element={
+                    <Navigate to="/admin/claims?tab=export" replace />
+                  }
+                />
+                <Route
+                  path="/appointment-approvals"
+                  element={<AppointmentApprovals />}
+                />
+                <Route
+                  path="/appointment-review/:id"
+                  element={<AppointmentReview />}
+                />
+                <Route path="/audit-logs" element={<AuditLogs />} />
+              </Route>
             </Route>
 
             {/* ===== FALLBACK ===== */}

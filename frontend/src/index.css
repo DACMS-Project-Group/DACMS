@@ -16,6 +16,23 @@
   --color-error: #DC3545;
   --color-warning: #FFC107;
 
+  --color-border-subtle: #E5E7EB;
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F8F9FA;
+  --color-text-muted: #78848E;
+  --color-text-strong: #181512;
+
+  --text-page: 1.5rem;
+  --text-page--line-height: 2rem;
+  --text-section: 1.125rem;
+  --text-section--line-height: 1.75rem;
+  --text-card: 1rem;
+  --text-card--line-height: 1.5rem;
+  --text-body: 0.875rem;
+  --text-body--line-height: 1.5rem;
+  --text-caption: 0.75rem;
+  --text-caption--line-height: 1rem;
+
   --color-status-amber: #8A5A00;
   --color-status-amber-soft: #FFF4D6;
   --color-status-progress: #3B4E9B;

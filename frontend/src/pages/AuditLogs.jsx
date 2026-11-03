@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import { CompactTable } from '../components/CompactTable';
 import { useDensity } from '../contexts/DensityContext';
@@ -80,7 +78,7 @@ const relatedRecordRoute = (recordType, recordReference) => {
   }
 
   if (recordType === 'claim') {
-    return `/claims-verification?search=${encodeURIComponent(recordReference)}`;
+    return `/admin/claims?search=${encodeURIComponent(recordReference)}`;
   }
 
   if (recordType === 'appointment') {
@@ -280,6 +278,7 @@ const AuditLogs = () => {
           .filter(Boolean)
           .join(' · ') || 'Unknown user';
         return (
+          <>
           <div className="max-w-[200px] truncate font-inter" title={label}>
             <span className="font-semibold text-dark">
               {log.user_name || log.user_email || 'Unknown user'}
@@ -290,6 +289,7 @@ const AuditLogs = () => {
               </span>
             )}
           </div>
+          </>
         );
       }
     },
@@ -321,6 +321,7 @@ const AuditLogs = () => {
         const route = relatedRecordRoute(type, ref);
 
         return (
+          <>
           <div className="max-w-[220px] truncate font-inter" title={label}>
             {route ? (
               <button
@@ -349,6 +350,7 @@ const AuditLogs = () => {
               <span className="text-neutral">{label}</span>
             )}
           </div>
+          </>
         );
       }
     },
@@ -376,14 +378,9 @@ const AuditLogs = () => {
   );
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole="admin" />
-
-        <main className="flex-1">
-          {/* Page Header */}
+{/* Page Header */}
           <div className="bg-primary px-6 py-3">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
               <div>
@@ -667,9 +664,8 @@ const AuditLogs = () => {
               )}
             </section>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

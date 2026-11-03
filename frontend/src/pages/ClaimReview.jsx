@@ -1,9 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { formatMoney, formatNumber } from '../lib/format';
 import { apiGet, apiPatch } from '../api';
 
 const ClaimReview = () => {
@@ -15,7 +14,7 @@ const ClaimReview = () => {
   const isLecturerReview = location.pathname.startsWith('/review-claim/');
   const listPath = isLecturerReview
     ? '/review-claims'
-    : '/claims-verification';
+    : '/admin/claims';
 
   const [claim, setClaim] = useState(null);
   const [verifiedSessions, setVerifiedSessions] = useState([]);
@@ -24,13 +23,6 @@ const ClaimReview = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loadError, setLoadError] = useState('');
   const [actionError, setActionError] = useState('');
-
-  const formatAmount = (amount) => {
-    return `R ${Number(amount ?? 0).toLocaleString('en-ZA', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-  };
 
   const formatDate = (date) => {
     if (!date) return 'Not provided';
@@ -226,37 +218,29 @@ const ClaimReview = () => {
   };
 
   const renderPageMessage = (message, showBackButton = false) => (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
-
-      <div className="flex">
-        <Sidebar userRole={isLecturerReview ? 'lecturer' : 'admin'} />
-
-        <main className="flex-1">
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              {isLecturerReview ? 'Claim Verification' : 'Claim Review'}
-            </h1>
-          </div>
-
-          <div className="p-8">
-            <Card>
-              <p className="text-neutral font-inter">{message}</p>
-
-              {showBackButton && (
-                <button
-                  type="button"
-                  onClick={() => navigate(listPath)}
-                  className="mt-4 rounded-lg bg-primary px-4 py-2 font-semibold text-white font-inter"
-                >
-                  Back to Claims
-                </button>
-              )}
-            </Card>
-          </div>
-        </main>
+    <>
+      <div className="bg-primary px-8 py-4">
+        <h1 className="text-2xl font-poppins font-semibold text-white">
+          {isLecturerReview ? 'Claim Verification' : 'Claim Review'}
+        </h1>
       </div>
-    </div>
+
+      <div className="p-8">
+        <Card>
+          <p className="text-neutral font-inter">{message}</p>
+
+          {showBackButton && (
+            <button
+              type="button"
+              onClick={() => navigate(listPath)}
+              className="mt-4 rounded-lg bg-primary px-4 py-2 font-semibold text-white font-inter"
+            >
+              Back to Claims
+            </button>
+          )}
+        </Card>
+      </div>
+    </>
   );
 
   if (isLoading) {
@@ -271,14 +255,9 @@ const ClaimReview = () => {
   }
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole={isLecturerReview ? 'lecturer' : 'admin'} />
-
-        <main className="flex-1">
-          <div className="bg-primary px-8 py-4">
+<div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-semibold text-white font-poppins">
               {isLecturerReview ? 'Claim Verification' : 'Claim Review'}
             </h1>
@@ -391,7 +370,7 @@ const ClaimReview = () => {
                   </p>
 
                   <div className="mt-2">
-                    <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
+                    <span className="inline-flex rounded-full bg-status-done-soft px-3 py-1 text-xs font-semibold text-status-done">
                       {claim.banking?.status || 'Not provided'}
                     </span>
                   </div>
@@ -511,7 +490,7 @@ const ClaimReview = () => {
                           </td>
 
                           <td className="px-4 py-4 text-sm font-medium text-dark font-inter">
-                            {Number(session.hours ?? 0).toFixed(2)}
+                            {formatNumber(session.hours, 2)}
                           </td>
 
                           <td className="px-4 py-4">
@@ -535,11 +514,11 @@ const ClaimReview = () => {
                                 </span>
                               </label>
                             ) : session.status === 'Verified' ? (
-                              <span className="inline-flex rounded-full bg-green-100 px-3 py-1 text-xs font-semibold text-green-800">
+                              <span className="inline-flex rounded-full bg-status-done-soft px-3 py-1 text-xs font-semibold text-status-done">
                                 Verified
                               </span>
                             ) : (
-                              <span className="inline-flex rounded-full bg-yellow-100 px-3 py-1 text-xs font-semibold text-yellow-800">
+                              <span className="inline-flex rounded-full bg-status-amber-soft px-3 py-1 text-xs font-semibold text-status-amber">
                                 Pending verification
                               </span>
                             )}
@@ -574,7 +553,7 @@ const ClaimReview = () => {
                   </p>
 
                   <p className="mt-2 text-2xl font-bold text-primary font-poppins">
-                    {Number(claim.hours ?? 0).toFixed(2)}
+                    {formatNumber(claim.hours, 2)}
                   </p>
                 </div>
 
@@ -584,7 +563,7 @@ const ClaimReview = () => {
                   </p>
 
                   <p className="mt-2 text-2xl font-bold text-primary font-poppins">
-                    {formatAmount(claim.hourlyRate)}
+                    {formatMoney(claim.hourlyRate)}
                   </p>
                 </div>
 
@@ -594,7 +573,7 @@ const ClaimReview = () => {
                   </p>
 
                   <p className="mt-2 text-2xl font-bold text-primary font-poppins">
-                    {formatAmount(claim.amount)}
+                    {formatMoney(claim.amount)}
                   </p>
                 </div>
               </div>
@@ -605,20 +584,20 @@ const ClaimReview = () => {
                 </p>
 
                 <p className="mt-1 font-semibold text-dark font-inter">
-                  {Number(claim.hours ?? 0).toFixed(2)} hours ×{' '}
-                  {formatAmount(claim.hourlyRate)} ={' '}
-                  {formatAmount(calculatedAmount)}
+                  {formatNumber(claim.hours, 2)} hours ×{' '}
+                  {formatMoney(claim.hourlyRate)} ={' '}
+                  {formatMoney(calculatedAmount)}
                 </p>
               </div>
 
               <div className="mt-4">
                 {calculationValid ? (
-                  <div className="rounded-xl bg-green-50 px-4 py-3 text-sm font-medium text-green-800 font-inter">
+                  <div className="rounded-xl bg-status-done-soft px-4 py-3 text-sm font-medium text-status-done font-inter">
                     Calculation is valid. The claimed amount matches the
                     calculated remuneration.
                   </div>
                 ) : (
-                  <div className="rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-800 font-inter">
+                  <div className="rounded-xl bg-status-danger-soft px-4 py-3 text-sm font-medium text-status-danger font-inter">
                     Calculation requires review. The claimed amount does not
                     match the calculated remuneration.
                   </div>
@@ -679,7 +658,7 @@ const ClaimReview = () => {
               {actionError && (
                 <p
                   role="alert"
-                  className="mb-4 text-sm font-medium text-red-700 font-inter"
+                  className="mb-4 text-sm font-medium text-error font-inter"
                 >
                   {actionError}
                 </p>
@@ -691,7 +670,7 @@ const ClaimReview = () => {
                     type="button"
                     onClick={handleReject}
                     disabled={isSubmitting}
-                    className="rounded-xl border border-red-500 px-5 py-3 font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50 font-inter"
+                    className="rounded-xl border border-error px-5 py-3 font-semibold text-error transition hover:bg-status-danger-soft disabled:cursor-not-allowed disabled:opacity-50 font-inter"
                   >
                     Reject Claim
                   </button>
@@ -717,9 +696,8 @@ const ClaimReview = () => {
               </div>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

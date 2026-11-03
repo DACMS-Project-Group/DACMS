@@ -1,13 +1,16 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import Button from '../ui/Button';
+import DataTable from '../ui/DataTable';
+import PageHeader from '../ui/PageHeader';
+import Section from '../ui/Section';
+import { formatMoney, formatNumber } from '../lib/format';
 import { apiGet } from '../api';
 
-const ClaimsVerification = () => {
+const ClaimsVerification = ({ embedded = false }) => {
   document.title = 'AACMS - Claims Verification';
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -71,13 +74,6 @@ const ClaimsVerification = () => {
     });
   }, [claims, searchTerm, statusFilter]);
 
-  const formatAmount = (amount) => {
-    return `R ${Number(amount || 0).toLocaleString('en-ZA', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-  };
-
   const formatDate = (dateString) => {
     if (!dateString) {
       return '-';
@@ -99,53 +95,82 @@ const ClaimsVerification = () => {
   };
 
   const handleExport = () => {
-    navigate('/export-payments');
+    navigate('/admin/claims?tab=export');
   };
 
+  const claimColumns = [
+    {
+      key: 'reference',
+      header: 'Claim ID',
+      className: 'p-4 font-semibold text-dark font-inter',
+      render: (claim) => claim.reference_number,
+    },
+    {
+      key: 'student',
+      header: 'Student',
+      className: 'p-4 text-dark font-inter',
+      render: (claim) => claim.student_name,
+    },
+    {
+      key: 'module',
+      header: 'Module',
+      className: 'p-4 text-dark font-inter',
+      render: (claim) => claim.module_code,
+    },
+    {
+      key: 'hours',
+      header: 'Hours',
+      className: 'p-4 text-dark font-inter',
+      render: (claim) => formatNumber(claim.total_hours_claimed, 2),
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      className: 'p-4 font-semibold text-dark font-inter',
+      render: (claim) => formatMoney(claim.total_claim_amount),
+    },
+    {
+      key: 'submitted',
+      header: 'Submitted',
+      className: 'p-4 text-sm text-neutral font-inter',
+      render: (claim) => formatDate(claim.submission_date),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'p-4',
+      render: (claim) => <StatusBadge status={claim.claim_status} />,
+    },
+    {
+      key: 'action',
+      header: 'Action',
+      className: 'p-4',
+      render: (claim) => (
+        <Button size="sm" onClick={() => handleReviewClaim(claim)}>
+          Review
+        </Button>
+      ),
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
-
-      <div className="flex">
-        <Sidebar userRole="admin" />
-
-        <main className="flex-1">
-          {/* Page Header */}
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              Claims Verification
-            </h1>
-          </div>
+    <>
+      {!embedded && (
+        <div className="bg-primary px-8 py-4">
+          <h1 className="text-2xl font-poppins font-semibold text-white">
+            Claims Verification
+          </h1>
+        </div>
+      )}
 
           <div className="p-8">
-            {/* Page Introduction */}
-            <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <h2 className="text-2xl font-semibold text-primary font-poppins">
-                  Review Submitted Claims
-                </h2>
+            <PageHeader
+              title="Review Submitted Claims"
+              description="Review submitted remuneration claims, verify timesheets, validate calculations, and approve or reject claims."
+              actions={<Button onClick={handleExport}>Export Payments</Button>}
+            />
 
-                <p className="mt-2 text-neutral font-inter">
-                  Review submitted remuneration claims, verify timesheets,
-                  validate calculations, and approve or reject claims.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleExport}
-                className="rounded-xl bg-primary px-6 py-3 font-semibold text-white transition hover:bg-primary-dark font-inter"
-              >
-                Export Payments
-              </button>
-            </div>
-
-            {/* Filters */}
-            <section className="mb-8">
-              <h3 className="mb-4 text-xl font-semibold text-primary font-poppins">
-                Filter Claims
-              </h3>
-
+            <Section title="Filter Claims">
               <Card>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                   <div>
@@ -193,14 +218,9 @@ const ClaimsVerification = () => {
                   </div>
                 </div>
               </Card>
-            </section>
+            </Section>
 
-            {/* Summary Cards */}
-            <section className="mb-8">
-              <h3 className="mb-4 text-xl font-semibold text-primary font-poppins">
-                Claims Summary
-              </h3>
-
+            <Section title="Claims Summary">
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 <Card>
                   <p className="font-medium text-neutral font-inter">
@@ -258,147 +278,32 @@ const ClaimsVerification = () => {
                   </p>
                 </Card>
               </div>
-            </section>
+            </Section>
 
-            {/* Claims Table */}
-            <section className="mb-8">
-              <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-primary font-poppins">
-                  Submitted Claims
-                </h3>
-
+            <Section
+              title="Submitted Claims"
+              actions={
                 <span className="text-sm text-neutral font-inter">
                   {filteredClaims.length} claims
                 </span>
-              </div>
-
+              }
+            >
               <Card>
-                <div className="overflow-x-auto">
-                  {loading ? (
-                    <div className="px-6 py-10 text-center">
-                      <p className="text-neutral font-inter">
-                        Loading claims...
-                      </p>
-                    </div>
-                  ) : error ? (
-                    <div className="px-6 py-10 text-center">
-                      <h3 className="text-lg font-semibold text-dark font-poppins">
-                        Unable to Load Claims
-                      </h3>
-
-                      <p className="mt-2 text-sm text-neutral font-inter">
-                        {error}
-                      </p>
-                    </div>
-                  ) : filteredClaims.length === 0 ? (
-                    <div className="px-6 py-10 text-center">
-                      <h3 className="text-lg font-semibold text-dark font-poppins">
-                        No Claims Found
-                      </h3>
-
-                      <p className="mt-2 text-sm text-neutral font-inter">
-                        Try changing your search or status filter.
-                      </p>
-                    </div>
-                  ) : (
-                    <table className="w-full min-w-[1100px]">
-                      <thead className="bg-primary-lightest">
-                        <tr>
-                          <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                            Claim ID
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                            Student
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                            Module
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                            Hours
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                            Amount
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                            Submitted
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                            Status
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                            Action
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {filteredClaims.map((claim) => (
-                          <tr
-                            key={claim.claim_id}
-                            className="border-t border-neutral/30 transition hover:bg-primary-lightest/30"
-                          >
-                            <td className="p-4 font-semibold text-dark font-inter">
-                              {claim.reference_number}
-                            </td>
-
-                            <td className="p-4 text-dark font-inter">
-                              {claim.student_name}
-                            </td>
-
-                            <td className="p-4 text-dark font-inter">
-                              {claim.module_code}
-                            </td>
-
-                            <td className="p-4 text-dark font-inter">
-                              {Number(
-                                claim.total_hours_claimed || 0
-                              ).toFixed(2)}
-                            </td>
-
-                            <td className="p-4 font-semibold text-dark font-inter">
-                              {formatAmount(
-                                claim.total_claim_amount
-                              )}
-                            </td>
-
-                            <td className="p-4 text-sm text-neutral font-inter">
-                              {formatDate(claim.submission_date)}
-                            </td>
-
-                            <td className="p-4">
-                              <StatusBadge status={claim.claim_status} />
-                            </td>
-
-                            <td className="p-4">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleReviewClaim(claim)
-                                }
-                                className="rounded-xl bg-primary px-4 py-2 font-semibold text-white transition hover:bg-primary-dark font-inter"
-                              >
-                                Review
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
+                <DataTable
+                  columns={claimColumns}
+                  rows={filteredClaims}
+                  getRowKey={(claim) => claim.claim_id}
+                  loading={loading}
+                  error={error}
+                  emptyTitle="No Claims Found"
+                  emptyDescription="Try changing your search or status filter."
+                  minWidth="1100px"
+                />
               </Card>
-            </section>
+            </Section>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

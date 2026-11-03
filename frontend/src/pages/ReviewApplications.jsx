@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiGet, apiPatch } from '../api';
@@ -278,27 +276,15 @@ const filteredApplications = applications.filter((application) => {
    */
   if (selectedApplication) {
     return (
-      <div className="min-h-screen bg-off-white">
+      <>
+        {/* Page Title */}
+        <div className="bg-primary text-white px-8 py-5">
+          <h1 className="text-2xl font-poppins font-semibold text-white">
+            Application Review
+          </h1>
+        </div>
 
-        {/* Top Navbar */}
-        <Navbar />
-
-        <div className="flex">
-
-          {/* Lecturer Sidebar */}
-          <Sidebar userRole="lecturer" />
-
-          {/* Main Content */}
-          <main className="flex-1">
-
-            {/* Page Title */}
-            <div className="bg-primary text-white px-8 py-5">
-              <h1 className="text-2xl font-poppins font-semibold text-white">
-                Application Review
-              </h1>
-            </div>
-
-            <div className="p-8">
+        <div className="p-8">
 
               {/* Back Button */}
               <button
@@ -320,7 +306,7 @@ const filteredApplications = applications.filter((application) => {
                         {selectedApplication.studentName}
                       </h2>
 
-                      <p className="text-gray-600 mt-1">
+                      <p className="text-neutral mt-1">
                         Student Number: {selectedApplication.studentNumber}
                       </p>
                     </div>
@@ -345,41 +331,41 @@ const filteredApplications = applications.filter((application) => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-600 mb-1">
+                      <label className="block text-sm font-semibold text-neutral mb-1">
                         Full Names
                       </label>
 
-                      <p className="text-gray-900">
+                      <p className="text-dark">
                         {selectedApplication.studentName}
                       </p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-600 mb-1">
+                      <label className="block text-sm font-semibold text-neutral mb-1">
                         Student Number
                       </label>
 
-                      <p className="text-gray-900">
+                      <p className="text-dark">
                         {selectedApplication.studentNumber}
                       </p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-600 mb-1">
+                      <label className="block text-sm font-semibold text-neutral mb-1">
                         Email Address
                       </label>
 
-                      <p className="text-gray-900">
+                      <p className="text-dark">
                         {selectedApplication.email}
                       </p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-600 mb-1">
+                      <label className="block text-sm font-semibold text-neutral mb-1">
                         Contact Number
                       </label>
 
-                      <p className="text-gray-900">
+                      <p className="text-dark">
                         {selectedApplication.phone}
                       </p>
                     </div>
@@ -400,31 +386,31 @@ const filteredApplications = applications.filter((application) => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-600 mb-1">
+                      <label className="block text-sm font-semibold text-neutral mb-1">
                         Module
                       </label>
 
-                      <p className="text-gray-900">
+                      <p className="text-dark">
                         {selectedApplication.moduleCode} - {selectedApplication.moduleName}
                       </p>
                     </div>
 
                     <div>
-                      <label className="block text-sm font-semibold text-gray-600 mb-1">
+                      <label className="block text-sm font-semibold text-neutral mb-1">
                         Application Date
                       </label>
 
-                      <p className="text-gray-900">
+                      <p className="text-dark">
                         {selectedApplication.dateSubmitted}
                       </p>
                     </div>
 
                     <div className="md:col-span-2">
-                      <label className="block text-sm font-semibold text-gray-600 mb-1">
+                      <label className="block text-sm font-semibold text-neutral mb-1">
                         Application Reason
                       </label>
 
-                      <p className="text-gray-900">
+                      <p className="text-dark">
                         {selectedApplication.reason}
                       </p>
                     </div>
@@ -448,11 +434,11 @@ const filteredApplications = applications.filter((application) => {
                       (document, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between border border-gray-200 rounded-xl p-4"
+                          className="flex items-center justify-between border border-border-subtle rounded-xl p-4"
                         >
 
                           <div>
-                            <p className="font-semibold text-gray-900">
+                            <p className="font-semibold text-dark">
                               {document.type || document.documentType || 'Document'}
                             </p>
                           </div>
@@ -487,7 +473,7 @@ const filteredApplications = applications.filter((application) => {
                     onChange={(event) => setComment(event.target.value)}
                     placeholder="Enter comments or feedback for the student..."
                     rows="5"
-                    className="w-full border border-gray-300 rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="w-full border border-border-subtle rounded-xl p-4 focus:outline-none focus:ring-2 focus:ring-primary"
                   />
 
                 </div>
@@ -501,7 +487,7 @@ const filteredApplications = applications.filter((application) => {
                     Application Decision
                   </h3>
 
-                  <p className="text-gray-600 mb-5">
+                  <p className="text-neutral mb-5">
                     Select an action for this application.
                   </p>
 
@@ -512,7 +498,7 @@ const filteredApplications = applications.filter((application) => {
                       onClick={() =>
                         handleStatusUpdate('Approved')
                       }
-                      className="bg-green-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-700 transition"
+                      className="bg-success text-white px-6 py-3 rounded-xl font-semibold hover:bg-success/90 transition"
                     >
                       Approve Application
                     </button>
@@ -522,7 +508,7 @@ const filteredApplications = applications.filter((application) => {
                       onClick={() =>
                         handleStatusUpdate('Rejected')
                       }
-                      className="bg-red-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-red-700 transition"
+                      className="bg-error text-white px-6 py-3 rounded-xl font-semibold hover:bg-error/90 transition"
                     >
                       Reject Application
                     </button>
@@ -539,8 +525,8 @@ const filteredApplications = applications.filter((application) => {
 
                   </div>
 
-                  <div className="mt-5 p-4 bg-gray-50 rounded-xl">
-                    <p className="text-sm text-gray-600">
+                  <div className="mt-5 p-4 bg-surface-muted rounded-xl">
+                    <p className="text-sm text-neutral">
                       Current Status
                     </p>
 
@@ -555,9 +541,7 @@ const filteredApplications = applications.filter((application) => {
               </Card>
 
             </div>
-          </main>
-        </div>
-      </div>
+      </>
     );
   }
 
@@ -565,27 +549,15 @@ const filteredApplications = applications.filter((application) => {
    * REVIEW APPLICATIONS MAIN PAGE
    */
   return (
-    <div className="min-h-screen bg-off-white">
+    <>
+      {/* Page Title */}
+      <div className="bg-primary text-white px-8 py-5">
+        <h1 className="text-2xl font-bold">
+          Review Applications
+        </h1>
+      </div>
 
-      {/* Top Navbar */}
-      <Navbar />
-
-      <div className="flex">
-
-        {/* Lecturer Sidebar */}
-        <Sidebar userRole="lecturer" />
-
-        {/* Main Content */}
-        <main className="flex-1">
-
-          {/* Page Title */}
-          <div className="bg-primary text-white px-8 py-5">
-            <h1 className="text-2xl font-bold">
-              Review Applications
-            </h1>
-          </div>
-
-          <div className="p-8">
+      <div className="p-8">
 
             {/* Page Introduction */}
             <div className="mb-6">
@@ -593,7 +565,7 @@ const filteredApplications = applications.filter((application) => {
                 Student Applications
               </h2>
 
-              <p className="text-gray-600 mt-1">
+              <p className="text-neutral mt-1">
                 Review and manage applications submitted by students.
               </p>
             </div>
@@ -606,7 +578,7 @@ const filteredApplications = applications.filter((application) => {
 
                   {/* Search */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-600 mb-2">
+                    <label className="block text-sm font-semibold text-neutral mb-2">
                       Search Applications
                     </label>
 
@@ -617,13 +589,13 @@ const filteredApplications = applications.filter((application) => {
                         setSearchTerm(event.target.value)
                       }
                       placeholder="Search by student name, number or module..."
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full border border-border-subtle rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary"
                     />
                   </div>
 
                   {/* Status Filter */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-600 mb-2">
+                    <label className="block text-sm font-semibold text-neutral mb-2">
                       Filter by Status
                     </label>
 
@@ -632,7 +604,7 @@ const filteredApplications = applications.filter((application) => {
                       onChange={(event) =>
                         setStatusFilter(event.target.value)
                       }
-                      className="w-full border border-gray-300 rounded-xl px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-primary"
+                      className="w-full border border-border-subtle rounded-xl px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-primary"
                     >
                       <option value="All">
                         All Applications
@@ -672,12 +644,12 @@ const filteredApplications = applications.filter((application) => {
                       Applications
                     </h3>
 
-                    <p className="text-gray-600 mt-1">
+                    <p className="text-neutral mt-1">
                       Select an application to review.
                     </p>
                   </div>
 
-                  <span className="text-sm text-gray-600">
+                  <span className="text-sm text-neutral">
                     {filteredApplications.length} Application(s)
                   </span>
 
@@ -689,29 +661,29 @@ const filteredApplications = applications.filter((application) => {
                   <table className="w-full">
 
                     <thead>
-                      <tr className="border-b border-gray-200 text-left">
+                      <tr className="border-b border-border-subtle text-left">
 
-                        <th className="px-4 py-4 text-sm font-semibold text-gray-600">
+                        <th className="px-4 py-4 text-sm font-semibold text-neutral">
                           Student
                         </th>
 
-                        <th className="px-4 py-4 text-sm font-semibold text-gray-600">
+                        <th className="px-4 py-4 text-sm font-semibold text-neutral">
                           Student Number
                         </th>
 
-                        <th className="px-4 py-4 text-sm font-semibold text-gray-600">
+                        <th className="px-4 py-4 text-sm font-semibold text-neutral">
                           Module
                         </th>
 
-                        <th className="px-4 py-4 text-sm font-semibold text-gray-600">
+                        <th className="px-4 py-4 text-sm font-semibold text-neutral">
                           Application Date
                         </th>
 
-                        <th className="px-4 py-4 text-sm font-semibold text-gray-600">
+                        <th className="px-4 py-4 text-sm font-semibold text-neutral">
                           Status
                         </th>
 
-                        <th className="px-4 py-4 text-sm font-semibold text-gray-600">
+                        <th className="px-4 py-4 text-sm font-semibold text-neutral">
                           Action
                         </th>
 
@@ -721,13 +693,13 @@ const filteredApplications = applications.filter((application) => {
                     <tbody>
                       {loading ? (
                         <tr>
-                          <td colSpan="6" className="px-4 py-10 text-center text-gray-500">
+                          <td colSpan="6" className="px-4 py-10 text-center text-neutral">
                             Loading applications...
                           </td>
                         </tr>
                       ) : error ? (
                         <tr>
-                          <td colSpan="6" className="px-4 py-10 text-center text-red-600">
+                          <td colSpan="6" className="px-4 py-10 text-center text-error">
                             {error}
                           </td>
                         </tr>
@@ -738,21 +710,21 @@ const filteredApplications = applications.filter((application) => {
                           return (
                             <tr
                               key={application.id}
-                              className="border-b border-gray-100 hover:bg-gray-50 transition"
+                              className="border-b border-border-subtle hover:bg-surface-muted transition"
                             >
                               <td className="px-4 py-4 font-semibold text-primary-dark">
                                 {application.studentName}
                               </td>
 
-                              <td className="px-4 py-4 text-gray-600">
+                              <td className="px-4 py-4 text-neutral">
                                 {application.studentNumber}
                               </td>
 
-                              <td className="px-4 py-4 text-gray-600">
+                              <td className="px-4 py-4 text-neutral">
                                 {application.moduleCode}
                               </td>
 
-                              <td className="px-4 py-4 text-gray-600">
+                              <td className="px-4 py-4 text-neutral">
                                 {application.dateSubmitted}
                               </td>
 
@@ -778,7 +750,7 @@ const filteredApplications = applications.filter((application) => {
                         <tr>
                           <td
                             colSpan="6"
-                            className="px-4 py-10 text-center text-gray-500"
+                            className="px-4 py-10 text-center text-neutral"
                           >
                             No applications found.
                           </td>
@@ -794,9 +766,7 @@ const filteredApplications = applications.filter((application) => {
             </Card>
 
           </div>
-        </main>
-      </div>
-    </div>
+    </>
   );
 };
 

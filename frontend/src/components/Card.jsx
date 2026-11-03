@@ -1,16 +1,11 @@
-//import React from 'react';
-
 const Card = ({ children, className = '' }) => {
   return (
-    <div className={`bg-white rounded-xl shadow-[0_2px_8px_rgba(108,61,145,0.08)] p-6 border border-dark ${className}`}>
+    <div
+      className={`rounded-xl border border-border-subtle bg-white p-4 shadow-sm md:p-6 ${className}`}
+    >
       {children}
     </div>
   );
 };
 
 export default Card;
-//eg
-//<Card>
-  //<h3>My Title</h3>
- // <p>My content</p>
-//</Card>

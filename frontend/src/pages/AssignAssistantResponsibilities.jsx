@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import { apiGet, apiPut } from '../api';
 
@@ -106,17 +104,9 @@ const AssignAssistantResponsibilities = () => {
   };
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
-
-      <div className="flex">
-        {/* ===== SIDEBAR ===== */}
-        <Sidebar userRole="lecturer" />
-
-        {/* ===== MAIN CONTENT ===== */}
-        <main className="flex-1">
-          {/* ===== PAGE TITLE BAR ===== */}
-          <div className="bg-primary h-16 flex items-center px-8">
+    <>
+      {/* ===== PAGE TITLE BAR ===== */}
+      <div className="bg-primary h-16 flex items-center px-8">
             <h1 className="text-2xl font-poppins font-semibold text-white">
               Assign Assistant Responsibilities
             </h1>
@@ -144,7 +134,7 @@ const AssignAssistantResponsibilities = () => {
                 </p>
               )}
               {!isLoading && loadError && (
-                <p className="text-red-700 font-inter" role="alert">
+                <p className="text-error font-inter" role="alert">
                   Unable to load approved assistants: {loadError}
                 </p>
               )}
@@ -277,8 +267,8 @@ const AssignAssistantResponsibilities = () => {
                       <p
                         className={`mt-3 text-sm font-inter ${
                           saveFeedback[assistant.id].isError
-                            ? 'text-red-700'
-                            : 'text-green-700'
+                            ? 'text-error'
+                            : 'text-status-done'
                         }`}
                         role={saveFeedback[assistant.id].isError ? 'alert' : 'status'}
                       >
@@ -290,9 +280,7 @@ const AssignAssistantResponsibilities = () => {
               </div>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+    </>
   );
 };
 

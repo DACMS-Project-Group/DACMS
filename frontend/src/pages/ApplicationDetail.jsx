@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
@@ -224,12 +222,9 @@ const ApplicationDetail = () => {
   // ---------------------------------------------------------
   if (loading) {
     return (
-      <div className="min-h-screen bg-off-white">
-        <Navbar />
-        <div className="flex">
-          <Sidebar userRole="student" />
-          <main className="flex-1 min-w-0">
-            <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+      <>
+
+<div className="bg-primary h-16 flex items-center px-4 md:px-8">
               <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
                 Application Details
               </h1>
@@ -241,9 +236,8 @@ const ApplicationDetail = () => {
                 </p>
               </Card>
             </div>
-          </main>
-        </div>
-      </div>
+
+      </>
     );
   }
 
@@ -252,12 +246,9 @@ const ApplicationDetail = () => {
   // ---------------------------------------------------------
   if (!application) {
     return (
-      <div className="min-h-screen bg-off-white">
-        <Navbar />
-        <div className="flex">
-          <Sidebar userRole="student" />
-          <main className="flex-1 min-w-0">
-            <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+      <>
+
+<div className="bg-primary h-16 flex items-center px-4 md:px-8">
               <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
                 Application Details
               </h1>
@@ -281,9 +272,8 @@ const ApplicationDetail = () => {
                 </button>
               </Card>
             </div>
-          </main>
-        </div>
-      </div>
+
+      </>
     );
   }
 
@@ -308,12 +298,9 @@ const ApplicationDetail = () => {
   const progress = getProgress();
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
-      <div className="flex">
-        <Sidebar userRole="student" />
-        <main className="flex-1 min-w-0">
-          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+    <>
+
+<div className="bg-primary h-16 flex items-center px-4 md:px-8">
             <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Application Details
             </h1>
@@ -447,9 +434,8 @@ const ApplicationDetail = () => {
               </button>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

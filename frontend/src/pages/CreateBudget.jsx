@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
+import Button from '../ui/Button';
+import FormField, { inputClass } from '../ui/FormField';
+import Toast from '../ui/Toast';
 import { apiGet, apiPost } from '../api';
 
 const CreateBudget = () => {
@@ -169,63 +170,48 @@ const CreateBudget = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F9FA]">
+    <>
+      {/* PAGE HEADER */}
+      <div className="bg-primary px-8 py-5">
+        <h1 className="text-2xl font-poppins font-semibold text-white">
+          Create New Budget
+        </h1>
+      </div>
 
-      {/* FULL-WIDTH HEADER */}
-      <Navbar />
-
-      {/* PAGE BODY */}
-      <div className="flex min-h-[calc(100vh-64px)]">
-
-        {/* SIDEBAR */}
-        <Sidebar userRole="admin" />
-
-        {/* MAIN CONTENT */}
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-
-          {/* PAGE HEADER */}
-          <div className="bg-[#6C3D91] px-8 py-5">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              Create New Budget
-            </h1>
-          </div>
-
-          {/* CONTENT */}
-          <main className="flex flex-1 px-8 py-8">
+      {/* CONTENT */}
+      <div className="flex flex-1 px-8 py-8">
 
             {/* BUDGET INFORMATION CARD */}
             <Card className="flex w-full flex-1 flex-col">
 
               {/* Card Header */}
               <div className="mb-8">
-                <h2 className="text-xl font-semibold text-gray-800">
+                <h2 className="text-xl font-semibold text-dark">
                   Budget Information
                 </h2>
 
-                <p className="mt-1 text-sm text-gray-500">
+                <p className="mt-1 text-sm text-neutral">
                   Create a budget and assign it to a lecturer for the
                   selected module.
                 </p>
               </div>
 
-              {/* Error */}
-              {error && (
-                <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                  {error}
-                </div>
-              )}
+              <Toast
+                tone="error"
+                message={error}
+                onDismiss={() => setError('')}
+              />
 
-              {/* Success */}
-              {success && (
-                <div className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
-                  {success}
-                </div>
-              )}
+              <Toast
+                tone="success"
+                message={success}
+                onDismiss={() => setSuccess('')}
+              />
 
               {/* Loading */}
               {loading ? (
                 <div className="flex flex-1 items-center justify-center py-12">
-                  <p className="text-gray-500">
+                  <p className="text-neutral">
                     Loading modules...
                   </p>
                 </div>
@@ -237,22 +223,14 @@ const CreateBudget = () => {
 
                   <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 
-                    {/* Module */}
-                    <div>
-                      <label
-                        htmlFor="module"
-                        className="mb-2 block text-sm font-medium text-gray-700"
-                      >
-                        Module
-                      </label>
-
+                    <FormField id="module" label="Module" required>
                       <select
                         id="module"
                         name="module"
                         value={formData.module}
                         onChange={handleChange}
                         required
-                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 focus:border-[#6C3D91] focus:outline-none focus:ring-1 focus:ring-[#6C3D91]"
+                        className={inputClass}
                       >
                         <option value="">
                           Select a module
@@ -277,17 +255,9 @@ const CreateBudget = () => {
                           </option>
                         ))}
                       </select>
-                    </div>
+                    </FormField>
 
-                    {/* Lecturer */}
-                    <div>
-                      <label
-                        htmlFor="lecturer"
-                        className="mb-2 block text-sm font-medium text-gray-700"
-                      >
-                        Lecturer
-                      </label>
-
+                    <FormField id="lecturer" label="Lecturer" required>
                       <select
                         id="lecturer"
                         name="lecturer"
@@ -298,7 +268,7 @@ const CreateBudget = () => {
                           lecturerLoading
                         }
                         required
-                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 focus:border-[#6C3D91] focus:outline-none focus:ring-1 focus:ring-[#6C3D91] disabled:cursor-not-allowed disabled:bg-gray-100"
+                        className={`${inputClass} disabled:cursor-not-allowed disabled:bg-light-grey`}
                       >
                         <option value="">
                           {!formData.module
@@ -319,17 +289,13 @@ const CreateBudget = () => {
                           </option>
                         ))}
                       </select>
-                    </div>
+                    </FormField>
 
-                    {/* Academic Year */}
-                    <div>
-                      <label
-                        htmlFor="academicYear"
-                        className="mb-2 block text-sm font-medium text-gray-700"
-                      >
-                        Academic Year
-                      </label>
-
+                    <FormField
+                      id="academicYear"
+                      label="Academic Year"
+                      required
+                    >
                       <input
                         id="academicYear"
                         type="number"
@@ -340,21 +306,17 @@ const CreateBudget = () => {
                         min={currentYear}
                         max="2100"
                         required
-                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 focus:border-[#6C3D91] focus:outline-none focus:ring-1 focus:ring-[#6C3D91]"
+                        className={inputClass}
                       />
-                    </div>
+                    </FormField>
 
-                    {/* Allocated Budget */}
-                    <div>
-                      <label
-                        htmlFor="allocatedAmount"
-                        className="mb-2 block text-sm font-medium text-gray-700"
-                      >
-                        Allocated Budget
-                      </label>
-
+                    <FormField
+                      id="allocatedAmount"
+                      label="Allocated Budget"
+                      required
+                    >
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral">
                           R
                         </span>
 
@@ -368,22 +330,17 @@ const CreateBudget = () => {
                           min="0"
                           step="0.01"
                           required
-                          className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-9 pr-4 text-gray-700 focus:border-[#6C3D91] focus:outline-none focus:ring-1 focus:ring-[#6C3D91]"
+                          className={`${inputClass} pl-9`}
                         />
                       </div>
-                    </div>
+                    </FormField>
 
-                    {/* Current Budget Usage */}
-                    <div>
-                      <label
-                        htmlFor="currentUsage"
-                        className="mb-2 block text-sm font-medium text-gray-700"
-                      >
-                        Current Budget Usage
-                      </label>
-
+                    <FormField
+                      id="currentUsage"
+                      label="Current Budget Usage"
+                    >
                       <div className="relative">
-                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
+                        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral">
                           R
                         </span>
 
@@ -395,20 +352,16 @@ const CreateBudget = () => {
                           onChange={handleChange}
                           min="0"
                           step="0.01"
-                          className="w-full rounded-lg border border-gray-300 bg-white py-3 pl-9 pr-4 text-gray-700 focus:border-[#6C3D91] focus:outline-none focus:ring-1 focus:ring-[#6C3D91]"
+                          className={`${inputClass} pl-9`}
                         />
                       </div>
-                    </div>
+                    </FormField>
 
-                    {/* Maximum Allowable Work Hours */}
-                    <div>
-                      <label
-                        htmlFor="maxHours"
-                        className="mb-2 block text-sm font-medium text-gray-700"
-                      >
-                        Maximum Allowable Work Hours
-                      </label>
-
+                    <FormField
+                      id="maxHours"
+                      label="Maximum Allowable Work Hours"
+                      required
+                    >
                       <input
                         id="maxHours"
                         type="number"
@@ -419,43 +372,36 @@ const CreateBudget = () => {
                         min="0"
                         step="0.01"
                         required
-                        className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-gray-700 focus:border-[#6C3D91] focus:outline-none focus:ring-1 focus:ring-[#6C3D91]"
+                        className={inputClass}
                       />
-                    </div>
+                    </FormField>
                   </div>
 
                   {/* Buttons */}
-                  <div className="mt-auto flex justify-end gap-3 border-t border-gray-200 pt-6">
-                    <button
-                      type="button"
+                  <div className="mt-auto flex justify-end gap-3 border-t border-border-subtle pt-6">
+                    <Button
+                      variant="secondary"
                       onClick={() =>
                         navigate('/budget-management')
                       }
                       disabled={submitting}
-                      className="rounded-lg border border-gray-300 bg-white px-6 py-3 font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Cancel
-                    </button>
+                    </Button>
 
-                    <button
-                      type="submit"
-                      disabled={submitting}
-                      className="rounded-lg bg-[#6C3D91] px-6 py-3 font-medium text-white transition hover:bg-[#5A3280] disabled:cursor-not-allowed disabled:opacity-60"
-                    >
+                    <Button type="submit" disabled={submitting}>
                       {submitting
                         ? 'Creating...'
                         : 'Create Budget'}
-                    </button>
+                    </Button>
                   </div>
 
                 </form>
               )}
 
             </Card>
-          </main>
-        </div>
       </div>
-    </div>
+    </>
   );
 };
 

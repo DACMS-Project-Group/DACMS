@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import { useAuth } from '../contexts/AuthContext';
 import { apiPatch } from '../api';
@@ -18,10 +16,12 @@ const renderMessage = (message) => {
 
   return (
     <>
+    <>
       {message.slice(0, message.length - path.length).replace(/[.\s]+$/, '')}{' '}
       <Link className="font-semibold text-primary underline" to={path}>
         Open related page
       </Link>
+    </>
     </>
   );
 };
@@ -135,14 +135,9 @@ const Notifications = () => {
   };
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole={userRole} />
-
-        <main className="flex-1 min-w-0">
-          <div className="bg-primary px-4 md:px-8 py-4">
+<div className="bg-primary px-4 md:px-8 py-4">
             <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
               <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
                 Notifications
@@ -260,6 +255,7 @@ const Notifications = () => {
                       const isOpen = expandedId === notification.id;
 
                       return (
+                        <>
                         <div
                           key={notification.id}
                           className={[
@@ -334,6 +330,7 @@ const Notifications = () => {
                             </div>
                           )}
                         </div>
+                        </>
                       );
                     })}
                   </div>
@@ -341,9 +338,8 @@ const Notifications = () => {
               </Card>
             </section>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

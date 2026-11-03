@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate, useLocation } from 'react-router-dom';
+import Button from '../ui/Button';
+import FormField, { inputClass } from '../ui/FormField';
 
 const ROLE_OPTIONS = [
   { value: 1, label: 'Student' },
@@ -160,13 +162,13 @@ const Login = () => {
           </p>
 
           {error && (
-            <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm text-center break-words">
+            <div className="mt-4 p-3 bg-status-danger-soft text-error rounded-xl text-sm text-center break-words">
               {error}
             </div>
           )}
 
           {success && (
-            <div className="mt-4 p-3 bg-green-50 text-green-700 rounded-xl text-sm text-center break-words">
+            <div className="mt-4 p-3 bg-status-done-soft text-status-done rounded-xl text-sm text-center break-words">
               {success}
             </div>
           )}
@@ -174,38 +176,41 @@ const Login = () => {
           {/* ============ LOGIN VIEW ============ */}
           {!isRegister && (
             <>
-              <form onSubmit={handleLogin} className="mt-6">
-                <div className="mb-3">
+              <form onSubmit={handleLogin} className="mt-6 space-y-3">
+                <FormField id="login-email" label="Email Address" required>
                   <input
+                    id="login-email"
                     type="email"
                     name="email"
                     placeholder="Email Address"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
+                    className={inputClass}
                     required
                   />
-                </div>
+                </FormField>
 
-                <div className="mb-4">
+                <FormField id="login-password" label="Password" required>
                   <input
+                    id="login-password"
                     type="password"
                     name="password"
                     placeholder="Password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
+                    className={inputClass}
                     required
                   />
-                </div>
+                </FormField>
 
-                <button
+                <Button
                   type="submit"
                   disabled={submitting}
-                  className="w-full bg-primary text-white p-3 rounded-xl font-semibold hover:bg-primary-dark transition text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="w-full"
+                  size="lg"
                 >
                   {submitting ? 'Signing in…' : 'Sign In'}
-                </button>
+                </Button>
               </form>
 
               <p className="text-center text-sm text-neutral mt-6 font-inter">
@@ -349,13 +354,14 @@ const Login = () => {
                 className="w-full p-3 border border-neutral rounded-xl focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/25 text-sm"
               />
 
-              <button
+              <Button
                 type="submit"
                 disabled={submitting}
-                className="w-full bg-primary text-white p-3 rounded-xl font-semibold hover:bg-primary-dark transition text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full"
+                size="lg"
               >
                 {submitting ? 'Creating account…' : 'Create Account'}
-              </button>
+              </Button>
 
               <p className="text-center text-sm text-neutral mt-4 font-inter">
                 Already have an account?{' '}

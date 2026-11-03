@@ -1,7 +1,8 @@
 import { useState, useEffect, useMemo } from 'react';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
+import Toast from '../ui/Toast';
+import ConfirmDialog from '../ui/ConfirmDialog';
+import { formatNumber, formatPercent } from '../lib/format';
 import { apiGet, apiPost, apiPut, apiDelete } from '../api';
 
 const StudentModules = () => {
@@ -12,6 +13,7 @@ const StudentModules = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [pendingDelete, setPendingDelete] = useState(null);
   const [editingGrade, setEditingGrade] = useState(null);
   const [error, setError] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
@@ -62,7 +64,7 @@ const StudentModules = () => {
       (sum, item) => sum + parseFloat(item.grade_achieved || 0),
       0
     );
-    const avg = (totalScore / totalModules).toFixed(1);
+    const avg = formatNumber(totalScore / totalModules, 1);
 
     const distinctions = grades.filter(
       (item) => parseFloat(item.grade_achieved || 0) >= 75
@@ -164,14 +166,10 @@ const StudentModules = () => {
     setShowAddSection(false);
   };
 
-  const handleDeleteGrade = async (gradeId, moduleCode) => {
-    if (
-      !window.confirm(
-        `Are you sure you want to remove ${moduleCode} from your academic records?`
-      )
-    ) {
-      return;
-    }
+  const handleDeleteGrade = async () => {
+    if (!pendingDelete) return;
+
+    const { grade_id: gradeId, module_code: moduleCode } = pendingDelete;
 
     try {
       setDeletingId(gradeId);
@@ -179,23 +177,20 @@ const StudentModules = () => {
       setSuccessMessage('');
       await apiDelete(`/student/grades/${gradeId}`);
       setSuccessMessage(`Record for ${moduleCode} removed successfully.`);
+      setPendingDelete(null);
       await loadData();
     } catch (err) {
       setError(err.message || 'Failed to remove module mark.');
+      setPendingDelete(null);
     } finally {
       setDeletingId(null);
     }
   };
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole="student" />
-
-        <main className="flex-1 min-w-0">
-          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+<div className="bg-primary h-16 flex items-center px-4 md:px-8">
             <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Academic Modules
             </h1>
@@ -237,17 +232,17 @@ const StudentModules = () => {
               </button>
             </div>
 
-            {successMessage && (
-              <div className="mb-6 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700 font-medium">
-                {successMessage}
-              </div>
-            )}
+            <Toast
+              tone="success"
+              message={successMessage}
+              onDismiss={() => setSuccessMessage('')}
+            />
 
-            {error && (
-              <div className="mb-6 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600 font-medium">
-                {error}
-              </div>
-            )}
+            <Toast
+              tone="error"
+              message={error}
+              onDismiss={() => setError('')}
+            />
 
             {/* KPI cards: 2×2 on phone */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
@@ -289,8 +284,8 @@ const StudentModules = () => {
             </div>
 
             {showAddSection && (
-              <Card className="mb-8 border border-purple-100 shadow-sm">
-                <div className="border-b border-gray-100 pb-4 mb-6">
+              <Card className="mb-8 border border-primary-lightest shadow-sm">
+                <div className="border-b border-border-subtle pb-4 mb-6">
                   <h3 className="text-lg font-poppins font-semibold text-primary">
                     {editingGrade ? 'Edit Module Mark' : 'Record Module Mark'}
                   </h3>
@@ -305,7 +300,7 @@ const StudentModules = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                     <div>
                       <label className="block text-sm font-medium text-neutral mb-2">
-                        Module <span className="text-red-500">*</span>
+                        Module <span className="text-error">*</span>
                       </label>
                       <select
                         name="moduleId"
@@ -313,7 +308,7 @@ const StudentModules = () => {
                         onChange={handleInputChange}
                         required
                         disabled={saving || Boolean(editingGrade)}
-                        className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-purple-200 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                        className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30 disabled:bg-light-grey disabled:cursor-not-allowed"
                       >
                         <option value="">-- Select Module --</option>
                         {availableModules.map((mod) => (
@@ -331,7 +326,7 @@ const StudentModules = () => {
 
                     <div>
                       <label className="block text-sm font-medium text-neutral mb-2">
-                        Grade Achieved (%) <span className="text-red-500">*</span>
+                        Grade Achieved (%) <span className="text-error">*</span>
                       </label>
                       <input
                         type="number"
@@ -344,13 +339,13 @@ const StudentModules = () => {
                         placeholder="e.g. 78.50"
                         required
                         disabled={saving}
-                        className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-purple-200"
+                        className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-neutral mb-2">
-                        Year Taken <span className="text-red-500">*</span>
+                        Year Taken <span className="text-error">*</span>
                       </label>
                       <input
                         type="number"
@@ -361,7 +356,7 @@ const StudentModules = () => {
                         onChange={handleInputChange}
                         required
                         disabled={saving}
-                        className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-purple-200"
+                        className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
                       />
                     </div>
                   </div>
@@ -371,7 +366,7 @@ const StudentModules = () => {
                       type="button"
                       onClick={handleCancelForm}
                       disabled={saving}
-                      className="px-5 py-2.5 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-gray-50 transition w-full sm:w-auto"
+                      className="px-5 py-2.5 rounded-lg border border-border-subtle text-sm font-medium text-dark hover:bg-surface-muted transition w-full sm:w-auto"
                     >
                       Cancel
                     </button>
@@ -392,7 +387,7 @@ const StudentModules = () => {
             )}
 
             <Card className="overflow-x-auto">
-              <div className="border-b border-gray-100 pb-4 mb-4 flex items-center justify-between">
+              <div className="border-b border-border-subtle pb-4 mb-4 flex items-center justify-between">
                 <h3 className="text-lg font-poppins font-semibold text-primary">
                   Recorded Modules
                 </h3>
@@ -419,7 +414,7 @@ const StudentModules = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse min-w-[720px]">
                     <thead>
-                      <tr className="border-b border-gray-200 text-xs font-semibold uppercase tracking-wider text-neutral">
+                      <tr className="border-b border-border-subtle text-xs font-semibold uppercase tracking-wider text-neutral">
                         <th className="py-3 px-4">Year</th>
                         <th className="py-3 px-4">Module Code</th>
                         <th className="py-3 px-4">Module Description</th>
@@ -428,7 +423,7 @@ const StudentModules = () => {
                         <th className="py-3 px-4 text-right">Actions</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100 text-sm">
+                    <tbody className="divide-y divide-border-subtle text-sm">
                       {grades.map((item) => {
                         const gradeVal = parseFloat(
                           item.grade_achieved || 0
@@ -442,16 +437,16 @@ const StudentModules = () => {
                         return (
                           <tr
                             key={item.grade_id}
-                            className="hover:bg-gray-50/80 transition-colors"
+                            className="hover:bg-surface-muted/80 transition-colors"
                           >
-                            <td className="py-4 px-4 font-medium text-gray-800 whitespace-nowrap">
+                            <td className="py-4 px-4 font-medium text-dark whitespace-nowrap">
                               {item.academic_year || '—'}
                             </td>
                             <td className="py-4 px-4 font-semibold text-primary whitespace-nowrap">
                               {item.module_code}
                             </td>
-                            <td className="py-4 px-4 text-gray-600 max-w-md">
-                              <p className="font-medium text-gray-900">
+                            <td className="py-4 px-4 text-neutral max-w-md">
+                              <p className="font-medium text-dark">
                                 {item.module_name}
                               </p>
                               {item.description && (
@@ -464,26 +459,26 @@ const StudentModules = () => {
                               <span
                                 className={
                                   isDistinction
-                                    ? 'text-green-600'
+                                    ? 'text-status-done'
                                     : gradeVal >= 50
-                                    ? 'text-gray-900'
-                                    : 'text-red-500'
+                                    ? 'text-dark'
+                                    : 'text-error'
                                 }
                               >
-                                {Number(gradeVal).toFixed(2)}%
+                                {formatPercent(gradeVal)}
                               </span>
                             </td>
                             <td className="py-4 px-4 text-center whitespace-nowrap">
                               {isDistinction ? (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-done-soft text-status-done">
                                   Distinction
                                 </span>
                               ) : isEligible ? (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-primary">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-lightest text-primary">
                                   Eligible
                                 </span>
                               ) : (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-grey text-neutral">
                                   Completed
                                 </span>
                               )}
@@ -500,14 +495,9 @@ const StudentModules = () => {
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={() =>
-                                    handleDeleteGrade(
-                                      item.grade_id,
-                                      item.module_code
-                                    )
-                                  }
+                                  onClick={() => setPendingDelete(item)}
                                   disabled={deletingId === item.grade_id}
-                                  className="text-sm font-medium text-red-600 hover:text-red-800 transition disabled:opacity-50"
+                                  className="text-sm font-medium text-error hover:text-status-danger transition disabled:opacity-50"
                                 >
                                   {deletingId === item.grade_id
                                     ? 'Removing...'
@@ -524,9 +514,21 @@ const StudentModules = () => {
               )}
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        title="Remove module record?"
+        description={
+          pendingDelete
+            ? `${pendingDelete.module_code} will be removed from your academic records. This cannot be undone.`
+            : ''
+        }
+        confirmLabel="Remove record"
+        busy={Boolean(deletingId)}
+        onConfirm={handleDeleteGrade}
+        onCancel={() => setPendingDelete(null)}
+      />
+    </>
   );
 };
 

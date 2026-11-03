@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import DataTable from '../ui/DataTable';
+import { formatDate, formatMoney, formatNumber } from '../lib/format';
 import { apiGet } from '../api';
 
 const Claims = () => {
@@ -45,25 +45,12 @@ const Claims = () => {
     };
   }, []);
 
-  const formatDate = (date) => {
-    if (!date) return '—';
-    return new Date(date).toLocaleDateString('en-ZA', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
   const formatPeriod = (startDate, endDate) => {
     if (!startDate && !endDate) return '—';
     if (startDate && endDate) {
       return `${formatDate(startDate)} - ${formatDate(endDate)}`;
     }
     return formatDate(startDate || endDate);
-  };
-
-  const formatCurrency = (amount) => {
-    return `R ${Number(amount || 0).toFixed(2)}`;
   };
 
   const totalClaims = claims.length;
@@ -82,15 +69,78 @@ const Claims = () => {
     navigate(`/claim-detail/${claim.ClaimID}`, { state: { claim } });
   };
 
+  const claimColumns = [
+    {
+      key: 'reference',
+      header: 'Reference',
+      render: (claim) => (
+        <>
+          <p className="font-semibold text-dark">
+            {claim.ClaimReferenceNumber}
+          </p>
+          <p className="mt-1 text-xs text-neutral">
+            Submitted {formatDate(claim.SubmissionDate)}
+          </p>
+        </>
+      ),
+    },
+    {
+      key: 'module',
+      header: 'Module',
+      render: (claim) => (
+        <>
+          <p className="font-semibold text-dark">{claim.ModuleCode}</p>
+          <p className="mt-1 text-sm text-neutral">{claim.ModuleName}</p>
+        </>
+      ),
+    },
+    {
+      key: 'period',
+      header: 'Period',
+      className: 'p-4 text-sm text-neutral whitespace-nowrap',
+      render: (claim) =>
+        formatPeriod(claim.PeriodStartDate, claim.PeriodEndDate),
+    },
+    {
+      key: 'hours',
+      header: 'Hours',
+      className: 'p-4 text-dark',
+      render: (claim) => formatNumber(claim.TotalHoursClaimed, 1),
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      className: 'p-4 font-semibold text-dark whitespace-nowrap',
+      render: (claim) => formatMoney(claim.TotalClaimAmount),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      render: (claim) => (
+        <StatusBadge status={claim.ClaimStatus || 'Pending'} />
+      ),
+    },
+    {
+      key: 'action',
+      header: 'Action',
+      headerClassName: 'p-4 text-right text-sm font-semibold text-primary font-inter',
+      className: 'p-4 text-right whitespace-nowrap',
+      render: (claim) => (
+        <button
+          type="button"
+          onClick={() => handleViewClaim(claim)}
+          className="text-primary font-semibold hover:underline"
+        >
+          View Details →
+        </button>
+      ),
+    },
+  ];
+
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole="student" />
-
-        <main className="flex-1 min-w-0">
-          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+<div className="bg-primary h-16 flex items-center px-4 md:px-8">
             <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Claims
             </h1>
@@ -156,127 +206,18 @@ const Claims = () => {
               </Card>
             </div>
 
-            {loading && (
-              <Card>
-                <p className="py-8 text-center text-neutral font-inter">
-                  Loading claims...
-                </p>
-              </Card>
-            )}
-
-            {!loading && error && (
-              <Card>
-                <div className="py-8 text-center">
-                  <p className="font-semibold text-error font-inter">
-                    Could not load claims
-                  </p>
-                  <p className="mt-1 text-sm text-neutral font-inter">
-                    {error}
-                  </p>
-                </div>
-              </Card>
-            )}
-
-            {!loading && !error && claims.length === 0 && (
-              <Card>
-                <div className="py-10 text-center">
-                  <p className="font-medium text-dark font-inter">
-                    No claims yet
-                  </p>
-                  <p className="mt-1 text-sm text-neutral font-inter">
-                    Your remuneration claims will appear here once they have
-                    been submitted.
-                  </p>
-                </div>
-              </Card>
-            )}
-
-            {!loading && !error && claims.length > 0 && (
-              <Card className="overflow-x-auto">
-                <table className="w-full min-w-[900px]">
-                  <thead>
-                    <tr className="border-b border-gray-200">
-                      {[
-                        'Reference',
-                        'Module',
-                        'Period',
-                        'Hours',
-                        'Amount',
-                        'Status',
-                      ].map((heading) => (
-                        <th
-                          key={heading}
-                          className="text-left py-4 px-4 font-poppins font-semibold text-dark"
-                        >
-                          {heading}
-                        </th>
-                      ))}
-                      <th className="text-right py-4 px-4 font-poppins font-semibold text-dark">
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {claims.map((claim) => (
-                      <tr
-                        key={claim.ClaimID}
-                        className="border-b border-gray-100 last:border-0"
-                      >
-                        <td className="py-4 px-4">
-                          <p className="font-semibold text-dark">
-                            {claim.ClaimReferenceNumber}
-                          </p>
-                          <p className="text-xs text-neutral mt-1">
-                            Submitted {formatDate(claim.SubmissionDate)}
-                          </p>
-                        </td>
-
-                        <td className="py-4 px-4">
-                          <p className="font-semibold text-dark">
-                            {claim.ModuleCode}
-                          </p>
-                          <p className="text-sm text-neutral mt-1">
-                            {claim.ModuleName}
-                          </p>
-                        </td>
-
-                        <td className="py-4 px-4 text-sm text-neutral whitespace-nowrap">
-                          {formatPeriod(
-                            claim.PeriodStartDate,
-                            claim.PeriodEndDate
-                          )}
-                        </td>
-
-                        <td className="py-4 px-4 text-dark">
-                          {Number(claim.TotalHoursClaimed || 0).toFixed(1)}
-                        </td>
-
-                        <td className="py-4 px-4 font-semibold text-dark whitespace-nowrap">
-                          {formatCurrency(claim.TotalClaimAmount)}
-                        </td>
-
-                        <td className="py-4 px-4">
-                          <StatusBadge
-                            status={claim.ClaimStatus || 'Pending'}
-                          />
-                        </td>
-
-                        <td className="py-4 px-4 text-right whitespace-nowrap">
-                          <button
-                            type="button"
-                            onClick={() => handleViewClaim(claim)}
-                            className="text-primary font-semibold hover:underline"
-                          >
-                            View Details →
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </Card>
-            )}
+            <Card>
+              <DataTable
+                columns={claimColumns}
+                rows={claims}
+                getRowKey={(claim) => claim.ClaimID}
+                loading={loading}
+                error={error}
+                emptyTitle="No claims yet"
+                emptyDescription="Your remuneration claims will appear here once they have been submitted."
+                minWidth="900px"
+              />
+            </Card>
 
             <div className="mt-6 md:mt-8">
               <button
@@ -288,9 +229,8 @@ const Claims = () => {
               </button>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

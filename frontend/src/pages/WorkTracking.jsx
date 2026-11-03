@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiGet, apiPost } from '../api';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import EmptyState from '../ui/EmptyState';
+import PageHeader from '../ui/PageHeader';
+import { formatHours, formatMoney, formatNumber } from '../lib/format';
 
 const pad = (value) => String(value).padStart(2, '0');
 
@@ -203,10 +204,10 @@ const WorkTracking = () => {
 
     if (calculatedHours > remainingHours) {
       setError(
-        `This session exceeds your remaining ${Math.max(
-          remainingHours,
-          0
-        ).toFixed(1)} allowable hours for ${selectedAppointment.moduleCode}.`
+        `This session exceeds your remaining ${formatNumber(
+          Math.max(remainingHours, 0),
+          1
+        )} allowable hours for ${selectedAppointment.moduleCode}.`
       );
       return;
     }
@@ -254,35 +255,24 @@ const WorkTracking = () => {
   };
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar />
-
-        <main className="flex-1 min-w-0">
-          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+<div className="bg-primary h-16 flex items-center px-4 md:px-8">
             <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Work Tracking
             </h1>
           </div>
 
           <div className="p-4 md:p-8">
-            <div className="mb-6 md:mb-8">
-              {/* FIXED: was text-white on off-white background */}
-              <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-primary">
-                Work Tracking
-              </h2>
-              <p className="mt-2 text-neutral">
-                Record and monitor your Assistant working hours and session
-                history.
-              </p>
-            </div>
+            <PageHeader
+              title="Work Tracking"
+              description="Record and monitor your Assistant working hours and session history."
+            />
 
             {error && (
               <div
                 role="alert"
-                className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+                className="mb-5 rounded-lg border border-error/30 bg-status-danger-soft px-4 py-3 text-sm text-error"
               >
                 {error}
               </div>
@@ -291,9 +281,10 @@ const WorkTracking = () => {
             {loading ? (
               <p className="py-8 text-neutral">Loading appointments...</p>
             ) : appointments.length === 0 ? (
-              <p className="py-8 text-neutral">
-                No active assistant appointments found.
-              </p>
+              <EmptyState
+                title="No active assistant appointments found"
+                description="An approved Assistant appointment is required before you can record work sessions."
+              />
             ) : (
               <>
                 <Card className="mb-6">
@@ -318,14 +309,15 @@ const WorkTracking = () => {
                         String(appointment.id);
 
                       return (
+                        <>
                         <button
                           key={appointment.id}
                           type="button"
                           onClick={() => handleAppointmentChange(appointment)}
                           className={`rounded-lg border p-4 md:p-5 text-left transition ${
                             isSelected
-                              ? 'border-primary bg-purple-50'
-                              : 'border-gray-200 bg-white hover:border-primary'
+                              ? 'border-primary bg-primary-lightest'
+                              : 'border-border-subtle bg-white hover:border-primary'
                           }`}
                         >
                           <div className="flex items-start justify-between gap-3">
@@ -333,7 +325,7 @@ const WorkTracking = () => {
                               <h3 className="font-semibold text-primary-dark">
                                 {appointment.moduleCode}
                               </h3>
-                              <p className="mt-1 text-sm text-gray-700 break-words">
+                              <p className="mt-1 text-sm text-dark break-words">
                                 {appointment.moduleName}
                               </p>
                             </div>
@@ -347,30 +339,31 @@ const WorkTracking = () => {
                           <div className="mt-4 grid grid-cols-2 gap-2 md:gap-3 text-sm md:grid-cols-4">
                             <div>
                               <p className="text-neutral">Worked</p>
-                              <p className="mt-1 font-semibold text-gray-800">
-                                {totalHours.toFixed(1)} hrs
+                              <p className="mt-1 font-semibold text-dark">
+                                {formatHours(totalHours)}
                               </p>
                             </div>
                             <div>
                               <p className="text-neutral">Maximum</p>
-                              <p className="mt-1 font-semibold text-gray-800">
+                              <p className="mt-1 font-semibold text-dark">
                                 {appointment.maxHours} hrs
                               </p>
                             </div>
                             <div>
                               <p className="text-neutral">Remaining</p>
-                              <p className="mt-1 font-semibold text-gray-800">
-                                {remaining.toFixed(1)} hrs
+                              <p className="mt-1 font-semibold text-dark">
+                                {formatHours(remaining)}
                               </p>
                             </div>
                             <div>
                               <p className="text-neutral">Estimated Earnings</p>
-                              <p className="mt-1 font-semibold text-gray-800">
-                                R {(totalHours * appointment.hourlyRate).toFixed(2)}
+                              <p className="mt-1 font-semibold text-dark">
+                                {formatMoney(totalHours * appointment.hourlyRate)}
                               </p>
                             </div>
                           </div>
                         </button>
+                        </>
                       );
                     })}
                   </div>
@@ -422,10 +415,10 @@ const WorkTracking = () => {
 
                         <form onSubmit={handleSaveSession}>
                           <div className="mb-5">
-                            <label className="mb-2 block text-sm font-medium text-gray-700">
+                            <label className="mb-2 block text-sm font-medium text-dark">
                               Assistant Appointment
                             </label>
-                            <div className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3">
+                            <div className="rounded-lg border border-border-subtle bg-surface-muted px-4 py-3">
                               <p className="font-semibold text-primary-dark break-words">
                                 {selectedAppointment.moduleCode} -{' '}
                                 {selectedAppointment.moduleName}
@@ -441,7 +434,7 @@ const WorkTracking = () => {
                             <div>
                               <label
                                 htmlFor="date"
-                                className="mb-2 block text-sm font-medium text-gray-700"
+                                className="mb-2 block text-sm font-medium text-dark"
                               >
                                 Date
                               </label>
@@ -452,14 +445,14 @@ const WorkTracking = () => {
                                 value={formData.date}
                                 onChange={handleChange}
                                 required
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full rounded-lg border border-border-subtle px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                               />
                             </div>
 
                             <div>
                               <label
                                 htmlFor="activity"
-                                className="mb-2 block text-sm font-medium text-gray-700"
+                                className="mb-2 block text-sm font-medium text-dark"
                               >
                                 Activity
                               </label>
@@ -472,14 +465,14 @@ const WorkTracking = () => {
                                 required
                                 maxLength={200}
                                 placeholder="Describe the work you performed"
-                                className="w-full rounded-lg border border-gray-300 bg-white px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full rounded-lg border border-border-subtle bg-white px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                               />
                             </div>
 
                             <div>
                               <label
                                 htmlFor="startTime"
-                                className="mb-2 block text-sm font-medium text-gray-700"
+                                className="mb-2 block text-sm font-medium text-dark"
                               >
                                 Start Time
                               </label>
@@ -490,14 +483,14 @@ const WorkTracking = () => {
                                 value={formData.startTime}
                                 onChange={handleChange}
                                 required
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full rounded-lg border border-border-subtle px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                               />
                             </div>
 
                             <div>
                               <label
                                 htmlFor="endTime"
-                                className="mb-2 block text-sm font-medium text-gray-700"
+                                className="mb-2 block text-sm font-medium text-dark"
                               >
                                 End Time
                               </label>
@@ -508,17 +501,17 @@ const WorkTracking = () => {
                                 value={formData.endTime}
                                 onChange={handleChange}
                                 required
-                                className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                                className="w-full rounded-lg border border-border-subtle px-4 py-3 outline-none focus:border-primary focus:ring-1 focus:ring-primary"
                               />
                             </div>
                           </div>
 
-                          <div className="mt-6 rounded-lg bg-gray-50 p-4">
+                          <div className="mt-6 rounded-lg bg-surface-muted p-4">
                             <p className="text-sm text-neutral">
                               Calculated Hours
                             </p>
                             <p className="mt-1 text-2xl font-semibold text-primary-dark">
-                              {calculatedHours.toFixed(1)} hours
+                              {formatHours(calculatedHours)}
                             </p>
                             {formData.startTime && formData.endTime && (
                               <p className="mt-1 text-sm text-neutral">
@@ -548,7 +541,7 @@ const WorkTracking = () => {
                                   endTime: '',
                                 });
                               }}
-                              className="rounded-lg border border-gray-300 px-5 py-3 font-medium text-gray-700 transition hover:bg-gray-50 w-full sm:w-auto"
+                              className="rounded-lg border border-border-subtle px-5 py-3 font-medium text-dark transition hover:bg-surface-muted w-full sm:w-auto"
                             >
                               Cancel
                             </button>
@@ -574,20 +567,15 @@ const WorkTracking = () => {
                         </p>
                       ) : getAppointmentSessions(selectedAppointment.id)
                           .length === 0 ? (
-                        <div className="py-10 text-center">
-                          <p className="font-medium text-gray-700">
-                            No Work Sessions Yet
-                          </p>
-                          <p className="mt-1 text-sm text-neutral">
-                            Record your first work session for this
-                            appointment.
-                          </p>
-                        </div>
+                        <EmptyState
+                          title="No Work Sessions Yet"
+                          description="Record your first work session for this appointment."
+                        />
                       ) : (
                         <div className="overflow-x-auto">
                           <table className="w-full min-w-[800px]">
                             <thead>
-                              <tr className="border-b border-gray-200 text-left">
+                              <tr className="border-b border-border-subtle text-left">
                                 {[
                                   'Date',
                                   'Module',
@@ -599,7 +587,7 @@ const WorkTracking = () => {
                                 ].map((heading) => (
                                   <th
                                     key={heading}
-                                    className="px-4 py-3 text-sm font-semibold text-gray-700"
+                                    className="px-4 py-3 text-sm font-semibold text-dark"
                                   >
                                     {heading}
                                   </th>
@@ -612,22 +600,22 @@ const WorkTracking = () => {
                               ).map((session) => (
                                 <tr
                                   key={session.id}
-                                  className="border-b border-gray-100"
+                                  className="border-b border-border-subtle"
                                 >
-                                  <td className="px-4 py-4 text-sm text-gray-700 whitespace-nowrap">
+                                  <td className="px-4 py-4 text-sm text-dark whitespace-nowrap">
                                     {session.date}
                                   </td>
                                   <td className="px-4 py-4 text-sm font-medium text-primary-dark whitespace-nowrap">
                                     {session.moduleCode}
                                   </td>
-                                  <td className="px-4 py-4 text-sm text-gray-700">
+                                  <td className="px-4 py-4 text-sm text-dark">
                                     {session.activity}
                                   </td>
-                                  <td className="px-4 py-4 text-sm text-gray-700 whitespace-nowrap">
+                                  <td className="px-4 py-4 text-sm text-dark whitespace-nowrap">
                                     {session.startTime} - {session.endTime}
                                   </td>
-                                  <td className="px-4 py-4 text-sm font-medium text-gray-700 whitespace-nowrap">
-                                    {session.hours.toFixed(1)} hrs
+                                  <td className="px-4 py-4 text-sm font-medium text-dark whitespace-nowrap">
+                                    {formatHours(session.hours)}
                                   </td>
                                   <td className="px-4 py-4">
                                     <StatusBadge status={session.status} />
@@ -655,9 +643,8 @@ const WorkTracking = () => {
               </>
             )}
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

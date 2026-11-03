@@ -1,8 +1,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
@@ -89,14 +87,9 @@ const AppointmentApprovals = () => {
   };
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole="admin" />
-
-        <main className="flex-1">
-          <div className="bg-primary px-8 py-4">
+<div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-poppins font-semibold text-white">
               Appointment Approvals
             </h1>
@@ -463,9 +456,8 @@ const AppointmentApprovals = () => {
               </Card>
             </section>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

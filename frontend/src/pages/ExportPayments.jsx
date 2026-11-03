@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import DataTable from '../ui/DataTable';
+import PageHeader from '../ui/PageHeader';
+import Section from '../ui/Section';
+import Toast from '../ui/Toast';
+import { formatDate, formatMoney } from '../lib/format';
 import { apiGet } from '../api';
 
-const ExportPayments = () => {
+const ExportPayments = ({ embedded = false }) => {
   document.title = 'AACMS - Export Payments';
   const [searchTerm, setSearchTerm] = useState('');
   const [dateFrom, setDateFrom] = useState('');
@@ -92,8 +95,7 @@ const ExportPayments = () => {
     0
   );
 
-  const formatCurrency = (amount) =>
-    `R ${Number(amount).toLocaleString('en-ZA')}`;
+  const formatCurrency = (amount) => formatMoney(amount);
 
   const downloadFile = (blob, filename) => {
     const url = URL.createObjectURL(blob);
@@ -176,53 +178,104 @@ const ExportPayments = () => {
     ? formatPeriodDate(exportDates[0]) === formatPeriodDate(exportDates[exportDates.length - 1])
       ? formatPeriodDate(exportDates[0])
       : `${formatPeriodDate(exportDates[0])} - ${formatPeriodDate(exportDates[exportDates.length - 1])}`
-    : '—';
-  const formatDate = (value) => new Date(value).toLocaleDateString('en-ZA', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-  });
+    : 'â€”';
+
+  const claimColumns = [
+    {
+      key: 'select',
+      header: (
+        <input
+          type="checkbox"
+          checked={
+            filteredClaims.length > 0 &&
+            filteredClaims.every((claim) =>
+              selectedClaims.includes(claim.id)
+            )
+          }
+          onChange={toggleAll}
+          className="h-4 w-4 accent-primary"
+        />
+      ),
+      className: 'px-5 py-5',
+      headerClassName: 'px-5 py-4 text-left',
+      render: (claim) => (
+        <input
+          type="checkbox"
+          checked={selectedClaims.includes(claim.id)}
+          onChange={() => toggleClaim(claim.id)}
+          className="h-4 w-4 accent-primary"
+        />
+      ),
+    },
+    {
+      key: 'reference',
+      header: 'Claim ID',
+      className: 'px-5 py-5 font-semibold text-dark font-inter',
+      render: (claim) => claim.reference_number || claim.id,
+    },
+    {
+      key: 'student',
+      header: 'Student',
+      className: 'px-5 py-5 text-dark font-inter',
+      render: (claim) => claim.student,
+    },
+    {
+      key: 'module',
+      header: 'Module',
+      className: 'px-5 py-5 text-dark font-inter',
+      render: (claim) => claim.module,
+    },
+    {
+      key: 'hours',
+      header: 'Hours',
+      className: 'px-5 py-5 text-dark font-inter',
+      render: (claim) => claim.hours,
+    },
+    {
+      key: 'rate',
+      header: 'Rate',
+      className: 'px-5 py-5 text-dark font-inter',
+      render: (claim) => formatCurrency(claim.rate),
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      className: 'px-5 py-5 font-semibold text-dark font-inter',
+      render: (claim) => formatCurrency(claim.amount),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'px-5 py-5',
+      render: (claim) => <StatusBadge status={claim.status} />,
+    },
+    {
+      key: 'date',
+      header: 'Date',
+      className: 'px-5 py-5 text-sm text-neutral font-inter',
+      render: (claim) => formatDate(claim.date),
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-off-white">
-
-      <Navbar />
-
-      <div className="flex">
-
-        <Sidebar userRole="admin" />
-
-        <main className="flex-1">
-
-          {/* Page Header */}
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              Export Payments
-            </h1>
-          </div>
+    <>
+      {!embedded && (
+        <div className="bg-primary px-8 py-4">
+          <h1 className="text-2xl font-poppins font-semibold text-white">
+            Export Payments
+          </h1>
+        </div>
+      )}
 
           {/* Page Content */}
           <div className="p-8">
 
-            {/* Introduction */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-poppins font-semibold text-primary">
-                Payment Export
-              </h2>
+            <PageHeader
+              title="Payment Export"
+              description="Review approved claims and export remuneration information for payment processing."
+            />
 
-              <p className="text-neutral mt-2 font-inter">
-                Review approved claims and export remuneration
-                information for payment processing.
-              </p>
-            </div>
-
-            {/* Filters */}
-            <section className="mb-8">
-
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                Filter Claims
-              </h3>
-
+            <Section title="Filter Claims">
               <Card>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -274,177 +327,34 @@ const ExportPayments = () => {
 
               </Card>
 
-            </section>
+            </Section>
 
             {/* Approved Claims */}
-            <section className="mb-8">
-
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
-
-                <h3 className="text-2xl font-poppins font-semibold text-primary">
-                  Approved Claims
-                </h3>
-
+            <Section
+              title="Approved Claims"
+              actions={
                 <span className="text-sm text-neutral font-inter">
                   {selectedClaims.length} selected
                 </span>
-
-              </div>
-
+              }
+            >
               <Card>
-
-                <div className="overflow-x-auto">
-
-                  <table className="w-full">
-
-                    <thead className="bg-primary-lightest">
-
-                      <tr>
-
-                        <th className="px-5 py-4 text-left">
-                          <input
-                            type="checkbox"
-                            checked={
-                              filteredClaims.length > 0 &&
-                              filteredClaims.every((claim) =>
-                                selectedClaims.includes(claim.id)
-                              )
-                            }
-                            onChange={toggleAll}
-                            className="w-4 h-4 accent-primary"
-                          />
-                        </th>
-
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Claim ID
-                        </th>
-
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Student
-                        </th>
-
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Module
-                        </th>
-
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Hours
-                        </th>
-
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Rate
-                        </th>
-
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Amount
-                        </th>
-
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Status
-                        </th>
-
-                        <th className="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter">
-                          Date
-                        </th>
-
-                      </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                      {filteredClaims.map((claim) => (
-
-                        <tr
-                          key={claim.id}
-                          className="border-t border-neutral/30 hover:bg-primary-lightest/30 transition"
-                        >
-
-                          <td className="px-5 py-5">
-
-                            <input
-                              type="checkbox"
-                              checked={selectedClaims.includes(
-                                claim.id
-                              )}
-                              onChange={() =>
-                                toggleClaim(claim.id)
-                              }
-                              className="w-4 h-4 accent-primary"
-                            />
-
-                          </td>
-
-                          <td className="px-5 py-5 font-semibold text-dark font-inter">
-                            {claim.reference_number || claim.id}
-                          </td>
-
-                          <td className="px-5 py-5 text-dark font-inter">
-                            {claim.student}
-                          </td>
-
-                          <td className="px-5 py-5 text-dark font-inter">
-                            {claim.module}
-                          </td>
-
-                          <td className="px-5 py-5 text-dark font-inter">
-                            {claim.hours}
-                          </td>
-
-                          <td className="px-5 py-5 text-dark font-inter">
-                            {formatCurrency(claim.rate)}
-                          </td>
-
-                          <td className="px-5 py-5 font-semibold text-dark font-inter">
-                            {formatCurrency(claim.amount)}
-                          </td>
-
-                          <td className="px-5 py-5">
-                            <StatusBadge status={claim.status} />
-                          </td>
-
-                          <td className="px-5 py-5 text-sm text-neutral font-inter">
-                            {formatDate(claim.date)}
-                          </td>
-
-                        </tr>
-
-                      ))}
-
-                      {filteredClaims.length === 0 && (
-
-                        <tr>
-
-                          <td
-                            colSpan="9"
-                            className="px-5 py-10 text-center text-neutral font-inter"
-                          >
-                            {loading
-                              ? 'Loading approved claims...'
-                              : 'No approved claims found matching your filters.'}
-                          </td>
-
-                        </tr>
-
-                      )}
-
-                    </tbody>
-
-                  </table>
-
-                </div>
-
+                <DataTable
+                  columns={claimColumns}
+                  rows={filteredClaims}
+                  getRowKey={(claim) => claim.id}
+                  loading={loading}
+                  emptyTitle="No approved claims found"
+                  emptyDescription="No approved claims match your filters."
+                  headerClassName="px-5 py-4 text-left text-sm font-semibold text-neutral font-inter"
+                  minWidth="1000px"
+                />
               </Card>
 
-            </section>
+            </Section>
 
             {/* Payment Export Summary */}
-            <section>
-
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
-                Payment Export Summary
-              </h3>
-
+            <Section title="Payment Export Summary">
               <Card>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -513,21 +423,17 @@ const ExportPayments = () => {
 
               </Card>
 
-            </section>
+            </Section>
 
-            {error && (
-              <p role="alert" className="mt-4 text-sm text-error font-inter">
-                {error}
-              </p>
-            )}
+            <Toast
+              tone="error"
+              message={error}
+              onDismiss={() => setError('')}
+            />
 
           </div>
 
-        </main>
-
-      </div>
-
-    </div>
+    </>
   );
 };
 

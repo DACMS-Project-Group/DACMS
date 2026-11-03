@@ -157,7 +157,7 @@ const TwoFactorAuth = () => {
               </p>
 
               {error && (
-                <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm text-center">
+                <div className="mt-4 p-3 bg-status-danger-soft text-error rounded-xl text-sm text-center">
                   {error}
                 </div>
               )}
@@ -168,7 +168,7 @@ const TwoFactorAuth = () => {
                 </div>
               ) : (
                 <>
-                  <div className="mt-8 bg-gray-50 rounded-xl p-6 flex justify-center">
+                  <div className="mt-8 bg-surface-muted rounded-xl p-6 flex justify-center">
                     <img src={qrCode} alt="QR Code" className="w-48 h-48" />
                   </div>
 
@@ -187,7 +187,7 @@ const TwoFactorAuth = () => {
                   )}
 
                   {showManualKey && (
-                    <div className="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                    <div className="mt-4 p-4 bg-status-progress-soft rounded-xl border border-status-progress/30">
                       <p className="text-xs text-neutral font-inter mb-2">
                         Manual entry key (if QR doesn't work):
                       </p>
@@ -240,8 +240,8 @@ const TwoFactorAuth = () => {
                 Keep these codes safe. Each can be used once if you lose your authenticator.
               </p>
 
-              <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-xl">
-                <p className="text-xs text-red-700 font-semibold mb-3 font-inter">
+              <div className="mt-6 p-4 bg-status-danger-soft border border-error/30 rounded-xl">
+                <p className="text-xs text-error font-semibold mb-3 font-inter">
                   ⚠️ Save These Codes Now
                 </p>
 
@@ -257,7 +257,7 @@ const TwoFactorAuth = () => {
                   <>
                     <div className="bg-white rounded p-3 mb-3 font-mono text-xs space-y-1 max-h-48 overflow-y-auto">
                       {backupCodes.map((code, idx) => (
-                        <div key={idx} className="text-gray-700">
+                        <div key={idx} className="text-dark">
                           {idx + 1}. <code className="font-semibold">{code}</code>
                         </div>
                       ))}
@@ -271,7 +271,7 @@ const TwoFactorAuth = () => {
                       {backupCodesCopied ? '✓ Copied!' : 'Copy All'}
                     </button>
 
-                    <p className="text-xs text-gray-600 text-center font-inter">
+                    <p className="text-xs text-neutral text-center font-inter">
                       Print or save to a secure location
                     </p>
                   </>
@@ -314,7 +314,7 @@ const TwoFactorAuth = () => {
               </p>
 
               {error && (
-                <div className="mt-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm text-center">
+                <div className="mt-4 p-3 bg-status-danger-soft text-error rounded-xl text-sm text-center">
                   {error}
                 </div>
               )}

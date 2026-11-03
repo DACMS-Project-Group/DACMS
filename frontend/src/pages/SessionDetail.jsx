@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { apiGet } from '../api';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { formatNumber } from '../lib/format';
 
 const pad = (value) => String(value).padStart(2, '0');
 
@@ -117,26 +116,16 @@ const SessionDetail = () => {
   const estimatedRemuneration = details?.estimatedRemuneration ?? 0;
 
   return (
-    <div className="min-h-screen bg-off-white">
-      {/* Top Navigation */}
-      <Navbar />
+    <>
+      {/* Page Header */}
+      <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+        <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
+          Session Detail
+        </h1>
+      </div>
 
-      {/* Sidebar + Main Content */}
-      <div className="flex">
-        {/* Sidebar */}
-        <Sidebar />
-
-        {/* Main Content */}
-        <main className="flex-1 min-w-0">
-          {/* Page Header */}
-          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
-            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-              Session Detail
-            </h1>
-          </div>
-
-          {/* Page Content */}
-          <div className="p-4 md:p-8">
+      {/* Page Content */}
+      <div className="p-4 md:p-8">
             {/* Back Button */}
             <div className="mb-6">
               <button
@@ -153,11 +142,11 @@ const SessionDetail = () => {
                 Loading session details...
               </p>
             ) : error ? (
-              <p role="alert" className="text-red-700">
+              <p role="alert" className="text-error">
                 {error}
               </p>
             ) : !currentSession || !currentAppointment ? (
-              <p role="alert" className="text-red-700">
+              <p role="alert" className="text-error">
                 Session details are unavailable.
               </p>
             ) : (
@@ -183,7 +172,7 @@ const SessionDetail = () => {
                     <div>
                       <p className="text-sm text-neutral">Date</p>
 
-                      <p className="mt-1 font-semibold text-gray-800">
+                      <p className="mt-1 font-semibold text-dark">
                         {formatDate(currentSession.date)}
                       </p>
                     </div>
@@ -191,7 +180,7 @@ const SessionDetail = () => {
                     <div className="min-w-0">
                       <p className="text-sm text-neutral">Activity</p>
 
-                      <p className="mt-1 font-semibold text-gray-800 break-words">
+                      <p className="mt-1 font-semibold text-dark break-words">
                         {currentSession.activity}
                       </p>
                     </div>
@@ -199,7 +188,7 @@ const SessionDetail = () => {
                     <div>
                       <p className="text-sm text-neutral">Session Time</p>
 
-                      <p className="mt-1 font-semibold text-gray-800 whitespace-nowrap">
+                      <p className="mt-1 font-semibold text-dark whitespace-nowrap">
                         {currentSession.startTime} - {currentSession.endTime}
                       </p>
                     </div>
@@ -207,15 +196,15 @@ const SessionDetail = () => {
                     <div>
                       <p className="text-sm text-neutral">Total Hours</p>
 
-                      <p className="mt-1 font-semibold text-gray-800">
-                        {currentSession.hours.toFixed(2)} hours
+                      <p className="mt-1 font-semibold text-dark">
+                        {formatNumber(currentSession.hours, 2)} hours
                       </p>
                     </div>
 
                     <div className="min-w-0">
                       <p className="text-sm text-neutral">Module</p>
 
-                      <p className="mt-1 font-semibold text-gray-800 break-words">
+                      <p className="mt-1 font-semibold text-dark break-words">
                         {currentAppointment.moduleCode} -{' '}
                         {currentAppointment.moduleName}
                       </p>
@@ -224,7 +213,7 @@ const SessionDetail = () => {
                     <div className="min-w-0">
                       <p className="text-sm text-neutral">Lecturer</p>
 
-                      <p className="mt-1 font-semibold text-gray-800 break-words">
+                      <p className="mt-1 font-semibold text-dark break-words">
                         {currentAppointment.lecturer}
                       </p>
                     </div>
@@ -248,7 +237,7 @@ const SessionDetail = () => {
                       <p className="text-sm text-neutral">Hours Worked</p>
 
                       <p className="mt-1 text-lg md:text-xl font-bold text-primary-dark">
-                        {currentSession.hours.toFixed(2)}
+                        {formatNumber(currentSession.hours, 2)}
                       </p>
                     </div>
 
@@ -300,7 +289,7 @@ const SessionDetail = () => {
                         Verification Date
                       </p>
 
-                      <p className="mt-1 font-semibold text-gray-800">
+                      <p className="mt-1 font-semibold text-dark">
                         {currentSession.verificationDate
                           ? currentSession.verificationDate
                           : 'Not yet verified'}
@@ -311,9 +300,7 @@ const SessionDetail = () => {
               </>
             )}
           </div>
-        </main>
-      </div>
-    </div>
+    </>
   );
 };
 

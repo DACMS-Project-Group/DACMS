@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
@@ -70,14 +68,9 @@ const Dashboard = () => {
   const claims = dashboardData?.claims || [];
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole="student" />
-
-        <main className="flex-1 min-w-0">
-          {/* Page Title Bar */}
+{/* Page Title Bar */}
           <div className="bg-primary h-16 flex items-center px-4 md:px-8">
             <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Dashboard
@@ -394,9 +387,8 @@ const Dashboard = () => {
             </div>
 
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

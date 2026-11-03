@@ -30,7 +30,7 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Dashboard', href: '/admin-dashboard' },
     { name: 'Budget Management', href: '/budget-management' },
     { name: 'Appointment Approvals', href: '/appointment-approvals' },
-    { name: 'Claims Verification', href: '/claims-verification' },
+    { name: 'Claims', href: '/admin/claims' },
   ];
 
   const navItems =

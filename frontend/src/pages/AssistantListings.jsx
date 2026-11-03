@@ -1,6 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import { apiGet, apiPost, apiPatch } from '../api';
 
@@ -296,16 +294,9 @@ const AssistantListings = () => {
 
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-
-      <div className="flex">
-        <Sidebar userRole="lecturer" />
-
-
-        <main className="flex-1">
-          {/* Page Header */}
+{/* Page Header */}
           <div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-poppins font-semibold text-white">
               Assistant Listings
@@ -341,7 +332,7 @@ const AssistantListings = () => {
 
             {/* Loading / Error */}
             {loadError && (
-              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="mb-6 rounded-lg border border-error/30 bg-status-danger-soft px-4 py-3 text-sm text-error">
                 {loadError}
               </div>
             )}
@@ -367,7 +358,7 @@ const AssistantListings = () => {
 
 
                 {formError && (
-                  <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  <div className="mb-5 rounded-lg border border-error/30 bg-status-danger-soft px-4 py-3 text-sm text-error">
                     {formError}
                   </div>
                 )}
@@ -389,7 +380,7 @@ const AssistantListings = () => {
                         disabled={
                           saving || modules.length === 0
                         }
-                        className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-purple-200"
+                        className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
                       >
                         <option value="">
                           {modules.length === 0
@@ -433,7 +424,7 @@ const AssistantListings = () => {
                         value={formData.deadline}
                         onChange={handleChange}
                         disabled={saving}
-                        className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-purple-200"
+                        className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
                       />
                     </div>
 
@@ -455,7 +446,7 @@ const AssistantListings = () => {
                         step="0.01"
                         placeholder="e.g. 60"
                         disabled={saving}
-                        className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-gray-800 outline-none transition focus:border-primary focus:ring-2 focus:ring-purple-200"
+                        className="w-full rounded-lg border border-neutral bg-white px-4 py-3 text-sm text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
                       />
                     </div>
                   </div>
@@ -466,7 +457,7 @@ const AssistantListings = () => {
                       type="button"
                       onClick={handleCancel}
                       disabled={saving}
-                      className="rounded-lg border border-gray-300 px-5 py-3 font-semibold text-gray-700 transition hover:bg-gray-50"
+                      className="rounded-lg border border-border-subtle px-5 py-3 font-semibold text-dark transition hover:bg-surface-muted"
                     >
                       Cancel
                     </button>
@@ -511,28 +502,28 @@ const AssistantListings = () => {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[750px]">
                     <thead>
-                      <tr className="border-b border-gray-200 bg-light-grey text-left">
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                      <tr className="border-b border-border-subtle bg-light-grey text-left">
+                        <th className="px-4 py-3 text-sm font-semibold text-dark">
                           Listing ID
                         </th>
 
 
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        <th className="px-4 py-3 text-sm font-semibold text-dark">
                           Module
                         </th>
 
 
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        <th className="px-4 py-3 text-sm font-semibold text-dark">
                           Deadline
                         </th>
 
 
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        <th className="px-4 py-3 text-sm font-semibold text-dark">
                           Minimum Grade
                         </th>
 
 
-                        <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                        <th className="px-4 py-3 text-sm font-semibold text-dark">
                           Actions
                         </th>
                       </tr>
@@ -557,33 +548,33 @@ const AssistantListings = () => {
                           return (
                             <tr
                               key={listing.id}
-                              className="border-b border-gray-100 last:border-b-0"
+                              className="border-b border-border-subtle last:border-b-0"
                             >
-                              <td className="px-4 py-4 text-sm text-gray-700">
+                              <td className="px-4 py-4 text-sm text-dark">
                                 {listing.id ?? '—'}
                               </td>
 
 
-                              <td className="px-4 py-4 text-sm text-gray-700">
+                              <td className="px-4 py-4 text-sm text-dark">
                                 <div className="font-medium">
                                   {listing.moduleCode || '—'}
                                 </div>
 
 
                                 {listing.moduleName && (
-                                  <div className="mt-1 text-xs text-gray-500">
+                                  <div className="mt-1 text-xs text-neutral">
                                     {listing.moduleName}
                                   </div>
                                 )}
                               </td>
 
 
-                              <td className="px-4 py-4 text-sm text-gray-700">
+                              <td className="px-4 py-4 text-sm text-dark">
                                 {formatDate(listing.deadline)}
                               </td>
 
 
-                              <td className="px-4 py-4 text-sm text-gray-700">
+                              <td className="px-4 py-4 text-sm text-dark">
                                 {listing.minimumGrade !== null &&
                                 listing.minimumGrade !== undefined
                                   ? `${listing.minimumGrade}%`
@@ -612,9 +603,8 @@ const AssistantListings = () => {
               )}
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

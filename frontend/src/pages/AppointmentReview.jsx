@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiGet, apiPatch } from '../api';
@@ -109,14 +107,9 @@ const AppointmentReview = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-off-white">
-        <Navbar />
+      <>
 
-        <div className="flex">
-          <Sidebar userRole="admin" />
-
-          <main className="flex-1">
-            <div className="bg-primary px-8 py-4">
+<div className="bg-primary px-8 py-4">
               <h1 className="text-2xl font-semibold text-white font-poppins">
                 Appointment Review
               </h1>
@@ -129,22 +122,16 @@ const AppointmentReview = () => {
                 </p>
               </Card>
             </div>
-          </main>
-        </div>
-      </div>
+
+      </>
     );
   }
 
   if (error && !appointment) {
     return (
-      <div className="min-h-screen bg-off-white">
-        <Navbar />
+      <>
 
-        <div className="flex">
-          <Sidebar userRole="admin" />
-
-          <main className="flex-1">
-            <div className="bg-primary px-8 py-4">
+<div className="bg-primary px-8 py-4">
               <h1 className="text-2xl font-semibold text-white font-poppins">
                 Appointment Review
               </h1>
@@ -152,7 +139,7 @@ const AppointmentReview = () => {
 
             <div className="p-8">
               <Card>
-                <p className="font-inter text-red-600">
+                <p className="font-inter text-error">
                   {error}
                 </p>
 
@@ -165,9 +152,8 @@ const AppointmentReview = () => {
                 </button>
               </Card>
             </div>
-          </main>
-        </div>
-      </div>
+
+      </>
     );
   }
 
@@ -184,14 +170,9 @@ const AppointmentReview = () => {
       : [];
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole="admin" />
-
-        <main className="flex-1">
-          <div className="bg-primary px-8 py-4">
+<div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-poppins font-semibold text-white">
               Appointment Review
             </h1>
@@ -200,8 +181,8 @@ const AppointmentReview = () => {
           <div className="p-8">
             {/* Error message */}
             {error && (
-              <div className="mb-6 rounded-lg border border-red-200 bg-red-50 p-4">
-                <p className="text-sm font-inter text-red-600">
+              <div className="mb-6 rounded-lg border border-error/30 bg-status-danger-soft p-4">
+                <p className="text-sm font-inter text-error">
                   {error}
                 </p>
               </div>
@@ -378,7 +359,7 @@ const AppointmentReview = () => {
                   {supportingDocuments.map((document, index) => (
                     <div
                       key={document.id || index}
-                      className="flex flex-col gap-3 rounded-lg border border-gray-200 bg-white p-4 md:flex-row md:items-center md:justify-between"
+                      className="flex flex-col gap-3 rounded-lg border border-border-subtle bg-white p-4 md:flex-row md:items-center md:justify-between"
                     >
                       <div>
                         <p className="font-inter font-medium text-dark">
@@ -516,7 +497,7 @@ const AppointmentReview = () => {
               </div>
 
               {submitted ? (
-                <div className="rounded-lg border border-gray-200 bg-off-white p-5">
+                <div className="rounded-lg border border-border-subtle bg-off-white p-5">
                   <p className="font-inter font-semibold text-primary">
                     {getDecisionText()}
                   </p>
@@ -543,7 +524,7 @@ const AppointmentReview = () => {
                       className={`rounded-lg border px-5 py-4 text-left font-inter transition ${
                         decision === 'Approved'
                           ? 'border-primary bg-primary text-white'
-                          : 'border-gray-200 bg-white text-dark hover:border-primary'
+                          : 'border-border-subtle bg-white text-dark hover:border-primary'
                       }`}
                     >
                       <p className="font-semibold">
@@ -567,7 +548,7 @@ const AppointmentReview = () => {
                       className={`rounded-lg border px-5 py-4 text-left font-inter transition ${
                         decision === 'Rejected'
                           ? 'border-primary bg-primary text-white'
-                          : 'border-gray-200 bg-white text-dark hover:border-primary'
+                          : 'border-border-subtle bg-white text-dark hover:border-primary'
                       }`}
                     >
                       <p className="font-semibold">
@@ -591,7 +572,7 @@ const AppointmentReview = () => {
                       className={`rounded-lg border px-5 py-4 text-left font-inter transition ${
                         decision === 'Returned'
                           ? 'border-primary bg-primary text-white'
-                          : 'border-gray-200 bg-white text-dark hover:border-primary'
+                          : 'border-border-subtle bg-white text-dark hover:border-primary'
                       }`}
                     >
                       <p className="font-semibold">
@@ -624,7 +605,7 @@ const AppointmentReview = () => {
                       onChange={(event) => setComments(event.target.value)}
                       rows="4"
                       placeholder="Enter comments or reasons for your decision..."
-                      className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-inter text-dark outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
+                      className="mt-2 w-full rounded-lg border border-border-subtle bg-white px-4 py-3 text-sm font-inter text-dark outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                     />
                   </div>
 
@@ -633,7 +614,7 @@ const AppointmentReview = () => {
                       type="button"
                       onClick={handleBack}
                       disabled={submitting}
-                      className="rounded-lg border border-gray-300 px-5 py-2.5 font-inter font-medium text-dark transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="rounded-lg border border-border-subtle px-5 py-2.5 font-inter font-medium text-dark transition hover:bg-light-grey disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Cancel
                     </button>
@@ -650,9 +631,8 @@ const AppointmentReview = () => {
               )}
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

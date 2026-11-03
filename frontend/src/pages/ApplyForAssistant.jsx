@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
+import Button from '../ui/Button';
+import { formatDate } from '../lib/format';
 import { apiGet, apiPost } from '../api';
 
 const ApplyForAssistant = () => {
@@ -45,16 +45,6 @@ const ApplyForAssistant = () => {
     };
   }, []);
 
-  const formatDate = (date) => {
-    if (!date) return '—';
-
-    return new Date(date).toLocaleDateString('en-ZA', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-    });
-  };
-
   const handleApply = async (listing) => {
     try {
       setApplyingId(listing.ListingID);
@@ -72,14 +62,9 @@ const ApplyForAssistant = () => {
   };
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole="student" />
-
-        <main className="flex-1 min-w-0">
-          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
+<div className="bg-primary h-16 flex items-center px-4 md:px-8">
             <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
               Assistant Applications
             </h1>
@@ -160,15 +145,15 @@ const ApplyForAssistant = () => {
                           Eligible
                         </span>
 
-                        <button
+                        <Button
                           onClick={() => handleApply(listing)}
                           disabled={applyingId === listing.ListingID}
-                          className="px-6 py-3 rounded-xl font-semibold bg-primary text-white hover:bg-primary-dark transition disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                          className="whitespace-nowrap"
                         >
                           {applyingId === listing.ListingID
                             ? 'Applying...'
                             : 'Apply'}
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </Card>
@@ -185,9 +170,8 @@ const ApplyForAssistant = () => {
               </button>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

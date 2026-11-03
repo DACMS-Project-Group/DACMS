@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import { formatPercent } from '../lib/format';
 import { apiGet } from '../api';
 
 const LectureDashboard = () => {
@@ -104,14 +103,9 @@ const LectureDashboard = () => {
   const claimsStats = claimsData?.stats || {};
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole="lecturer" />
-
-        <main className="flex-1">
-          {/* Page Header */}
+{/* Page Header */}
           <div className="bg-primary h-16 flex items-center px-8">
             <h1 className="text-2xl font-poppins font-semibold text-white">
               Lecturer Dashboard
@@ -399,7 +393,7 @@ const LectureDashboard = () => {
                   <div className="rounded-lg bg-off-white p-5">
                     <p className="text-sm text-neutral">Utilisation</p>
                     <p className="mt-2 text-2xl font-bold text-primary-dark">
-                      {loading ? '—' : `${utilisationPct.toFixed(1)}%`}
+                      {loading ? '—' : formatPercent(utilisationPct)}
                     </p>
                   </div>
                 </div>
@@ -407,15 +401,15 @@ const LectureDashboard = () => {
                 {/* Progress Bar */}
                 <div className="mt-6">
                   <div className="mb-2 flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-700">
+                    <span className="text-sm font-medium text-dark">
                       Budget Used
                     </span>
-                    <span className="text-sm font-medium text-gray-700">
-                      {utilisationPct.toFixed(1)}%
+                    <span className="text-sm font-medium text-dark">
+                      {loading ? '—' : formatPercent(utilisationPct)}
                     </span>
                   </div>
 
-                  <div className="h-3 w-full rounded-full bg-gray-200">
+                  <div className="h-3 w-full rounded-full bg-light-grey">
                     <div
                       className="h-3 rounded-full bg-primary"
                       style={{ width: `${utilisationPct}%` }}
@@ -426,7 +420,7 @@ const LectureDashboard = () => {
                 {/* Per-module budgets */}
                 {budgets.length > 0 && (
                   <div className="mt-6 border-t border-neutral pt-4">
-                    <h4 className="text-sm font-semibold text-gray-700 mb-3">
+                    <h4 className="text-sm font-semibold text-dark mb-3">
                       Your Modules
                     </h4>
                     <div className="space-y-3">
@@ -459,9 +453,8 @@ const LectureDashboard = () => {
               </Card>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
@@ -82,14 +80,9 @@ const BudgetManagement = () => {
   );
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole={user?.role || 'admin'} />
-
-        <main className="flex-1">
-          <div className="bg-primary px-8 py-4">
+<div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-poppins font-semibold text-white">
               Budget Management
             </h1>
@@ -186,7 +179,7 @@ const BudgetManagement = () => {
 
                   <p
                     className={`text-3xl font-poppins font-bold mt-3 ${Number(stats.total_remaining) < 0
-                        ? 'text-red-600'
+                        ? 'text-error'
                         : 'text-primary'
                       }`}
                   >
@@ -219,7 +212,7 @@ const BudgetManagement = () => {
 
               {error && (
                 <Card>
-                  <div className="p-6 text-red-600 font-inter">
+                  <div className="p-6 text-error font-inter">
                     {error}
                   </div>
                 </Card>
@@ -312,7 +305,7 @@ const BudgetManagement = () => {
 
                                 <td
                                   className={`px-5 py-5 font-medium font-inter ${Number(budget.remaining_budget) < 0
-                                      ? 'text-red-600'
+                                      ? 'text-error'
                                       : 'text-dark'
                                     }`}
                                 >
@@ -326,13 +319,13 @@ const BudgetManagement = () => {
                                     </span>
                                   </div>
 
-                                  <div className="w-full h-2 bg-gray-200 rounded-full">
+                                  <div className="w-full h-2 bg-light-grey rounded-full">
                                     <div
                                       className={`h-2 rounded-full ${percentage >= 100
-                                          ? 'bg-red-500'
+                                          ? 'bg-error'
                                           : percentage >= 80
-                                            ? 'bg-yellow-500'
-                                            : 'bg-green-500'
+                                            ? 'bg-warning'
+                                            : 'bg-success'
                                         }`}
                                       style={{
                                         width: `${Math.min(
@@ -409,9 +402,8 @@ const BudgetManagement = () => {
               )}
             </section>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

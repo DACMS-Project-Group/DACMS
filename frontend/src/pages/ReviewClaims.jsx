@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import DataTable from '../ui/DataTable';
+import { formatMoney } from '../lib/format';
 import { apiGet } from '../api';
 
 const formatSubmittedDate = (date) =>
@@ -93,22 +93,80 @@ const ReviewClaims = () => {
     navigate(`/review-claim/${claim.id}`);
   };
 
-  const formatCurrency = (amount) => {
-    return `R ${amount.toLocaleString('en-ZA', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    })}`;
-  };
+  const claimColumns = [
+    {
+      key: 'reference',
+      header: 'Claim Reference',
+      className: 'p-4 text-sm font-medium text-dark font-inter',
+      render: (claim) => claim.reference,
+    },
+    {
+      key: 'student',
+      header: 'Student',
+      className: 'p-4 text-sm font-inter',
+      render: (claim) => (
+        <>
+          <div className="font-medium text-dark">{claim.studentName}</div>
+          <div className="text-neutral">{claim.studentNumber}</div>
+        </>
+      ),
+    },
+    {
+      key: 'module',
+      header: 'Module',
+      className: 'p-4 text-sm text-dark font-inter',
+      render: (claim) => claim.moduleCode,
+    },
+    {
+      key: 'hours',
+      header: 'Hours',
+      className: 'p-4 text-sm text-dark font-inter',
+      render: (claim) => claim.hours,
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      className: 'p-4 text-sm font-medium text-dark font-inter',
+      render: (claim) => formatMoney(claim.amount),
+    },
+    {
+      key: 'date',
+      header: 'Submitted',
+      className: 'p-4 text-sm text-dark font-inter',
+      render: (claim) => claim.date,
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'p-4',
+      render: (claim) => <StatusBadge status={claim.status} />,
+    },
+    {
+      key: 'comment',
+      header: 'Lecturer Comment',
+      className: 'p-4 text-sm text-dark font-inter',
+      render: (claim) => claim.lecturerComment || 'Not reviewed',
+    },
+    {
+      key: 'action',
+      header: 'Action',
+      className: 'p-4',
+      render: (claim) => (
+        <button
+          type="button"
+          onClick={() => handleReview(claim)}
+          className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-dark font-inter"
+        >
+          Review
+        </button>
+      ),
+    },
+  ];
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole="lecturer" />
-
-        <main className="flex-1">
-          {/* Page Header */}
+{/* Page Header */}
           <div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-poppins font-semibold text-white">
               Review Claims
@@ -249,129 +307,16 @@ const ReviewClaims = () => {
                   </p>
                 </div>
 
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead>
-                      <tr className="border-b border-neutral/30">
-                        <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
-                          Claim Reference
-                        </th>
-
-                        <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
-                          Student
-                        </th>
-
-                        <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
-                          Module
-                        </th>
-
-                        <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
-                          Hours
-                        </th>
-
-                        <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
-                          Amount
-                        </th>
-
-                        <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
-                          Submitted
-                        </th>
-
-                        <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
-                          Status
-                        </th>
-
-                        <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
-                          Lecturer Comment
-                        </th>
-
-                        <th className="px-4 py-4 text-left text-sm font-semibold text-primary font-inter">
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {isLoading ? (
-                        <tr>
-                          <td colSpan="9" className="px-6 py-10 text-center text-neutral font-inter">
-                            Loading claims...
-                          </td>
-                        </tr>
-                      ) : loadError ? (
-                        <tr>
-                          <td colSpan="9" className="px-6 py-10 text-center text-red-700 font-inter">
-                            Unable to load claims: {loadError}
-                          </td>
-                        </tr>
-                      ) : filteredClaims.length > 0 ? (
-                        filteredClaims.map((claim) => (
-                          <tr
-                            key={claim.id}
-                            className="border-b border-neutral/20 transition hover:bg-primary-lightest/30"
-                          >
-                            <td className="px-4 py-4 text-sm font-medium text-dark font-inter">
-                              {claim.reference}
-                            </td>
-
-                            <td className="px-4 py-4 text-sm font-inter">
-                              <div className="font-medium text-dark">
-                                {claim.studentName}
-                              </div>
-
-                              <div className="text-neutral">
-                                {claim.studentNumber}
-                              </div>
-                            </td>
-
-                            <td className="px-4 py-4 text-sm text-dark font-inter">
-                              {claim.moduleCode}
-                            </td>
-
-                            <td className="px-4 py-4 text-sm text-dark font-inter">
-                              {claim.hours}
-                            </td>
-
-                            <td className="px-4 py-4 text-sm font-medium text-dark font-inter">
-                              {formatCurrency(claim.amount)}
-                            </td>
-
-                            <td className="px-4 py-4 text-sm text-dark font-inter">
-                              {claim.date}
-                            </td>
-
-                            <td className="px-4 py-4">
-                              <StatusBadge status={claim.status} />
-                            </td>
-
-                            <td className="px-4 py-4 text-sm text-dark font-inter">
-                              {claim.lecturerComment || 'Not reviewed'}
-                            </td>
-
-                            <td className="px-4 py-4">
-                              <button
-                                type="button"
-                                onClick={() => handleReview(claim)}
-                                className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-dark font-inter"
-                              >
-                                Review
-                              </button>
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan="9"
-                            className="px-6 py-10 text-center text-neutral font-inter"
-                          >
-                            No claims found matching your search criteria.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable
+                  columns={claimColumns}
+                  rows={filteredClaims}
+                  getRowKey={(claim) => claim.id}
+                  loading={isLoading}
+                  error={loadError}
+                  emptyTitle="No claims found"
+                  emptyDescription="No claims match your search criteria."
+                  minWidth="1000px"
+                />
               </Card>
             </section>
 
@@ -388,9 +333,8 @@ const ReviewClaims = () => {
               </p>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import EmptyState from '../ui/EmptyState';
+import PageHeader from '../ui/PageHeader';
+import { formatHours } from '../lib/format';
 import { apiGet } from '../api';
 
 const VerifyWorkHours = () => {
@@ -176,39 +177,28 @@ const VerifyWorkHours = () => {
   };
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole="lecturer" />
-
-        <main className="flex-1">
-          <div className="bg-primary px-8 py-4">
+<div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-poppins font-semibold text-white">
               Verify Work Hours
             </h1>
           </div>
 
           <div className="p-8">
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold text-primary-dark">
-                Verify Work Hours
-              </h2>
-
-              <p className="mt-2 text-neutral">
-                Review and verify the working hours recorded by
-                your Assistant. Changes are saved immediately.
-              </p>
-            </div>
+            <PageHeader
+              title="Verify Work Hours"
+              description="Review and verify the working hours recorded by your Assistant. Changes are saved immediately."
+            />
 
             {savedMessage && (
-              <div className="mb-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm font-medium text-green-800">
+              <div className="mb-5 rounded-lg border border-success/30 bg-status-done-soft px-4 py-3 text-sm font-medium text-status-done">
                 {savedMessage}
               </div>
             )}
 
             {error && (
-              <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="mb-5 rounded-lg border border-error/30 bg-status-danger-soft px-4 py-3 text-sm text-error">
                 {error}
               </div>
             )}
@@ -228,36 +218,36 @@ const VerifyWorkHours = () => {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[950px]">
                   <thead>
-                    <tr className="border-b border-gray-200 bg-light-grey text-left">
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                    <tr className="border-b border-border-subtle bg-light-grey text-left">
+                      <th className="px-4 py-3 text-sm font-semibold text-dark">
                         Date
                       </th>
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-sm font-semibold text-dark">
                         Student
                       </th>
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-sm font-semibold text-dark">
                         Module
                       </th>
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-sm font-semibold text-dark">
                         Activity
                       </th>
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-sm font-semibold text-dark">
                         Time
                       </th>
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-sm font-semibold text-dark">
                         Hours
                       </th>
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-sm font-semibold text-dark">
                         Status
                       </th>
 
-                      <th className="px-4 py-3 text-sm font-semibold text-gray-700">
+                      <th className="px-4 py-3 text-sm font-semibold text-dark">
                         Action
                       </th>
                     </tr>
@@ -270,20 +260,20 @@ const VerifyWorkHours = () => {
                           colSpan="8"
                           className="px-4 py-8 text-center text-sm text-neutral"
                         >
-                          No work sessions found.
+                          <EmptyState title="No work sessions found" />
                         </td>
                       </tr>
                     ) : (
                       sessions.map((session) => (
                         <tr
                           key={session.id}
-                          className="border-b border-gray-100 last:border-b-0"
+                          className="border-b border-border-subtle last:border-b-0"
                         >
-                          <td className="px-4 py-4 text-sm text-gray-700">
+                          <td className="px-4 py-4 text-sm text-dark">
                             {formatDate(session.date)}
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
+                          <td className="px-4 py-4 text-sm text-dark">
                             <div>
                               <div className="font-medium">
                                 {session.studentName}
@@ -301,16 +291,16 @@ const VerifyWorkHours = () => {
                             {session.moduleCode}
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
+                          <td className="px-4 py-4 text-sm text-dark">
                             {session.activity}
                           </td>
 
-                          <td className="px-4 py-4 text-sm text-gray-700">
+                          <td className="px-4 py-4 text-sm text-dark">
                             {session.startTime} - {session.endTime}
                           </td>
 
-                          <td className="px-4 py-4 text-sm font-medium text-gray-800">
-                            {session.hours.toFixed(1)} hrs
+                          <td className="px-4 py-4 text-sm font-medium text-dark">
+                            {formatHours(session.hours)}
                           </td>
 
                           <td className="px-4 py-4">
@@ -334,7 +324,7 @@ const VerifyWorkHours = () => {
                                 onClick={() =>
                                   handleVerifyOne(session.id)
                                 }
-                                className="rounded-lg border border-primary px-3 py-1.5 text-sm font-semibold text-primary transition hover:bg-purple-50"
+                                className="rounded-lg border border-primary px-3 py-1.5 text-sm font-semibold text-primary transition hover:bg-primary-lightest"
                               >
                                 Verify
                               </button>
@@ -348,9 +338,8 @@ const VerifyWorkHours = () => {
               </div>
             </Card>
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { useNavigate } from 'react-router-dom';
-import Sidebar from '../components/Sidebar';
-import Navbar from '../components/Navbar';
 import { apiGet } from '../api';
 
 const AdminDashboard = () => {
@@ -76,14 +74,9 @@ const AdminDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole="admin" />
-
-        <main className="flex-1">
-          {/* PAGE HEADING */}
+{/* PAGE HEADING */}
           <div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-poppins font-semibold text-white">
               Administrator Dashboard
@@ -160,7 +153,7 @@ const AdminDashboard = () => {
                   </div>
 
                   <button
-                    onClick={() => navigate('/claims-verification')}
+                    onClick={() => navigate('/admin/claims')}
                     className="text-primary font-semibold hover:underline mt-4 font-inter"
                   >
                     View claims →
@@ -312,9 +305,8 @@ const AdminDashboard = () => {
             </div>
 
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 

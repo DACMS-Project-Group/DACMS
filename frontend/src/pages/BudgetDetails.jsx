@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import Navbar from '../components/Navbar';
-import Sidebar from '../components/Sidebar';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
@@ -74,14 +72,9 @@ const BudgetDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-off-white">
-        <Navbar />
+      <>
 
-        <div className="flex">
-          <Sidebar userRole={user?.role || 'admin'} />
-
-          <main className="flex-1">
-            <div className="bg-primary px-8 py-4">
+<div className="bg-primary px-8 py-4">
               <h1 className="text-2xl font-poppins font-semibold text-white">
                 Budget Details
               </h1>
@@ -94,22 +87,16 @@ const BudgetDetails = () => {
                 </div>
               </Card>
             </div>
-          </main>
-        </div>
-      </div>
+
+      </>
     );
   }
 
   if (error || !budget) {
     return (
-      <div className="min-h-screen bg-off-white">
-        <Navbar />
+      <>
 
-        <div className="flex">
-          <Sidebar userRole={user?.role || 'admin'} />
-
-          <main className="flex-1">
-            <div className="bg-primary px-8 py-4">
+<div className="bg-primary px-8 py-4">
               <h1 className="text-2xl font-semibold text-white font-poppins">
                 Budget Details
               </h1>
@@ -117,14 +104,13 @@ const BudgetDetails = () => {
 
             <div className="p-8">
               <Card>
-                <div className="p-6 text-red-600 font-inter">
+                <div className="p-6 text-error font-inter">
                   {error || 'Budget information could not be found.'}
                 </div>
               </Card>
             </div>
-          </main>
-        </div>
-      </div>
+
+      </>
     );
   }
 
@@ -132,14 +118,9 @@ const BudgetDetails = () => {
   const status = getStatus(percentage);
 
   return (
-    <div className="min-h-screen bg-off-white">
-      <Navbar />
+    <>
 
-      <div className="flex">
-        <Sidebar userRole={user?.role || 'admin'} />
-
-        <main className="flex-1">
-          <div className="bg-primary px-8 py-4">
+<div className="bg-primary px-8 py-4">
             <h1 className="text-2xl font-semibold text-white font-poppins">
               Budget Details
             </h1>
@@ -233,7 +214,7 @@ const BudgetDetails = () => {
                   <p
                     className={`text-3xl font-poppins font-bold mt-3 ${
                       Number(budget.remaining_budget) < 0
-                        ? 'text-red-600'
+                        ? 'text-error'
                         : 'text-primary'
                     }`}
                   >
@@ -265,10 +246,10 @@ const BudgetDetails = () => {
                   <div
                     className={`h-4 rounded-full ${
                       percentage >= 100
-                        ? 'bg-red-600'
+                        ? 'bg-error'
                         : percentage >= 80
-                        ? 'bg-yellow-500'
-                        : 'bg-green-600'
+                        ? 'bg-warning'
+                        : 'bg-success'
                     }`}
                     style={{
                       width: `${Math.min(percentage, 100)}%`,
@@ -369,9 +350,8 @@ const BudgetDetails = () => {
               </section>
             )}
           </div>
-        </main>
-      </div>
-    </div>
+
+    </>
   );
 };
 
