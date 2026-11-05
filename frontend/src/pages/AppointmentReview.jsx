@@ -1,3 +1,5 @@
+import Button from '../ui/Button';
+import DetailPage from '../ui/DetailPage';
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import Card from '../components/Card';
@@ -105,58 +107,6 @@ const AppointmentReview = () => {
     return '';
   };
 
-  if (loading) {
-    return (
-      <>
-
-<div className="bg-primary px-8 py-4">
-              <h1 className="text-2xl font-semibold text-white font-poppins">
-                Appointment Review
-              </h1>
-            </div>
-
-            <div className="p-8">
-              <Card>
-                <p className="font-inter text-neutral">
-                  Loading appointment details...
-                </p>
-              </Card>
-            </div>
-
-      </>
-    );
-  }
-
-  if (error && !appointment) {
-    return (
-      <>
-
-<div className="bg-primary px-8 py-4">
-              <h1 className="text-2xl font-semibold text-white font-poppins">
-                Appointment Review
-              </h1>
-            </div>
-
-            <div className="p-8">
-              <Card>
-                <p className="font-inter text-error">
-                  {error}
-                </p>
-
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="mt-4 rounded-lg bg-primary px-5 py-2.5 font-inter font-medium text-white transition hover:bg-primary-dark"
-                >
-                  Back to Appointment Approvals
-                </button>
-              </Card>
-            </div>
-
-      </>
-    );
-  }
-
   const currentAppointment = appointment;
 
   const supportingDocuments =
@@ -170,15 +120,21 @@ const AppointmentReview = () => {
       : [];
 
   return (
-    <>
-
-<div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              Appointment Review
-            </h1>
-          </div>
-
-          <div className="p-8">
+    <DetailPage
+      title="Appointment Review"
+      breadcrumbs={[
+        { label: 'Appointment Approvals', to: '/appointment-approvals' },
+        { label: currentAppointment?.reference || 'Appointment Review' },
+      ]}
+      backTo="/appointment-approvals"
+      backLabel="Back to Appointment Approvals"
+      loading={loading}
+      loadingMessage="Loading appointment details..."
+      errorTitle="Could not load appointment"
+      error={!appointment ? error || 'Appointment details could not be found.' : ''}
+    >
+      {appointment ? (
+        <>
             {/* Error message */}
             {error && (
               <div className="mb-6 rounded-lg border border-error/30 bg-status-danger-soft p-4">
@@ -196,7 +152,7 @@ const AppointmentReview = () => {
                     Appointment Reference
                   </p>
 
-                  <h2 className="mt-1 text-xl font-poppins font-semibold text-primary">
+                  <h2 className="text-section mt-1 font-poppins font-semibold text-primary">
                     {currentAppointment.reference}
                   </h2>
                 </div>
@@ -250,7 +206,7 @@ const AppointmentReview = () => {
             {/* Student Information */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-lg font-poppins font-semibold text-primary">
+                <h2 className="text-section font-poppins font-semibold text-primary">
                   Student Information
                 </h2>
 
@@ -295,7 +251,7 @@ const AppointmentReview = () => {
             {/* Application Information */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-lg font-poppins font-semibold text-primary">
+                <h2 className="text-section font-poppins font-semibold text-primary">
                   Application Information
                 </h2>
 
@@ -341,7 +297,7 @@ const AppointmentReview = () => {
             {/* Supporting Documents */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-lg font-poppins font-semibold text-primary">
+                <h2 className="text-section font-poppins font-semibold text-primary">
                   Supporting Documents
                 </h2>
 
@@ -372,7 +328,7 @@ const AppointmentReview = () => {
                       </div>
 
                       {document.documentUrl && (
-                        <button
+                        <Button unstyled
                           type="button"
                           onClick={() =>
                             window.open(
@@ -384,7 +340,7 @@ const AppointmentReview = () => {
                           className="font-inter font-medium text-primary transition hover:text-primary-dark"
                         >
                           View Document
-                        </button>
+                        </Button>
                       )}
                     </div>
                   ))}
@@ -395,7 +351,7 @@ const AppointmentReview = () => {
             {/* Lecturer Recommendation */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-lg font-poppins font-semibold text-primary">
+                <h2 className="text-section font-poppins font-semibold text-primary">
                   Lecturer Recommendation
                 </h2>
 
@@ -418,7 +374,7 @@ const AppointmentReview = () => {
             {/* Appointment Details */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-lg font-poppins font-semibold text-primary">
+                <h2 className="text-section font-poppins font-semibold text-primary">
                   Proposed Appointment Details
                 </h2>
 
@@ -487,7 +443,7 @@ const AppointmentReview = () => {
             {/* Administrator Decision */}
             <Card>
               <div className="mb-5">
-                <h2 className="text-lg font-poppins font-semibold text-primary">
+                <h2 className="text-section font-poppins font-semibold text-primary">
                   Administrator Decision
                 </h2>
 
@@ -507,18 +463,18 @@ const AppointmentReview = () => {
                     this decision.
                   </p>
 
-                  <button
+                  <Button unstyled
                     type="button"
                     onClick={handleBack}
                     className="mt-4 rounded-lg bg-primary px-5 py-2.5 font-inter font-medium text-white transition hover:bg-primary-dark"
                   >
                     Back to Appointment Approvals
-                  </button>
+                  </Button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmitDecision}>
                   <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-                    <button
+                    <Button unstyled
                       type="button"
                       onClick={() => handleDecision('Approved')}
                       className={`rounded-lg border px-5 py-4 text-left font-inter transition ${
@@ -540,9 +496,9 @@ const AppointmentReview = () => {
                       >
                         Approve the recommended appointment.
                       </p>
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button unstyled
                       type="button"
                       onClick={() => handleDecision('Rejected')}
                       className={`rounded-lg border px-5 py-4 text-left font-inter transition ${
@@ -564,9 +520,9 @@ const AppointmentReview = () => {
                       >
                         Reject the appointment recommendation.
                       </p>
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button unstyled
                       type="button"
                       onClick={() => handleDecision('Returned')}
                       className={`rounded-lg border px-5 py-4 text-left font-inter transition ${
@@ -588,7 +544,7 @@ const AppointmentReview = () => {
                       >
                         Return the recommendation to the lecturer.
                       </p>
-                    </button>
+                    </Button>
                   </div>
 
                   <div className="mt-6">
@@ -610,29 +566,29 @@ const AppointmentReview = () => {
                   </div>
 
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                    <button
+                    <Button unstyled
                       type="button"
                       onClick={handleBack}
                       disabled={submitting}
                       className="rounded-lg border border-border-subtle px-5 py-2.5 font-inter font-medium text-dark transition hover:bg-light-grey disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Cancel
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button unstyled
                       type="submit"
                       disabled={!decision || submitting}
                       className="rounded-lg bg-primary px-5 py-2.5 font-inter font-medium text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {submitting ? 'Submitting...' : 'Submit Decision'}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               )}
             </Card>
-          </div>
-
-    </>
+        </>
+      ) : null}
+    </DetailPage>
   );
 };
 

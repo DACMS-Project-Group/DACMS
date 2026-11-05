@@ -1,3 +1,6 @@
+import Button from '../ui/Button';
+import DataTable from '../ui/DataTable';
+import DetailPage from '../ui/DetailPage';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import Card from '../components/Card';
@@ -217,53 +220,89 @@ const ClaimReview = () => {
     }
   };
 
-  const renderPageMessage = (message, showBackButton = false) => (
-    <>
-      <div className="bg-primary px-8 py-4">
-        <h1 className="text-2xl font-poppins font-semibold text-white">
-          {isLecturerReview ? 'Claim Verification' : 'Claim Review'}
-        </h1>
-      </div>
-
-      <div className="p-8">
-        <Card>
-          <p className="text-neutral font-inter">{message}</p>
-
-          {showBackButton && (
-            <button
-              type="button"
-              onClick={() => navigate(listPath)}
-              className="mt-4 rounded-lg bg-primary px-4 py-2 font-semibold text-white font-inter"
-            >
-              Back to Claims
-            </button>
-          )}
-        </Card>
-      </div>
-    </>
-  );
-
-  if (isLoading) {
-    return renderPageMessage('Loading claim...');
-  }
-
-  if (loadError || !claim) {
-    return renderPageMessage(
-      loadError || 'Claim not found.',
-      true
-    );
-  }
+  const sessionColumns = [
+    {
+      key: 'date',
+      header: 'Date',
+      className: 'px-4 py-4 text-sm text-dark font-inter',
+      render: (session) => formatDate(session.date),
+    },
+    {
+      key: 'activity',
+      header: 'Activity',
+      className: 'px-4 py-4 text-sm text-dark font-inter',
+      render: (session) => session.activity || 'Not provided',
+    },
+    {
+      key: 'time',
+      header: 'Time',
+      className: 'px-4 py-4 text-sm text-dark font-inter',
+      render: (session) =>
+        `${session.startTime || '--:--'} - ${session.endTime || '--:--'}`,
+    },
+    {
+      key: 'hours',
+      header: 'Hours',
+      className: 'px-4 py-4 text-sm font-medium text-dark font-inter',
+      render: (session) => formatNumber(session.hours, 2),
+    },
+    {
+      key: 'verification',
+      header: 'Verification',
+      className: 'px-4 py-4',
+      render: (session, index) =>
+        isLecturerReview ? (
+          <label className="flex cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={verifiedSessions[index] || false}
+              onChange={() => toggleSessionVerification(index)}
+              className="h-4 w-4 rounded border-neutral text-primary focus:ring-primary"
+            />
+            <span className="text-sm font-medium text-dark font-inter">
+              {verifiedSessions[index] ? 'Verified' : 'Pending verification'}
+            </span>
+          </label>
+        ) : session.status === 'Verified' ? (
+          <span className="inline-flex rounded-full bg-status-done-soft px-3 py-1 text-xs font-semibold text-status-done">
+            Verified
+          </span>
+        ) : (
+          <span className="inline-flex rounded-full bg-status-amber-soft px-3 py-1 text-xs font-semibold text-status-amber">
+            Pending verification
+          </span>
+        ),
+    },
+  ];
 
   return (
-    <>
-
-<div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white font-poppins">
-              {isLecturerReview ? 'Claim Verification' : 'Claim Review'}
-            </h1>
-          </div>
-
-          <div className="p-8">
+    <DetailPage
+      title={isLecturerReview ? 'Claim Verification' : 'Claim Review'}
+      breadcrumbs={[
+        {
+          label: isLecturerReview ? 'Review Claims' : 'Claims',
+          to: listPath,
+        },
+        {
+          label:
+            claim?.claimReference ||
+            claim?.reference ||
+            (claim?.id
+              ? `Claim #${claim.id}`
+              : isLecturerReview
+                ? 'Claim Verification'
+                : 'Claim Review'),
+        },
+      ]}
+      backTo={listPath}
+      backLabel="Back to Claims"
+      loading={isLoading}
+      loadingMessage="Loading claim..."
+      errorTitle="Could not load claim"
+      error={!claim ? loadError || 'Claim not found.' : ''}
+    >
+      {claim ? (
+        <>
             {/* Claim Summary */}
             <Card className="mb-6">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -272,7 +311,7 @@ const ClaimReview = () => {
                     Claim Reference
                   </p>
 
-                  <h2 className="mt-1 text-xl font-semibold text-primary font-poppins">
+                  <h2 className="text-section mt-1 font-semibold text-primary font-poppins">
                     {claim.claimReference ||
                       claim.reference ||
                       `Claim #${claim.id}`}
@@ -289,7 +328,7 @@ const ClaimReview = () => {
 
             {/* Student Information */}
             <Card className="mb-6">
-              <h2 className="mb-5 text-lg font-semibold text-primary font-poppins">
+              <h2 className="text-section mb-5 font-semibold text-primary font-poppins">
                 Student Information
               </h2>
 
@@ -329,7 +368,7 @@ const ClaimReview = () => {
 
             {/* Banking Information */}
             <Card className="mb-6">
-              <h2 className="mb-5 text-lg font-semibold text-primary font-poppins">
+              <h2 className="text-section mb-5 font-semibold text-primary font-poppins">
                 Banking Information
               </h2>
 
@@ -380,7 +419,7 @@ const ClaimReview = () => {
 
             {/* Claim Details */}
             <Card className="mb-6">
-              <h2 className="mb-5 text-lg font-semibold text-primary font-poppins">
+              <h2 className="text-section mb-5 font-semibold text-primary font-poppins">
                 Claim Details
               </h2>
 
@@ -421,7 +460,7 @@ const ClaimReview = () => {
             <Card className="mb-6">
               <div className="mb-5 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div>
-                  <h2 className="text-lg font-semibold text-primary font-poppins">
+                  <h2 className="text-section font-semibold text-primary font-poppins">
                     Timesheet Verification
                   </h2>
 
@@ -433,116 +472,27 @@ const ClaimReview = () => {
                 </div>
 
                 {isLecturerReview && sessions.length > 0 && (
-                  <button
+                  <Button unstyled
                     type="button"
                     onClick={verifyAllSessions}
                     className="rounded-xl border border-primary px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary-lightest font-inter"
                   >
                     Verify All
-                  </button>
+                  </Button>
                 )}
               </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-neutral/30">
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-neutral font-inter">
-                        Date
-                      </th>
-
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-neutral font-inter">
-                        Activity
-                      </th>
-
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-neutral font-inter">
-                        Time
-                      </th>
-
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-neutral font-inter">
-                        Hours
-                      </th>
-
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-neutral font-inter">
-                        Verification
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {sessions.length > 0 ? (
-                      sessions.map((session, index) => (
-                        <tr
-                          key={session.id ?? index}
-                          className="border-t border-neutral/30"
-                        >
-                          <td className="px-4 py-4 text-sm text-dark font-inter">
-                            {formatDate(session.date)}
-                          </td>
-
-                          <td className="px-4 py-4 text-sm text-dark font-inter">
-                            {session.activity || 'Not provided'}
-                          </td>
-
-                          <td className="px-4 py-4 text-sm text-dark font-inter">
-                            {session.startTime || '--:--'} -{' '}
-                            {session.endTime || '--:--'}
-                          </td>
-
-                          <td className="px-4 py-4 text-sm font-medium text-dark font-inter">
-                            {formatNumber(session.hours, 2)}
-                          </td>
-
-                          <td className="px-4 py-4">
-                            {isLecturerReview ? (
-                              <label className="flex cursor-pointer items-center gap-3">
-                                <input
-                                  type="checkbox"
-                                  checked={
-                                    verifiedSessions[index] || false
-                                  }
-                                  onChange={() =>
-                                    toggleSessionVerification(index)
-                                  }
-                                  className="h-4 w-4 rounded border-neutral text-primary focus:ring-primary"
-                                />
-
-                                <span className="text-sm font-medium text-dark font-inter">
-                                  {verifiedSessions[index]
-                                    ? 'Verified'
-                                    : 'Pending verification'}
-                                </span>
-                              </label>
-                            ) : session.status === 'Verified' ? (
-                              <span className="inline-flex rounded-full bg-status-done-soft px-3 py-1 text-xs font-semibold text-status-done">
-                                Verified
-                              </span>
-                            ) : (
-                              <span className="inline-flex rounded-full bg-status-amber-soft px-3 py-1 text-xs font-semibold text-status-amber">
-                                Pending verification
-                              </span>
-                            )}
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan="5"
-                          className="px-4 py-8 text-center text-sm text-neutral font-inter"
-                        >
-                          No work sessions were found for this claim.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+              <DataTable
+                columns={sessionColumns}
+                rows={sessions}
+                getRowKey={(session, index) => session.id ?? index}
+                emptyTitle="No work sessions were found for this claim."
+                minWidth="800px"
+              />
             </Card>
 
             {/* Claim Calculation */}
             <Card className="mb-6">
-              <h2 className="mb-5 text-lg font-semibold text-primary font-poppins">
+              <h2 className="text-section mb-5 font-semibold text-primary font-poppins">
                 Claim Calculation
               </h2>
 
@@ -608,7 +558,7 @@ const ClaimReview = () => {
             {/* Review Actions */}
             <Card>
               <div className="mb-5">
-                <h2 className="text-lg font-semibold text-primary font-poppins">
+                <h2 className="text-section font-semibold text-primary font-poppins">
                   Review Decision
                 </h2>
 
@@ -666,17 +616,17 @@ const ClaimReview = () => {
 
               <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">
                 {isLecturerReview && (
-                  <button
+                  <Button unstyled
                     type="button"
                     onClick={handleReject}
                     disabled={isSubmitting}
                     className="rounded-xl border border-error px-5 py-3 font-semibold text-error transition hover:bg-status-danger-soft disabled:cursor-not-allowed disabled:opacity-50 font-inter"
                   >
                     Reject Claim
-                  </button>
+                  </Button>
                 )}
 
-                <button
+                <Button unstyled
                   type="button"
                   onClick={handleApprove}
                   disabled={
@@ -692,12 +642,12 @@ const ClaimReview = () => {
                     : claim.status === 'Verified'
                       ? 'Claim Verified'
                       : 'Approve Claim'}
-                </button>
+                </Button>
               </div>
             </Card>
-          </div>
-
-    </>
+        </>
+      ) : null}
+    </DetailPage>
   );
 };
 

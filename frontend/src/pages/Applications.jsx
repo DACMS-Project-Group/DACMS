@@ -60,11 +60,6 @@ const Applications = () => {
     <>
 
 {/* Page title bar */}
-          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
-            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-              Applications
-            </h1>
-          </div>
 
           <div className="p-4 md:p-8">
             <PageHeader
@@ -109,7 +104,7 @@ const Applications = () => {
                   <Card key={application.ApplicationID}>
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                       <div>
-                        <h3 className="text-xl md:text-2xl font-poppins font-semibold text-dark">
+                        <h3 className="text-card font-poppins font-semibold text-dark">
                           {application.ModuleCode}
                         </h3>
 
@@ -134,7 +129,7 @@ const Applications = () => {
                           status={application.ApplicationStatus || 'Pending'}
                         />
 
-                        <button
+                        <Button unstyled
                           onClick={() =>
                             navigate(
                               `/application-detail/${application.ApplicationID}`,
@@ -144,7 +139,7 @@ const Applications = () => {
                           className="text-primary font-semibold hover:underline whitespace-nowrap"
                         >
                           View Details →
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </Card>

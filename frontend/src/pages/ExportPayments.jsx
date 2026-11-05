@@ -1,3 +1,4 @@
+import Button from '../ui/Button';
 import { useEffect, useState } from 'react';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
@@ -259,21 +260,16 @@ const ExportPayments = ({ embedded = false }) => {
 
   return (
     <>
-      {!embedded && (
-        <div className="bg-primary px-8 py-4">
-          <h1 className="text-2xl font-poppins font-semibold text-white">
-            Export Payments
-          </h1>
-        </div>
-      )}
 
           {/* Page Content */}
-          <div className="p-8">
+          <div className={embedded ? '' : 'p-8'}>
 
-            <PageHeader
-              title="Payment Export"
-              description="Review approved claims and export remuneration information for payment processing."
-            />
+            {!embedded && (
+              <PageHeader
+                title="Payment Export"
+                description="Review verified claims and export remuneration information for payment processing."
+              />
+            )}
 
             <Section title="Filter Claims">
               <Card>
@@ -403,21 +399,21 @@ const ExportPayments = ({ embedded = false }) => {
 
                 <div className="flex flex-col sm:flex-row justify-end gap-4 mt-8">
 
-                  <button
+                  <Button unstyled
                     onClick={exportPDF}
                     disabled={exporting || loading || selectedClaims.length === 0}
                     className="px-6 py-3 border-2 border-primary text-primary rounded-xl font-semibold hover:bg-primary-lightest transition font-inter"
                   >
                     {exporting ? 'Exporting...' : 'Export PDF'}
-                  </button>
+                  </Button>
 
-                  <button
+                  <Button unstyled
                     onClick={exportExcel}
                     disabled={loading || selectedClaims.length === 0}
                     className="px-6 py-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition font-inter"
                   >
                     Export CSV
-                  </button>
+                  </Button>
 
                 </div>
 

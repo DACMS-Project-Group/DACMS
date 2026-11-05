@@ -1,3 +1,5 @@
+import Button from '../ui/Button';
+import PageHeader from '../ui/PageHeader';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
@@ -126,13 +128,13 @@ const Claims = () => {
       headerClassName: 'p-4 text-right text-sm font-semibold text-primary font-inter',
       className: 'p-4 text-right whitespace-nowrap',
       render: (claim) => (
-        <button
+        <Button unstyled
           type="button"
           onClick={() => handleViewClaim(claim)}
           className="text-primary font-semibold hover:underline"
         >
           View Details →
-        </button>
+        </Button>
       ),
     },
   ];
@@ -140,32 +142,21 @@ const Claims = () => {
   return (
     <>
 
-<div className="bg-primary h-16 flex items-center px-4 md:px-8">
-            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-              Claims
-            </h1>
-          </div>
 
           <div className="p-4 md:p-8">
-            {/* Heading + button */}
-            <div className="mb-6 md:mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-primary">
-                  My Claims
-                </h2>
-                <p className="text-neutral mt-2">
-                  View and track your remuneration claims.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => navigate('/generate-new-claim')}
-                className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark w-full md:w-auto"
-              >
-                Generate New Claim
-              </button>
-            </div>
+            <PageHeader
+              title="My Claims"
+              description="View and track your remuneration claims."
+              actions={
+                <Button unstyled
+                  type="button"
+                  onClick={() => navigate('/generate-new-claim')}
+                  className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark w-full md:w-auto"
+                >
+                  Generate New Claim
+                </Button>
+              }
+            />
 
             {/* Summary cards: 2×2 on phone, 4 across on desktop */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-6 md:mb-8">
@@ -220,13 +211,13 @@ const Claims = () => {
             </Card>
 
             <div className="mt-6 md:mt-8">
-              <button
+              <Button unstyled
                 type="button"
                 onClick={() => navigate('/student-dashboard')}
                 className="text-primary font-semibold hover:underline"
               >
                 ← Back to Dashboard
-              </button>
+              </Button>
             </div>
           </div>
 

@@ -21,6 +21,7 @@
   --color-surface-muted: #F8F9FA;
   --color-text-muted: #78848E;
   --color-text-strong: #181512;
+  --color-signature-ink: #000000;
 
   --text-page: 1.5rem;
   --text-page--line-height: 2rem;
@@ -54,5 +55,5 @@
 
 body {
   margin: 0;
-  background: #F8F9FA;
+  background: var(--color-surface-muted);
 }

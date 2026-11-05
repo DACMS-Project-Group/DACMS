@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import DataTable from '../ui/DataTable';
+import DetailPage from '../ui/DetailPage';
 import { useParams } from 'react-router-dom';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
@@ -70,77 +72,63 @@ const BudgetDetails = () => {
     return 'Active';
   };
 
-  if (loading) {
-    return (
-      <>
-
-<div className="bg-primary px-8 py-4">
-              <h1 className="text-2xl font-poppins font-semibold text-white">
-                Budget Details
-              </h1>
-            </div>
-
-            <div className="p-8">
-              <Card>
-                <div className="p-6 text-center text-neutral font-inter">
-                  Loading budget details...
-                </div>
-              </Card>
-            </div>
-
-      </>
-    );
-  }
-
-  if (error || !budget) {
-    return (
-      <>
-
-<div className="bg-primary px-8 py-4">
-              <h1 className="text-2xl font-semibold text-white font-poppins">
-                Budget Details
-              </h1>
-            </div>
-
-            <div className="p-8">
-              <Card>
-                <div className="p-6 text-error font-inter">
-                  {error || 'Budget information could not be found.'}
-                </div>
-              </Card>
-            </div>
-
-      </>
-    );
-  }
-
   const percentage = getPercentage();
   const status = getStatus(percentage);
 
+  const lecturerColumns = [
+    {
+      key: 'lecturer',
+      header: 'Lecturer',
+      className: 'p-4 font-semibold text-dark font-inter',
+    },
+    {
+      key: 'lecturer_email',
+      header: 'Email',
+      className: 'p-4 text-dark font-inter',
+    },
+    {
+      key: 'allocated_budget',
+      header: 'Allocated',
+      className: 'p-4 text-dark font-inter',
+      render: (row) => formatCurrency(row.allocated_budget),
+    },
+    {
+      key: 'current_budget_usage',
+      header: 'Used',
+      className: 'p-4 text-dark font-inter',
+      render: (row) => formatCurrency(row.current_budget_usage),
+    },
+    {
+      key: 'remaining_budget',
+      header: 'Remaining',
+      className: 'p-4 text-dark font-inter',
+      render: (row) => formatCurrency(row.remaining_budget),
+    },
+  ];
+
   return (
-    <>
-
-<div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-semibold text-white font-poppins">
-              Budget Details
-            </h1>
-          </div>
-
-          <div className="p-8">
-            {/* Page Introduction */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-poppins font-semibold text-primary">
-                {budget.module_code}
-              </h2>
-
-              <p className="text-neutral mt-2 font-inter">
-                {budget.module_description}
-              </p>
-            </div>
-
+    <DetailPage
+      title={budget?.module_code || 'Budget Details'}
+      description={budget?.module_description}
+      breadcrumbs={[
+        {
+          label: 'Budgets',
+          to: isLecturer ? '/lecturer-budgets' : '/budget-management',
+        },
+        { label: 'Budget Details' },
+      ]}
+      backTo={isLecturer ? '/lecturer-budgets' : '/budget-management'}
+      backLabel="Back to Budgets"
+      loading={loading}
+      loadingMessage="Loading budget details..."
+      errorTitle="Could not load budget"
+      error={error || (!budget ? 'Budget information could not be found.' : '')}
+    >
+      {budget ? (
+        <>
             {/* Budget Information */}
             <section className="mb-8">
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              <h3 className="text-card font-poppins font-semibold text-primary mb-4">
                 Budget Information
               </h3>
 
@@ -181,7 +169,7 @@ const BudgetDetails = () => {
 
             {/* Budget Summary */}
             <section className="mb-8">
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              <h3 className="text-card font-poppins font-semibold text-primary mb-4">
                 Budget Summary
               </h3>
 
@@ -226,7 +214,7 @@ const BudgetDetails = () => {
 
             {/* Budget Utilisation */}
             <section className="mb-8">
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              <h3 className="text-card font-poppins font-semibold text-primary mb-4">
                 Budget Utilisation
               </h3>
 
@@ -273,69 +261,25 @@ const BudgetDetails = () => {
 
             {/* Lecturer Allocation */}
             <section className="mb-8">
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              <h3 className="text-card font-poppins font-semibold text-primary mb-4">
                 Lecturer Allocation
               </h3>
 
               <Card>
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-primary-lightest">
-                      <tr>
-                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                          Lecturer
-                        </th>
-
-                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                          Email
-                        </th>
-
-                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                          Allocated
-                        </th>
-
-                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                          Used
-                        </th>
-
-                        <th className="p-4 text-left text-sm font-semibold text-primary font-inter">
-                          Remaining
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      <tr className="border-t border-neutral/30 hover:bg-primary-lightest/30 transition">
-                        <td className="p-4 font-semibold text-dark font-inter">
-                          {budget.lecturer}
-                        </td>
-
-                        <td className="p-4 text-dark font-inter">
-                          {budget.lecturer_email}
-                        </td>
-
-                        <td className="p-4 text-dark font-inter">
-                          {formatCurrency(budget.allocated_budget)}
-                        </td>
-
-                        <td className="p-4 text-dark font-inter">
-                          {formatCurrency(budget.current_budget_usage)}
-                        </td>
-
-                        <td className="p-4 text-dark font-inter">
-                          {formatCurrency(budget.remaining_budget)}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable
+                  columns={lecturerColumns}
+                  rows={[budget]}
+                  getRowKey={(row) => row.budget_id}
+                  emptyTitle="No lecturer allocation found"
+                  minWidth="700px"
+                />
               </Card>
             </section>
 
             {/* Audit History — admin only */}
             {!isLecturer && (
               <section>
-                <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                <h3 className="text-card font-poppins font-semibold text-primary mb-4">
                   Budget Audit History
                 </h3>
 
@@ -349,9 +293,9 @@ const BudgetDetails = () => {
                 </Card>
               </section>
             )}
-          </div>
-
-    </>
+        </>
+      ) : null}
+    </DetailPage>
   );
 };
 

@@ -151,7 +151,7 @@ const Login = () => {
             />
           </div>
 
-          <h2 className="text-xl md:text-2xl font-poppins font-bold text-primary-dark text-center">
+          <h2 className="text-section font-poppins font-bold text-primary-dark text-center">
             {isRegister ? 'Create Account' : 'Welcome Back'}
           </h2>
 
@@ -215,13 +215,13 @@ const Login = () => {
 
               <p className="text-center text-sm text-neutral mt-6 font-inter">
                 Don't have an account?{' '}
-                <button
+                <Button unstyled
                   type="button"
                   onClick={() => switchView('register')}
                   className="text-primary font-semibold hover:underline"
                 >
                   Register
-                </button>
+                </Button>
               </p>
             </>
           )}
@@ -365,13 +365,13 @@ const Login = () => {
 
               <p className="text-center text-sm text-neutral mt-4 font-inter">
                 Already have an account?{' '}
-                <button
+                <Button unstyled
                   type="button"
                   onClick={() => switchView('login')}
                   className="text-primary font-semibold hover:underline"
                 >
                   Sign in
-                </button>
+                </Button>
               </p>
             </form>
           )}

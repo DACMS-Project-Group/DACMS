@@ -1,5 +1,6 @@
+import DetailPage from '../ui/DetailPage';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { formatMoney, formatNumber } from '../lib/format';
@@ -7,7 +8,6 @@ import { apiGet } from '../api';
 
 const ClaimDetail = () => {
   document.title = 'AACMS - Claim Detail';
-  const navigate = useNavigate();
   const location = useLocation();
   const { id } = useParams();
 
@@ -68,97 +68,30 @@ const ClaimDetail = () => {
     return formatDate(startDate || endDate);
   };
 
-  const handleBackToClaims = () => {
-    navigate('/claims');
-  };
-
-  if (loading) {
-    return (
-      <>
-
-<div className="bg-primary h-16 flex items-center px-4 md:px-8">
-              <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-                Claim Detail
-              </h1>
-            </div>
-
-            <div className="p-4 md:p-8">
-              <Card>
-                <p className="py-8 text-center text-neutral font-inter">
-                  Loading claim details...
-                </p>
-              </Card>
-            </div>
-
-      </>
-    );
-  }
-
-  if (error || !claim) {
-    return (
-      <>
-
-<div className="bg-primary h-16 flex items-center px-4 md:px-8">
-              <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-                Claim Detail
-              </h1>
-            </div>
-
-            <div className="p-4 md:p-8">
-              <Card>
-                <div className="py-8 text-center">
-                  <p className="font-semibold text-error font-inter">
-                    Could not load claim
-                  </p>
-
-                  <p className="mt-1 text-sm text-neutral font-inter">
-                    {error || 'The requested claim could not be found.'}
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={handleBackToClaims}
-                    className="mt-6 font-medium text-primary transition hover:text-primary-dark"
-                  >
-                    ← Back to Claims
-                  </button>
-                </div>
-              </Card>
-            </div>
-
-      </>
-    );
-  }
-
   return (
-    <>
-
-{/* Page Header */}
-          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
-            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-              Claim Detail
-            </h1>
-          </div>
-
-          <div className="p-4 md:p-8">
-            {/* Back Button */}
-            <div className="mb-6">
-              <button
-                type="button"
-                onClick={handleBackToClaims}
-                className="font-medium text-primary transition hover:text-primary-dark"
-              >
-                ← Back to Claims
-              </button>
-            </div>
-
-            {/* Claim Overview */}
+    <DetailPage
+      title="Claim Detail"
+      breadcrumbs={[
+        { label: 'Claims', to: '/claims' },
+        {
+          label: claim?.ClaimReferenceNumber || 'Claim Detail',
+        },
+      ]}
+      backTo="/claims"
+      backLabel="Back to Claims"
+      loading={loading}
+      loadingMessage="Loading claim details..."
+      errorTitle="Could not load claim"
+      error={error || (!claim ? 'The requested claim could not be found.' : '')}
+    >
+      {claim ? (
+        <>
             <Card className="mb-6">
               <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="min-w-0">
                   <p className="text-sm text-neutral">Claim Reference</p>
 
-                  <h2 className="mt-1 text-lg md:text-xl font-semibold text-primary-dark break-words">
+                  <h2 className="text-section mt-1 font-semibold text-primary-dark break-words">
                     {claim.ClaimReferenceNumber}
                   </h2>
                 </div>
@@ -199,7 +132,7 @@ const ClaimDetail = () => {
             {/* Claim Information */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                <h2 className="text-section font-semibold text-primary-dark">
                   Claim Information
                 </h2>
 
@@ -238,7 +171,7 @@ const ClaimDetail = () => {
             {/* Assistant Appointment */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                <h2 className="text-section font-semibold text-primary-dark">
                   Assistant Appointment
                 </h2>
 
@@ -277,7 +210,7 @@ const ClaimDetail = () => {
             {/* Work Sessions */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                <h2 className="text-section font-semibold text-primary-dark">
                   Work Sessions Included
                 </h2>
 
@@ -314,7 +247,7 @@ const ClaimDetail = () => {
             {/* Claim Calculation */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                <h2 className="text-section font-semibold text-primary-dark">
                   Claim Calculation
                 </h2>
 
@@ -363,7 +296,7 @@ const ClaimDetail = () => {
             {/* Claim Status */}
             <Card>
               <div className="mb-5">
-                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                <h2 className="text-section font-semibold text-primary-dark">
                   Claim Status
                 </h2>
 
@@ -399,9 +332,9 @@ const ClaimDetail = () => {
                 </div>
               </div>
             </Card>
-          </div>
-
-    </>
+        </>
+      ) : null}
+    </DetailPage>
   );
 };
 

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import PageHeader from '../ui/PageHeader';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import Button from '../ui/Button';
@@ -64,23 +65,12 @@ const ApplyForAssistant = () => {
   return (
     <>
 
-<div className="bg-primary h-16 flex items-center px-4 md:px-8">
-            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-              Assistant Applications
-            </h1>
-          </div>
 
           <div className="p-4 md:p-8">
-            <div className="mb-6 md:mb-8">
-              <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-primary">
-                Available Assistant Positions
-              </h2>
-
-              <p className="text-neutral mt-2">
-                View available modules and apply for an Assistant position if
-                you meet the eligibility requirements.
-              </p>
-            </div>
+            <PageHeader
+              title="Available Assistant Positions"
+              description="View available modules and apply for an Assistant position if you meet the eligibility requirements."
+            />
 
             {error && (
               <Card>
@@ -123,7 +113,7 @@ const ApplyForAssistant = () => {
                   <Card key={listing.ListingID}>
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
                       <div className="min-w-0">
-                        <h3 className="text-xl md:text-2xl font-poppins font-semibold text-dark break-words">
+                        <h3 className="text-card font-poppins font-semibold text-dark break-words">
                           {listing.ModuleCode}
                         </h3>
 
@@ -162,12 +152,12 @@ const ApplyForAssistant = () => {
             )}
 
             <div className="mt-6 md:mt-8">
-              <button
+              <Button unstyled
                 onClick={() => navigate('/applications')}
                 className="text-primary font-semibold hover:underline"
               >
                 ← Back to Applications
-              </button>
+              </Button>
             </div>
           </div>
 

@@ -1,3 +1,4 @@
+import Button from '../ui/Button';
 import { useState } from 'react';
 import { useDensity } from '../contexts/DensityContext';
 
@@ -89,14 +90,14 @@ export const CompactTable = ({
                 ))}
                 {renderRowExpansion && (
                   <td className={`${padX} ${padY} text-center`}>
-                    <button
+                    <Button unstyled
                       onClick={() => toggleExpansion(row.id)}
                       className="p-1 rounded hover:bg-neutral/100 transition-colors"
                       aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
                       title={isExpanded ? 'Collapse details' : 'Expand details'}
                     >
                       {chevron(isExpanded)}
-                    </button>
+                    </Button>
                   </td>
                 )}
               </tr>

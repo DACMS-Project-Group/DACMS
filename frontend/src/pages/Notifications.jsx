@@ -1,3 +1,5 @@
+import Button from '../ui/Button';
+import PageHeader from '../ui/PageHeader';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Card from '../components/Card';
@@ -16,12 +18,10 @@ const renderMessage = (message) => {
 
   return (
     <>
-    <>
       {message.slice(0, message.length - path.length).replace(/[.\s]+$/, '')}{' '}
       <Link className="font-semibold text-primary underline" to={path}>
         Open related page
       </Link>
-    </>
     </>
   );
 };
@@ -136,34 +136,30 @@ const Notifications = () => {
 
   return (
     <>
-
-<div className="bg-primary px-4 md:px-8 py-4">
-            <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-              <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-                Notifications
-              </h1>
-
-              <div className="flex flex-wrap items-center gap-3 md:gap-4">
-                <span className="text-sm text-white/80 font-inter">
-                  {unreadCount} unread
-                </span>
-
-                {unreadCount > 0 && (
-                  <button
-                    type="button"
-                    onClick={markAllAsRead}
-                    className="text-sm text-white/80 underline transition hover:text-white font-inter"
-                  >
-                    Mark all as read
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
           <div className="p-4 md:p-8">
+            <PageHeader
+              title="Notifications"
+              actions={
+                <>
+                  <span className="text-sm text-neutral font-inter">
+                    {unreadCount} unread
+                  </span>
+
+                  {unreadCount > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      type="button"
+                      onClick={markAllAsRead}
+                    >
+                      Mark all as read
+                    </Button>
+                  )}
+                </>
+              }
+            />
             <section className="mb-6 md:mb-8">
-              <h2 className="mb-4 text-lg md:text-xl font-semibold text-primary font-poppins">
+              <h2 className="text-section mb-4 font-semibold text-primary font-poppins">
                 Notification Summary
               </h2>
 
@@ -219,7 +215,7 @@ const Notifications = () => {
             </section>
 
             <section>
-              <h2 className="mb-4 text-lg md:text-xl font-semibold text-primary font-poppins">
+              <h2 className="text-section mb-4 font-semibold text-primary font-poppins">
                 All Notifications
               </h2>
 
@@ -251,13 +247,14 @@ const Notifications = () => {
                   </div>
                 ) : (
                   <div className="space-y-3">
-                    {notifications.map((notification) => {
+                    {notifications.map((notification, index) => {
                       const isOpen = expandedId === notification.id;
+                      const rowKey =
+                        notification.id ?? `notification-${index}`;
 
                       return (
-                        <>
+                        <React.Fragment key={rowKey}>
                         <div
-                          key={notification.id}
                           className={[
                             'rounded-xl border border-l-4 transition-all duration-300',
                             getTypeBorder(notification.type),
@@ -330,7 +327,7 @@ const Notifications = () => {
                             </div>
                           )}
                         </div>
-                        </>
+                        </React.Fragment>
                       );
                     })}
                   </div>

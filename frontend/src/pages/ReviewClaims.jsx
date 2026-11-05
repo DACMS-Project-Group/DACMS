@@ -1,9 +1,12 @@
+import Button from '../ui/Button';
+import PageHeader from '../ui/PageHeader';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import DataTable from '../ui/DataTable';
 import { formatMoney } from '../lib/format';
+import { CLAIM_STATUS_OPTIONS } from '../lib/statuses';
 import { apiGet } from '../api';
 
 const formatSubmittedDate = (date) =>
@@ -152,13 +155,13 @@ const ReviewClaims = () => {
       header: 'Action',
       className: 'p-4',
       render: (claim) => (
-        <button
+        <Button unstyled
           type="button"
           onClick={() => handleReview(claim)}
           className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition hover:bg-primary-dark font-inter"
         >
           Review
-        </button>
+        </Button>
       ),
     },
   ];
@@ -167,24 +170,12 @@ const ReviewClaims = () => {
     <>
 
 {/* Page Header */}
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              Review Claims
-            </h1>
-          </div>
 
           <div className="p-8">
-            {/* Introduction */}
-            <div className="mb-8">
-              <h2 className="text-xl font-semibold text-primary font-poppins">
-                Assistant Claims
-              </h2>
-
-              <p className="mt-1 text-neutral font-inter">
-                Review submitted claims for assistants assigned to your
-                modules.
-              </p>
-            </div>
+            <PageHeader
+              title="Review Claims"
+              description="Review submitted claims for assistants assigned to your modules."
+            />
 
             {/* Summary Cards */}
             <section className="mb-8">
@@ -250,7 +241,7 @@ const ReviewClaims = () => {
             {/* Search and Filters */}
             <section className="mb-8">
               <Card>
-                <h2 className="mb-4 text-xl font-semibold text-primary font-poppins">
+                <h2 className="text-section mb-4 font-semibold text-primary font-poppins">
                   Search & Filter Claims
                 </h2>
 
@@ -280,13 +271,11 @@ const ReviewClaims = () => {
                       className="w-full rounded-lg border border-neutral/40 bg-white px-4 py-3 text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 font-inter"
                     >
                       <option value="All">All Statuses</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Under Review">Under Review</option>
-                      <option value="Verified">Verified</option>
-                      <option value="Approved by Lecturer">Approved by Lecturer</option>
-                      <option value="Approved">Approved</option>
-                      <option value="Rejected by Lecturer">Rejected by Lecturer</option>
-                      <option value="Rejected">Rejected</option>
+                      {CLAIM_STATUS_OPTIONS.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>
@@ -297,7 +286,7 @@ const ReviewClaims = () => {
             <section className="mb-8">
               <Card>
                 <div className="mb-4">
-                  <h2 className="text-xl font-semibold text-primary font-poppins">
+                  <h2 className="text-section font-semibold text-primary font-poppins">
                     Claims Submitted by Assistants
                   </h2>
 
@@ -322,7 +311,7 @@ const ReviewClaims = () => {
 
             {/* Information */}
             <Card>
-              <h2 className="mb-2 text-xl font-semibold text-primary font-poppins">
+              <h2 className="text-section mb-2 font-semibold text-primary font-poppins">
                 Claim Review
               </h2>
 

@@ -1,3 +1,6 @@
+import Button from '../ui/Button';
+import DataTable from '../ui/DataTable';
+import PageHeader from '../ui/PageHeader';
 
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -86,31 +89,112 @@ const AppointmentApprovals = () => {
     });
   };
 
+  const pendingColumns = [
+    {
+      key: 'reference',
+      header: 'Reference',
+      className: 'p-4 font-inter font-semibold text-dark',
+    },
+    {
+      key: 'student',
+      header: 'Student',
+      className: 'p-4 font-inter',
+      render: (appointment) => (
+        <>
+          <p className="text-dark">{appointment.student}</p>
+          <p className="mt-1 text-sm text-neutral">{appointment.student_number}</p>
+        </>
+      ),
+    },
+    {
+      key: 'module_code',
+      header: 'Module',
+      className: 'p-4 font-inter text-dark',
+    },
+    {
+      key: 'lecturer',
+      header: 'Lecturer',
+      className: 'p-4 font-inter text-dark',
+    },
+    {
+      key: 'date_submitted',
+      header: 'Date',
+      className: 'p-4 text-sm font-inter text-neutral',
+      render: (appointment) => formatDate(appointment.date_submitted),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'p-4',
+      render: (appointment) => <StatusBadge status={appointment.status} />,
+    },
+    {
+      key: 'action',
+      header: 'Action',
+      className: 'p-4',
+      render: (appointment) => (
+        <Button
+          unstyled
+          type="button"
+          onClick={() => handleReviewAppointment(appointment)}
+          className="rounded-xl bg-primary px-4 py-2 font-inter font-semibold text-white transition hover:bg-primary-dark"
+        >
+          Review
+        </Button>
+      ),
+    },
+  ];
+
+  const historyColumns = [
+    {
+      key: 'reference',
+      header: 'Reference',
+      className: 'p-4 font-inter font-semibold text-dark',
+    },
+    {
+      key: 'student',
+      header: 'Student',
+      className: 'p-4 font-inter text-dark',
+    },
+    {
+      key: 'module',
+      header: 'Module',
+      className: 'p-4 font-inter text-dark',
+      render: (appointment) => appointment.module_code || appointment.module,
+    },
+    {
+      key: 'lecturer',
+      header: 'Lecturer',
+      className: 'p-4 font-inter text-dark',
+    },
+    {
+      key: 'date',
+      header: 'Date',
+      className: 'p-4 text-sm font-inter text-neutral',
+      render: (appointment) =>
+        formatDate(appointment.date_submitted || appointment.date),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'p-4',
+      render: (appointment) => <StatusBadge status={appointment.status} />,
+    },
+  ];
+
   return (
     <>
 
-<div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              Appointment Approvals
-            </h1>
-          </div>
 
           <div className="p-8">
-            {/* Page Introduction */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-poppins font-semibold text-primary">
-                Appointment Approval
-              </h2>
-
-              <p className="mt-2 text-neutral font-inter">
-                Review lecturer recommendations and approve, reject, or return
-                assistant appointments for revision.
-              </p>
-            </div>
+            <PageHeader
+              title="Appointment Approvals"
+              description="Review lecturer recommendations and approve, reject, or return assistant appointments for revision."
+            />
 
             {/* Appointment Summary */}
             <section className="mb-8">
-              <h3 className="mb-4 text-2xl font-poppins font-semibold text-primary">
+              <h3 className="text-card mb-4 font-poppins font-semibold text-primary">
                 Appointment Summary
               </h3>
 
@@ -177,7 +261,7 @@ const AppointmentApprovals = () => {
             <section className="mb-8">
               <div className="mb-4 flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-poppins font-semibold text-primary">
+                  <h3 className="text-card font-poppins font-semibold text-primary">
                     Pending Appointment Approvals
                   </h3>
                 </div>
@@ -196,127 +280,23 @@ const AppointmentApprovals = () => {
               </div>
 
               <Card>
-                <div className="overflow-x-auto">
-                  {loading ? (
-                    <div className="px-6 py-10 text-center">
-                      <p className="text-neutral font-inter">
-                        Loading appointments...
-                      </p>
-                    </div>
-                  ) : error ? (
-                    <div className="px-6 py-10 text-center">
-                      <h3 className="text-lg font-semibold text-dark font-poppins">
-                        Unable to Load Appointments
-                      </h3>
-
-                      <p className="mt-2 text-sm text-neutral font-inter">
-                        {error}
-                      </p>
-                    </div>
-                  ) : filteredPendingAppointments.length === 0 ? (
-                    <div className="px-6 py-10 text-center">
-                      <h3 className="text-lg font-semibold text-dark font-poppins">
-                        No Pending Appointments
-                      </h3>
-
-                      <p className="mt-2 text-sm text-neutral font-inter">
-                        There are currently no appointments awaiting review.
-                      </p>
-                    </div>
-                  ) : (
-                    <table className="w-full min-w-[1100px]">
-                      <thead className="bg-primary-lightest">
-                        <tr>
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Reference
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Student
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Module
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Lecturer
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Date
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Status
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Action
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {filteredPendingAppointments.map((appointment) => (
-                          <tr
-                            key={appointment.position_id}
-                            className="border-t border-neutral/30 transition hover:bg-primary-lightest/30"
-                          >
-                            <td className="p-4 font-inter font-semibold text-dark">
-                              {appointment.reference}
-                            </td>
-
-                            <td className="p-4 font-inter">
-                              <p className="text-dark">
-                                {appointment.student}
-                              </p>
-
-                              <p className="mt-1 text-sm text-neutral">
-                                {appointment.student_number}
-                              </p>
-                            </td>
-
-                            <td className="p-4 font-inter text-dark">
-                              {appointment.module_code}
-                            </td>
-
-                            <td className="p-4 font-inter text-dark">
-                              {appointment.lecturer}
-                            </td>
-
-                            <td className="p-4 text-sm font-inter text-neutral">
-                              {formatDate(appointment.date_submitted)}
-                            </td>
-
-                            <td className="p-4">
-                              <StatusBadge status={appointment.status} />
-                            </td>
-
-                            <td className="p-4">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleReviewAppointment(appointment)
-                                }
-                                className="rounded-xl bg-primary px-4 py-2 font-inter font-semibold text-white transition hover:bg-primary-dark"
-                              >
-                                Review
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
+                <DataTable
+                  columns={pendingColumns}
+                  rows={filteredPendingAppointments}
+                  getRowKey={(appointment) => appointment.position_id}
+                  loading={loading}
+                  error={error}
+                  emptyTitle="No Pending Appointments"
+                  emptyDescription="There are currently no appointments awaiting review."
+                  minWidth="1100px"
+                />
               </Card>
             </section>
 
             {/* Approval History */}
             <section className="mb-8">
               <div className="mb-4 flex items-center justify-between">
-                <h3 className="text-2xl font-poppins font-semibold text-primary">
+                <h3 className="text-card font-poppins font-semibold text-primary">
                   Approval History
                 </h3>
 
@@ -326,88 +306,20 @@ const AppointmentApprovals = () => {
               </div>
 
               <Card>
-                <div className="overflow-x-auto">
-                  {historyAppointments.length === 0 ? (
-                    <div className="px-6 py-10 text-center">
-                      <h3 className="text-lg font-semibold text-dark font-poppins">
-                        No Approval History
-                      </h3>
-
-                      <p className="mt-2 text-sm text-neutral font-inter">
-                        No appointment decisions have been recorded yet.
-                      </p>
-                    </div>
-                  ) : (
-                    <table className="w-full min-w-[1000px]">
-                      <thead className="bg-primary-lightest">
-                        <tr>
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Reference
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Student
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Module
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Lecturer
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Date
-                          </th>
-
-                          <th className="p-4 text-left text-sm font-semibold font-inter text-primary">
-                            Status
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {historyAppointments.map((appointment) => (
-                          <tr
-                            key={appointment.position_id}
-                            className="border-t border-neutral/30 transition hover:bg-primary-lightest/30"
-                          >
-                            <td className="p-4 font-inter font-semibold text-dark">
-                              {appointment.reference}
-                            </td>
-
-                            <td className="p-4 font-inter text-dark">
-                              {appointment.student}
-                            </td>
-
-                            <td className="p-4 font-inter text-dark">
-                              {appointment.module_code || appointment.module}
-                            </td>
-
-                            <td className="p-4 font-inter text-dark">
-                              {appointment.lecturer}
-                            </td>
-
-                            <td className="p-4 text-sm font-inter text-neutral">
-                              {formatDate(appointment.date_submitted || appointment.date)}
-                            </td>
-
-                            <td className="p-4">
-                              <StatusBadge status={appointment.status} />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </div>
+                <DataTable
+                  columns={historyColumns}
+                  rows={historyAppointments}
+                  getRowKey={(appointment) => appointment.position_id}
+                  emptyTitle="No Approval History"
+                  emptyDescription="No appointment decisions have been recorded yet."
+                  minWidth="1000px"
+                />
               </Card>
             </section>
 
             {/* Appointment Management */}
             <section>
-              <h3 className="mb-4 text-2xl font-poppins font-semibold text-primary">
+              <h3 className="text-card mb-4 font-poppins font-semibold text-primary">
                 Appointment Management
               </h3>
 

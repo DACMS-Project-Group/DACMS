@@ -1,8 +1,14 @@
+import Button from '../ui/Button';
+import DataTable from '../ui/DataTable';
+import EmptyState from '../ui/EmptyState';
+import PageHeader from '../ui/PageHeader';
+import Section from '../ui/Section';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
+import { formatHours, formatMoney } from '../lib/format';
 
 const Dashboard = () => {
   document.title = 'AACMS - Dashboard';
@@ -67,328 +73,344 @@ const Dashboard = () => {
   const applications = dashboardData?.applications || [];
   const claims = dashboardData?.claims || [];
 
+  const kpis = [
+    {
+      label: 'Active positions',
+      value: stats.active_positions ?? 0,
+      to: '/modules',
+      viewLabel: 'View modules',
+    },
+    {
+      label: 'Pending applications',
+      value: stats.pending_applications ?? 0,
+      to: '/applications',
+      viewLabel: 'View applications',
+    },
+    {
+      label: 'Hours this month',
+      value: formatHours(stats.hours_this_month ?? 0, 1),
+      to: '/work-tracking',
+      viewLabel: 'View work tracking',
+    },
+    {
+      label: 'Pending claims',
+      value: stats.pending_claims ?? 0,
+      to: '/claims',
+      viewLabel: 'View claims',
+    },
+  ];
+
+  const attentionItems = [
+    {
+      label: 'Applications awaiting a decision',
+      count: stats.pending_applications ?? 0,
+      to: '/applications',
+      cta: 'View applications',
+    },
+    {
+      label: 'Claims pending approval',
+      count: stats.pending_claims ?? 0,
+      to: '/claims',
+      cta: 'View claims',
+    },
+  ].filter((item) => item.count > 0);
+
+  const monthlyHoursColumns = [
+    {
+      key: 'module',
+      header: 'Module',
+      className: 'py-3 px-4 text-dark font-inter',
+      render: (row) => row.module || '—',
+    },
+    {
+      key: 'hours',
+      header: 'Hours worked',
+      className: 'py-3 px-4 text-dark font-inter',
+      sortValue: (row) => Number(row.hours ?? row.total_hours ?? 0),
+      render: (row) => row.hours ?? row.total_hours ?? 0,
+    },
+  ];
+
+  const applicationColumns = [
+    {
+      key: 'module',
+      header: 'Module',
+      className: 'py-3 px-4 text-dark font-inter',
+      render: (app) => app.module || app.moduleCode || '—',
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'py-3 px-4',
+      render: (app) => <StatusBadge status={app.status || 'Pending'} />,
+    },
+  ];
+
+  const claimColumns = [
+    {
+      key: 'module',
+      header: 'Module',
+      className: 'py-3 px-4 text-dark font-inter',
+    },
+    {
+      key: 'amount',
+      header: 'Amount',
+      className: 'py-3 px-4 text-dark font-inter',
+      sortValue: (claim) => Number(claim.amount ?? 0),
+      render: (claim) => formatMoney(claim.amount),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'py-3 px-4',
+      render: (claim) => <StatusBadge status={claim.status} />,
+    },
+    {
+      key: 'reference',
+      header: 'Claim #',
+      className: 'py-3 px-4 text-dark font-inter',
+    },
+  ];
+
   return (
-    <>
+    <div className="p-4 md:p-8">
+      <PageHeader
+        title={loading ? 'Dashboard' : `Welcome ${profile.name || 'Student'}!`}
+        description="Your applications, work hours, and claims at a glance."
+      />
 
-{/* Page Title Bar */}
-          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
-            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-              Dashboard
-            </h1>
-          </div>
+      {error && (
+        <p className="mb-6 text-sm text-error font-inter">
+          Could not load dashboard data: {error}
+        </p>
+      )}
 
-          <div className="p-4 md:p-8">
-            {/* Welcome Message */}
-            <div className="mb-6 md:mb-8">
-              <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-primary">
-                {loading
-                  ? 'Welcome!'
-                  : `Welcome ${profile.name || 'Student'}!`}
-              </h2>
+      {/* Work queue */}
+      <Section
+        title="Needs your attention"
+        description="Items waiting on you or the university."
+      >
+        <Card>
+          {loading ? (
+            <p className="py-4 text-sm text-neutral font-inter">
+              Checking for outstanding items…
+            </p>
+          ) : attentionItems.length === 0 ? (
+            <EmptyState
+              title="Nothing needs your attention"
+              description="You have no pending applications or claims."
+              action={
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => navigate('/work-tracking')}
+                >
+                  Start a work session
+                </Button>
+              }
+            />
+          ) : (
+            <div className="divide-y divide-border-subtle">
+              {attentionItems.map((item) => (
+                <div
+                  key={item.label}
+                  className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-lightest px-2 font-poppins text-sm font-semibold text-primary">
+                      {item.count}
+                    </span>
 
-              {error && (
-                <p className="mt-2 text-sm text-error font-inter">
-                  Could not load dashboard data: {error}
-                </p>
-              )}
-            </div>
+                    <p className="text-dark font-inter">{item.label}</p>
+                  </div>
 
-            {/* Quick Actions & Notifications */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {/* Quick Actions */}
-              <Card>
-                <h3 className="text-xl md:text-2xl font-poppins font-semibold text-dark mb-4">
-                  Quick Actions
-                </h3>
-
-                <div className="flex flex-col gap-3">
-                  <button
-                    onClick={() => navigate('/work-tracking')}
-                    className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition text-center"
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => navigate(item.to)}
                   >
-                    Start work session
-                  </button>
-
-                  <button
-                    onClick={() => navigate('/apply-for-assistant')}
-                    className="bg-primary-lightest text-dark px-6 py-3 rounded-xl font-semibold hover:bg-primary-light hover:text-white transition text-center"
-                  >
-                    Apply to Assistant
-                  </button>
-
-                  <button
-                    onClick={() => navigate('/generate-new-claim')}
-                    className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-lightest transition text-center"
-                  >
-                    Submit Claim
-                  </button>
+                    {item.cta}
+                  </Button>
                 </div>
-              </Card>
+              ))}
+            </div>
+          )}
+        </Card>
+      </Section>
 
-              {/* Notifications */}
-              <Card>
-                <h3 className="text-xl md:text-2xl font-poppins font-semibold text-dark mb-4">
-                  Notifications
-                </h3>
+      {/* Stats overview */}
+      <Section title="Overview">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+          {kpis.map((kpi) => (
+            <Card key={kpi.label} className="flex h-full flex-col justify-between">
+              <div>
+                <p className="text-xs text-neutral font-inter md:text-sm">
+                  {kpi.label}
+                </p>
 
-                <div className="space-y-4">
-                  {notificationError ? (
-                    <p className="text-error font-inter text-sm">
-                      Could not load notifications: {notificationError}
-                    </p>
-                  ) : notifications.length === 0 ? (
-                    <p className="text-neutral font-inter text-sm">
-                      No notifications yet.
-                    </p>
-                  ) : notifications.map((notification) => (
+                <p className="mt-2 text-2xl font-bold text-primary-dark font-poppins md:text-3xl">
+                  {loading ? '—' : kpi.value}
+                </p>
+              </div>
+
+              <Button
+                variant="ghost"
+                size="sm"
+                aria-label={kpi.viewLabel}
+                onClick={() => navigate(kpi.to)}
+                className="mt-3 self-start px-2"
+              >
+                {kpi.viewLabel} →
+              </Button>
+            </Card>
+          ))}
+        </div>
+      </Section>
+
+      {/* Notifications and quick actions */}
+      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Section title="Notifications" noMargin className="h-full min-w-0">
+          <Card className="h-full">
+            <div className="flex h-full flex-col">
+              <div className="flex-1 space-y-4">
+                {notificationError ? (
+                  <p className="text-sm text-error font-inter">
+                    Could not load notifications: {notificationError}
+                  </p>
+                ) : notifications.length === 0 ? (
+                  <EmptyState
+                    title="No notifications yet"
+                    description="Updates about your applications and claims will appear here."
+                  />
+                ) : (
+                  notifications.map((notification) => (
                     <div key={notification.NotificationID}>
                       <p className="font-semibold text-dark font-inter">
                         {notification.Subject}
                       </p>
+
                       <p className="text-sm text-neutral font-inter">
                         {notification.Message}
                       </p>
                     </div>
-                  ))}
-
-                  <button
-                    onClick={() => navigate('/notifications')}
-                    className="text-primary font-semibold hover:underline block ml-auto font-inter"
-                  >
-                    View all →
-                  </button>
-                </div>
-              </Card>
-            </div>
-
-            {/* Stats Overview */}
-            <div className="mb-8">
-              <h3 className="text-xl md:text-2xl font-poppins font-semibold text-primary mb-4">
-                Overview
-              </h3>
-
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-                <Card>
-                  <p className="text-xs md:text-sm text-neutral font-inter">
-                    Active Positions
-                  </p>
-                  <p className="mt-2 text-2xl md:text-3xl font-bold text-primary-dark font-poppins">
-                    {loading ? '—' : stats.active_positions ?? 0}
-                  </p>
-                </Card>
-
-                <Card>
-                  <p className="text-xs md:text-sm text-neutral font-inter">
-                    Pending Applications
-                  </p>
-                  <p className="mt-2 text-2xl md:text-3xl font-bold text-primary-dark font-poppins">
-                    {loading ? '—' : stats.pending_applications ?? 0}
-                  </p>
-                </Card>
-
-                <Card>
-                  <p className="text-xs md:text-sm text-neutral font-inter">
-                    Hours This Month
-                  </p>
-                  <p className="mt-2 text-2xl md:text-3xl font-bold text-primary-dark font-poppins">
-                    {loading ? '—' : stats.hours_this_month ?? 0}
-                  </p>
-                </Card>
-
-                <Card>
-                  <p className="text-xs md:text-sm text-neutral font-inter">
-                    Pending Claims
-                  </p>
-                  <p className="mt-2 text-2xl md:text-3xl font-bold text-primary-dark font-poppins">
-                    {loading ? '—' : stats.pending_claims ?? 0}
-                  </p>
-                </Card>
+                  ))
+                )}
               </div>
 
-              {/* Monthly Hours table */}
-              <Card className="overflow-x-auto">
-                <table className="w-full min-w-[320px]">
-                  <thead>
-                    <tr className="bg-light-grey">
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
-                        Module
-                      </th>
-                      <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
-                        Hours worked
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {loading ? (
-                      <tr>
-                        <td colSpan="2" className="py-6 text-center text-neutral font-inter">
-                          Loading…
-                        </td>
-                      </tr>
-                    ) : monthlyHours.length === 0 ? (
-                      <tr>
-                        <td colSpan="2" className="py-6 text-center text-neutral font-inter">
-                          No hours recorded yet
-                        </td>
-                      </tr>
-                    ) : (
-                      monthlyHours.map((row, index) => (
-                        <tr
-                          key={index}
-                          className="border-b border-neutral last:border-0"
-                        >
-                          <td className="py-3 px-4 text-dark font-inter">
-                            {row.module || '—'}
-                          </td>
-                          <td className="py-3 px-4 text-dark font-inter">
-                            {row.hours ?? row.total_hours ?? 0}
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </Card>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/notifications')}
+                className="mt-4 self-end"
+              >
+                View all →
+              </Button>
             </div>
+          </Card>
+        </Section>
 
-            {/* Application Status & Claims */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              {/* Application Status */}
-              <div>
-                <h3 className="text-xl md:text-2xl font-poppins font-semibold text-primary mb-4">
-                  Application Status
-                </h3>
+        <Section title="Quick actions" noMargin className="h-full min-w-0">
+          <Card className="h-full">
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => navigate('/work-tracking')}
+                className="w-full"
+              >
+                Start work session
+              </Button>
 
-                <Card className="overflow-x-auto">
-                  <table className="w-full min-w-[280px]">
-                    <thead>
-                      <tr className="bg-light-grey">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
-                          Module
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
+              <Button
+                variant="subtle"
+                onClick={() => navigate('/apply-for-assistant')}
+                className="w-full"
+              >
+                Apply to Assistant
+              </Button>
 
-                    <tbody>
-                      {loading ? (
-                        <tr>
-                          <td colSpan="2" className="py-6 text-center text-neutral font-inter">
-                            Loading…
-                          </td>
-                        </tr>
-                      ) : applications.length === 0 ? (
-                        <tr>
-                          <td colSpan="2" className="py-6 text-center text-neutral font-inter">
-                            No applications yet
-                          </td>
-                        </tr>
-                      ) : (
-                        applications.map((app, index) => (
-                          <tr
-                            key={index}
-                            className="border-b border-neutral last:border-0"
-                          >
-                            <td className="py-3 px-4 text-dark font-inter">
-                              {app.module || app.moduleCode || '—'}
-                            </td>
-                            <td className="py-3 px-4">
-                              <StatusBadge status={app.status || 'Pending'} />
-                            </td>
-                          </tr>
-                        ))
-                      )}
-                    </tbody>
-                  </table>
-
-                  <button
-                    onClick={() => navigate('/applications')}
-                    className="text-primary font-semibold hover:underline block text-right mt-4 ml-auto font-inter"
-                  >
-                    View all →
-                  </button>
-                </Card>
-              </div>
-
-              {/* Claims */}
-              <div>
-                <h3 className="text-xl md:text-2xl font-poppins font-semibold text-primary mb-4">
-                  Claims
-                </h3>
-
-                <Card className="overflow-x-auto">
-                  <table className="w-full min-w-[480px]">
-                    <thead>
-                      <tr className="bg-light-grey">
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
-                          Module
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
-                          Amount
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
-                          Status
-                        </th>
-                        <th className="text-left py-3 px-4 text-sm font-semibold text-neutral font-inter">
-                          Claim #
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {loading ? (
-                        <tr>
-                          <td colSpan="4" className="py-6 text-center text-neutral font-inter">
-                            Loading…
-                          </td>
-                        </tr>
-                      ) : claims.length === 0 ? (
-                        <tr>
-                          <td colSpan="4" className="py-6 text-center text-neutral font-inter">
-                            No claims yet
-                          </td>
-                        </tr>
-                      ) : claims.map((claim) => (
-                        <tr
-                          key={claim.claim_id}
-                          className="border-b border-neutral last:border-0"
-                        >
-                          <td className="py-3 px-4 text-dark font-inter">
-                            {claim.module}
-                          </td>
-                          <td className="py-3 px-4 text-dark font-inter">
-                            {`R ${Number(claim.amount).toLocaleString('en-ZA', {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}`}
-                          </td>
-                          <td className="py-3 px-4">
-                            <StatusBadge status={claim.status} />
-                          </td>
-                          <td className="py-3 px-4 text-dark font-inter">
-                            {claim.reference}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-
-                  <button
-                    onClick={() => navigate('/claims')}
-                    className="text-primary font-semibold hover:underline block text-right mt-4 ml-auto font-inter"
-                  >
-                    View all →
-                  </button>
-                </Card>
-              </div>
+              <Button
+                variant="secondary"
+                onClick={() => navigate('/generate-new-claim')}
+                className="w-full"
+              >
+                Submit Claim
+              </Button>
             </div>
+          </Card>
+        </Section>
+      </div>
 
-          </div>
+      {/* Hours this month */}
+      <Section
+        title="Hours this month"
+        description="Hours captured per module this month."
+      >
+        <Card>
+          <DataTable
+            columns={monthlyHoursColumns}
+            rows={monthlyHours}
+            loading={loading}
+            emptyTitle="No hours recorded yet"
+            emptyDescription="Start a work session to see your hours here."
+            minWidth="320px"
+          />
+        </Card>
+      </Section>
 
-    </>
+      {/* Applications and claims */}
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <Section
+          title="Application status"
+          noMargin
+          className="h-full min-w-0"
+          actions={
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/applications')}
+            >
+              View all →
+            </Button>
+          }
+        >
+          <Card>
+            <DataTable
+              columns={applicationColumns}
+              rows={applications}
+              loading={loading}
+              emptyTitle="No applications yet"
+              emptyDescription="Apply for an Assistant position to see it here."
+              minWidth="280px"
+            />
+          </Card>
+        </Section>
+
+        <Section
+          title="Claims"
+          noMargin
+          className="h-full min-w-0"
+          actions={
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/claims')}
+            >
+              View all →
+            </Button>
+          }
+        >
+          <Card>
+            <DataTable
+              columns={claimColumns}
+              rows={claims}
+              loading={loading}
+              emptyTitle="No claims yet"
+              emptyDescription="Submit a claim once you have logged work hours."
+              minWidth="480px"
+            />
+          </Card>
+        </Section>
+      </div>
+    </div>
   );
 };
 

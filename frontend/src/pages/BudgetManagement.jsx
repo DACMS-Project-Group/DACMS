@@ -1,3 +1,6 @@
+import Button from '../ui/Button';
+import DataTable from '../ui/DataTable';
+import PageHeader from '../ui/PageHeader';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
@@ -79,25 +82,136 @@ const BudgetManagement = () => {
         .includes(searchTerm.toLowerCase())
   );
 
+  const budgetColumns = [
+    {
+      key: 'module_code',
+      header: 'Module',
+      className: 'px-5 py-5',
+      render: (budget) => (
+        <>
+          <p className="font-semibold text-dark font-inter">{budget.module_code}</p>
+          <p className="text-sm text-neutral mt-1 font-inter">
+            {budget.module_description}
+          </p>
+        </>
+      ),
+    },
+    {
+      key: 'allocated_budget',
+      header: 'Allocated',
+      className: 'px-5 py-5 text-dark font-inter',
+      render: (budget) => formatCurrency(budget.allocated_budget),
+    },
+    {
+      key: 'current_budget_usage',
+      header: 'Used',
+      className: 'px-5 py-5 text-dark font-inter',
+      render: (budget) => formatCurrency(budget.current_budget_usage),
+    },
+    {
+      key: 'remaining_budget',
+      header: 'Remaining',
+      className: 'px-5 py-5 font-medium font-inter',
+      render: (budget) => (
+        <span
+          className={
+            Number(budget.remaining_budget) < 0 ? 
+              'text-error'
+            : 'text-dark'
+          }
+        >
+          {formatCurrency(budget.remaining_budget)}
+        </span>
+      ),
+    },
+    {
+      key: 'utilisation',
+      header: 'Utilisation',
+      className: 'px-5 py-5 min-w-[170px]',
+      render: (budget) => {
+        const percentage = getPercentage(
+          budget.current_budget_usage,
+          budget.allocated_budget
+        );
+        return (
+          <>
+            <div className="flex justify-between mb-1">
+              <span className="text-sm text-dark font-inter">{percentage}%</span>
+            </div>
+            <div className="w-full h-2 bg-light-grey rounded-full">
+              <div
+                className={`h-2 rounded-full ${
+                  percentage >= 100
+                    ? 'bg-error'
+                    : percentage >= 80
+                      ? 'bg-warning'
+                      : 'bg-success'
+                }`}
+                style={{ width: `${Math.min(percentage, 100)}%` }}
+              />
+            </div>
+          </>
+        );
+      },
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'px-5 py-5',
+      render: (budget) => (
+        <StatusBadge
+          status={getStatus(
+            getPercentage(
+              budget.current_budget_usage,
+              budget.allocated_budget
+            )
+          )}
+        />
+      ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      className: 'px-5 py-5',
+      render: (budget) => (
+        <div className="flex gap-4">
+          <Button
+            unstyled
+            onClick={() =>
+              navigate(
+                user?.role === 'lecturer'
+                  ? `/lecturer-budget-details/${budget.budget_id}`
+                  : `/budget-details/${budget.budget_id}`
+              )
+            }
+            className="text-primary font-semibold hover:underline font-inter"
+          >
+            View
+          </Button>
+
+          {user?.role === 'admin' && (
+            <Button
+              unstyled
+              onClick={() => navigate(`/edit-budget/${budget.budget_id}`)}
+              className="text-neutral font-semibold hover:underline font-inter"
+            >
+              Edit
+            </Button>
+          )}
+        </div>
+      ),
+    },
+  ];
+
   return (
     <>
 
-<div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              Budget Management
-            </h1>
-          </div>
 
           <div className="p-8">
-            <div className="mb-8">
-              <h2 className="text-3xl font-poppins font-semibold text-primary">
-                Budget Overview
-              </h2>
-
-              <p className="text-neutral mt-2 font-inter">
-                Create, allocate and monitor module budgets and expenditure.
-              </p>
-            </div>
+            <PageHeader
+              title="Budget Management"
+              description="Create, allocate and monitor module budgets and expenditure."
+            />
 
             <div className="flex flex-col md:flex-row justify-between gap-4 mb-8">
               <div className="relative w-full md:w-96">
@@ -123,7 +237,7 @@ const BudgetManagement = () => {
               </div>
 
               {user?.role !== 'lecturer' && (
-                <button
+                <Button unstyled
                   onClick={() => navigate('/create-budget')}
                   className="
                     bg-primary
@@ -138,12 +252,12 @@ const BudgetManagement = () => {
                   "
                 >
                   + Create Budget
-                </button>
+                </Button>
               )}
             </div>
 
             <section className="mb-8">
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              <h3 className="text-card font-poppins font-semibold text-primary mb-4">
                 Budget Summary
               </h3>
 
@@ -206,7 +320,7 @@ const BudgetManagement = () => {
             </section>
 
             <section>
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              <h3 className="text-card font-poppins font-semibold text-primary mb-4">
                 Module Budgets
               </h3>
 
@@ -220,184 +334,15 @@ const BudgetManagement = () => {
 
               {!error && (
                 <Card>
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-primary-lightest">
-                        <tr>
-                          <th className="px-5 py-4 text-left text-sm font-semibold text-primary font-inter">
-                            Module
-                          </th>
-
-                          <th className="px-5 py-4 text-left text-sm font-semibold text-primary font-inter">
-                            Allocated
-                          </th>
-
-                          <th className="px-5 py-4 text-left text-sm font-semibold text-primary font-inter">
-                            Used
-                          </th>
-
-                          <th className="px-5 py-4 text-left text-sm font-semibold text-primary font-inter">
-                            Remaining
-                          </th>
-
-                          <th className="px-5 py-4 text-left text-sm font-semibold text-primary font-inter">
-                            Utilisation
-                          </th>
-
-                          <th className="px-5 py-4 text-left text-sm font-semibold text-primary font-inter">
-                            Status
-                          </th>
-
-                          <th className="px-5 py-4 text-left text-sm font-semibold text-primary font-inter">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
-
-                      <tbody>
-                        {loading ? (
-                          <tr>
-                            <td
-                              colSpan="7"
-                              className="px-5 py-10 text-center text-neutral font-inter"
-                            >
-                              Loading budgets...
-                            </td>
-                          </tr>
-                        ) : (
-                          filteredBudgets.map((budget) => {
-                            const percentage = getPercentage(
-                              budget.current_budget_usage,
-                              budget.allocated_budget
-                            );
-
-                            const status = getStatus(percentage);
-
-                            return (
-                              <tr
-                                key={budget.budget_id}
-                                className="
-                                  border-t
-                                  border-neutral/30
-                                  hover:bg-primary-lightest/30
-                                  transition
-                                "
-                              >
-                                <td className="px-5 py-5">
-                                  <p className="font-semibold text-dark font-inter">
-                                    {budget.module_code}
-                                  </p>
-
-                                  <p className="text-sm text-neutral mt-1 font-inter">
-                                    {budget.module_description}
-                                  </p>
-                                </td>
-
-                                <td className="px-5 py-5 text-dark font-inter">
-                                  {formatCurrency(budget.allocated_budget)}
-                                </td>
-
-                                <td className="px-5 py-5 text-dark font-inter">
-                                  {formatCurrency(
-                                    budget.current_budget_usage
-                                  )}
-                                </td>
-
-                                <td
-                                  className={`px-5 py-5 font-medium font-inter ${Number(budget.remaining_budget) < 0
-                                      ? 'text-error'
-                                      : 'text-dark'
-                                    }`}
-                                >
-                                  {formatCurrency(budget.remaining_budget)}
-                                </td>
-
-                                <td className="px-5 py-5 min-w-[170px]">
-                                  <div className="flex justify-between mb-1">
-                                    <span className="text-sm text-dark font-inter">
-                                      {percentage}%
-                                    </span>
-                                  </div>
-
-                                  <div className="w-full h-2 bg-light-grey rounded-full">
-                                    <div
-                                      className={`h-2 rounded-full ${percentage >= 100
-                                          ? 'bg-error'
-                                          : percentage >= 80
-                                            ? 'bg-warning'
-                                            : 'bg-success'
-                                        }`}
-                                      style={{
-                                        width: `${Math.min(
-                                          percentage,
-                                          100
-                                        )}%`,
-                                      }}
-                                    />
-                                  </div>
-                                </td>
-
-                                <td className="px-5 py-5">
-                                  <StatusBadge status={status} />
-                                </td>
-
-                                <td className="px-5 py-5">
-                                  <div className="flex gap-4">
-                                    <button
-                                      onClick={() =>
-                                        navigate(
-                                          user?.role === 'lecturer'
-                                            ? `/lecturer-budget-details/${budget.budget_id}`
-                                            : `/budget-details/${budget.budget_id}`
-                                        )
-                                      }
-                                      className="
-                                        text-primary
-                                        font-semibold
-                                        hover:underline
-                                        font-inter
-                                      "
-                                    >
-                                      View
-                                    </button>
-
-                                    {user?.role === 'admin' && (
-                                      <button
-                                        onClick={() =>
-                                          navigate(
-                                            `/edit-budget/${budget.budget_id}`
-                                          )
-                                        }
-                                        className="
-                                          text-neutral
-                                          font-semibold
-                                          hover:underline
-                                          font-inter
-                                        "
-                                      >
-                                        Edit
-                                      </button>
-                                    )}
-                                  </div>
-                                </td>
-                              </tr>
-                            );
-                          })
-                        )}
-
-                        {!loading && filteredBudgets.length === 0 && (
-                          <tr>
-                            <td
-                              colSpan="7"
-                              className="px-5 py-10 text-center text-neutral font-inter"
-                            >
-                              No budgets found matching your search.
-                            </td>
-                          </tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
+                  <DataTable
+                    columns={budgetColumns}
+                    rows={filteredBudgets}
+                    getRowKey={(budget) => budget.budget_id}
+                    loading={loading}
+                    emptyTitle="No budgets found"
+                    emptyDescription="No budgets match your search."
+                    minWidth="900px"
+                  />
                 </Card>
               )}
             </section>

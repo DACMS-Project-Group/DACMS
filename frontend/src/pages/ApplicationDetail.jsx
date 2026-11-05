@@ -1,5 +1,6 @@
+import DetailPage from '../ui/DetailPage';
 import { useEffect, useState } from 'react';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { apiGet } from '../api';
@@ -97,7 +98,6 @@ function mapApplication(app, lecturerFromPosition = '') {
 }
 
 const ApplicationDetail = () => {
-  const navigate = useNavigate();
   document.title = 'AACMS - Application Detail';
   const location = useLocation();
   const { id } = useParams();
@@ -218,70 +218,10 @@ const ApplicationDetail = () => {
   }, [id, location.state]);
 
   // ---------------------------------------------------------
-  // Loading state
-  // ---------------------------------------------------------
-  if (loading) {
-    return (
-      <>
-
-<div className="bg-primary h-16 flex items-center px-4 md:px-8">
-              <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-                Application Details
-              </h1>
-            </div>
-            <div className="p-4 md:p-8">
-              <Card>
-                <p className="py-6 text-center text-neutral">
-                  Loading application...
-                </p>
-              </Card>
-            </div>
-
-      </>
-    );
-  }
-
-  // ---------------------------------------------------------
-  // Application not found / error state
-  // ---------------------------------------------------------
-  if (!application) {
-    return (
-      <>
-
-<div className="bg-primary h-16 flex items-center px-4 md:px-8">
-              <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-                Application Details
-              </h1>
-            </div>
-            <div className="p-4 md:p-8">
-              <Card>
-                <h2 className="text-xl md:text-2xl font-poppins font-semibold text-dark">
-                  Application Not Found
-                </h2>
-
-                <p className="text-neutral mt-2">
-                  {error ||
-                    'Please return to your applications and select an application to view its details.'}
-                </p>
-
-                <button
-                  onClick={() => navigate('/applications')}
-                  className="mt-6 bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition w-full md:w-auto"
-                >
-                  Back to Applications
-                </button>
-              </Card>
-            </div>
-
-      </>
-    );
-  }
-
-  // ---------------------------------------------------------
   // Determine approval progress
   // ---------------------------------------------------------
   const getProgress = () => {
-    switch (application.status) {
+    switch (application?.status) {
       case 'Approved':
         return 3;
       case 'Under Review':
@@ -298,17 +238,30 @@ const ApplicationDetail = () => {
   const progress = getProgress();
 
   return (
-    <>
-
-<div className="bg-primary h-16 flex items-center px-4 md:px-8">
-            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-              Application Details
-            </h1>
-          </div>
-
-          <div className="p-4 md:p-8">
+    <DetailPage
+      title="Application Details"
+      breadcrumbs={[
+        { label: 'Applications', to: '/applications' },
+        {
+          label: application?.reference || 'Application Details',
+        },
+      ]}
+      backTo="/applications"
+      backLabel="Back to Applications"
+      loading={loading}
+      loadingMessage="Loading application..."
+      errorTitle="Application Not Found"
+      error={
+        application
+          ? ''
+          : error ||
+            'Please return to your applications and select an application to view its details.'
+      }
+    >
+      {application ? (
+        <>
             <div className="mb-6 md:mb-8">
-              <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-primary">
+              <h2 className="text-section font-poppins font-semibold text-primary">
                 {application.moduleCode}
               </h2>
               <p className="text-neutral mt-2 break-words">
@@ -319,7 +272,7 @@ const ApplicationDetail = () => {
             <Card>
               <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                 <div className="min-w-0">
-                  <h3 className="text-xl md:text-2xl font-poppins font-semibold text-dark break-words">
+                  <h3 className="text-card font-poppins font-semibold text-dark break-words">
                     {application.moduleName}
                   </h3>
                   <p className="text-neutral mt-2">
@@ -361,7 +314,7 @@ const ApplicationDetail = () => {
             </Card>
 
             <Card className="mt-6">
-              <h3 className="text-lg md:text-xl font-poppins font-semibold text-dark">
+              <h3 className="text-card font-poppins font-semibold text-dark">
                 Approval Progress
               </h3>
 
@@ -424,18 +377,9 @@ const ApplicationDetail = () => {
                 )}
               </div>
             </Card>
-
-            <div className="mt-6 md:mt-8">
-              <button
-                onClick={() => navigate('/applications')}
-                className="text-primary font-semibold hover:underline"
-              >
-                ← Back to Applications
-              </button>
-            </div>
-          </div>
-
-    </>
+        </>
+      ) : null}
+    </DetailPage>
   );
 };
 

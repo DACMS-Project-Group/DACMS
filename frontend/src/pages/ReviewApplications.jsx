@@ -1,8 +1,12 @@
+import Button from '../ui/Button';
 import React, { useEffect, useState } from 'react';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
+import DataTable from '../ui/DataTable';
+import PageHeader from '../ui/PageHeader';
 import { apiGet, apiPatch } from '../api';
 import { useNavigate } from 'react-router-dom';
+import { APPLICATION_STATUS_OPTIONS } from '../lib/statuses';
 
 const ReviewApplications = () => {
   document.title = 'AACMS - Review Applications';
@@ -181,6 +185,53 @@ const filteredApplications = applications.filter((application) => {
     }
   };
 
+  const applicationColumns = [
+    {
+      key: 'studentName',
+      header: 'Student',
+      className: 'px-4 py-4 font-semibold text-primary-dark',
+      render: (application) => application.studentName,
+    },
+    {
+      key: 'studentNumber',
+      header: 'Student Number',
+      className: 'px-4 py-4 text-neutral',
+      render: (application) => application.studentNumber,
+    },
+    {
+      key: 'moduleCode',
+      header: 'Module',
+      className: 'px-4 py-4 text-neutral',
+      render: (application) => application.moduleCode,
+    },
+    {
+      key: 'dateSubmitted',
+      header: 'Application Date',
+      className: 'px-4 py-4 text-neutral',
+      render: (application) => application.dateSubmitted,
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'px-4 py-4',
+      render: (application) => <StatusBadge status={application.status} />,
+    },
+    {
+      key: 'action',
+      header: 'Action',
+      className: 'px-4 py-4',
+      render: (application) => (
+        <button
+          type="button"
+          onClick={() => handleReview(application)}
+          className="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-primary-dark transition"
+        >
+          {application.status === 'Pending Review' ? 'Review' : 'View'}
+        </button>
+      ),
+    },
+  ];
+
   //File download function
   const viewDocument = (document) => {
     if (!selectedApplication?.id || !document.id) {
@@ -277,32 +328,28 @@ const filteredApplications = applications.filter((application) => {
   if (selectedApplication) {
     return (
       <>
-        {/* Page Title */}
-        <div className="bg-primary text-white px-8 py-5">
-          <h1 className="text-2xl font-poppins font-semibold text-white">
-            Application Review
-          </h1>
-        </div>
-
-        <div className="p-8">
+        <div className="p-4 md:p-8">
+          <PageHeader title="Application Review" />
 
               {/* Back Button */}
-              <button
+              <Button unstyled
                 type="button"
                 onClick={handleBack}
                 className="mb-6 text-primary font-semibold hover:underline"
               >
                 ← Back to Review Applications
-              </button>
+              </Button>
+
+              <div className="space-y-6">
 
               {/* Application Header */}
               <Card>
-                <div className="p-6">
+                <div>
 
-                  <div className="flex justify-between items-start">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
 
-                    <div>
-                      <h2 className="text-2xl font-bold text-primary-dark">
+                    <div className="min-w-0">
+                      <h2 className="text-section font-bold text-primary-dark">
                         {selectedApplication.studentName}
                       </h2>
 
@@ -322,9 +369,9 @@ const filteredApplications = applications.filter((application) => {
 
               {/* Student Information */}
               <Card>
-                <div className="p-6">
+                <div>
 
-                  <h3 className="text-xl font-bold text-primary-dark mb-5">
+                  <h3 className="text-card font-bold text-primary-dark mb-5">
                     Student Information
                   </h3>
 
@@ -377,9 +424,9 @@ const filteredApplications = applications.filter((application) => {
 
               {/* Application Information */}
               <Card>
-                <div className="p-6">
+                <div>
 
-                  <h3 className="text-xl font-bold text-primary-dark mb-5">
+                  <h3 className="text-card font-bold text-primary-dark mb-5">
                     Application Information
                   </h3>
 
@@ -422,9 +469,9 @@ const filteredApplications = applications.filter((application) => {
 
               {/* Supporting Documents */}
               <Card>
-                <div className="p-6">
+                <div>
 
-                  <h3 className="text-xl font-bold text-primary-dark mb-5">
+                  <h3 className="text-card font-bold text-primary-dark mb-5">
                     Supporting Documents
                   </h3>
 
@@ -443,13 +490,13 @@ const filteredApplications = applications.filter((application) => {
                             </p>
                           </div>
 
-                          <button
+                          <Button unstyled
                             type="button"
                             onClick={() => viewDocument(document)}
                             className="border-2 border-primary text-primary px-4 py-2 rounded-lg font-semibold hover:bg-primary-lightest transition"
                           >
                             View
-                          </button>
+                          </Button>
 
                         </div>
                       )
@@ -462,9 +509,9 @@ const filteredApplications = applications.filter((application) => {
 
               {/* Lecturer Comments */}
               <Card>
-                <div className="p-6">
+                <div>
 
-                  <h3 className="text-xl font-bold text-primary-dark mb-5">
+                  <h3 className="text-card font-bold text-primary-dark mb-5">
                     Lecturer Comments
                   </h3>
 
@@ -481,9 +528,9 @@ const filteredApplications = applications.filter((application) => {
 
               {/* Application Actions */}
               <Card>
-                <div className="p-6">
+                <div>
 
-                  <h3 className="text-xl font-bold text-primary-dark mb-5">
+                  <h3 className="text-card font-bold text-primary-dark mb-5">
                     Application Decision
                   </h3>
 
@@ -493,7 +540,7 @@ const filteredApplications = applications.filter((application) => {
 
                   <div className="flex flex-wrap gap-4">
 
-                    <button
+                    <Button unstyled
                       type="button"
                       onClick={() =>
                         handleStatusUpdate('Approved')
@@ -501,9 +548,9 @@ const filteredApplications = applications.filter((application) => {
                       className="bg-success text-white px-6 py-3 rounded-xl font-semibold hover:bg-success/90 transition"
                     >
                       Approve Application
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button unstyled
                       type="button"
                       onClick={() =>
                         handleStatusUpdate('Rejected')
@@ -511,17 +558,17 @@ const filteredApplications = applications.filter((application) => {
                       className="bg-error text-white px-6 py-3 rounded-xl font-semibold hover:bg-error/90 transition"
                     >
                       Reject Application
-                    </button>
+                    </Button>
 
-                    <button
+                    <Button unstyled
                       type="button"
                       onClick={() =>
-                        handleStatusUpdate('Changes Requested')
+                        handleStatusUpdate('Returned')
                       }
                       className="border-2 border-primary text-primary px-6 py-3 rounded-xl font-semibold hover:bg-primary-lightest transition"
                     >
                       Request Changes
-                    </button>
+                    </Button>
 
                   </div>
 
@@ -540,6 +587,8 @@ const filteredApplications = applications.filter((application) => {
                 </div>
               </Card>
 
+              </div>
+
             </div>
       </>
     );
@@ -550,31 +599,17 @@ const filteredApplications = applications.filter((application) => {
    */
   return (
     <>
-      {/* Page Title */}
-      <div className="bg-primary text-white px-8 py-5">
-        <h1 className="text-2xl font-bold">
-          Review Applications
-        </h1>
-      </div>
+      <div className="p-4 md:p-8">
+            <PageHeader
+              title="Review Applications"
+              description="Review and manage applications submitted by students."
+            />
 
-      <div className="p-8">
-
-            {/* Page Introduction */}
-            <div className="mb-6">
-              <h2 className="text-2xl font-bold text-primary-dark">
-                Student Applications
-              </h2>
-
-              <p className="text-neutral mt-1">
-                Review and manage applications submitted by students.
-              </p>
-            </div>
+            <div className="space-y-6">
 
             {/* Search and Filter */}
             <Card>
-              <div className="p-6">
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 
                   {/* Search */}
                   <div>
@@ -610,37 +645,24 @@ const filteredApplications = applications.filter((application) => {
                         All Applications
                       </option>
 
-                      <option value="Pending Review">
-                        Pending Review
-                      </option>
-
-                      <option value="Approved">
-                        Approved
-                      </option>
-
-                      <option value="Rejected">
-                        Rejected
-                      </option>
-
-                      <option value="Changes Requested">
-                        Changes Requested
-                      </option>
+                      {APPLICATION_STATUS_OPTIONS.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
                     </select>
                   </div>
 
                 </div>
 
-              </div>
             </Card>
 
             {/* Applications */}
             <Card>
-              <div className="p-6">
-
-                <div className="flex justify-between items-center mb-6">
+              <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
 
                   <div>
-                    <h3 className="text-xl font-bold text-primary-dark">
+                    <h3 className="text-card font-bold text-primary-dark">
                       Applications
                     </h3>
 
@@ -655,115 +677,20 @@ const filteredApplications = applications.filter((application) => {
 
                 </div>
 
-                {/* Applications Table */}
-                <div className="overflow-x-auto">
+              <DataTable
+                  columns={applicationColumns}
+                  rows={filteredApplications.map(mapApplicationOverview)}
+                  getRowKey={(application) => application.id}
+                  loading={loading}
+                  error={error}
+                  emptyTitle="No applications found"
+                  emptyDescription="No applications match your search criteria."
+                  minWidth="900px"
+                />
 
-                  <table className="w-full">
-
-                    <thead>
-                      <tr className="border-b border-border-subtle text-left">
-
-                        <th className="px-4 py-4 text-sm font-semibold text-neutral">
-                          Student
-                        </th>
-
-                        <th className="px-4 py-4 text-sm font-semibold text-neutral">
-                          Student Number
-                        </th>
-
-                        <th className="px-4 py-4 text-sm font-semibold text-neutral">
-                          Module
-                        </th>
-
-                        <th className="px-4 py-4 text-sm font-semibold text-neutral">
-                          Application Date
-                        </th>
-
-                        <th className="px-4 py-4 text-sm font-semibold text-neutral">
-                          Status
-                        </th>
-
-                        <th className="px-4 py-4 text-sm font-semibold text-neutral">
-                          Action
-                        </th>
-
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {loading ? (
-                        <tr>
-                          <td colSpan="6" className="px-4 py-10 text-center text-neutral">
-                            Loading applications...
-                          </td>
-                        </tr>
-                      ) : error ? (
-                        <tr>
-                          <td colSpan="6" className="px-4 py-10 text-center text-error">
-                            {error}
-                          </td>
-                        </tr>
-                      ) : filteredApplications.length > 0 ? (
-                        filteredApplications.map((raw) => {
-                          const application = mapApplicationOverview(raw);
-
-                          return (
-                            <tr
-                              key={application.id}
-                              className="border-b border-border-subtle hover:bg-surface-muted transition"
-                            >
-                              <td className="px-4 py-4 font-semibold text-primary-dark">
-                                {application.studentName}
-                              </td>
-
-                              <td className="px-4 py-4 text-neutral">
-                                {application.studentNumber}
-                              </td>
-
-                              <td className="px-4 py-4 text-neutral">
-                                {application.moduleCode}
-                              </td>
-
-                              <td className="px-4 py-4 text-neutral">
-                                {application.dateSubmitted}
-                              </td>
-
-                              <td className="px-4 py-4">
-                                <StatusBadge status={application.status} />
-                              </td>
-
-                              <td className="px-4 py-4">
-                                <button
-                                  type="button"
-                                  onClick={() => handleReview(application)}
-                                  className="bg-primary text-white px-5 py-2 rounded-lg font-semibold hover:bg-primary-dark transition"
-                                >
-                                  {application.status === 'Pending Review'
-                                    ? 'Review'
-                                    : 'View'}
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      ) : (
-                        <tr>
-                          <td
-                            colSpan="6"
-                            className="px-4 py-10 text-center text-neutral"
-                          >
-                            No applications found.
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-
-                  </table>
-
-                </div>
-
-              </div>
             </Card>
+
+            </div>
 
           </div>
     </>

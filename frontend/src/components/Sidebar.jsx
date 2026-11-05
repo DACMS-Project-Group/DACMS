@@ -1,10 +1,10 @@
+import { useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
+import Button from '../ui/Button';
 import { useSidebar } from '../contexts/SidebarContext';
 
 const Sidebar = ({ userRole = 'student' }) => {
   const role = userRole?.toLowerCase().trim();
-  const { logout } = useAuth();
   const { isOpen, close } = useSidebar();
 
   const studentNavItems = [
@@ -13,7 +13,6 @@ const Sidebar = ({ userRole = 'student' }) => {
     { name: 'Modules', href: '/modules' },
     { name: 'Work Tracking', href: '/work-tracking' },
     { name: 'Claims', href: '/claims' },
-    { name: 'Profile', href: '/profile' },
   ];
 
   const lecturerNavItems = [
@@ -40,24 +39,42 @@ const Sidebar = ({ userRole = 'student' }) => {
         ? adminNavItems
         : studentNavItems;
 
+  // Escape closes the mobile drawer.
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        close();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, close]);
+
   return (
     <>
-      {/* Mobile backdrop */}
+      {/* Mobile backdrop — above the navbar so the bar is dimmed too */}
       {isOpen && (
         <div
           onClick={close}
           aria-hidden="true"
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          className="fixed inset-0 z-[60] bg-black/50 md:hidden"
         />
       )}
 
       <aside
+        id="app-sidebar"
+        aria-label="Main navigation"
         className={[
           // --- Mobile: fixed off-canvas drawer ---
-          'fixed top-0 left-0 z-50',
-          'h-screen w-64',
+          'fixed top-0 left-0 z-[70]',
+          'flex h-dvh w-64 flex-col',
           'bg-primary-dark text-white',
-          'flex flex-col',
           'transform transition-transform duration-300 ease-in-out',
           isOpen ? 'translate-x-0' : '-translate-x-full',
 
@@ -65,6 +82,34 @@ const Sidebar = ({ userRole = 'student' }) => {
           'md:sticky md:top-24 md:z-auto md:h-[calc(100vh-6rem)] md:translate-x-0',
         ].join(' ')}
       >
+        {/* Drawer header — mobile only */}
+        <div className="flex items-center justify-between border-b border-white/15 px-4 py-3 md:hidden">
+          <span className="text-xs font-semibold uppercase tracking-wide text-white/70">
+            Menu
+          </span>
+
+          <Button
+            unstyled
+            type="button"
+            aria-label="Close navigation menu"
+            onClick={close}
+            className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-primary-light"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="h-5 w-5"
+            >
+              <path d="M6 6l12 12M18 6 6 18" />
+            </svg>
+          </Button>
+        </div>
+
         <nav className="min-h-0 flex-1 overflow-y-auto p-4 pt-6">
           {navItems.map((item) => (
             <NavLink
@@ -72,7 +117,7 @@ const Sidebar = ({ userRole = 'student' }) => {
               to={item.href}
               onClick={close}
               className={({ isActive }) =>
-                `block px-4 py-3 rounded-xl transition-colors duration-200 mb-2 ${
+                `mb-2 block rounded-xl px-4 py-3 transition-colors duration-200 ${
                   isActive
                     ? 'bg-primary-light font-semibold'
                     : 'hover:bg-primary-light'
@@ -83,47 +128,6 @@ const Sidebar = ({ userRole = 'student' }) => {
             </NavLink>
           ))}
         </nav>
-
-        <div className="flex items-center gap-2 p-4">
-          {role === 'admin' && (
-            <NavLink
-              to="/audit-logs"
-              onClick={close}
-              aria-label="View audit logs"
-              title="Audit Logs"
-              className={({ isActive }) =>
-                `flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition-colors duration-200 ${
-                  isActive ? 'bg-primary-light' : 'hover:bg-primary-light'
-                }`
-              }
-            >
-              <svg
-                aria-hidden="true"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                className="h-6 w-6"
-              >
-                <path d="M8 3h8l4 4v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h3Z" />
-                <path d="M16 3v4h4" />
-                <path d="M8 11h8" />
-                <path d="M8 15h8" />
-                <path d="M8 19h5" />
-              </svg>
-            </NavLink>
-          )}
-
-          <button
-            type="button"
-            onClick={logout}
-            className="block flex-1 rounded-xl px-4 py-3 text-left transition-colors duration-200 hover:bg-primary-light"
-          >
-            Logout
-          </button>
-        </div>
       </aside>
     </>
   );

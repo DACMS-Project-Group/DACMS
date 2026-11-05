@@ -1,3 +1,5 @@
+import Button from '../ui/Button';
+import PageHeader from '../ui/PageHeader';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
@@ -106,31 +108,23 @@ const LectureDashboard = () => {
     <>
 
 {/* Page Header */}
-          <div className="bg-primary h-16 flex items-center px-8">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              Lecturer Dashboard
-            </h1>
-          </div>
 
           {/* Page Content */}
           <div className="p-8">
-            {/* Introduction */}
-            <div className="mb-8">
-              <p className="text-neutral text-base font-inter">
-                Here's an overview of your assistant applications and
-                activities.
-              </p>
+            <PageHeader
+              title="Lecturer Dashboard"
+              description="Here's an overview of your assistant applications and activities."
+            />
 
-              {error && (
-                <p className="mt-2 text-sm text-error font-inter">
-                  Could not load dashboard data: {error}
-                </p>
-              )}
-            </div>
+            {error && (
+              <p className="mb-6 text-sm text-error font-inter">
+                Could not load dashboard data: {error}
+              </p>
+            )}
 
             {/* Overview */}
             <div className="mb-8">
-              <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+              <h2 className="text-section font-poppins font-semibold text-primary mb-4">
                 Overview
               </h2>
 
@@ -181,7 +175,7 @@ const LectureDashboard = () => {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               {/* Claims summary */}
               <div>
-                <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+                <h2 className="text-section font-poppins font-semibold text-primary mb-4">
                   Claims Summary
                 </h2>
 
@@ -219,18 +213,18 @@ const LectureDashboard = () => {
                     </div>
                   )}
 
-                  <button
+                  <Button unstyled
                     onClick={() => navigate('/review-claims')}
                     className="text-primary font-semibold hover:underline mt-4 font-inter"
                   >
                     Review claims →
-                  </button>
+                  </Button>
                 </Card>
               </div>
 
               {/* Applications */}
               <div>
-                <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+                <h2 className="text-section font-poppins font-semibold text-primary mb-4">
                   Applications
                 </h2>
 
@@ -269,19 +263,19 @@ const LectureDashboard = () => {
                     </div>
                   )}
 
-                  <button
+                  <Button unstyled
                     onClick={() => navigate('/review-applications')}
                     className="text-primary font-semibold hover:underline mt-4 font-inter"
                   >
                     Review applications →
-                  </button>
+                  </Button>
                 </Card>
               </div>
             </div>
 
             {/* Work Sessions */}
             <div className="mb-8">
-              <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+              <h2 className="text-section font-poppins font-semibold text-primary mb-4">
                 Work Sessions
               </h2>
 
@@ -342,24 +336,24 @@ const LectureDashboard = () => {
                   </div>
                 )}
 
-                <button
+                <Button unstyled
                   onClick={() => navigate('/verify-hours')}
                   className="text-primary font-semibold hover:underline mt-4 font-inter"
                 >
                   Verify hours →
-                </button>
+                </Button>
               </Card>
             </div>
 
             {/* Budget Utilisation */}
             <div className="mb-8">
-              <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+              <h2 className="text-section font-poppins font-semibold text-primary mb-4">
                 Budget Utilisation
               </h2>
 
               <Card>
                 <div className="mb-5">
-                  <h3 className="text-xl font-poppins font-semibold text-primary-dark">
+                  <h3 className="text-card font-poppins font-semibold text-primary-dark">
                     Current Budget
                   </h3>
                   <p className="mt-1 text-sm text-neutral">
@@ -420,7 +414,7 @@ const LectureDashboard = () => {
                 {/* Per-module budgets */}
                 {budgets.length > 0 && (
                   <div className="mt-6 border-t border-neutral pt-4">
-                    <h4 className="text-sm font-semibold text-dark mb-3">
+                    <h4 className="text-body font-semibold text-dark mb-3">
                       Your Modules
                     </h4>
                     <div className="space-y-3">

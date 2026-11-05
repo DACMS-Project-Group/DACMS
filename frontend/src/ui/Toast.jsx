@@ -1,3 +1,4 @@
+import Button from './Button';
 const TONES = {
   success: 'border-success/30 bg-status-done-soft text-status-done',
   error: 'border-error/30 bg-status-danger-soft text-status-danger',
@@ -40,14 +41,14 @@ const Toast = ({
       </div>
 
       {onDismiss && (
-        <button
+        <Button unstyled
           type="button"
           onClick={onDismiss}
           aria-label="Dismiss notification"
           className="-mr-1 -mt-1 rounded-lg p-1 text-lg leading-none opacity-70 transition hover:opacity-100"
         >
           ×
-        </button>
+        </Button>
       )}
     </div>
   );

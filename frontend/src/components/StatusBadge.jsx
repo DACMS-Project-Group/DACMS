@@ -1,26 +1,8 @@
-const TONES = {
-  pending: 'bg-status-amber-soft text-status-amber',
-  review: 'bg-status-progress-soft text-status-progress',
-  done: 'bg-status-done-soft text-status-done',
-  danger: 'bg-status-danger-soft text-status-danger',
-};
-
-const STATUS = {
-  Pending: 'pending',
-  Returned: 'pending',
-  'In Review': 'review',
-  'Under Review': 'review',
-  'Approved by Lecturer': 'done',
-  Verified: 'done',
-  Approved: 'done',
-  Paid: 'done',
-  Rejected: 'danger',
-  'Rejected by Lecturer': 'danger',
-};
+import { STATUS_TONES } from '../lib/statuses';
 
 const StatusBadge = ({ status }) => {
   const label = String(status ?? '').trim() || 'Unknown';
-  const tone = TONES[STATUS[label]] ?? 'bg-light-grey text-dark';
+  const tone = STATUS_TONES[label] ?? 'bg-light-grey text-dark';
 
   return (
     <span

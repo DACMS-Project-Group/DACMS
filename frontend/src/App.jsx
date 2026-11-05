@@ -31,8 +31,7 @@ import AssistantListings from './pages/AssistantListings';
 import TwoFactorAuth from './pages/TwoFactorAuth';
 import AdminDashboard from './pages/AdminDashboard';
 import BudgetManagement from './pages/BudgetManagement';
-import CreateBudget from './pages/CreateBudget';
-import EditBudget from './pages/EditBudget';
+import BudgetForm from './pages/BudgetForm';
 import BudgetDetails from './pages/BudgetDetails';
 import ClaimsWorkspace from './pages/ClaimsWorkspace';
 import ClaimReview from './pages/ClaimReview';
@@ -122,8 +121,8 @@ function App() {
               <Route element={<AppLayout />}>
                 <Route path="/admin-dashboard" element={<AdminDashboard />} />
                 <Route path="/budget-management" element={<BudgetManagement />} />
-                <Route path="/create-budget" element={<CreateBudget />} />
-                <Route path="/edit-budget/:id" element={<EditBudget />} />
+                <Route path="/create-budget" element={<BudgetForm />} />
+                <Route path="/edit-budget/:id" element={<BudgetForm />} />
                 <Route path="/budget-details/:id" element={<BudgetDetails />} />
                 <Route path="/admin/claims" element={<ClaimsWorkspace />} />
                 <Route

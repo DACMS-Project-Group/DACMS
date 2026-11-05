@@ -1,3 +1,5 @@
+import Button from '../ui/Button';
+import DataTable from '../ui/DataTable';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiGet, apiPost } from '../api';
@@ -254,14 +256,60 @@ const WorkTracking = () => {
     });
   };
 
+  const sessionColumns = [
+    {
+      key: 'date',
+      header: 'Date',
+      className: 'px-4 py-4 text-sm text-dark whitespace-nowrap',
+    },
+    {
+      key: 'moduleCode',
+      header: 'Module',
+      className: 'px-4 py-4 text-sm font-medium text-primary-dark whitespace-nowrap',
+    },
+    {
+      key: 'activity',
+      header: 'Activity',
+      className: 'px-4 py-4 text-sm text-dark',
+    },
+    {
+      key: 'time',
+      header: 'Time',
+      className: 'px-4 py-4 text-sm text-dark whitespace-nowrap',
+      render: (session) => `${session.startTime} - ${session.endTime}`,
+    },
+    {
+      key: 'hours',
+      header: 'Hours',
+      className: 'px-4 py-4 text-sm font-medium text-dark whitespace-nowrap',
+      render: (session) => formatHours(session.hours),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'px-4 py-4',
+      render: (session) => <StatusBadge status={session.status} />,
+    },
+    {
+      key: 'action',
+      header: 'Action',
+      className: 'px-4 py-4',
+      render: (session) => (
+        <Button
+          unstyled
+          type="button"
+          onClick={() => handleViewSession(session)}
+          className="font-medium text-primary transition hover:text-primary-dark"
+        >
+          View
+        </Button>
+      ),
+    },
+  ];
+
   return (
     <>
 
-<div className="bg-primary h-16 flex items-center px-4 md:px-8">
-            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-              Work Tracking
-            </h1>
-          </div>
 
           <div className="p-4 md:p-8">
             <PageHeader
@@ -289,7 +337,7 @@ const WorkTracking = () => {
               <>
                 <Card className="mb-6">
                   <div className="mb-6">
-                    <h2 className="text-lg font-semibold text-primary-dark">
+                    <h2 className="text-section font-semibold text-primary-dark">
                       Assistant Appointments
                     </h2>
                     <p className="mt-1 text-sm text-neutral">
@@ -310,7 +358,7 @@ const WorkTracking = () => {
 
                       return (
                         <>
-                        <button
+                        <Button unstyled
                           key={appointment.id}
                           type="button"
                           onClick={() => handleAppointmentChange(appointment)}
@@ -322,7 +370,7 @@ const WorkTracking = () => {
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div className="min-w-0">
-                              <h3 className="font-semibold text-primary-dark">
+                              <h3 className="text-card font-semibold text-primary-dark">
                                 {appointment.moduleCode}
                               </h3>
                               <p className="mt-1 text-sm text-dark break-words">
@@ -362,7 +410,7 @@ const WorkTracking = () => {
                               </p>
                             </div>
                           </div>
-                        </button>
+                        </Button>
                         </>
                       );
                     })}
@@ -377,7 +425,7 @@ const WorkTracking = () => {
                           <p className="text-sm text-neutral">
                             Selected Assistant Appointment
                           </p>
-                          <h2 className="mt-1 text-lg md:text-xl font-semibold text-primary-dark break-words">
+                          <h2 className="text-section mt-1 font-semibold text-primary-dark break-words">
                             {selectedAppointment.moduleCode} -{' '}
                             {selectedAppointment.moduleName}
                           </h2>
@@ -387,7 +435,7 @@ const WorkTracking = () => {
                         </div>
 
                         {!showForm && (
-                          <button
+                          <Button unstyled
                             type="button"
                             onClick={() => {
                               setError('');
@@ -396,7 +444,7 @@ const WorkTracking = () => {
                             className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark w-full md:w-auto"
                           >
                             Record Work Session
-                          </button>
+                          </Button>
                         )}
                       </div>
                     </Card>
@@ -404,7 +452,7 @@ const WorkTracking = () => {
                     {showForm && (
                       <Card className="mb-6">
                         <div className="mb-6">
-                          <h2 className="text-lg font-semibold text-primary-dark">
+                          <h2 className="text-section font-semibold text-primary-dark">
                             Record Work Session
                           </h2>
                           <p className="mt-1 text-sm text-neutral">
@@ -521,14 +569,14 @@ const WorkTracking = () => {
                           </div>
 
                           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                            <button
+                            <Button unstyled
                               type="submit"
                               disabled={saving}
                               className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark disabled:cursor-not-allowed disabled:opacity-60 w-full sm:w-auto"
                             >
                               {saving ? 'Saving...' : 'Save Work Session'}
-                            </button>
-                            <button
+                            </Button>
+                            <Button unstyled
                               type="button"
                               disabled={saving}
                               onClick={() => {
@@ -544,7 +592,7 @@ const WorkTracking = () => {
                               className="rounded-lg border border-border-subtle px-5 py-3 font-medium text-dark transition hover:bg-surface-muted w-full sm:w-auto"
                             >
                               Cancel
-                            </button>
+                            </Button>
                           </div>
                         </form>
                       </Card>
@@ -552,7 +600,7 @@ const WorkTracking = () => {
 
                     <Card>
                       <div className="mb-6">
-                        <h2 className="text-lg font-semibold text-primary-dark">
+                        <h2 className="text-section font-semibold text-primary-dark">
                           Work Session History
                         </h2>
                         <p className="mt-1 text-sm text-neutral">
@@ -572,70 +620,14 @@ const WorkTracking = () => {
                           description="Record your first work session for this appointment."
                         />
                       ) : (
-                        <div className="overflow-x-auto">
-                          <table className="w-full min-w-[800px]">
-                            <thead>
-                              <tr className="border-b border-border-subtle text-left">
-                                {[
-                                  'Date',
-                                  'Module',
-                                  'Activity',
-                                  'Time',
-                                  'Hours',
-                                  'Status',
-                                  'Action',
-                                ].map((heading) => (
-                                  <th
-                                    key={heading}
-                                    className="px-4 py-3 text-sm font-semibold text-dark"
-                                  >
-                                    {heading}
-                                  </th>
-                                ))}
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {getAppointmentSessions(
-                                selectedAppointment.id
-                              ).map((session) => (
-                                <tr
-                                  key={session.id}
-                                  className="border-b border-border-subtle"
-                                >
-                                  <td className="px-4 py-4 text-sm text-dark whitespace-nowrap">
-                                    {session.date}
-                                  </td>
-                                  <td className="px-4 py-4 text-sm font-medium text-primary-dark whitespace-nowrap">
-                                    {session.moduleCode}
-                                  </td>
-                                  <td className="px-4 py-4 text-sm text-dark">
-                                    {session.activity}
-                                  </td>
-                                  <td className="px-4 py-4 text-sm text-dark whitespace-nowrap">
-                                    {session.startTime} - {session.endTime}
-                                  </td>
-                                  <td className="px-4 py-4 text-sm font-medium text-dark whitespace-nowrap">
-                                    {formatHours(session.hours)}
-                                  </td>
-                                  <td className="px-4 py-4">
-                                    <StatusBadge status={session.status} />
-                                  </td>
-                                  <td className="px-4 py-4">
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleViewSession(session)
-                                      }
-                                      className="font-medium text-primary transition hover:text-primary-dark"
-                                    >
-                                      View
-                                    </button>
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                        <DataTable
+                          columns={sessionColumns}
+                          rows={getAppointmentSessions(selectedAppointment.id)}
+                          getRowKey={(session) => session.id}
+                          emptyTitle="No Work Sessions Yet"
+                          emptyDescription="Record your first work session for this appointment."
+                          minWidth="800px"
+                        />
                       )}
                     </Card>
                   </>

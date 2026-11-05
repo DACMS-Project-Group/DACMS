@@ -1,5 +1,6 @@
+import DetailPage from '../ui/DetailPage';
 import { useEffect, useState } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { apiGet } from '../api';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
@@ -27,7 +28,6 @@ const getLocalTime = (value) => {
 
 const SessionDetail = () => {
   document.title = 'AACMS - Session Detail';
-  const navigate = useNavigate();
   const location = useLocation();
   const { id: sessionId } = useParams();
   const positionId = location.state?.appointment?.id;
@@ -116,46 +116,36 @@ const SessionDetail = () => {
   const estimatedRemuneration = details?.estimatedRemuneration ?? 0;
 
   return (
-    <>
-      {/* Page Header */}
-      <div className="bg-primary h-16 flex items-center px-4 md:px-8">
-        <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-          Session Detail
-        </h1>
-      </div>
-
-      {/* Page Content */}
-      <div className="p-4 md:p-8">
-            {/* Back Button */}
-            <div className="mb-6">
-              <button
-                type="button"
-                onClick={() => navigate('/work-tracking')}
-                className="font-medium text-primary transition hover:text-primary-dark"
-              >
-                ← Back to Work Tracking
-              </button>
-            </div>
-
-            {loading ? (
-              <p role="status" className="text-neutral">
-                Loading session details...
-              </p>
-            ) : error ? (
-              <p role="alert" className="text-error">
-                {error}
-              </p>
-            ) : !currentSession || !currentAppointment ? (
-              <p role="alert" className="text-error">
-                Session details are unavailable.
-              </p>
-            ) : (
+    <DetailPage
+      title="Session Detail"
+      description="Review the details and remuneration for this work session."
+      breadcrumbs={[
+        { label: 'Work Tracking', to: '/work-tracking' },
+        {
+          label: currentSession?.date
+            ? formatDate(currentSession.date)
+            : 'Session Detail',
+        },
+      ]}
+      backTo="/work-tracking"
+      backLabel="Back to Work Tracking"
+      loading={loading}
+      loadingMessage="Loading session details..."
+      errorTitle="Could not load session"
+      error={
+        error ||
+        (!currentSession || !currentAppointment
+          ? 'Session details are unavailable.'
+          : '')
+      }
+    >
+      {currentSession && currentAppointment ? (
               <>
                 {/* Session Overview */}
                 <Card className="mb-6">
                   <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                      <h2 className="text-section font-semibold text-primary-dark">
                         Work Session
                       </h2>
 
@@ -223,7 +213,7 @@ const SessionDetail = () => {
                 {/* Remuneration Information */}
                 <Card className="mb-6">
                   <div className="mb-5">
-                    <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                    <h2 className="text-section font-semibold text-primary-dark">
                       Remuneration
                     </h2>
 
@@ -264,7 +254,7 @@ const SessionDetail = () => {
                 {/* Verification Information */}
                 <Card>
                   <div className="mb-5">
-                    <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                    <h2 className="text-section font-semibold text-primary-dark">
                       Verification
                     </h2>
 
@@ -298,9 +288,8 @@ const SessionDetail = () => {
                   </div>
                 </Card>
               </>
-            )}
-          </div>
-    </>
+      ) : null}
+    </DetailPage>
   );
 };
 

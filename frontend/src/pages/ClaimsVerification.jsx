@@ -8,6 +8,7 @@ import DataTable from '../ui/DataTable';
 import PageHeader from '../ui/PageHeader';
 import Section from '../ui/Section';
 import { formatMoney, formatNumber } from '../lib/format';
+import { CLAIM_STATUS_OPTIONS } from '../lib/statuses';
 import { apiGet } from '../api';
 
 const ClaimsVerification = ({ embedded = false }) => {
@@ -155,20 +156,15 @@ const ClaimsVerification = ({ embedded = false }) => {
 
   return (
     <>
-      {!embedded && (
-        <div className="bg-primary px-8 py-4">
-          <h1 className="text-2xl font-poppins font-semibold text-white">
-            Claims Verification
-          </h1>
-        </div>
-      )}
 
-          <div className="p-8">
-            <PageHeader
-              title="Review Submitted Claims"
-              description="Review submitted remuneration claims, verify timesheets, validate calculations, and approve or reject claims."
-              actions={<Button onClick={handleExport}>Export Payments</Button>}
-            />
+          <div className={embedded ? '' : 'p-8'}>
+            {!embedded && (
+              <PageHeader
+                title="Review Submitted Claims"
+                description="Review submitted remuneration claims, verify timesheets, validate calculations, and approve or reject claims."
+                actions={<Button onClick={handleExport}>Export Payments</Button>}
+              />
+            )}
 
             <Section title="Filter Claims">
               <Card>
@@ -210,10 +206,11 @@ const ClaimsVerification = ({ embedded = false }) => {
                       className="h-11 w-full rounded-xl border border-neutral px-4 font-inter focus:border-primary focus:outline-none"
                     >
                       <option value="All">All Statuses</option>
-                      <option value="Pending">Pending</option>
-                      <option value="Approved by Lecturer">Approved by Lecturer</option>
-                      <option value="Verified">Verified</option>
-                      <option value="Rejected by Lecturer">Rejected by Lecturer</option>
+                      {CLAIM_STATUS_OPTIONS.map((status) => (
+                        <option key={status} value={status}>
+                          {status}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>

@@ -1,3 +1,6 @@
+import Button from '../ui/Button';
+import DataTable from '../ui/DataTable';
+import PageHeader from '../ui/PageHeader';
 import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import { apiGet, apiPost, apiPatch } from '../api';
@@ -293,40 +296,80 @@ const AssistantListings = () => {
   };
 
 
+  const listingColumns = [
+    {
+      key: 'id',
+      header: 'Listing ID',
+      className: 'px-4 py-4 text-sm text-dark',
+      render: (listing) => listing.id ?? '—',
+    },
+    {
+      key: 'moduleCode',
+      header: 'Module',
+      className: 'px-4 py-4 text-sm text-dark',
+      render: (listing) => (
+        <>
+          <div className="font-medium">{listing.moduleCode || '—'}</div>
+          {listing.moduleName && (
+            <div className="mt-1 text-xs text-neutral">{listing.moduleName}</div>
+          )}
+        </>
+      ),
+    },
+    {
+      key: 'deadline',
+      header: 'Deadline',
+      className: 'px-4 py-4 text-sm text-dark',
+      render: (listing) => formatDate(listing.deadline),
+    },
+    {
+      key: 'minimumGrade',
+      header: 'Minimum Grade',
+      className: 'px-4 py-4 text-sm text-dark',
+      render: (listing) =>
+        listing.minimumGrade !== null && listing.minimumGrade !== undefined
+          ? `${listing.minimumGrade}%`
+          : '—',
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      className: 'px-4 py-4',
+      render: (listing) => (
+        <Button
+          unstyled
+          type="button"
+          onClick={() => handleOpenEdit(listing)}
+          className="font-medium text-primary transition hover:text-primary-dark"
+        >
+          Edit
+        </Button>
+      ),
+    },
+  ];
+
   return (
     <>
 
 {/* Page Header */}
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              Assistant Listings
-            </h1>
-          </div>
 
 
           <div className="p-8">
-            {/* Page Introduction */}
-            <div className="mb-8">
-              <h2 className="text-2xl font-semibold text-primary-dark">
-                Assistant Listings
-              </h2>
-
-
-              <p className="mt-2 text-neutral">
-                Create and manage assistant positions for your modules.
-              </p>
-            </div>
+            <PageHeader
+              title="Assistant Listings"
+              description="Create and manage assistant positions for your modules."
+            />
 
 
             {/* Create Button */}
             <div className="mb-6 flex justify-end">
-              <button
+              <Button unstyled
                 type="button"
                 onClick={handleOpenCreate}
                 className="rounded-lg bg-primary px-5 py-3 font-semibold text-white transition hover:bg-primary-dark"
               >
                 Create Listing
-              </button>
+              </Button>
             </div>
 
 
@@ -342,7 +385,7 @@ const AssistantListings = () => {
             {showForm && (
               <Card className="mb-6">
                 <div className="mb-5">
-                  <h2 className="text-lg font-semibold text-primary-dark">
+                  <h2 className="text-section font-semibold text-primary-dark">
                     {editingId
                       ? 'Edit Assistant Listing'
                       : 'Create Assistant Listing'}
@@ -453,17 +496,17 @@ const AssistantListings = () => {
 
 
                   <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-end">
-                    <button
+                    <Button unstyled
                       type="button"
                       onClick={handleCancel}
                       disabled={saving}
                       className="rounded-lg border border-border-subtle px-5 py-3 font-semibold text-dark transition hover:bg-surface-muted"
                     >
                       Cancel
-                    </button>
+                    </Button>
 
 
-                    <button
+                    <Button unstyled
                       type="submit"
                       disabled={saving}
                       className="rounded-lg bg-primary px-5 py-3 font-semibold text-white transition hover:bg-primary-dark disabled:opacity-50"
@@ -473,7 +516,7 @@ const AssistantListings = () => {
                         : editingId
                         ? 'Update Listing'
                         : 'Create Listing'}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </Card>
@@ -483,7 +526,7 @@ const AssistantListings = () => {
             {/* Listings */}
             <Card>
               <div className="mb-5">
-                <h2 className="text-lg font-semibold text-primary-dark">
+                <h2 className="text-section font-semibold text-primary-dark">
                   Your Assistant Listings
                 </h2>
 
@@ -499,107 +542,13 @@ const AssistantListings = () => {
                   Loading listings...
                 </p>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[750px]">
-                    <thead>
-                      <tr className="border-b border-border-subtle bg-light-grey text-left">
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Listing ID
-                        </th>
-
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Module
-                        </th>
-
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Deadline
-                        </th>
-
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Minimum Grade
-                        </th>
-
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-
-
-                    <tbody>
-                      {listings.length === 0 ? (
-                        <tr>
-                          <td
-                            colSpan="5"
-                            className="py-8 text-center text-sm text-neutral"
-                          >
-                            No assistant listings found.
-                          </td>
-                        </tr>
-                      ) : (
-                        listings.map((rawListing) => {
-                          const listing = mapListing(rawListing);
-
-
-                          return (
-                            <tr
-                              key={listing.id}
-                              className="border-b border-border-subtle last:border-b-0"
-                            >
-                              <td className="px-4 py-4 text-sm text-dark">
-                                {listing.id ?? '—'}
-                              </td>
-
-
-                              <td className="px-4 py-4 text-sm text-dark">
-                                <div className="font-medium">
-                                  {listing.moduleCode || '—'}
-                                </div>
-
-
-                                {listing.moduleName && (
-                                  <div className="mt-1 text-xs text-neutral">
-                                    {listing.moduleName}
-                                  </div>
-                                )}
-                              </td>
-
-
-                              <td className="px-4 py-4 text-sm text-dark">
-                                {formatDate(listing.deadline)}
-                              </td>
-
-
-                              <td className="px-4 py-4 text-sm text-dark">
-                                {listing.minimumGrade !== null &&
-                                listing.minimumGrade !== undefined
-                                  ? `${listing.minimumGrade}%`
-                                  : '—'}
-                              </td>
-
-
-                              <td className="px-4 py-4">
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    handleOpenEdit(listing)
-                                  }
-                                  className="font-medium text-primary transition hover:text-primary-dark"
-                                >
-                                  Edit
-                                </button>
-                              </td>
-                            </tr>
-                          );
-                        })
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable
+                  columns={listingColumns}
+                  rows={listings.map(mapListing)}
+                  getRowKey={(listing) => listing.id}
+                  emptyTitle="No assistant listings found."
+                  minWidth="750px"
+                />
               )}
             </Card>
           </div>

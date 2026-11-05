@@ -19,15 +19,24 @@ const Button = ({
   variant = 'primary',
   size = 'md',
   className = '',
-  type = 'button',
+  unstyled = false,
+  type,
   children,
   ...props
 }) => (
   <Component
-    type={Component === 'button' ? type : undefined}
-    className={`inline-flex items-center justify-center rounded-xl font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 ${
-      VARIANTS[variant] ?? VARIANTS.primary
-    } ${SIZES[size] ?? SIZES.md} ${className}`}
+    type={
+      Component === 'button'
+        ? type ?? (unstyled ? undefined : 'button')
+        : undefined
+    }
+    className={`inline-flex items-center justify-center focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+      unstyled
+        ? ''
+        : `rounded-xl font-inter font-semibold transition-colors ${
+            VARIANTS[variant] ?? VARIANTS.primary
+          } ${SIZES[size] ?? SIZES.md}`
+    } ${className}`}
     {...props}
   >
     {children}

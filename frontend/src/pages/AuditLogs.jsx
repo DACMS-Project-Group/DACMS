@@ -1,8 +1,9 @@
+import Button from '../ui/Button';
+import PageHeader from '../ui/PageHeader';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
 import { CompactTable } from '../components/CompactTable';
-import { useDensity } from '../contexts/DensityContext';
 import { apiGet } from '../api';
 
 const ACTION_BADGE_CLASSES = {
@@ -91,7 +92,6 @@ const relatedRecordRoute = (recordType, recordReference) => {
 const AuditLogs = () => {
   document.title = 'AACMS - Security Audit Logs';
   const navigate = useNavigate();
-  const { density, toggle } = useDensity();
 
   const [logs, setLogs] = useState([]);
   const [stats, setStats] = useState({
@@ -324,7 +324,7 @@ const AuditLogs = () => {
           <>
           <div className="max-w-[220px] truncate font-inter" title={label}>
             {route ? (
-              <button
+              <Button unstyled
                 onClick={(e) => {
                   e.preventDefault();
                   navigate(route);
@@ -345,7 +345,7 @@ const AuditLogs = () => {
                   <line x1="5" y1="12" x2="19" y2="12" />
                   <polyline points="12 5 14 12 12 19" />
                 </svg>
-              </button>
+              </Button>
             ) : (
               <span className="text-neutral">{label}</span>
             )}
@@ -380,48 +380,28 @@ const AuditLogs = () => {
   return (
     <>
 
-{/* Page Header */}
-          <div className="bg-primary px-6 py-3">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div>
-                <h1 className="text-xl font-poppins font-semibold text-white">
-                  Security Audit Logs
-                </h1>
-                <p className="mt-0.5 text-xs text-primary-light/80 font-inter">
-                  Read-only trail of administrator actions for security review
-                  and compliance.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={toggle}
-                  className="px-3 py-1.5 rounded text-xs font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors border border-white/20"
-                >
-                  {density === 'compact' ? 'Comfortable view' : 'Compact view'}
-                </button>
-
-                <button
+          <div className="p-4">
+            <PageHeader
+              title="Security Audit Logs"
+              description="Read-only trail of administrator actions for security review and compliance."
+              actions={
+                <Button
+                  size="sm"
                   type="button"
                   onClick={handleExport}
                   disabled={loading || logs.length === 0}
-                  className="px-4 py-2 rounded bg-primary text-white text-xs font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-inter"
                 >
                   Export CSV
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="p-4">
+                </Button>
+              }
+            />
             {/* Time-range presets */}
             <section className="mb-4">
               <div className="flex flex-wrap gap-2">
                 {PRESETS.map((p) => {
                   const isActive = preset === p;
                   return (
-                    <button
+                    <Button unstyled
                       key={p.label}
                       onClick={() => {
                         setPreset(p);
@@ -439,7 +419,7 @@ const AuditLogs = () => {
                       }`}
                     >
                       {p.label}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -552,13 +532,13 @@ const AuditLogs = () => {
                   </div>
 
                   <div className="flex items-end">
-                    <button
+                    <Button unstyled
                       type="button"
                       onClick={clearFilters}
                       className="w-full h-9 rounded border-2 border-primary text-primary text-xs font-semibold hover:bg-primary-lightest transition-colors font-inter"
                     >
                       Clear
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </Card>
@@ -566,7 +546,7 @@ const AuditLogs = () => {
 
             {/* Security summary cards */}
             <section className="mb-6">
-              <h2 className="mb-3 text-xs font-poppins font-semibold text-primary uppercase tracking-wider">
+              <h2 className="text-section mb-3 font-poppins font-semibold text-primary uppercase tracking-wider">
                 Security summary
               </h2>
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -625,7 +605,7 @@ const AuditLogs = () => {
             <section>
               <div className="mb-3 flex items-center justify-between">
                 <div>
-                  <h2 className="text-xs font-poppins font-semibold text-primary uppercase tracking-wider">
+                  <h2 className="text-section font-poppins font-semibold text-primary uppercase tracking-wider">
                     Log entries
                   </h2>
                   <p className="text-[10px] text-neutral">
@@ -654,7 +634,7 @@ const AuditLogs = () => {
 
               {!loading && logs.length === 0 && (
                 <div className="mt-4 px-4 py-10 text-center">
-                  <h3 className="text-sm font-semibold text-dark font-poppins">
+                  <h3 className="text-card font-semibold text-dark font-poppins">
                     No matching entries
                   </h3>
                   <p className="mt-1 text-[10px] text-neutral font-inter">

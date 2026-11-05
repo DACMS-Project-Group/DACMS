@@ -1,3 +1,6 @@
+import Button from '../ui/Button';
+import DataTable from '../ui/DataTable';
+import PageHeader from '../ui/PageHeader';
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
@@ -520,26 +523,180 @@ const GenerateNewClaim = () => {
     student?.BranchCode ??
     '-';
 
+  const getApplicationDisplay = (application) => {
+    const applicationId = getApplicationId(application);
+    const position = positions.find(
+      (item) =>
+        String(item.application_id ?? item.ApplicationID) ===
+        String(applicationId)
+    );
+
+    const moduleCode =
+      position?.module_code ??
+      position?.ModuleCode ??
+      application.module_code ??
+      application.ModuleCode ??
+      '-';
+
+    const moduleName =
+      position?.module_name ??
+      position?.ModuleName ??
+      application.module_name ??
+      application.ModuleName ??
+      '';
+
+    const lecturerFirstName =
+      position?.lecturer_f_name ?? position?.LecturerFName ?? '';
+    const lecturerLastName =
+      position?.lecturer_l_name ?? position?.LecturerLName ?? '';
+
+    const lecturer =
+      position?.lecturer ??
+      position?.lecturer_name ??
+      position?.LecturerName ??
+      (`${lecturerFirstName} ${lecturerLastName}`.trim() || '-');
+
+    const rate = Number(
+      position?.standard_hourly_rate ?? position?.StandardHourlyRate ?? 0
+    );
+
+    return { applicationId, position, moduleCode, moduleName, lecturer, rate };
+  };
+
+  const applicationColumns = [
+    {
+      key: 'select',
+      header: 'Select',
+      className: 'px-4 py-4',
+      render: (application) => {
+        const { applicationId } = getApplicationDisplay(application);
+        const isSelected =
+          String(applicationId) === String(selectedApplicationId);
+
+        return (
+          <input
+            type="radio"
+            name="selectedApplication"
+            value={applicationId}
+            checked={isSelected}
+            onChange={handleApplicationChange}
+            className="h-4 w-4"
+          />
+        );
+      },
+    },
+    {
+      key: 'module',
+      header: 'Module',
+      className: 'px-4 py-4 text-sm font-medium text-primary-dark',
+      render: (application) => {
+        const { moduleCode, moduleName } = getApplicationDisplay(application);
+        return moduleName ? `${moduleCode} - ${moduleName}` : moduleCode;
+      },
+    },
+    {
+      key: 'lecturer',
+      header: 'Lecturer',
+      className: 'px-4 py-4 text-sm text-dark',
+      render: (application) => getApplicationDisplay(application).lecturer,
+    },
+    {
+      key: 'rate',
+      header: 'Hourly Rate',
+      className: 'px-4 py-4 text-sm text-dark whitespace-nowrap',
+      render: (application) => {
+        const { position, rate } = getApplicationDisplay(application);
+        return position ? formatMoney(rate) : '-';
+      },
+    },
+    {
+      key: 'hours',
+      header: 'Approved Hours',
+      className: 'px-4 py-4 text-sm font-medium text-dark',
+      render: (application) => {
+        const { applicationId } = getApplicationDisplay(application);
+        return String(applicationId) === String(selectedApplicationId)
+          ? formatNumber(totalHours, 2)
+          : '-';
+      },
+    },
+  ];
+
+  const approvedSessionColumns = [
+    {
+      key: 'date',
+      header: 'Date',
+      className: 'px-4 py-4 text-sm text-dark whitespace-nowrap',
+      render: (session) =>
+        formatSessionDate(session.start_time ?? session.StartTime),
+    },
+    {
+      key: 'module',
+      header: 'Module',
+      className: 'px-4 py-4 text-sm font-medium text-primary-dark whitespace-nowrap',
+      render: () => moduleCode || '-',
+    },
+    {
+      key: 'activity',
+      header: 'Activity',
+      className: 'px-4 py-4 text-sm text-dark',
+      render: (session) =>
+        session.activity_description ??
+        session.ActivityDescription ??
+        '-',
+    },
+    {
+      key: 'time',
+      header: 'Time',
+      className: 'px-4 py-4 text-sm text-dark whitespace-nowrap',
+      render: (session) => {
+        const start = session.start_time ?? session.StartTime;
+        const end = session.end_time ?? session.EndTime;
+        return `${formatTime(start)} - ${formatTime(end)}`;
+      },
+    },
+    {
+      key: 'hours',
+      header: 'Hours',
+      className: 'px-4 py-4 text-sm font-medium text-dark',
+      render: (session) =>
+        formatNumber(
+          Number(session.total_hours ?? session.TotalHoursWorked ?? 0),
+          2
+        ),
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'px-4 py-4',
+      render: () => (
+        <span className="inline-flex rounded-full bg-status-done-soft px-3 py-1 text-xs font-medium text-status-done whitespace-nowrap">
+          Verified
+        </span>
+      ),
+    },
+  ];
+
   return (
     <>
       {/* Page Header */}
-      <div className="bg-primary h-16 flex items-center px-4 md:px-8">
-        <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-          Generate New Claim
-        </h1>
-      </div>
 
       {/* Page Content */}
           <div className="p-4 md:p-8">
+            <PageHeader
+              title="Generate New Claim"
+              description="Create and submit a new remuneration claim."
+            />
+
             {/* Back Button */}
             <div className="mb-6">
-              <button
+              <Button unstyled
                 type="button"
                 onClick={handleBackToClaims}
                 className="font-medium text-primary transition hover:text-primary-dark"
               >
                 ← Back to Claims
-              </button>
+              </Button>
             </div>
 
             {/* Loading */}
@@ -554,7 +711,7 @@ const GenerateNewClaim = () => {
             {/* Error Message */}
             {error && (
               <div className="mb-6 rounded-lg border border-error/30 bg-status-danger-soft px-4 py-4">
-                <h3 className="font-semibold text-status-danger">
+                <h3 className="text-card font-semibold text-status-danger">
                   Unable to continue
                 </h3>
 
@@ -567,7 +724,7 @@ const GenerateNewClaim = () => {
             {/* Success Message */}
             {claimSubmitted && (
               <div className="mb-6 rounded-lg border border-success/30 bg-status-done-soft px-4 py-4">
-                <h3 className="font-semibold text-status-done">
+                <h3 className="text-card font-semibold text-status-done">
                   Claim Submitted Successfully
                 </h3>
 
@@ -608,20 +765,20 @@ const GenerateNewClaim = () => {
                   </div>
                 )}
 
-                <button
+                <Button unstyled
                   type="button"
                   onClick={handleBackToClaims}
                   className="mt-3 font-medium text-status-done underline"
                 >
                   View Claims
-                </button>
+                </Button>
               </div>
             )}
 
             {/* Student Information */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                <h2 className="text-section font-semibold text-primary-dark">
                   Student Information
                 </h2>
 
@@ -685,7 +842,7 @@ const GenerateNewClaim = () => {
             {/* Account Details */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                <h2 className="text-section font-semibold text-primary-dark">
                   Account Details
                 </h2>
 
@@ -739,7 +896,7 @@ const GenerateNewClaim = () => {
             {/* Claim Period */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                <h2 className="text-section font-semibold text-primary-dark">
                   Claim Period
                 </h2>
 
@@ -775,7 +932,7 @@ const GenerateNewClaim = () => {
             {/* Assistant Appointments */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                <h2 className="text-section font-semibold text-primary-dark">
                   Assistant Appointments
                 </h2>
 
@@ -787,7 +944,7 @@ const GenerateNewClaim = () => {
 
               {applications.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border-subtle px-4 py-10 text-center">
-                  <h3 className="text-base md:text-lg font-semibold text-dark">
+                  <h3 className="text-card font-semibold text-dark">
                     No Applications Found
                   </h3>
 
@@ -797,139 +954,27 @@ const GenerateNewClaim = () => {
                   </p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[850px]">
-                    <thead>
-                      <tr className="border-b border-border-subtle text-left">
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Select
-                        </th>
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Module
-                        </th>
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Lecturer
-                        </th>
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Hourly Rate
-                        </th>
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Approved Hours
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {applications.map((application) => {
-                        const applicationId =
-                          getApplicationId(application);
-
-                        const position = positions.find(
-                          (item) =>
-                            String(
-                              item.application_id ??
-                              item.ApplicationID
-                            ) === String(applicationId)
-                        );
-
-                        const applicationModuleCode =
-                          position?.module_code ??
-                          position?.ModuleCode ??
-                          application.module_code ??
-                          application.ModuleCode ??
-                          '-';
-
-                        const applicationModuleName =
-                          position?.module_name ??
-                          position?.ModuleName ??
-                          application.module_name ??
-                          application.ModuleName ??
-                          '';
-
-                        const applicationLecturerFirstName =
-                          position?.lecturer_f_name ??
-                          position?.LecturerFName ??
-                          '';
-
-                        const applicationLecturerLastName =
-                          position?.lecturer_l_name ??
-                          position?.LecturerLName ??
-                          '';
-
-                        const applicationLecturer =
-                          position?.lecturer ??
-                          position?.lecturer_name ??
-                          position?.LecturerName ??
-                          (`${applicationLecturerFirstName} ${applicationLecturerLastName}`.trim() || '-');
-
-                        const applicationRate = Number(
-                          position?.standard_hourly_rate ??
-                          position?.StandardHourlyRate ??
-                          0
-                        );
-
-                        const isSelected =
-                          String(applicationId) ===
-                          String(selectedApplicationId);
-
-                        return (
-                          <tr
-                            key={applicationId}
-                            className={`border-b border-border-subtle last:border-b-0 ${
-                              isSelected ? 'bg-primary-lightest' : ''
-                            }`}
-                          >
-                            <td className="px-4 py-4">
-                              <input
-                                type="radio"
-                                name="selectedApplication"
-                                value={applicationId}
-                                checked={isSelected}
-                                onChange={handleApplicationChange}
-                                className="h-4 w-4"
-                              />
-                            </td>
-
-                            <td className="px-4 py-4 text-sm font-medium text-primary-dark">
-                              {applicationModuleCode}
-
-                              {applicationModuleName
-                                ? ` - ${applicationModuleName}`
-                                : ''}
-                            </td>
-
-                            <td className="px-4 py-4 text-sm text-dark">
-                              {applicationLecturer}
-                            </td>
-
-                            <td className="px-4 py-4 text-sm text-dark whitespace-nowrap">
-                              {position
-                                ? formatMoney(applicationRate)
-                                : '-'}
-                            </td>
-
-                            <td className="px-4 py-4 text-sm font-medium text-dark">
-                              {isSelected
-                                ? formatNumber(totalHours, 2)
-                                : '-'}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable
+                  columns={applicationColumns}
+                  rows={applications}
+                  getRowKey={(application) => getApplicationId(application)}
+                  rowClassName={(application) =>
+                    String(getApplicationId(application)) ===
+                    String(selectedApplicationId)
+                      ? 'bg-primary-lightest'
+                      : ''
+                  }
+                  emptyTitle="No Applications Found"
+                  emptyDescription="You do not have any applications available for remuneration claims."
+                  minWidth="850px"
+                />
               )}
             </Card>
 
             {/* Approved Work Sessions */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                <h2 className="text-section font-semibold text-primary-dark">
                   Approved Work Sessions
                 </h2>
 
@@ -947,7 +992,7 @@ const GenerateNewClaim = () => {
                 </div>
               ) : approvedSessions.length === 0 ? (
                 <div className="rounded-lg border border-dashed border-border-subtle px-4 py-10 text-center">
-                  <h3 className="text-base md:text-lg font-semibold text-dark">
+                  <h3 className="text-card font-semibold text-dark">
                     No Approved Work Sessions
                   </h3>
 
@@ -958,105 +1003,24 @@ const GenerateNewClaim = () => {
                   </p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[850px]">
-                    <thead>
-                      <tr className="border-b border-border-subtle text-left">
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Date
-                        </th>
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Module
-                        </th>
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Activity
-                        </th>
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Time
-                        </th>
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Hours
-                        </th>
-
-                        <th className="px-4 py-3 text-sm font-semibold text-dark">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {approvedSessions.map((session) => {
-                        const startTime =
-                          session.start_time ??
-                          session.StartTime;
-
-                        const endTime =
-                          session.end_time ??
-                          session.EndTime;
-
-                        const activity =
-                          session.activity_description ??
-                          session.ActivityDescription ??
-                          '-';
-
-                        const hours = Number(
-                          session.total_hours ??
-                          session.TotalHoursWorked ??
-                          0
-                        );
-
-                        const sessionId =
-                          session.session_id ??
-                          session.SessionID;
-
-                        return (
-                          <tr
-                            key={sessionId}
-                            className="border-b border-border-subtle last:border-b-0"
-                          >
-                            <td className="px-4 py-4 text-sm text-dark whitespace-nowrap">
-                              {formatSessionDate(startTime)}
-                            </td>
-
-                            <td className="px-4 py-4 text-sm font-medium text-primary-dark whitespace-nowrap">
-                              {moduleCode || '-'}
-                            </td>
-
-                            <td className="px-4 py-4 text-sm text-dark">
-                              {activity}
-                            </td>
-
-                            <td className="px-4 py-4 text-sm text-dark whitespace-nowrap">
-                              {formatTime(startTime)} -{' '}
-                              {formatTime(endTime)}
-                            </td>
-
-                            <td className="px-4 py-4 text-sm font-medium text-dark">
-                              {formatNumber(hours, 2)}
-                            </td>
-
-                            <td className="px-4 py-4">
-                              <span className="inline-flex rounded-full bg-status-done-soft px-3 py-1 text-xs font-medium text-status-done whitespace-nowrap">
-                                Verified
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable
+                  columns={approvedSessionColumns}
+                  rows={approvedSessions}
+                  loading={sessionsLoading}
+                  getRowKey={(session) =>
+                    session.session_id ?? session.SessionID
+                  }
+                  emptyTitle="No Approved Work Sessions"
+                  emptyDescription="You do not have any completed work sessions approved by your lecturer and available for claiming."
+                  minWidth="850px"
+                />
               )}
             </Card>
 
             {/* Claim Calculation */}
             <Card className="mb-6">
               <div className="mb-5">
-                <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                <h2 className="text-section font-semibold text-primary-dark">
                   Claim Calculation
                 </h2>
 
@@ -1144,7 +1108,7 @@ const GenerateNewClaim = () => {
               <Card>
                 <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                   <div>
-                    <h2 className="text-base md:text-lg font-semibold text-primary-dark">
+                    <h2 className="text-section font-semibold text-primary-dark">
                       Submit Remuneration Claim
                     </h2>
 
@@ -1154,7 +1118,7 @@ const GenerateNewClaim = () => {
                     </p>
                   </div>
 
-                  <button
+                  <Button unstyled
                     type="button"
                     onClick={handleSubmitClaim}
                     disabled={
@@ -1168,7 +1132,7 @@ const GenerateNewClaim = () => {
                     {submitting
                       ? 'Submitting...'
                       : 'Submit Claim'}
-                  </button>
+                  </Button>
                 </div>
               </Card>
             )}

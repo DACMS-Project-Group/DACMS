@@ -1,3 +1,4 @@
+import Button from '../ui/Button';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { apiPost } from '../api';
@@ -148,7 +149,7 @@ const TwoFactorAuth = () => {
           {/* SETUP STEP 1: Display QR Code */}
           {step === 'setup' || (step === 'confirm' && qrCode) ? (
             <>
-              <h2 className="text-2xl font-poppins font-bold text-primary-dark text-center">
+              <h2 className="text-section font-poppins font-bold text-primary-dark text-center">
                 Set Up Two-Factor Authentication
               </h2>
 
@@ -177,13 +178,13 @@ const TwoFactorAuth = () => {
                   </p>
 
                   {!showManualKey && (
-                    <button
+                    <Button unstyled
                       type="button"
                       onClick={() => setShowManualKey(true)}
                       className="mt-4 text-primary text-sm font-semibold hover:text-primary-dark underline w-full text-center"
                     >
                       Can't scan? Enter manually
-                    </button>
+                    </Button>
                   )}
 
                   {showManualKey && (
@@ -216,13 +217,13 @@ const TwoFactorAuth = () => {
                       required
                     />
 
-                    <button
+                    <Button unstyled
                       type="submit"
                       disabled={loading || code.length !== 6}
                       className="w-full mt-4 bg-primary text-white p-3 rounded-xl font-semibold hover:bg-primary-dark transition text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {loading ? 'Verifying…' : 'Verify and Continue'}
-                    </button>
+                    </Button>
                   </form>
                 </>
               )}
@@ -232,7 +233,7 @@ const TwoFactorAuth = () => {
           {/* BACKUP CODES STEP 2: Save Backup Codes */}
           {step === 'backup' && (
             <>
-              <h2 className="text-2xl font-poppins font-bold text-primary-dark text-center">
+              <h2 className="text-section font-poppins font-bold text-primary-dark text-center">
                 Save Your Backup Codes
               </h2>
 
@@ -245,13 +246,13 @@ const TwoFactorAuth = () => {
                   ⚠️ Save These Codes Now
                 </p>
 
-                <button
+                <Button unstyled
                   type="button"
                   onClick={() => setShowBackupCodesList(!showBackupCodesList)}
                   className="text-sm text-primary font-semibold underline mb-3 w-full text-center"
                 >
                   {showBackupCodesList ? 'Hide' : 'Show'} Backup Codes
-                </button>
+                </Button>
 
                 {showBackupCodesList && (
                   <>
@@ -263,13 +264,13 @@ const TwoFactorAuth = () => {
                       ))}
                     </div>
 
-                    <button
+                    <Button unstyled
                       type="button"
                       onClick={copyToClipboard}
                       className="w-full p-2 bg-primary text-white rounded text-xs font-semibold hover:bg-primary-dark transition mb-2"
                     >
                       {backupCodesCopied ? '✓ Copied!' : 'Copy All'}
-                    </button>
+                    </Button>
 
                     <p className="text-xs text-neutral text-center font-inter">
                       Print or save to a secure location
@@ -291,21 +292,21 @@ const TwoFactorAuth = () => {
                 </label>
               </div>
 
-              <button
+              <Button unstyled
                 type="button"
                 onClick={finishSetup}
                 disabled={!backupCodesCopied}
                 className="w-full mt-6 bg-primary text-white p-3 rounded-xl font-semibold hover:bg-primary-dark transition text-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Setup Complete → Log In
-              </button>
+              </Button>
             </>
           )}
 
           {/* LOGIN STEP: Enter Code to Verify */}
           {step === 'login' && (
             <>
-              <h2 className="text-2xl font-poppins font-bold text-primary-dark text-center">
+              <h2 className="text-section font-poppins font-bold text-primary-dark text-center">
                 Two-Factor Code
               </h2>
 
@@ -339,22 +340,22 @@ const TwoFactorAuth = () => {
                   required
                 />
 
-                <button
+                <Button unstyled
                   type="submit"
                   disabled={loading || !code.trim()}
                   className="w-full mt-4 bg-primary text-white p-3 rounded-xl font-semibold hover:bg-primary-dark transition text-sm disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Verifying…' : 'Verify'}
-                </button>
+                </Button>
               </form>
 
-              <button
+              <Button unstyled
                 type="button"
                 onClick={() => navigate('/login', { replace: true })}
                 className="w-full mt-3 text-primary text-sm font-semibold hover:text-primary-dark text-center"
               >
                 Back to Login
-              </button>
+              </Button>
             </>
           )}
         </div>
@@ -369,7 +370,7 @@ const TwoFactorAuth = () => {
       {/* RIGHT: 60% PURPLE SIDE */}
       <div className="hidden w-3/5 bg-gradient-to-br from-primary to-primary-dark lg:flex flex-col items-center justify-center p-8 text-white">
         <div className="max-w-md text-center">
-          <h1 className="text-4xl font-poppins font-bold mb-4">
+          <h1 className="text-page font-poppins font-bold mb-4">
             Secure Your Account
           </h1>
 
@@ -383,7 +384,7 @@ const TwoFactorAuth = () => {
                 <span className="text-2xl">📱</span>
               </div>
               <div className="text-left">
-                <h3 className="font-semibold mb-1 font-inter">Authenticator App</h3>
+                <h3 className="text-card font-semibold mb-1 font-inter">Authenticator App</h3>
                 <p className="text-sm text-white/70 font-inter">
                   Use any authenticator app to generate codes
                 </p>
@@ -395,7 +396,7 @@ const TwoFactorAuth = () => {
                 <span className="text-2xl">🔑</span>
               </div>
               <div className="text-left">
-                <h3 className="font-semibold mb-1 font-inter">Backup Codes</h3>
+                <h3 className="text-card font-semibold mb-1 font-inter">Backup Codes</h3>
                 <p className="text-sm text-white/70 font-inter">
                   Save backup codes for account recovery
                 </p>
@@ -407,7 +408,7 @@ const TwoFactorAuth = () => {
                 <span className="text-2xl">🛡️</span>
               </div>
               <div className="text-left">
-                <h3 className="font-semibold mb-1 font-inter">Always Protected</h3>
+                <h3 className="text-card font-semibold mb-1 font-inter">Always Protected</h3>
                 <p className="text-sm text-white/70 font-inter">
                   2FA cannot be disabled for admin accounts
                 </p>

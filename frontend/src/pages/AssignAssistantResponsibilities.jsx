@@ -1,3 +1,5 @@
+import Button from '../ui/Button';
+import PageHeader from '../ui/PageHeader';
 import React, { useEffect, useState } from 'react';
 import Card from '../components/Card';
 import { apiGet, apiPut } from '../api';
@@ -106,25 +108,17 @@ const AssignAssistantResponsibilities = () => {
   return (
     <>
       {/* ===== PAGE TITLE BAR ===== */}
-      <div className="bg-primary h-16 flex items-center px-8">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              Assign Assistant Responsibilities
-            </h1>
-          </div>
 
           {/* ===== MAIN CONTENT ===== */}
           <div className="p-8">
-            {/* Description */}
-            <div className="mb-8">
-              <p className="text-neutral text-base font-inter">
-                Assign responsibilities and set hour limits for your approved
-                assistants.
-              </p>
-            </div>
+            <PageHeader
+              title="Assign Assistant Responsibilities"
+              description="Assign responsibilities and set hour limits for your approved assistants."
+            />
 
             {/* ===== APPROVED ASSISTANTS ===== */}
             <div className="mb-8">
-              <h2 className="text-3xl font-poppins font-semibold text-primary mb-4">
+              <h2 className="text-section font-poppins font-semibold text-primary mb-4">
                 Approved Assistants
               </h2>
 
@@ -154,7 +148,7 @@ const AssignAssistantResponsibilities = () => {
                           {assistant.name.charAt(0)}
                         </div>
                         <div>
-                          <h3 className="text-xl font-poppins font-semibold text-dark">
+                          <h3 className="text-card font-poppins font-semibold text-dark">
                             {assistant.name}
                           </h3>
                           <p className="text-sm text-neutral font-inter">
@@ -168,7 +162,7 @@ const AssignAssistantResponsibilities = () => {
 
                     {/* Responsibilities */}
                     <div className="mb-6">
-                      <h4 className="text-lg font-poppins font-semibold text-dark mb-3">
+                      <h4 className="text-body font-poppins font-semibold text-dark mb-3">
                         Responsibilities
                       </h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -234,7 +228,7 @@ const AssignAssistantResponsibilities = () => {
 
                     {/* Hour Limit */}
                     <div className="mb-6">
-                      <h4 className="text-lg font-poppins font-semibold text-dark mb-3">
+                      <h4 className="text-body font-poppins font-semibold text-dark mb-3">
                         Hour Limit
                       </h4>
                       <div className="flex items-center gap-4">
@@ -255,13 +249,13 @@ const AssignAssistantResponsibilities = () => {
 
                     {/* Save Button */}
                     <div className="flex justify-end">
-                      <button
+                      <Button unstyled
                         onClick={() => handleSave(assistant.id)}
                         disabled={saveFeedback[assistant.id]?.isSaving}
                         className="bg-primary text-white px-6 py-3 rounded-xl font-semibold hover:bg-primary-dark transition font-inter disabled:opacity-60"
                       >
                         {saveFeedback[assistant.id]?.isSaving ? 'Saving...' : 'Save'}
-                      </button>
+                      </Button>
                     </div>
                     {saveFeedback[assistant.id]?.message && (
                       <p

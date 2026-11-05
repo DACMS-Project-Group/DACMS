@@ -1,3 +1,5 @@
+import Button from '../ui/Button';
+import PageHeader from '../ui/PageHeader';
 import React, { useRef, useState, useMemo, useEffect } from 'react';
 import Card from '../components/Card';
 import { apiGet, apiPatch, apiUpload } from '../api';
@@ -338,6 +340,9 @@ const StudentProfile = () => {
     const context = canvas.getContext('2d');
     const { x, y } = getCanvasCoordinates(event);
     isDrawing.current = true;
+    context.strokeStyle = getComputedStyle(document.documentElement)
+      .getPropertyValue('--color-signature-ink')
+      .trim();
     context.beginPath();
     context.moveTo(x, y);
   };
@@ -349,7 +354,6 @@ const StudentProfile = () => {
     const { x, y } = getCanvasCoordinates(event);
     context.lineWidth = 2;
     context.lineCap = 'round';
-    context.strokeStyle = '#000000';
     context.lineTo(x, y);
     context.stroke();
   };
@@ -544,7 +548,7 @@ const StudentProfile = () => {
 
     return (
       <>
-      <button
+      <Button unstyled
         type="button"
         onClick={() => toggleSection(sectionKey)}
         aria-expanded={isOpen}
@@ -552,7 +556,7 @@ const StudentProfile = () => {
         className="w-full flex items-start md:items-center justify-between gap-3 text-left group"
       >
         <div className="min-w-0">
-          <h2 className="text-lg md:text-xl font-bold text-primary-dark flex flex-wrap items-center gap-2">
+          <h2 className="text-section font-bold text-primary-dark flex flex-wrap items-center gap-2">
             <span className="break-words">
               Section {sectionKey}: {title}
             </span>
@@ -578,7 +582,7 @@ const StudentProfile = () => {
             clipRule="evenodd"
           />
         </svg>
-      </button>
+      </Button>
       </>
     );
   };
@@ -598,7 +602,7 @@ const StudentProfile = () => {
           {sectionMessages[sectionKey]}
         </span>
       )}
-      <button
+      <Button unstyled
         type="submit"
         disabled={savingSection === sectionKey}
         className="bg-primary text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-primary-dark transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
@@ -606,7 +610,7 @@ const StudentProfile = () => {
         {savingSection === sectionKey
           ? 'Saving…'
           : `Save Section ${sectionKey}`}
-      </button>
+      </Button>
     </div>
     </>
   );
@@ -615,14 +619,10 @@ const StudentProfile = () => {
     <>
 
 {/* Page title bar */}
-          <div className="bg-primary h-16 flex items-center px-4 md:px-8">
-            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-              Student Profile
-            </h1>
-          </div>
 
           {loading && (
             <div className="p-4 md:p-8">
+              <PageHeader title="Student Profile" description="Manage your personal, academic, and banking information." />
               <Card>
                 <p className="py-6 text-center text-neutral font-inter">
                   Loading profile…
@@ -633,6 +633,7 @@ const StudentProfile = () => {
 
           {!loading && loadError && (
             <div className="p-4 md:p-8">
+              <PageHeader title="Student Profile" description="Manage your personal, academic, and banking information." />
               <Card>
                 <div className="py-6 text-center">
                   <p className="font-semibold text-error font-inter">
@@ -648,6 +649,7 @@ const StudentProfile = () => {
 
           {!loading && !loadError && (
             <div className="p-4 md:p-8 space-y-4 md:space-y-6">
+              <PageHeader title="Student Profile" description="Manage your personal, academic, and banking information." />
               {/* ============ SECTION A ============ */}
               <form onSubmit={handleSaveSection('A')}>
                 <Card>
@@ -1168,7 +1170,7 @@ const StudentProfile = () => {
                       <div id="section-C" className="mt-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                           <div className="space-y-4">
-                            <h3 className="font-bold text-lg text-dark border-b pb-2">
+                            <h3 className="text-card font-bold text-dark border-b pb-2">
                               Residential Address
                             </h3>
 
@@ -1244,7 +1246,7 @@ const StudentProfile = () => {
 
                           <div className="space-y-4">
                             <div className="flex items-center justify-between border-b pb-2 flex-wrap gap-2">
-                              <h3 className="font-bold text-lg text-dark">Postal Address</h3>
+                              <h3 className="text-card font-bold text-dark">Postal Address</h3>
                               <label className="flex items-center text-xs text-neutral gap-1.5 cursor-pointer">
                                 <input type="checkbox" name="sameAsResidential"
                                   checked={formData.sameAsResidential}
@@ -1551,13 +1553,13 @@ const StudentProfile = () => {
                                   </label>
 
                                   {entry && !isUploading && (
-                                    <button
+                                    <Button unstyled
                                       type="button"
                                       onClick={() => handleRemoveFile(doc.key)}
                                       className="text-error hover:text-status-danger text-sm font-medium"
                                     >
                                       Remove
-                                    </button>
+                                    </Button>
                                   )}
                                 </div>
                               </div>
@@ -1573,7 +1575,7 @@ const StudentProfile = () => {
                 {openSection === 'F' && (
                   <Card>
                     <div className="p-4 md:p-6">
-                      <h3 className="text-base md:text-lg font-bold text-primary-dark mb-4">
+                      <h3 className="text-card font-bold text-primary-dark mb-4">
                         Declaration
                       </h3>
 
@@ -1621,10 +1623,10 @@ const StudentProfile = () => {
                                 onTouchMove={draw}
                                 onTouchEnd={stopDrawing}
                                 className="border border-border-subtle rounded-lg bg-white w-full cursor-crosshair touch-none" />
-                              <button type="button" onClick={clearSignature}
+                              <Button unstyled type="button" onClick={clearSignature}
                                 className="text-xs text-error font-semibold hover:underline">
                                 Clear Signature
-                              </button>
+                              </Button>
                             </div>
                           </div>
 

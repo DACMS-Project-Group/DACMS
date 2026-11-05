@@ -1,3 +1,6 @@
+import Button from '../ui/Button';
+import DataTable from '../ui/DataTable';
+import PageHeader from '../ui/PageHeader';
 import { useState, useEffect, useMemo } from 'react';
 import Card from '../components/Card';
 import Toast from '../ui/Toast';
@@ -187,50 +190,141 @@ const StudentModules = () => {
     }
   };
 
+  const gradeColumns = [
+    {
+      key: 'academic_year',
+      header: 'Year',
+      className: 'py-4 px-4 font-medium text-dark whitespace-nowrap',
+      render: (item) => item.academic_year || '—',
+    },
+    {
+      key: 'module_code',
+      header: 'Module Code',
+      className: 'py-4 px-4 font-semibold text-primary whitespace-nowrap',
+    },
+    {
+      key: 'module_name',
+      header: 'Module Description',
+      className: 'py-4 px-4 text-neutral max-w-md',
+      render: (item) => (
+        <>
+          <p className="font-medium text-dark">{item.module_name}</p>
+          {item.description && (
+            <p className="text-xs text-neutral mt-0.5 line-clamp-1">
+              {item.description}
+            </p>
+          )}
+        </>
+      ),
+    },
+    {
+      key: 'grade',
+      header: 'Grade',
+      className: 'py-4 px-4 text-center font-bold whitespace-nowrap',
+      render: (item) => {
+        const gradeVal = parseFloat(item.grade_achieved || 0);
+        const isDistinction = gradeVal >= 75;
+        return (
+          <span
+            className={
+              isDistinction
+                ? 'text-status-done'
+                : gradeVal >= 50
+                ? 'text-dark'
+                : 'text-error'
+            }
+          >
+            {formatPercent(gradeVal)}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'status',
+      header: 'Status',
+      className: 'py-4 px-4 text-center whitespace-nowrap',
+      render: (item) => {
+        const gradeVal = parseFloat(item.grade_achieved || 0);
+        const minReq = parseFloat(item.min_academic_requirement || 65);
+        const isEligible = gradeVal >= minReq;
+        const isDistinction = gradeVal >= 75;
+        return isDistinction ? (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-done-soft text-status-done">
+            Distinction
+          </span>
+        ) : isEligible ? (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-lightest text-primary">
+            Eligible
+          </span>
+        ) : (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-grey text-neutral">
+            Completed
+          </span>
+        );
+      },
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      headerClassName: 'py-3 px-4 text-right',
+      className: 'py-4 px-4 text-right whitespace-nowrap',
+      render: (item) => (
+        <div className="flex items-center justify-end gap-3">
+          <Button
+            unstyled
+            type="button"
+            onClick={() => handleStartEdit(item)}
+            disabled={deletingId === item.grade_id}
+            className="text-sm font-medium text-primary hover:text-primary-dark transition disabled:opacity-50"
+          >
+            Edit
+          </Button>
+          <Button
+            unstyled
+            type="button"
+            onClick={() => setPendingDelete(item)}
+            disabled={deletingId === item.grade_id}
+            className="text-sm font-medium text-error hover:text-status-danger transition disabled:opacity-50"
+          >
+            {deletingId === item.grade_id ? 'Removing...' : 'Delete'}
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
   return (
     <>
 
-<div className="bg-primary h-16 flex items-center px-4 md:px-8">
-            <h1 className="text-xl md:text-2xl font-poppins font-semibold text-white">
-              Academic Modules
-            </h1>
-          </div>
 
           <div className="p-4 md:p-8">
-            {/* Header + Add button */}
-            <div className="mb-6 md:mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-              <div>
-                <h2 className="text-2xl md:text-3xl font-poppins font-semibold text-primary">
-                  My Modules & Grades
-                </h2>
-                <p className="text-neutral mt-2">
-                  Manage your completed modules, academic marks, and graduation
-                  records.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  setError('');
-                  setSuccessMessage('');
-                  if (showAddSection) {
-                    handleCancelForm();
-                  } else {
-                    setEditingGrade(null);
-                    setFormData({
-                      moduleId: '',
-                      gradeAchieved: '',
-                      academicYear: currentYear,
-                    });
-                    setShowAddSection(true);
-                  }
-                }}
-                className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark shadow-sm w-full md:w-auto"
-              >
-                {showAddSection ? 'Close Form' : '+ Add Module'}
-              </button>
-            </div>
+            <PageHeader
+              title="My Modules & Grades"
+              description="Manage your completed modules, academic marks, and graduation records."
+              actions={
+                <Button unstyled
+                  type="button"
+                  onClick={() => {
+                    setError('');
+                    setSuccessMessage('');
+                    if (showAddSection) {
+                      handleCancelForm();
+                    } else {
+                      setEditingGrade(null);
+                      setFormData({
+                        moduleId: '',
+                        gradeAchieved: '',
+                        academicYear: currentYear,
+                      });
+                      setShowAddSection(true);
+                    }
+                  }}
+                  className="rounded-lg bg-primary px-5 py-3 font-medium text-white transition hover:bg-primary-dark shadow-sm w-full md:w-auto"
+                >
+                  {showAddSection ? 'Close Form' : '+ Add Module'}
+                </Button>
+              }
+            />
 
             <Toast
               tone="success"
@@ -286,7 +380,7 @@ const StudentModules = () => {
             {showAddSection && (
               <Card className="mb-8 border border-primary-lightest shadow-sm">
                 <div className="border-b border-border-subtle pb-4 mb-6">
-                  <h3 className="text-lg font-poppins font-semibold text-primary">
+                  <h3 className="text-card font-poppins font-semibold text-primary">
                     {editingGrade ? 'Edit Module Mark' : 'Record Module Mark'}
                   </h3>
                   <p className="text-sm text-neutral mt-1">
@@ -362,15 +456,15 @@ const StudentModules = () => {
                   </div>
 
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-end gap-3">
-                    <button
+                    <Button unstyled
                       type="button"
                       onClick={handleCancelForm}
                       disabled={saving}
                       className="px-5 py-2.5 rounded-lg border border-border-subtle text-sm font-medium text-dark hover:bg-surface-muted transition w-full sm:w-auto"
                     >
                       Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button unstyled
                       type="submit"
                       disabled={saving}
                       className="px-6 py-2.5 rounded-lg bg-primary text-sm font-medium text-white hover:bg-primary-dark transition disabled:opacity-50 w-full sm:w-auto"
@@ -380,7 +474,7 @@ const StudentModules = () => {
                         : editingGrade
                         ? 'Update Module'
                         : 'Save Module'}
-                    </button>
+                    </Button>
                   </div>
                 </form>
               </Card>
@@ -388,7 +482,7 @@ const StudentModules = () => {
 
             <Card className="overflow-x-auto">
               <div className="border-b border-border-subtle pb-4 mb-4 flex items-center justify-between">
-                <h3 className="text-lg font-poppins font-semibold text-primary">
+                <h3 className="text-card font-poppins font-semibold text-primary">
                   Recorded Modules
                 </h3>
                 <span className="text-sm font-inter text-neutral whitespace-nowrap">
@@ -411,106 +505,13 @@ const StudentModules = () => {
                   </p>
                 </div>
               ) : (
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse min-w-[720px]">
-                    <thead>
-                      <tr className="border-b border-border-subtle text-xs font-semibold uppercase tracking-wider text-neutral">
-                        <th className="py-3 px-4">Year</th>
-                        <th className="py-3 px-4">Module Code</th>
-                        <th className="py-3 px-4">Module Description</th>
-                        <th className="py-3 px-4 text-center">Grade</th>
-                        <th className="py-3 px-4 text-center">Status</th>
-                        <th className="py-3 px-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-border-subtle text-sm">
-                      {grades.map((item) => {
-                        const gradeVal = parseFloat(
-                          item.grade_achieved || 0
-                        );
-                        const minReq = parseFloat(
-                          item.min_academic_requirement || 65
-                        );
-                        const isEligible = gradeVal >= minReq;
-                        const isDistinction = gradeVal >= 75;
-
-                        return (
-                          <tr
-                            key={item.grade_id}
-                            className="hover:bg-surface-muted/80 transition-colors"
-                          >
-                            <td className="py-4 px-4 font-medium text-dark whitespace-nowrap">
-                              {item.academic_year || '—'}
-                            </td>
-                            <td className="py-4 px-4 font-semibold text-primary whitespace-nowrap">
-                              {item.module_code}
-                            </td>
-                            <td className="py-4 px-4 text-neutral max-w-md">
-                              <p className="font-medium text-dark">
-                                {item.module_name}
-                              </p>
-                              {item.description && (
-                                <p className="text-xs text-neutral mt-0.5 line-clamp-1">
-                                  {item.description}
-                                </p>
-                              )}
-                            </td>
-                            <td className="py-4 px-4 text-center font-bold whitespace-nowrap">
-                              <span
-                                className={
-                                  isDistinction
-                                    ? 'text-status-done'
-                                    : gradeVal >= 50
-                                    ? 'text-dark'
-                                    : 'text-error'
-                                }
-                              >
-                                {formatPercent(gradeVal)}
-                              </span>
-                            </td>
-                            <td className="py-4 px-4 text-center whitespace-nowrap">
-                              {isDistinction ? (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-status-done-soft text-status-done">
-                                  Distinction
-                                </span>
-                              ) : isEligible ? (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-lightest text-primary">
-                                  Eligible
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-light-grey text-neutral">
-                                  Completed
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-4 px-4 text-right whitespace-nowrap">
-                              <div className="flex items-center justify-end gap-3">
-                                <button
-                                  type="button"
-                                  onClick={() => handleStartEdit(item)}
-                                  disabled={deletingId === item.grade_id}
-                                  className="text-sm font-medium text-primary hover:text-primary-dark transition disabled:opacity-50"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => setPendingDelete(item)}
-                                  disabled={deletingId === item.grade_id}
-                                  className="text-sm font-medium text-error hover:text-status-danger transition disabled:opacity-50"
-                                >
-                                  {deletingId === item.grade_id
-                                    ? 'Removing...'
-                                    : 'Delete'}
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
+                <DataTable
+                  columns={gradeColumns}
+                  rows={grades}
+                  getRowKey={(item) => item.grade_id}
+                  emptyTitle="No academic module marks recorded yet."
+                  minWidth="720px"
+                />
               )}
             </Card>
           </div>

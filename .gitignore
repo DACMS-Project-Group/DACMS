@@ -13,3 +13,10 @@
 .docker/
 
 backend/logs/*.log
+
+# Local dev environment dirrecories
+
+.venv/
+.opencode/plugins/
+.idea/
+**graphify**

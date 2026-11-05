@@ -1,3 +1,5 @@
+import Button from '../ui/Button';
+import PageHeader from '../ui/PageHeader';
 import React, { useState, useEffect } from 'react';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
@@ -77,33 +79,22 @@ const AdminDashboard = () => {
     <>
 
 {/* PAGE HEADING */}
-          <div className="bg-primary px-8 py-4">
-            <h1 className="text-2xl font-poppins font-semibold text-white">
-              Administrator Dashboard
-            </h1>
-          </div>
 
           <div className="p-8">
-            {/* Welcome */}
-            <div className="mb-8">
-              <h2 className="text-3xl font-poppins font-semibold text-primary">
-                Administrator Overview
-              </h2>
+            <PageHeader
+              title="Administrator Dashboard"
+              description="Monitor and manage the Assistant Applications and Claims Management System."
+            />
 
-              <p className="text-neutral mt-2 font-inter">
-                Monitor and manage the Assistant Applications and Claims Management System.
+            {error && (
+              <p className="mb-6 text-sm text-error font-inter">
+                Could not load dashboard data: {error}
               </p>
-
-              {error && (
-                <p className="mt-2 text-sm text-error font-inter">
-                  Could not load dashboard data: {error}
-                </p>
-              )}
-            </div>
+            )}
 
             {/* SYSTEM STATISTICS */}
             <section className="mb-8">
-              <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+              <h3 className="text-card font-poppins font-semibold text-primary mb-4">
                 System Statistics
               </h3>
 
@@ -130,7 +121,7 @@ const AdminDashboard = () => {
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 items-stretch">
               {/* Monthly Claims */}
               <section className="min-w-0 h-full flex flex-col">
-                <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                <h3 className="text-card font-poppins font-semibold text-primary mb-4">
                   Monthly Claims Summary
                 </h3>
 
@@ -152,18 +143,18 @@ const AdminDashboard = () => {
                     ))}
                   </div>
 
-                  <button
+                  <Button unstyled
                     onClick={() => navigate('/admin/claims')}
                     className="text-primary font-semibold hover:underline mt-4 font-inter"
                   >
                     View claims →
-                  </button>
+                  </Button>
                 </Card>
               </section>
 
               {/* Work Sessions */}
               <section className="min-w-0 h-full flex flex-col">
-                <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                <h3 className="text-card font-poppins font-semibold text-primary mb-4">
                   Monthly Work Sessions
                 </h3>
 
@@ -189,7 +180,7 @@ const AdminDashboard = () => {
 
               {/* Pending Appointments */}
               <section className="min-w-0 h-full flex flex-col">
-                <h3 className="text-2xl font-poppins font-semibold text-primary mb-4">
+                <h3 className="text-card font-poppins font-semibold text-primary mb-4">
                   Pending Appointments
                 </h3>
 
@@ -247,7 +238,7 @@ const AdminDashboard = () => {
                     </span>
 
                     <div className="flex items-center gap-3">
-                      <button
+                      <Button unstyled
                         type="button"
                         onClick={() =>
                           setAppointmentPage((page) => Math.max(page - 1, 1))
@@ -257,14 +248,14 @@ const AdminDashboard = () => {
                         className="text-2xl leading-none text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:text-primary-dark"
                       >
                         ‹
-                      </button>
+                      </Button>
 
                       <div className="flex items-center gap-2">
                         {Array.from(
                           { length: totalAppointmentPages },
                           (_, index) => index + 1
                         ).map((page) => (
-                          <button
+                          <Button unstyled
                             key={page}
                             type="button"
                             aria-label={`Go to page ${page}`}
@@ -278,7 +269,7 @@ const AdminDashboard = () => {
                         ))}
                       </div>
 
-                      <button
+                      <Button unstyled
                         type="button"
                         onClick={() =>
                           setAppointmentPage((page) =>
@@ -290,16 +281,16 @@ const AdminDashboard = () => {
                         className="text-2xl leading-none text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:text-primary-dark"
                       >
                         ›
-                      </button>
+                      </Button>
                     </div>
                   </div>
 
-                  <button
+                  <Button unstyled
                     onClick={() => navigate('/appointment-approvals')}
                     className="text-primary font-semibold hover:underline mt-4 font-inter"
                   >
                     Review appointments →
-                  </button>
+                  </Button>
                 </Card>
               </section>
             </div>
