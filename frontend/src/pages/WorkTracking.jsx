@@ -346,7 +346,7 @@ const WorkTracking = () => {
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
                     {appointments.map((appointment) => {
                       const totalHours = getAppointmentTotalHours(
                         appointment.id
@@ -362,7 +362,7 @@ const WorkTracking = () => {
                           key={appointment.id}
                           type="button"
                           onClick={() => handleAppointmentChange(appointment)}
-                          className={`rounded-lg border p-4 md:p-5 text-left transition ${
+                          className={`w-full rounded-lg border p-4 md:p-5 text-left transition ${
                             isSelected
                               ? 'border-primary bg-primary-lightest'
                               : 'border-border-subtle bg-white hover:border-primary'
@@ -384,7 +384,7 @@ const WorkTracking = () => {
                             )}
                           </div>
 
-                          <div className="mt-4 grid grid-cols-2 gap-2 md:gap-3 text-sm md:grid-cols-4">
+                          <div className="mt-4 grid grid-cols-2 gap-2 md:gap-3 text-sm xl:grid-cols-4">
                             <div>
                               <p className="text-neutral">Worked</p>
                               <p className="mt-1 font-semibold text-dark">

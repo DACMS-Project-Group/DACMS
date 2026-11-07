@@ -262,7 +262,7 @@ const ExportPayments = ({ embedded = false }) => {
     <>
 
           {/* Page Content */}
-          <div className={embedded ? '' : 'p-8'}>
+          <div className={embedded ? '' : 'p-4 md:p-8'}>
 
             {!embedded && (
               <PageHeader
@@ -353,7 +353,7 @@ const ExportPayments = ({ embedded = false }) => {
             <Section title="Payment Export Summary">
               <Card>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-4">
 
                   <div>
                     <p className="text-sm text-neutral font-inter">

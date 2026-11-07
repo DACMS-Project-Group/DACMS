@@ -136,34 +136,7 @@ const DataTable = ({
   );
 
   if (loading || error || rows.length === 0) {
-    return (
-      <div className="overflow-x-auto">
-        <table className={`w-full ${className}`} style={{ minWidth }}>
-          <thead className="bg-primary-lightest">
-            <tr>
-              {columns.map((column) => (
-                <th
-                  key={column.key}
-                  className={`${headerClassName} ${
-                    column.headerClassName ?? ''
-                  }`}
-                >
-                  {column.header}
-                </th>
-              ))}
-            </tr>
-          </thead>
-
-          <tbody>
-            <tr>
-              <td colSpan={columns.length} className="p-4">
-                {stateRow}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    );
+    return <div className="px-1 py-2">{stateRow}</div>;
   }
 
   return (

@@ -3,6 +3,8 @@ import DataTable from '../ui/DataTable';
 import EmptyState from '../ui/EmptyState';
 import PageHeader from '../ui/PageHeader';
 import Section from '../ui/Section';
+import StatCard from '../ui/StatCard';
+import WorkQueue from '../ui/WorkQueue';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Card from '../components/Card';
@@ -190,87 +192,41 @@ const Dashboard = () => {
         title="Needs your attention"
         description="Items waiting on you or the university."
       >
-        <Card>
-          {loading ? (
-            <p className="py-4 text-sm text-neutral font-inter">
-              Checking for outstanding items…
-            </p>
-          ) : attentionItems.length === 0 ? (
-            <EmptyState
-              title="Nothing needs your attention"
-              description="You have no pending applications or claims."
-              action={
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => navigate('/work-tracking')}
-                >
-                  Start a work session
-                </Button>
-              }
-            />
-          ) : (
-            <div className="divide-y divide-border-subtle">
-              {attentionItems.map((item) => (
-                <div
-                  key={item.label}
-                  className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="inline-flex h-9 min-w-9 items-center justify-center rounded-full bg-primary-lightest px-2 font-poppins text-sm font-semibold text-primary">
-                      {item.count}
-                    </span>
-
-                    <p className="text-dark font-inter">{item.label}</p>
-                  </div>
-
-                  <Button
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => navigate(item.to)}
-                  >
-                    {item.cta}
-                  </Button>
-                </div>
-              ))}
-            </div>
-          )}
-        </Card>
+        <WorkQueue
+          items={attentionItems}
+          loading={loading}
+          emptyDescription="You have no pending applications or claims."
+          emptyAction={{
+            label: 'Start a work session',
+            to: '/work-tracking',
+          }}
+        />
       </Section>
 
       {/* Stats overview */}
       <Section title="Overview">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 md:gap-4">
           {kpis.map((kpi) => (
-            <Card key={kpi.label} className="flex h-full flex-col justify-between">
-              <div>
-                <p className="text-xs text-neutral font-inter md:text-sm">
-                  {kpi.label}
-                </p>
-
-                <p className="mt-2 text-2xl font-bold text-primary-dark font-poppins md:text-3xl">
-                  {loading ? '—' : kpi.value}
-                </p>
-              </div>
-
-              <Button
-                variant="ghost"
-                size="sm"
-                aria-label={kpi.viewLabel}
-                onClick={() => navigate(kpi.to)}
-                className="mt-3 self-start px-2"
-              >
-                {kpi.viewLabel} →
-              </Button>
-            </Card>
+            <StatCard
+              key={kpi.label}
+              label={kpi.label}
+              value={kpi.value}
+              loading={loading}
+              actionLabel={kpi.viewLabel}
+              onAction={() => navigate(kpi.to)}
+            />
           ))}
         </div>
       </Section>
 
       {/* Notifications and quick actions */}
-      <div className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-2">
-        <Section title="Notifications" noMargin className="h-full min-w-0">
-          <Card className="h-full">
+      <div className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <Section
+          title="Notifications"
+          noMargin
+          className="flex h-full min-w-0 flex-col"
+        >
+          <Card className="flex-1">
             <div className="flex h-full flex-col">
               <div className="flex-1 space-y-4">
                 {notificationError ? (
@@ -309,8 +265,12 @@ const Dashboard = () => {
           </Card>
         </Section>
 
-        <Section title="Quick actions" noMargin className="h-full min-w-0">
-          <Card className="h-full">
+        <Section
+          title="Quick actions"
+          noMargin
+          className="flex h-full min-w-0 flex-col"
+        >
+          <Card className="flex-1">
             <div className="flex flex-col gap-3">
               <Button
                 onClick={() => navigate('/work-tracking')}
@@ -357,7 +317,7 @@ const Dashboard = () => {
       </Section>
 
       {/* Applications and claims */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         <Section
           title="Application status"
           noMargin

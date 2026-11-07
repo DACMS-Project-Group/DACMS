@@ -186,7 +186,7 @@ const AppointmentApprovals = () => {
     <>
 
 
-          <div className="p-8">
+          <div className="p-4 md:p-8">
             <PageHeader
               title="Appointment Approvals"
               description="Review lecturer recommendations and approve, reject, or return assistant appointments for revision."
@@ -259,7 +259,7 @@ const AppointmentApprovals = () => {
 
             {/* Pending Appointments */}
             <section className="mb-8">
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
                 <div>
                   <h3 className="text-card font-poppins font-semibold text-primary">
                     Pending Appointment Approvals
@@ -271,9 +271,9 @@ const AppointmentApprovals = () => {
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Search reference, student, module…"
-                    className="h-10 w-64 rounded border border-neutral px-3 text-sm focus:border-primary focus:outline-none"
+                    className="h-10 w-full rounded border border-neutral px-3 text-sm focus:border-primary focus:outline-none sm:w-64"
                   />
-                  <span className="text-sm font-inter text-neutral">
+                  <span className="whitespace-nowrap text-sm font-inter text-neutral">
                     {filteredPendingAppointments.length} pending
                   </span>
                 </div>
@@ -295,7 +295,7 @@ const AppointmentApprovals = () => {
 
             {/* Approval History */}
             <section className="mb-8">
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-card font-poppins font-semibold text-primary">
                   Approval History
                 </h3>

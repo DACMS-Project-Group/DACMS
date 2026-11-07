@@ -1,8 +1,15 @@
 import Button from '../ui/Button';
 import PageHeader from '../ui/PageHeader';
-import React, { useRef, useState, useMemo, useEffect } from 'react';
+import { Fragment, useRef, useState, useMemo, useEffect } from 'react';
 import Card from '../components/Card';
 import { apiGet, apiPatch, apiUpload } from '../api';
+
+// Compact form styles shared by every profile section.
+const fieldClass =
+  'w-full rounded-lg border border-border-subtle bg-white px-3 py-2 text-sm text-dark outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/25 disabled:bg-light-grey disabled:text-neutral';
+const labelClass = 'mb-1 block text-[13px] font-medium text-dark font-inter';
+const fieldGridClass =
+  'grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3';
 
 // Which camelCase payload keys belong to which section.
 const SECTION_FIELDS = {
@@ -561,7 +568,7 @@ const StudentProfile = () => {
               Section {sectionKey}: {title}
             </span>
             {badge && (
-              <span className="text-xs font-normal text-neutral">
+              <span className="break-words text-xs font-normal text-neutral">
                 {badge}
               </span>
             )}
@@ -590,7 +597,7 @@ const StudentProfile = () => {
   // ---- Reusable SectionSaveButton ----
   const SectionSaveButton = ({ sectionKey }) => (
     <>
-    <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-4 mt-6 border-t">
+    <div className="flex flex-col-reverse gap-3 border-t pt-3 mt-4 sm:flex-row sm:items-center sm:justify-end">
       {sectionMessages[sectionKey] && (
         <span
           className={`text-sm font-medium sm:mr-auto ${
@@ -602,10 +609,11 @@ const StudentProfile = () => {
           {sectionMessages[sectionKey]}
         </span>
       )}
-      <Button unstyled
+      <Button
         type="submit"
+        size="sm"
         disabled={savingSection === sectionKey}
-        className="bg-primary text-white px-6 py-2.5 rounded-lg font-semibold hover:bg-primary-dark transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed w-full sm:w-auto"
+        className="w-full sm:w-auto"
       >
         {savingSection === sectionKey
           ? 'Saving…'
@@ -614,6 +622,10 @@ const StudentProfile = () => {
     </div>
     </>
   );
+
+  const uploadedDocumentCount = requiredDocuments.filter(
+    (doc) => uploadedFiles[doc.key]
+  ).length;
 
   return (
     <>
@@ -648,67 +660,67 @@ const StudentProfile = () => {
           )}
 
           {!loading && !loadError && (
-            <div className="p-4 md:p-8 space-y-4 md:space-y-6">
+            <div className="p-4 md:p-8 space-y-3 md:space-y-4">
               <PageHeader title="Student Profile" description="Manage your personal, academic, and banking information." />
               {/* ============ SECTION A ============ */}
               <form onSubmit={handleSaveSection('A')}>
                 <Card>
-                  <div className="p-4 md:p-6">
+                  <div>
                     <SectionHeader
                       sectionKey="A"
                       title="Student Information"
                     />
 
                     {openSection === 'A' && (
-                      <div id="section-A" className="mt-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                      <div id="section-A" className="mt-4">
+                        <div className={fieldGridClass}>
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Justifiable Reason <span className="text-error">*</span>
                             </label>
                             <input type="text" name="justifiableReason"
                               value={formData.justifiableReason}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Student Number <span className="text-error">*</span>
                             </label>
                             <input type="text" name="studentNumber"
                               value={formData.studentNumber}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               {formData.saCitizen === 'Yes' ? 'ID No.' : 'ID / Identity No.'}
                             </label>
                             <input type="text" name="idPassportNumber"
                               value={formData.idPassportNumber}
                               onChange={handleChange}
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Person Type <span className="text-error">*</span>
                             </label>
                             <input type="text" name="personType"
                               value={formData.personType}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Title <span className="text-error">*</span>
                             </label>
                             <select name="title" value={formData.title}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select title</option>
                               <option value="Mr">Mr</option>
                               <option value="Mrs">Mrs</option>
@@ -718,58 +730,58 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Surname <span className="text-error">*</span>
                             </label>
                             <input type="text" name="surname"
                               value={formData.surname}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               First Name <span className="text-error">*</span>
                             </label>
                             <input type="text" name="firstName"
                               value={formData.firstName}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Initials <span className="text-error">*</span>
                             </label>
                             <input type="text" name="initials"
                               value={formData.initials}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">Middle Names</label>
+                            <label className={labelClass}>Middle Names</label>
                             <input type="text" name="middleNames"
                               value={formData.middleNames}
                               onChange={handleChange}
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">Nick Name</label>
+                            <label className={labelClass}>Nick Name</label>
                             <input type="text" name="nickName"
                               value={formData.nickName}
                               onChange={handleChange}
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Gender <span className="text-error">*</span>
                             </label>
                             <select name="gender" value={formData.gender}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select gender</option>
                               <option value="Female">Female</option>
                               <option value="Male">Male</option>
@@ -778,12 +790,12 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Race <span className="text-error">*</span>
                             </label>
                             <select name="race" value={formData.race}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select race</option>
                               <option value="African">African</option>
                               <option value="Colored">Colored</option>
@@ -793,12 +805,12 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Marital Status <span className="text-error">*</span>
                             </label>
                             <select name="maritalStatus" value={formData.maritalStatus}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select option</option>
                               <option value="Single">Single</option>
                               <option value="Married">Married</option>
@@ -808,30 +820,30 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">Previous Surname</label>
+                            <label className={labelClass}>Previous Surname</label>
                             <input type="text" name="previousSurname"
                               value={formData.previousSurname}
                               onChange={handleChange}
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Date of Birth <span className="text-error">*</span>
                             </label>
                             <input type="date" name="dateOfBirth"
                               value={formData.dateOfBirth}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Home Language <span className="text-error">*</span>
                             </label>
                             <select name="homeLanguage" value={formData.homeLanguage}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select language</option>
                               <option value="Afrikaans">Afrikaans</option>
                               <option value="English">English</option>
@@ -848,12 +860,12 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Preference Language <span className="text-error">*</span>
                             </label>
                             <select name="preferenceLanguage" value={formData.preferenceLanguage}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select language</option>
                               <option value="English">English</option>
                               <option value="Afrikaans">Afrikaans</option>
@@ -862,12 +874,12 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Disability <span className="text-error">*</span>
                             </label>
                             <select name="disability" value={formData.disability}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select option</option>
                               <option value="No">No</option>
                               <option value="Yes">Yes</option>
@@ -875,13 +887,13 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Currently employed by NWU? <span className="text-error">*</span>
                             </label>
                             <select name="currentlyEmployedByNwu"
                               value={formData.currentlyEmployedByNwu}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select option</option>
                               <option value="No">No</option>
                               <option value="Yes">Yes</option>
@@ -889,13 +901,13 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Primary Employment Outside? <span className="text-error">*</span>
                             </label>
                             <select name="primaryEmploymentOutside"
                               value={formData.primaryEmploymentOutside}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select option</option>
                               <option value="No">No</option>
                               <option value="Yes">Yes</option>
@@ -903,12 +915,12 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               SA Citizen <span className="text-error">*</span>
                             </label>
                             <select name="saCitizen" value={formData.saCitizen}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select option</option>
                               <option value="Yes">Yes</option>
                               <option value="No">No</option>
@@ -916,29 +928,29 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Nationality <span className="text-error">*</span>
                             </label>
                             <input type="text" name="nationality"
                               value={formData.nationality}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">Country of Birth</label>
+                            <label className={labelClass}>Country of Birth</label>
                             <input type="text" name="countryOfBirth"
                               value={formData.countryOfBirth}
                               onChange={handleChange}
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">Income Tax No.</label>
+                            <label className={labelClass}>Income Tax No.</label>
                             <input type="text" name="incomeTaxNo"
                               value={formData.incomeTaxNo}
                               onChange={handleChange}
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           {formData.saCitizen === 'No' && (
@@ -950,78 +962,78 @@ const StudentProfile = () => {
                               </div>
 
                               <div>
-                                <label className="block font-semibold mb-2">
+                                <label className={labelClass}>
                                   Passport Number <span className="text-error">*</span>
                                 </label>
                                 <input type="text" name="passportNumber"
                                   value={formData.passportNumber}
                                   onChange={handleChange} required
-                                  className="w-full border border-border-subtle rounded-lg p-3" />
+                                  className={fieldClass} />
                               </div>
 
                               <div>
-                                <label className="block font-semibold mb-2">
+                                <label className={labelClass}>
                                   Country of Passport Issue <span className="text-error">*</span>
                                 </label>
                                 <input type="text" name="countryOfPassportIssue"
                                   value={formData.countryOfPassportIssue}
                                   onChange={handleChange} required
-                                  className="w-full border border-border-subtle rounded-lg p-3" />
+                                  className={fieldClass} />
                               </div>
 
                               <div>
-                                <label className="block font-semibold mb-2">
+                                <label className={labelClass}>
                                   Study / Work Permit Number <span className="text-error">*</span>
                                 </label>
                                 <input type="text" name="permitNumber"
                                   value={formData.permitNumber}
                                   onChange={handleChange} required
-                                  className="w-full border border-border-subtle rounded-lg p-3" />
+                                  className={fieldClass} />
                               </div>
                             </>
                           )}
 
                           {formData.currentlyEmployedByNwu === 'Yes' && (
-                            <div className="mt-6 pt-4 border-t bg-surface-muted p-4 rounded-lg col-span-1 md:col-span-3">
-                              <p className="font-semibold text-sm text-dark mb-3">
+                            <div className="mt-4 rounded-lg border-t border-border-subtle bg-surface-muted p-3 col-span-1 md:col-span-3">
+                              <p className="mb-2 text-sm font-semibold text-dark">
                                 NWU Employment Details:
                               </p>
-                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                                 <div>
-                                  <label className="block text-sm font-semibold mb-1">
+                                  <label className={labelClass}>
                                     OE Code and Name (1)
                                   </label>
                                   <input type="text" name="oeCodeAndName1"
                                     value={formData.oeCodeAndName1}
                                     onChange={handleChange}
-                                    className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                    className={fieldClass} />
                                 </div>
                                 <div>
-                                  <label className="block text-sm font-semibold mb-1">
+                                  <label className={labelClass}>
                                     Job Name (1)
                                   </label>
                                   <input type="text" name="jobName1"
                                     value={formData.jobName1}
                                     onChange={handleChange}
-                                    className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                    className={fieldClass} />
                                 </div>
                                 <div>
-                                  <label className="block text-sm font-semibold mb-1">
+                                  <label className={labelClass}>
                                     OE Code and Name (2)
                                   </label>
                                   <input type="text" name="oeCodeAndName2"
                                     value={formData.oeCodeAndName2}
                                     onChange={handleChange}
-                                    className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                    className={fieldClass} />
                                 </div>
                                 <div>
-                                  <label className="block text-sm font-semibold mb-1">
+                                  <label className={labelClass}>
                                     Job Name (2)
                                   </label>
                                   <input type="text" name="jobName2"
                                     value={formData.jobName2}
                                     onChange={handleChange}
-                                    className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                    className={fieldClass} />
                                 </div>
                               </div>
                             </div>
@@ -1038,7 +1050,6 @@ const StudentProfile = () => {
               {/* ============ SECTION B ============ */}
               <form onSubmit={handleSaveSection('B')}>
                 <Card>
-                  <div className="p-4 md:p-6">
                     <SectionHeader
                       sectionKey="B"
                       title="Next of Kin"
@@ -1046,15 +1057,15 @@ const StudentProfile = () => {
                     />
 
                     {openSection === 'B' && (
-                      <div id="section-B" className="mt-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+                      <div id="section-B" className="mt-4">
+                        <div className={fieldGridClass}>
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Title <span className="text-error">*</span>
                             </label>
                             <select name="nextOfKinTitle" value={formData.nextOfKinTitle}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select option</option>
                               <option value="Mr">Mr</option>
                               <option value="Mrs">Mrs</option>
@@ -1065,71 +1076,71 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Initials <span className="text-error">*</span>
                             </label>
                             <input type="text" name="nextOfKinInitials"
                               value={formData.nextOfKinInitials}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Surname <span className="text-error">*</span>
                             </label>
                             <input type="text" name="nextOfKinSurname"
                               value={formData.nextOfKinSurname}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Name <span className="text-error">*</span>
                             </label>
                             <input type="text" name="nextOfKinName"
                               value={formData.nextOfKinName}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Relationship <span className="text-error">*</span>
                             </label>
                             <input type="text" name="nextOfKinRelationship"
                               value={formData.nextOfKinRelationship}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">Daytime Phone No.</label>
+                            <label className={labelClass}>Daytime Phone No.</label>
                             <input type="tel" name="nextOfKinDaytimePhoneNo"
                               value={formData.nextOfKinDaytimePhoneNo}
                               onChange={handleChange}
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Mobile No. <span className="text-error">*</span>
                             </label>
                             <input type="tel" name="nextOfKinMobile"
                               value={formData.nextOfKinMobile}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Is Next of Kin an NWU Employee?
                             </label>
                             <select name="isNextOfKinNwuEmployee"
                               value={formData.isNextOfKinNwuEmployee}
                               onChange={handleChange}
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select option</option>
                               <option value="No">No</option>
                               <option value="Yes">Yes</option>
@@ -1138,14 +1149,14 @@ const StudentProfile = () => {
 
                           {formData.isNextOfKinNwuEmployee === 'Yes' && (
                             <div>
-                              <label className="block font-semibold mb-2">
+                              <label className={labelClass}>
                                 If yes, his/her NWU No.{' '}
                                 <span className="text-error">*</span>
                               </label>
                               <input type="text" name="nextOfKinNwuNumber"
                                 value={formData.nextOfKinNwuNumber}
                                 onChange={handleChange} required
-                                className="w-full border border-border-subtle rounded-lg p-3" />
+                                className={fieldClass} />
                             </div>
                           )}
                         </div>
@@ -1153,98 +1164,96 @@ const StudentProfile = () => {
                         <SectionSaveButton sectionKey="B" />
                       </div>
                     )}
-                  </div>
                 </Card>
               </form>
 
               {/* ============ SECTION C ============ */}
               <form onSubmit={handleSaveSection('C')}>
                 <Card>
-                  <div className="p-4 md:p-6">
                     <SectionHeader
                       sectionKey="C"
                       title="Contact Details"
                     />
 
                     {openSection === 'C' && (
-                      <div id="section-C" className="mt-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <div className="space-y-4">
+                      <div id="section-C" className="mt-4">
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                          <div className="space-y-3">
                             <h3 className="text-card font-bold text-dark border-b pb-2">
                               Residential Address
                             </h3>
 
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className="block text-sm font-semibold mb-1">Unit No.</label>
+                                <label className={labelClass}>Unit No.</label>
                                 <input type="text" name="resUnitNo"
                                   value={formData.resUnitNo}
                                   onChange={handleChange}
-                                  className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                  className={fieldClass} />
                               </div>
                               <div>
-                                <label className="block text-sm font-semibold mb-1">Complex</label>
+                                <label className={labelClass}>Complex</label>
                                 <input type="text" name="resComplex"
                                   value={formData.resComplex}
                                   onChange={handleChange}
-                                  className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                  className={fieldClass} />
                               </div>
                             </div>
 
-                            <div className="grid grid-cols-3 gap-3">
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                               <div>
-                                <label className="block text-sm font-semibold mb-1">
+                                <label className={labelClass}>
                                   Street No. <span className="text-error">*</span>
                                 </label>
                                 <input type="text" name="resStreetNo"
                                   value={formData.resStreetNo}
                                   onChange={handleChange} required
-                                  className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                  className={fieldClass} />
                               </div>
-                              <div className="col-span-2">
-                                <label className="block text-sm font-semibold mb-1">
+                              <div className="sm:col-span-2">
+                                <label className={labelClass}>
                                   Street Name / Farm Name <span className="text-error">*</span>
                                 </label>
                                 <input type="text" name="resStreetName"
                                   value={formData.resStreetName}
                                   onChange={handleChange} required
-                                  className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                  className={fieldClass} />
                               </div>
                             </div>
 
                             <div>
-                              <label className="block text-sm font-semibold mb-1">
+                              <label className={labelClass}>
                                 Suburb / District <span className="text-error">*</span>
                               </label>
                               <input type="text" name="resSuburb"
                                 value={formData.resSuburb}
                                 onChange={handleChange} required
-                                className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                className={fieldClass} />
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
                               <div>
-                                <label className="block text-sm font-semibold mb-1">
+                                <label className={labelClass}>
                                   Town / City <span className="text-error">*</span>
                                 </label>
                                 <input type="text" name="resTownCity"
                                   value={formData.resTownCity}
                                   onChange={handleChange} required
-                                  className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                  className={fieldClass} />
                               </div>
                               <div>
-                                <label className="block text-sm font-semibold mb-1">
+                                <label className={labelClass}>
                                   Postal Code <span className="text-error">*</span>
                                 </label>
                                 <input type="text" name="resPostalCode"
                                   value={formData.resPostalCode}
                                   onChange={handleChange} required
-                                  className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                  className={fieldClass} />
                               </div>
                             </div>
                           </div>
 
-                          <div className="space-y-4">
+                          <div className="space-y-3">
                             <div className="flex items-center justify-between border-b pb-2 flex-wrap gap-2">
                               <h3 className="text-card font-bold text-dark">Postal Address</h3>
                               <label className="flex items-center text-xs text-neutral gap-1.5 cursor-pointer">
@@ -1255,80 +1264,82 @@ const StudentProfile = () => {
                               </label>
                             </div>
 
-                            {!formData.sameAsResidential && (
-                              <>
+                            {formData.sameAsResidential ? (
+                              <p className="rounded-lg border border-border-subtle bg-surface-muted px-3 py-2 text-xs text-neutral font-inter">
+                                Postal address uses your residential address.
+                              </p>
+                            ) : (
+                              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div>
-                                  <label className="block text-sm font-semibold mb-1">PO Box No.</label>
+                                  <label className={labelClass}>PO Box No.</label>
                                   <input type="text" name="poBoxNo"
                                     value={formData.poBoxNo}
                                     onChange={handleChange}
-                                    className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                    className={fieldClass} />
                                 </div>
                                 <div>
-                                  <label className="block text-sm font-semibold mb-1">Private Bag No.</label>
+                                  <label className={labelClass}>Private Bag No.</label>
                                   <input type="text" name="privateBagNo"
                                     value={formData.privateBagNo}
                                     onChange={handleChange}
-                                    className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                    className={fieldClass} />
                                 </div>
                                 <div>
-                                  <label className="block text-sm font-semibold mb-1">Post Office Branch Name</label>
+                                  <label className={labelClass}>Post Office Branch Name</label>
                                   <input type="text" name="postOfficeBranch"
                                     value={formData.postOfficeBranch}
                                     onChange={handleChange}
-                                    className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                    className={fieldClass} />
                                 </div>
                                 <div>
-                                  <label className="block text-sm font-semibold mb-1">Postal Code</label>
+                                  <label className={labelClass}>Postal Code</label>
                                   <input type="text" name="postalCode"
                                     value={formData.postalCode}
                                     onChange={handleChange}
-                                    className="w-full border border-border-subtle rounded-lg p-2.5" />
+                                    className={fieldClass} />
                                 </div>
-                              </>
+                              </div>
                             )}
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6 pt-6 border-t">
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-3 mt-4 pt-4 border-t">
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Mobile No. <span className="text-error">*</span>
                             </label>
                             <input type="tel" name="mobileNo"
                               value={formData.mobileNo}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
                           <div>
-                            <label className="block font-semibold mb-2">Work Telephone No.</label>
+                            <label className={labelClass}>Work Telephone No.</label>
                             <input type="tel" name="workPhoneNo"
                               value={formData.workPhoneNo}
                               onChange={handleChange}
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Email Address <span className="text-error">*</span>
                             </label>
                             <input type="email" name="emailAddress"
                               value={formData.emailAddress}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
                         </div>
 
                         <SectionSaveButton sectionKey="C" />
                       </div>
                     )}
-                  </div>
                 </Card>
               </form>
 
               {/* ============ SECTION D ============ */}
               <form onSubmit={handleSaveSection('D')}>
                 <Card>
-                  <div className="p-4 md:p-6">
                     <SectionHeader
                       sectionKey="D"
                       title="Highest Qualification"
@@ -1336,116 +1347,114 @@ const StudentProfile = () => {
                     />
 
                     {openSection === 'D' && (
-                      <div id="section-D" className="mt-6">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <div id="section-D" className="mt-4">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Institution <span className="text-error">*</span>
                             </label>
                             <input type="text" name="institution"
                               value={formData.institution}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Qualification Type <span className="text-error">*</span>
                             </label>
                             <input type="text" name="qualificationType"
                               value={formData.qualificationType}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Qualification Status <span className="text-error">*</span>
                             </label>
                             <select name="qualificationStatus"
                               value={formData.qualificationStatus}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select option</option>
                               <option value="Completed">Completed</option>
                               <option value="In Progress">In Progress</option>
                             </select>
                           </div>
                           <div>
-                            <label className="block font-semibold mb-2">Awarded Date</label>
+                            <label className={labelClass}>Awarded Date</label>
                             <input type="date" name="awardedDate"
                               value={formData.awardedDate}
                               onChange={handleChange}
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
                         </div>
 
                         <SectionSaveButton sectionKey="D" />
                       </div>
                     )}
-                  </div>
                 </Card>
               </form>
 
               {/* ============ SECTION E ============ */}
               <form onSubmit={handleSaveSection('E')}>
                 <Card>
-                  <div className="p-4 md:p-6">
                     <SectionHeader
                       sectionKey="E"
                       title="Bank Details"
                     />
 
                     {openSection === 'E' && (
-                      <div id="section-E" className="mt-6">
-                        <p className="text-xs text-error mb-6 italic">
+                      <div id="section-E" className="mt-4">
+                        <p className="text-xs text-error mb-3 italic">
                           (No payment will be made if the bank account confirmation
                           letter, not older than 3 months, is not attached)
                         </p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Account Holder Surname and Initials{' '}
                               <span className="text-error">*</span>
                             </label>
                             <input type="text" name="accountHolderSurnameInitials"
                               value={formData.accountHolderSurnameInitials}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Name of Bank <span className="text-error">*</span>
                             </label>
                             <input type="text" name="bankName"
                               value={formData.bankName}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Bank Branch Code <span className="text-error">*</span>
                             </label>
-                            <input type="text" name="branchCode"
+                            <input type="text" name="branchCode" inputMode="numeric"
                               value={formData.branchCode}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Account Number <span className="text-error">*</span>
                             </label>
-                            <input type="text" name="accountNumber"
+                            <input type="text" name="accountNumber" inputMode="numeric"
                               value={formData.accountNumber}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3" />
+                              className={fieldClass} />
                           </div>
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Account Type <span className="text-error">*</span>
                             </label>
                             <select name="accountType" value={formData.accountType}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select account type</option>
                               <option value="Cheque / Current">Cheque / Current</option>
                               <option value="Savings">Savings</option>
@@ -1453,13 +1462,13 @@ const StudentProfile = () => {
                             </select>
                           </div>
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Account Holder Relationship <span className="text-error">*</span>
                             </label>
                             <select name="accountHolderRelationship"
                               value={formData.accountHolderRelationship}
                               onChange={handleChange} required
-                              className="w-full border border-border-subtle rounded-lg p-3">
+                              className={fieldClass}>
                               <option value="">Select relationship</option>
                               <option value="Own">Own Account</option>
                               <option value="Parent/Guardian">Parent/Guardian Account</option>
@@ -1472,40 +1481,43 @@ const StudentProfile = () => {
                         <SectionSaveButton sectionKey="E" />
                       </div>
                     )}
-                  </div>
                 </Card>
               </form>
 
               {/* ============ SECTION F: DOCUMENTS + DECLARATION ============ */}
               <form onSubmit={handleSaveSection('F')}>
                 <Card>
-                  <div className="p-4 md:p-6">
                     <SectionHeader
                       sectionKey="F"
                       title="Required Documents & Declaration"
                     />
 
                     {openSection === 'F' && (
-                      <div id="section-F" className="mt-6">
-                        <p className="text-sm text-neutral mb-6">
-                          Please attach clear copies of all required supporting
-                          documentation below.
-                        </p>
+                      <div id="section-F" className="mt-4">
+                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                          <p className="text-sm text-neutral">
+                            Please attach clear copies of all required supporting
+                            documentation below.
+                          </p>
+                          <span className="rounded-full bg-surface-muted px-2.5 py-1 text-xs font-medium text-neutral font-inter">
+                            {uploadedDocumentCount} of {requiredDocuments.length}{' '}
+                            uploaded
+                          </span>
+                        </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-3">
                           {requiredDocuments.map((doc) => {
                             const isUploading = uploadingFiles[doc.key];
                             const uploadError = uploadErrors[doc.key];
                             const entry = uploadedFiles[doc.key];
 
                             return (
-                              <>
+                              <Fragment key={doc.key}>
                               <div
-                                key={doc.key}
-                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 border rounded-lg bg-surface-muted gap-4"
+                                className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 border border-border-subtle rounded-lg bg-surface-muted gap-3"
                               >
                                 <div className="flex-1 min-w-0">
-                                  <p className="font-semibold text-dark">
+                                  <p className="text-sm font-semibold text-dark">
                                     {doc.name} <span className="text-error">*</span>
                                   </p>
 
@@ -1539,7 +1551,7 @@ const StudentProfile = () => {
 
                                   <label
                                     htmlFor={`file-${doc.key}`}
-                                    className={`cursor-pointer bg-white border border-border-subtle text-dark px-4 py-2 rounded-md text-sm font-medium shadow-sm text-center flex-1 sm:flex-initial ${
+                                    className={`cursor-pointer bg-white border border-border-subtle text-dark px-3 py-1.5 rounded-md text-xs font-medium shadow-sm text-center flex-1 sm:flex-initial ${
                                       isUploading
                                         ? 'opacity-50 cursor-not-allowed'
                                         : 'hover:bg-surface-muted'
@@ -1563,45 +1575,43 @@ const StudentProfile = () => {
                                   )}
                                 </div>
                               </div>
-                              </>
+                              </Fragment>
                             );
                           })}
                         </div>
                       </div>
                     )}
-                  </div>
                 </Card>
 
                 {openSection === 'F' && (
-                  <Card>
-                    <div className="p-4 md:p-6">
-                      <h3 className="text-card font-bold text-primary-dark mb-4">
+                  <Card className="mt-3">
+                      <h3 className="text-card font-bold text-primary-dark mb-3">
                         Declaration
                       </h3>
 
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         <p className="text-sm text-dark leading-relaxed font-medium">
                           I, the undersigned, hereby confirm that the information
                           I provided is true and correct.
                         </p>
 
-                        <div className="flex items-start gap-3 mt-4">
+                        <div className="flex items-start gap-3">
                           <input type="checkbox" id="declarationAgreement"
                             checked={agreed}
                             onChange={(e) => setAgreed(e.target.checked)}
                             className="mt-1 h-4 w-4 text-primary rounded border-border-subtle" />
                           <label htmlFor="declarationAgreement"
-                            className="text-sm font-medium text-dark">
+                            className="cursor-pointer text-sm font-medium text-dark">
                             I agree to the declaration statement above
                           </label>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6 pt-4 border-t items-end">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4 pt-4 border-t items-end">
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Initials and Surname
                             </label>
-                            <div className="w-full border border-border-subtle rounded-lg p-3 bg-light-grey text-dark break-words">
+                            <div className="w-full rounded-lg border border-border-subtle bg-light-grey px-3 py-2 text-sm text-dark break-words">
                               {formData.declarationInitialsSurname ||
                                 `${formData.initials} ${formData.surname}`.trim() ||
                                 'Automatically recorded'}
@@ -1609,7 +1619,7 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">
+                            <label className={labelClass}>
                               Student Signature
                             </label>
                             <div className="space-y-2">
@@ -1631,8 +1641,8 @@ const StudentProfile = () => {
                           </div>
 
                           <div>
-                            <label className="block font-semibold mb-2">Date</label>
-                            <div className="w-full border border-border-subtle rounded-lg p-3 bg-light-grey text-dark">
+                            <label className={labelClass}>Date</label>
+                            <div className="w-full rounded-lg border border-border-subtle bg-light-grey px-3 py-2 text-sm text-dark">
                               {formData.declarationDate || 'Automatically recorded when saved'}
                             </div>
                           </div>
@@ -1640,7 +1650,6 @@ const StudentProfile = () => {
                       </div>
 
                       <SectionSaveButton sectionKey="F" />
-                    </div>
                   </Card>
                 )}
               </form>

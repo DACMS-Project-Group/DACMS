@@ -1,60 +1,65 @@
 import Button from '../ui/Button';
+import EmptyState from '../ui/EmptyState';
 import PageHeader from '../ui/PageHeader';
-import React, { useState, useEffect } from 'react';
+import Section from '../ui/Section';
+import StatCard from '../ui/StatCard';
+import WorkQueue from '../ui/WorkQueue';
+import { useEffect, useState } from 'react';
 import Card from '../components/Card';
 import StatusBadge from '../components/StatusBadge';
 import { useNavigate } from 'react-router-dom';
+import { formatMoney } from '../lib/format';
 import { apiGet } from '../api';
+
+const APPOINTMENTS_PER_PAGE = 4;
+
+const renderAmount = (value) => {
+  if (value === null || value === undefined || value === '') return '—';
+
+  if (typeof value === 'number') return formatMoney(value);
+
+  const numeric = Number(value);
+
+  return Number.isFinite(numeric) ? formatMoney(numeric) : value;
+};
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   document.title = 'AACMS - Admin Dashboard';
+
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
   const [appointmentPage, setAppointmentPage] = useState(1);
-  const APPOINTMENTS_PER_PAGE = 4;
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchData = async () => {
       try {
         const result = await apiGet('/admin/dashboard');
-        setData(result);
-        setError('');
-      } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        setError(error.message || 'Unable to load dashboard data.');
+
+        if (!cancelled) {
+          setData(result);
+          setError('');
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message || 'Unable to load dashboard data.');
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
 
     fetchData();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const statisticCards = [
-    {
-      title: 'Total Modules',
-      value: data?.stats?.total_modules ?? 'null',
-    },
-    {
-      title: 'Total Lecturers',
-      value: data?.stats?.total_lecturers ?? 'null',
-    },
-    {
-      title: 'Total Assistants',
-      value: data?.stats?.total_demis ?? 'null',
-    },
-    {
-      title: 'Pending Approvals',
-      value: data?.stats?.total_pending_approvals ?? 'null',
-    },
-    {
-      title: 'Pending Claims',
-      value: data?.stats?.total_pending_claims ?? 'null',
-    },
-  ];
-
+  const stats = data?.stats || {};
   const monthlyClaims = data?.monthlyClaims || [];
   const monthlyWork = data?.monthlyWork || [];
   const pendingAppointments = data?.pendingAppointments || [];
@@ -75,229 +80,295 @@ const AdminDashboard = () => {
     appointmentPage * APPOINTMENTS_PER_PAGE
   );
 
+  const kpis = [
+    {
+      title: 'Total modules',
+      value: stats.total_modules ?? 0,
+      to: '/budget-management',
+      viewLabel: 'Manage budgets',
+    },
+    {
+      title: 'Total lecturers',
+      value: stats.total_lecturers ?? 0,
+    },
+    {
+      title: 'Total assistants',
+      value: stats.total_demis ?? 0,
+    },
+    {
+      title: 'Pending approvals',
+      value: stats.total_pending_approvals ?? 0,
+      to: '/appointment-approvals',
+      viewLabel: 'Review approvals',
+    },
+    {
+      title: 'Pending claims',
+      value: stats.total_pending_claims ?? 0,
+      to: '/admin/claims',
+      viewLabel: 'Review claims',
+    },
+  ];
+
+  const attentionItems = [
+    {
+      label: 'Appointments awaiting approval',
+      count: Number(stats.total_pending_approvals ?? 0),
+      to: '/appointment-approvals',
+      cta: 'Review approvals',
+    },
+    {
+      label: 'Claims awaiting processing',
+      count: Number(stats.total_pending_claims ?? 0),
+      to: '/admin/claims',
+      cta: 'Review claims',
+    },
+  ].filter((item) => item.count > 0);
+
   return (
-    <>
+    <div className="p-4 md:p-8">
+      <PageHeader
+        title="Administrator Dashboard"
+        description="Monitor appointments, claims, and budget health across the system."
+      />
 
-{/* PAGE HEADING */}
+      {error && (
+        <p className="mb-6 text-sm text-error font-inter">
+          Could not load dashboard data: {error}
+        </p>
+      )}
 
-          <div className="p-8">
-            <PageHeader
-              title="Administrator Dashboard"
-              description="Monitor and manage the Assistant Applications and Claims Management System."
+      {/* Work queue */}
+      <Section
+        title="Needs your attention"
+        description="Approvals and claims waiting on the administrator team."
+      >
+        <WorkQueue
+          items={attentionItems}
+          loading={loading}
+          emptyDescription="No appointments or claims are awaiting processing."
+        />
+      </Section>
+
+      {/* Overview */}
+      <Section title="Overview">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 xl:grid-cols-5">
+          {kpis.map((kpi) => (
+            <StatCard
+              key={kpi.title}
+              label={kpi.title}
+              value={kpi.value}
+              loading={loading}
+              actionLabel={kpi.viewLabel}
+              onAction={kpi.to ? () => navigate(kpi.to) : undefined}
             />
+          ))}
+        </div>
+      </Section>
 
-            {error && (
-              <p className="mb-6 text-sm text-error font-inter">
-                Could not load dashboard data: {error}
+      {/* Monthly activity and pending appointments */}
+      <div className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-3">
+        <Section
+          title="Monthly claims"
+          noMargin
+          className="flex h-full min-w-0 flex-col"
+          actions={
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/admin/claims')}
+            >
+              View claims →
+            </Button>
+          }
+        >
+          <Card className="flex-1">
+            {loading ? (
+              <p className="py-6 text-center text-neutral font-inter">
+                Loading…
               </p>
-            )}
-
-            {/* SYSTEM STATISTICS */}
-            <section className="mb-8">
-              <h3 className="text-card font-poppins font-semibold text-primary mb-4">
-                System Statistics
-              </h3>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {statisticCards.map((stat) => (
-                  <Card key={stat.title}>
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <p className="text-neutral font-inter font-medium">
-                          {stat.title}
-                        </p>
-
-                        <p className="text-3xl font-poppins font-bold text-primary mt-3">
-                          {loading ? '—' : stat.value}
-                        </p>
-                      </div>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </section>
-
-            {/* MONTHLY CLAIMS, MONTHLY WORK SESSIONS, AND PENDING CLAIMS */}
-            <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8 items-stretch">
-              {/* Monthly Claims */}
-              <section className="min-w-0 h-full flex flex-col">
-                <h3 className="text-card font-poppins font-semibold text-primary mb-4">
-                  Monthly Claims Summary
-                </h3>
-
-                <Card className="h-full flex flex-col justify-between">
-                  <div className="space-y-4 flex-1">
-                    {monthlyClaims.map((claim) => (
-                      <div
-                        key={claim.month}
-                        className="flex justify-between items-center border-b border-neutral pb-3 last:border-0"
-                      >
-                        <span className="font-semibold text-dark font-inter">
-                          {claim.month}
-                        </span>
-
-                        <span className="font-semibold text-primary font-inter">
-                          {claim.amount}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <Button unstyled
-                    onClick={() => navigate('/admin/claims')}
-                    className="text-primary font-semibold hover:underline mt-4 font-inter"
+            ) : monthlyClaims.length === 0 ? (
+              <EmptyState
+                title="No claim data"
+                description="Monthly claim totals will appear here."
+              />
+            ) : (
+              <div className="space-y-4">
+                {monthlyClaims.map((claim) => (
+                  <div
+                    key={claim.month}
+                    className="flex items-center justify-between border-b border-border-subtle pb-3 last:border-0 last:pb-0"
                   >
-                    View claims →
-                  </Button>
-                </Card>
-              </section>
-
-              {/* Work Sessions */}
-              <section className="min-w-0 h-full flex flex-col">
-                <h3 className="text-card font-poppins font-semibold text-primary mb-4">
-                  Monthly Work Sessions
-                </h3>
-
-                <Card className="h-full flex flex-col justify-between">
-                  <div className="space-y-4 flex-1">
-                    {monthlyWork.map((month) => (
-                      <div
-                        key={month.month}
-                        className="flex justify-between items-center border-b border-neutral pb-3 last:border-0"
-                      >
-                        <span className="font-semibold text-dark font-inter">
-                          {month.month}
-                        </span>
-
-                        <span className="font-semibold text-primary font-inter">
-                          {month.total_sessions}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </section>
-
-              {/* Pending Appointments */}
-              <section className="min-w-0 h-full flex flex-col">
-                <h3 className="text-card font-poppins font-semibold text-primary mb-4">
-                  Pending Appointments
-                </h3>
-
-                <Card className="h-full flex flex-col justify-between">
-                  <div className="space-y-3 flex-1">
-                    {currentAppointments.length > 0 ? (
-                      currentAppointments.map((appointment, index) => (
-                        <div
-                          key={`${appointment.module}-${appointment.date}-${index}`}
-                          className="border-b border-neutral/60 pb-3 last:border-0"
-                        >
-                          <div className="flex justify-between items-start gap-3">
-                            <div className="min-w-0">
-                              <p className="text-sm font-semibold text-dark font-inter truncate">
-                                {appointment.module}
-                              </p>
-
-                              <p className="text-xs text-neutral mt-1 font-inter truncate">
-                                {appointment.lecturer} → {appointment.assistant}
-                              </p>
-
-                              <p className="text-xs text-neutral mt-1 font-inter">
-                                {appointment.date}
-                              </p>
-                            </div>
-
-                            <div className="shrink-0">
-                              <StatusBadge status={appointment.status} />
-                            </div>
-                          </div>
-                        </div>
-                      ))
-                    ) : (
-                      <p className="text-sm text-neutral font-inter">
-                        No pending appointments.
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <span className="text-xs font-inter text-neutral">
-                      Showing{' '}
-                      {currentAppointments.length > 0
-                        ? (appointmentPage - 1) * APPOINTMENTS_PER_PAGE + 1
-                        : 0}
-                      {pendingAppointments.length > 0
-                        ? `-${Math.min(
-                            appointmentPage * APPOINTMENTS_PER_PAGE,
-                            pendingAppointments.length
-                          )}`
-                        : ''}
-                      {pendingAppointments.length > 0
-                        ? ` of ${pendingAppointments.length}`
-                        : ''}
+                    <span className="font-semibold text-dark font-inter">
+                      {claim.month}
                     </span>
 
-                    <div className="flex items-center gap-3">
-                      <Button unstyled
-                        type="button"
-                        onClick={() =>
-                          setAppointmentPage((page) => Math.max(page - 1, 1))
-                        }
-                        disabled={appointmentPage === 1}
-                        aria-label="Previous page"
-                        className="text-2xl leading-none text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:text-primary-dark"
-                      >
-                        ‹
-                      </Button>
+                    <span className="whitespace-nowrap font-semibold text-primary font-inter">
+                      {renderAmount(claim.amount)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </Section>
 
-                      <div className="flex items-center gap-2">
-                        {Array.from(
-                          { length: totalAppointmentPages },
-                          (_, index) => index + 1
-                        ).map((page) => (
-                          <Button unstyled
-                            key={page}
-                            type="button"
-                            aria-label={`Go to page ${page}`}
-                            onClick={() => setAppointmentPage(page)}
-                            className={`h-2 w-2 rounded-full transition ${
-                              page === appointmentPage
-                                ? 'bg-primary'
-                                : 'bg-primary/30 hover:bg-primary/60'
-                            }`}
-                          />
-                        ))}
+        <Section
+          title="Monthly work sessions"
+          noMargin
+          className="flex h-full min-w-0 flex-col"
+        >
+          <Card className="flex-1">
+            {loading ? (
+              <p className="py-6 text-center text-neutral font-inter">
+                Loading…
+              </p>
+            ) : monthlyWork.length === 0 ? (
+              <EmptyState
+                title="No session data"
+                description="Monthly work session totals will appear here."
+              />
+            ) : (
+              <div className="space-y-4">
+                {monthlyWork.map((month) => (
+                  <div
+                    key={month.month}
+                    className="flex items-center justify-between border-b border-border-subtle pb-3 last:border-0 last:pb-0"
+                  >
+                    <span className="font-semibold text-dark font-inter">
+                      {month.month}
+                    </span>
+
+                    <span className="whitespace-nowrap font-semibold text-primary font-inter">
+                      {month.total_sessions}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </Section>
+
+        <Section
+          title="Pending appointments"
+          noMargin
+          className="flex h-full min-w-0 flex-col"
+          actions={
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/appointment-approvals')}
+            >
+              Review appointments →
+            </Button>
+          }
+        >
+          <Card className="flex flex-1 flex-col">
+            <div className="flex-1 space-y-3">
+              {loading ? (
+                <p className="py-6 text-center text-neutral font-inter">
+                  Loading…
+                </p>
+              ) : currentAppointments.length === 0 ? (
+                <EmptyState
+                  title="No pending appointments"
+                  description="New appointment requests will appear here."
+                />
+              ) : (
+                currentAppointments.map((appointment, index) => (
+                  <div
+                    key={`${appointment.module}-${appointment.date}-${index}`}
+                    className="border-b border-border-subtle pb-3 last:border-0 last:pb-0"
+                  >
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-semibold text-dark font-inter">
+                          {appointment.module}
+                        </p>
+
+                        <p className="mt-1 truncate text-xs text-neutral font-inter">
+                          {appointment.lecturer} → {appointment.assistant}
+                        </p>
+
+                        <p className="mt-1 text-xs text-neutral font-inter">
+                          {appointment.date}
+                        </p>
                       </div>
 
-                      <Button unstyled
-                        type="button"
-                        onClick={() =>
-                          setAppointmentPage((page) =>
-                            Math.min(page + 1, totalAppointmentPages)
-                          )
-                        }
-                        disabled={appointmentPage === totalAppointmentPages}
-                        aria-label="Next page"
-                        className="text-2xl leading-none text-primary disabled:opacity-40 disabled:cursor-not-allowed hover:text-primary-dark"
-                      >
-                        ›
-                      </Button>
+                      <div className="shrink-0">
+                        <StatusBadge status={appointment.status} />
+                      </div>
                     </div>
                   </div>
-
-                  <Button unstyled
-                    onClick={() => navigate('/appointment-approvals')}
-                    className="text-primary font-semibold hover:underline mt-4 font-inter"
-                  >
-                    Review appointments →
-                  </Button>
-                </Card>
-              </section>
+                ))
+              )}
             </div>
 
-          </div>
+            {pendingAppointments.length > 0 && (
+              <div className="mt-4 flex flex-col gap-2 border-t border-border-subtle pt-3 sm:flex-row sm:items-center sm:justify-between">
+                <span className="text-xs text-neutral font-inter">
+                  Showing {(appointmentPage - 1) * APPOINTMENTS_PER_PAGE + 1}–
+                  {Math.min(
+                    appointmentPage * APPOINTMENTS_PER_PAGE,
+                    pendingAppointments.length
+                  )}{' '}
+                  of {pendingAppointments.length}
+                </span>
 
-    </>
+                <div className="flex items-center gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    onClick={() =>
+                      setAppointmentPage((page) => Math.max(page - 1, 1))
+                    }
+                    disabled={appointmentPage === 1}
+                    aria-label="Previous page"
+                  >
+                    ‹
+                  </Button>
+
+                  {Array.from(
+                    { length: totalAppointmentPages },
+                    (_, index) => index + 1
+                  ).map((page) => (
+                    <Button
+                      key={page}
+                      variant={page === appointmentPage ? 'primary' : 'ghost'}
+                      size="sm"
+                      type="button"
+                      aria-label={`Go to page ${page}`}
+                      aria-current={
+                        page === appointmentPage ? 'page' : undefined
+                      }
+                      onClick={() => setAppointmentPage(page)}
+                      className="min-w-9 px-2"
+                    >
+                      {page}
+                    </Button>
+                  ))}
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    onClick={() =>
+                      setAppointmentPage((page) =>
+                        Math.min(page + 1, totalAppointmentPages)
+                      )
+                    }
+                    disabled={appointmentPage === totalAppointmentPages}
+                    aria-label="Next page"
+                  >
+                    ›
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Card>
+        </Section>
+      </div>
+    </div>
   );
 };
 
