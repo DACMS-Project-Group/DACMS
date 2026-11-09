@@ -332,7 +332,7 @@ const ClaimReview = () => {
                 Student Information
               </h2>
 
-              <div className="grid gap-5 md:grid-cols-3">
+              <div className="grid gap-5 lg:grid-cols-3">
                 <div>
                   <p className="text-sm text-neutral font-inter">
                     Student Number
@@ -372,7 +372,7 @@ const ClaimReview = () => {
                 Banking Information
               </h2>
 
-              <div className="grid gap-5 md:grid-cols-4">
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 <div>
                   <p className="text-sm text-neutral font-inter">
                     Bank
@@ -423,7 +423,7 @@ const ClaimReview = () => {
                 Claim Details
               </h2>
 
-              <div className="grid gap-5 md:grid-cols-3">
+              <div className="grid gap-5 lg:grid-cols-3">
                 <div>
                   <p className="text-sm text-neutral font-inter">
                     Module Code
@@ -496,7 +496,7 @@ const ClaimReview = () => {
                 Claim Calculation
               </h2>
 
-              <div className="grid gap-5 md:grid-cols-3">
+              <div className="grid gap-5 lg:grid-cols-3">
                 <div className="rounded-xl bg-off-white px-5 py-4">
                   <p className="text-sm text-neutral font-inter">
                     Total Hours

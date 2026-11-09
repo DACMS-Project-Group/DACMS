@@ -133,7 +133,7 @@ const BudgetDetails = () => {
               </h3>
 
               <Card>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                   <div>
                     <p className="text-sm text-neutral font-inter">
                       Budget ID
@@ -173,7 +173,7 @@ const BudgetDetails = () => {
                 Budget Summary
               </h3>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
                 <Card>
                   <p className="text-neutral font-inter font-medium">
                     Allocated Budget

@@ -261,7 +261,7 @@ const BudgetManagement = () => {
                 Budget Summary
               </h3>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-6">
                 <Card>
                   <p className="text-neutral font-inter font-medium">
                     Total Allocated

@@ -1,6 +1,6 @@
 import Button from '../ui/Button';
 import DataTable from '../ui/DataTable';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { apiGet, apiPost } from '../api';
 import Card from '../components/Card';
@@ -384,7 +384,7 @@ const WorkTracking = () => {
                             )}
                           </div>
 
-                          <div className="mt-4 grid grid-cols-2 gap-2 md:gap-3 text-sm xl:grid-cols-4">
+                          <div className="mt-4 grid grid-cols-2 gap-2 md:gap-3 text-sm 2xl:grid-cols-4">
                             <div>
                               <p className="text-neutral">Worked</p>
                               <p className="mt-1 font-semibold text-dark">

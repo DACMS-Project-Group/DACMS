@@ -308,13 +308,13 @@ const LectureDashboard = () => {
                 {sessionModules.map((module) => (
                   <div
                     key={module.code}
-                    className="flex items-baseline justify-between gap-2 border-b border-border-subtle pb-2 last:border-0 last:pb-0"
+                    className="border-b border-border-subtle pb-2 last:border-0 last:pb-0"
                   >
-                    <p className="text-xs font-semibold text-dark font-inter">
+                    <p className="truncate text-xs font-semibold text-dark font-inter">
                       {module.code}
                     </p>
 
-                    <div className="flex shrink-0 items-baseline gap-1 whitespace-nowrap text-[10px] text-neutral font-inter">
+                    <div className="mt-0.5 flex items-baseline justify-end gap-1 whitespace-nowrap text-[10px] text-neutral font-inter">
                       <span className="w-9 shrink-0 text-right font-semibold text-primary-dark tabular-nums">
                         {formatHours(
                           module.hours,
