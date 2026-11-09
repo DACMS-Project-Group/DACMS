@@ -1,5 +1,5 @@
 import Button from '../ui/Button';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { useDensity } from '../contexts/DensityContext';
 
 /**
@@ -76,49 +76,43 @@ export const CompactTable = ({
           {rows.map((row) => {
             const isExpanded = expandedIds.has(row.id);
             return (
-              <tr
-                key={row.id}
-                className="transition-colors hover:bg-primary-lightest/40 group odd:bg-white even:bg-off-white/60"
-              >
-                {columns.map((col) => (
-                  <td
-                    key={col.key}
-                    className={`${padX} ${padY} ${cellFont} text-neutral align-middle`}
-                  >
-                    {col.render(row)}
-                  </td>
-                ))}
-                {renderRowExpansion && (
-                  <td className={`${padX} ${padY} text-center`}>
-                    <Button unstyled
-                      onClick={() => toggleExpansion(row.id)}
-                      className="p-1 rounded hover:bg-neutral/100 transition-colors"
-                      aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
-                      title={isExpanded ? 'Collapse details' : 'Expand details'}
+              <Fragment key={row.id}>
+                <tr className="transition-colors hover:bg-primary-lightest/40 group odd:bg-white even:bg-off-white/60">
+                  {columns.map((col) => (
+                    <td
+                      key={col.key}
+                      className={`${padX} ${padY} ${cellFont} text-neutral align-middle`}
                     >
-                      {chevron(isExpanded)}
-                    </Button>
-                  </td>
+                      {col.render(row)}
+                    </td>
+                  ))}
+                  {renderRowExpansion && (
+                    <td className={`${padX} ${padY} text-center`}>
+                      <Button unstyled
+                        onClick={() => toggleExpansion(row.id)}
+                        className="p-1 rounded hover:bg-neutral/100 transition-colors"
+                        aria-label={isExpanded ? 'Collapse details' : 'Expand details'}
+                        title={isExpanded ? 'Collapse details' : 'Expand details'}
+                      >
+                        {chevron(isExpanded)}
+                      </Button>
+                    </td>
+                  )}
+                </tr>
+
+                {isExpanded && renderRowExpansion && (
+                  <tr className="bg-primary-lightest/30">
+                    <td
+                      colSpan={columns.length + (renderRowExpansion ? 1 : 0)}
+                      className={`${padX} ${padY} ${cellFont} text-neutral`}
+                    >
+                      <div className="border-l border-primary pl-3 pt-2">
+                        {renderRowExpansion(row)}
+                      </div>
+                    </td>
+                  </tr>
                 )}
-              </tr>
-            );
-          })}
-
-          {rows.map((row) => {
-            const isExpanded = expandedIds.has(row.id);
-            if (!isExpanded || !renderRowExpansion) return null;
-
-            return (
-              <tr key={`${row.id}-expansion`} className="bg-primary-lightest/30">
-                <td
-                  colSpan={columns.length + (renderRowExpansion ? 1 : 0)}
-                  className={`${padX} ${padY} ${cellFont} text-neutral`}
-                >
-                  <div className="border-l border-primary pl-3 pt-2">
-                    {renderRowExpansion(row)}
-                  </div>
-                </td>
-              </tr>
+              </Fragment>
             );
           })}
         </tbody>
