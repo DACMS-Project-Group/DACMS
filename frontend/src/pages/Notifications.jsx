@@ -6,25 +6,10 @@ import Card from '../components/Card';
 import { useAuth } from '../contexts/AuthContext';
 import { apiPatch } from '../api';
 import { liveNotifs } from '../contexts/notificationContext';
-
-const renderMessage = (message) => {
-  const path = message.match(
-    /(\/(?:application-review\/\d+|application-detail\/\d+|appointment-approvals|verify-hours|session-detail\/\d+|review-claims|review-claim\/\d+|claim-detail\/\d+|appointment-review\/\d+|review-applications))\.?$/
-  )?.[1];
-
-  if (!path) {
-    return message;
-  }
-
-  return (
-    <>
-      {message.slice(0, message.length - path.length).replace(/[.\s]+$/, '')}{' '}
-      <Link className="font-semibold text-primary underline" to={path}>
-        Open related page
-      </Link>
-    </>
-  );
-};
+import {
+  getNotificationFallbackTarget,
+  splitNotificationMessage,
+} from '../lib/notificationLinks';
 
 const Notifications = () => {
   document.title = 'Notifications';
@@ -251,6 +236,16 @@ const Notifications = () => {
                       const isOpen = expandedId === notification.id;
                       const rowKey =
                         notification.id ?? `notification-${index}`;
+                      const {
+                        text: messageText,
+                        target: messageTarget,
+                      } = splitNotificationMessage(notification.message);
+                      const relatedTarget =
+                        messageTarget ||
+                        getNotificationFallbackTarget(
+                          notification.type,
+                          userRole
+                        );
 
                       return (
                         <React.Fragment key={rowKey}>
@@ -322,7 +317,21 @@ const Notifications = () => {
                           {isOpen && (
                             <div className="border-t border-neutral/20 px-3 md:px-4 pb-4 pt-3">
                               <p className="text-sm leading-relaxed text-dark font-inter break-words">
-                                {renderMessage(notification.message)}
+                                {messageText}
+                                {relatedTarget ? (
+                                  <>
+                                    {' '}
+                                    <Link
+                                      className="font-semibold text-primary underline"
+                                      to={relatedTarget}
+                                      onClick={(event) =>
+                                        event.stopPropagation()
+                                      }
+                                    >
+                                      Open related page
+                                    </Link>
+                                  </>
+                                ) : null}
                               </p>
                             </div>
                           )}

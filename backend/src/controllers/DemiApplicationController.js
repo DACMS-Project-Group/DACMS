@@ -40,7 +40,7 @@ class DemiApplicationController {
                 message:
                     `Application ${details.ApplicationReference || `#${details.ApplicationID}`} ` +
                     `from ${details.StudentName} (${details.StudentNumber}) for ` +
-                    `${details.ModuleCode} needs your review. Open /application-review/${details.ApplicationID}.`
+                    `${details.ModuleCode} needs your review. Open /review-applications.`
             });
             res.status(201).json({ application });
         } catch (err) {
