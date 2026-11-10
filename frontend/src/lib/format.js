@@ -6,6 +6,16 @@ const money = (value) =>
 
 export const formatMoney = (value) => money(value);
 
+export const formatMoneyCompact = (value) => {
+  const amount = Number(value ?? 0);
+  const absolute = Math.abs(amount);
+
+  if (absolute >= 1_000_000) return `R ${(amount / 1_000_000).toFixed(1)}m`;
+  if (absolute >= 1_000) return `R ${(amount / 1_000).toFixed(1)}k`;
+
+  return `R ${Math.round(amount)}`;
+};
+
 export const formatNumber = (value, digits = 2) =>
   Number(value ?? 0).toLocaleString('en-ZA', {
     minimumFractionDigits: digits,

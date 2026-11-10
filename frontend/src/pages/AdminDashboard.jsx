@@ -1,26 +1,45 @@
+import BreakdownDonut from '../ui/BreakdownDonut';
 import Button from '../ui/Button';
 import EmptyState from '../ui/EmptyState';
 import PageHeader from '../ui/PageHeader';
 import Section from '../ui/Section';
-import StatCard from '../ui/StatCard';
+import StackedBarChart from '../ui/StackedBarChart';
+import StatusSummaryList from '../ui/StatusSummaryList';
 import WorkQueue from '../ui/WorkQueue';
 import { useEffect, useState } from 'react';
 import Card from '../components/Card';
-import StatusBadge from '../components/StatusBadge';
 import { useNavigate } from 'react-router-dom';
-import { formatMoney } from '../lib/format';
+import {
+  formatMoney,
+  formatMoneyCompact,
+  formatPercent,
+} from '../lib/format';
 import { apiGet } from '../api';
 
-const APPOINTMENTS_PER_PAGE = 4;
+const STATUS_COLORS = {
+  approved: '#3F1D5A',
+  awaitingLecturer: '#6C3D91',
+  awaitingAdmin: '#B08BC9',
+};
 
-const renderAmount = (value) => {
-  if (value === null || value === undefined || value === '') return '—';
+const Metric = ({ label, value, hint, tone = 'neutral' }) => {
+  const hintTone = {
+    neutral: 'text-neutral',
+    warning: 'text-status-amber',
+    danger: 'text-status-danger',
+  }[tone];
 
-  if (typeof value === 'number') return formatMoney(value);
+  return (
+    <div>
+      <p className="text-xs text-neutral font-inter">{label}</p>
 
-  const numeric = Number(value);
+      <p className="mt-1 text-lg font-semibold text-primary-dark font-poppins">
+        {value}
+      </p>
 
-  return Number.isFinite(numeric) ? formatMoney(numeric) : value;
+      {hint && <p className={`mt-1 text-xs font-inter ${hintTone}`}>{hint}</p>}
+    </div>
+  );
 };
 
 const AdminDashboard = () => {
@@ -30,7 +49,6 @@ const AdminDashboard = () => {
   const [data, setData] = useState(null);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
-  const [appointmentPage, setAppointmentPage] = useState(1);
 
   useEffect(() => {
     let cancelled = false;
@@ -60,69 +78,110 @@ const AdminDashboard = () => {
   }, []);
 
   const stats = data?.stats || {};
-  const monthlyClaims = data?.monthlyClaims || [];
-  const monthlyWork = data?.monthlyWork || [];
-  const pendingAppointments = data?.pendingAppointments || [];
-
-  const totalAppointmentPages = Math.max(
-    Math.ceil(pendingAppointments.length / APPOINTMENTS_PER_PAGE),
-    1
-  );
-
-  useEffect(() => {
-    setAppointmentPage((currentPage) =>
-      Math.min(currentPage, totalAppointmentPages)
-    );
-  }, [totalAppointmentPages]);
-
-  const currentAppointments = pendingAppointments.slice(
-    (appointmentPage - 1) * APPOINTMENTS_PER_PAGE,
-    appointmentPage * APPOINTMENTS_PER_PAGE
-  );
-
-  const kpis = [
-    {
-      title: 'Total modules',
-      value: stats.total_modules ?? 0,
-      to: '/budget-management',
-      viewLabel: 'Manage budgets',
-    },
-    {
-      title: 'Total lecturers',
-      value: stats.total_lecturers ?? 0,
-    },
-    {
-      title: 'Total assistants',
-      value: stats.total_demis ?? 0,
-    },
-    {
-      title: 'Pending approvals',
-      value: stats.total_pending_approvals ?? 0,
-      to: '/appointment-approvals',
-      viewLabel: 'Review approvals',
-    },
-    {
-      title: 'Pending claims',
-      value: stats.total_pending_claims ?? 0,
-      to: '/admin/claims',
-      viewLabel: 'Review claims',
-    },
-  ];
+  const budgetUtilization = data?.budgetUtilization || {
+    months: [],
+    modules: [],
+  };
+  const budgetStats = data?.budgetStats || {};
+  const positionApprovals = data?.positionApprovals || {};
+  const claimBreakdown = data?.claimBreakdown || {};
+  const pendingAppointmentsByModule =
+    data?.pendingAppointmentsByModule || [];
 
   const attentionItems = [
     {
-      label: 'Appointments awaiting approval',
+      label: 'Assistant positions awaiting admin approval',
       count: Number(stats.total_pending_approvals ?? 0),
       to: '/appointment-approvals',
       cta: 'Review approvals',
     },
     {
-      label: 'Claims awaiting processing',
+      label: 'Claims awaiting admin verification',
       count: Number(stats.total_pending_claims ?? 0),
       to: '/admin/claims',
       cta: 'Review claims',
     },
   ].filter((item) => item.count > 0);
+
+  const budgetMonths = budgetUtilization.months || [];
+  const budgetModules = budgetUtilization.modules || [];
+  const moduleTotals = budgetUtilization.moduleTotals || [];
+  const budgetAllocated = Number(budgetStats.total_allocated ?? 0);
+  const budgetUsed = moduleTotals.reduce(
+    (sum, module) => sum + Number(module.utilised ?? 0),
+    0
+  );
+  const budgetRemaining = budgetAllocated - budgetUsed;
+  const budgetUsedPct =
+    budgetAllocated > 0 ? (budgetUsed / budgetAllocated) * 100 : 0;
+
+  const overBudgetCount = moduleTotals.filter(
+    (module) =>
+      Number(module.allocated ?? 0) > 0 &&
+      Number(module.utilised ?? 0) > Number(module.allocated ?? 0)
+  ).length;
+
+  const nearLimitCount = moduleTotals.filter((module) => {
+    const allocated = Number(module.allocated ?? 0);
+    const utilised = Number(module.utilised ?? 0);
+
+    return (
+      allocated > 0 && utilised >= allocated * 0.8 && utilised <= allocated
+    );
+  }).length;
+
+  const currentMonth = budgetMonths[budgetMonths.length - 1];
+  const previousMonth = budgetMonths[budgetMonths.length - 2];
+  const currentMonthTotal = Number(currentMonth?.total ?? 0);
+  const previousMonthTotal = Number(previousMonth?.total ?? 0);
+  const monthChangePct =
+    previousMonthTotal > 0
+      ? ((currentMonthTotal - previousMonthTotal) / previousMonthTotal) * 100
+      : null;
+
+  const positionSegments = [
+    {
+      label: 'Approved',
+      value: Number(positionApprovals.approved ?? 0),
+      color: STATUS_COLORS.approved,
+    },
+    {
+      label: 'Awaiting lecturer decision',
+      value: Number(positionApprovals.awaiting_lecturer ?? 0),
+      color: STATUS_COLORS.awaitingLecturer,
+    },
+    {
+      label: 'Awaiting admin decision',
+      value: Number(positionApprovals.awaiting_admin ?? 0),
+      color: STATUS_COLORS.awaitingAdmin,
+    },
+  ];
+  const positionTotal = positionSegments.reduce(
+    (sum, segment) => sum + segment.value,
+    0
+  );
+
+  const claimItems = [
+    {
+      label: 'Approved (verified)',
+      value: Number(claimBreakdown.approved ?? 0),
+      amount: Number(claimBreakdown.approved_amount ?? 0),
+      color: STATUS_COLORS.approved,
+    },
+    {
+      label: 'Awaiting lecturer decision',
+      value: Number(claimBreakdown.awaiting_lecturer ?? 0),
+      amount: Number(claimBreakdown.awaiting_lecturer_amount ?? 0),
+      color: STATUS_COLORS.awaitingLecturer,
+    },
+    {
+      label: 'Awaiting admin decision',
+      value: Number(claimBreakdown.awaiting_admin ?? 0),
+      amount: Number(claimBreakdown.awaiting_admin_amount ?? 0),
+      color: STATUS_COLORS.awaitingAdmin,
+    },
+  ];
+  const claimTotal = claimItems.reduce((sum, item) => sum + item.value, 0);
 
   return (
     <div className="p-4 md:p-8">
@@ -149,26 +208,129 @@ const AdminDashboard = () => {
         />
       </Section>
 
-      {/* Overview */}
-      <Section title="Overview">
-        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 md:gap-4 xl:grid-cols-5">
-          {kpis.map((kpi) => (
-            <StatCard
-              key={kpi.title}
-              label={kpi.title}
-              value={kpi.value}
-              loading={loading}
-              actionLabel={kpi.viewLabel}
-              onAction={kpi.to ? () => navigate(kpi.to) : undefined}
-            />
-          ))}
-        </div>
-      </Section>
-
-      {/* Monthly activity and pending appointments */}
-      <div className="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-3">
+      {/* Budget utilisation and position approvals */}
+      <div className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
         <Section
-          title="Monthly claims"
+          title="Budget utilisation by module"
+          description="Rand value of logged work sessions per month, stacked by module and compared over the last 12 months."
+          noMargin
+          className="flex h-full min-w-0 flex-col xl:col-span-2"
+          actions={
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/budget-management')}
+            >
+              Manage budgets →
+            </Button>
+          }
+        >
+          <Card className="flex flex-1 flex-col">
+            {loading ? (
+              <p className="py-10 text-center text-neutral font-inter">
+                Loading…
+              </p>
+            ) : (
+              <>
+                <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  <Metric
+                    label="Allocated (YTD)"
+                    value={formatMoney(budgetAllocated)}
+                  />
+
+                  <Metric
+                    label="Utilised (12 mo)"
+                    value={formatMoney(budgetUsed)}
+                    hint={`${formatPercent(budgetUsedPct)} of allocation`}
+                  />
+
+                  <Metric
+                    label="Remaining"
+                    value={formatMoney(budgetRemaining)}
+                    hint={
+                      overBudgetCount > 0
+                        ? `${overBudgetCount} module${
+                            overBudgetCount === 1 ? '' : 's'
+                          } over budget`
+                        : `${nearLimitCount} module${
+                            nearLimitCount === 1 ? '' : 's'
+                          } at 80%+`
+                    }
+                    tone={
+                      overBudgetCount > 0
+                        ? 'danger'
+                        : nearLimitCount > 0
+                          ? 'warning'
+                          : 'neutral'
+                    }
+                  />
+
+                  <Metric
+                    label="Utilisation this month"
+                    value={formatMoney(currentMonthTotal)}
+                    hint={
+                      monthChangePct === null
+                        ? 'No prior month data'
+                        : `${monthChangePct >= 0 ? '↑' : '↓'} ${formatPercent(
+                            Math.abs(monthChangePct)
+                          )} vs last month`
+                    }
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <StackedBarChart
+                    data={budgetMonths}
+                    modules={budgetModules}
+                    formatValue={formatMoney}
+                    formatAxis={formatMoneyCompact}
+                    emptyMessage="Logged work-session value will appear here."
+                  />
+                </div>
+              </>
+            )}
+          </Card>
+        </Section>
+
+        <Section
+          title="Assistant position approvals"
+          description="Where applications currently sit in the approval pipeline."
+          noMargin
+          className="flex h-full min-w-0 flex-col"
+          actions={
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/appointment-approvals')}
+            >
+              Review →
+            </Button>
+          }
+        >
+          <Card className="flex flex-1 flex-col justify-center">
+            {loading ? (
+              <p className="py-10 text-center text-neutral font-inter">
+                Loading…
+              </p>
+            ) : positionTotal === 0 ? (
+              <EmptyState
+                title="No position activity"
+                description="Application and appointment totals will appear here."
+              />
+            ) : (
+              <BreakdownDonut
+                segments={positionSegments}
+                centerLabel="Positions"
+              />
+            )}
+          </Card>
+        </Section>
+      </div>
+
+      {/* Claims pipeline and pending appointments */}
+      <div className="mb-8 grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <Section
+          title="Claims"
           noMargin
           className="flex h-full min-w-0 flex-col"
           actions={
@@ -177,81 +339,31 @@ const AdminDashboard = () => {
               size="sm"
               onClick={() => navigate('/admin/claims')}
             >
-              View claims →
+              Review claims →
             </Button>
           }
         >
-          <Card className="flex-1">
+          <Card className="flex flex-1 flex-col">
             {loading ? (
-              <p className="py-6 text-center text-neutral font-inter">
+              <p className="py-10 text-center text-neutral font-inter">
                 Loading…
               </p>
-            ) : monthlyClaims.length === 0 ? (
+            ) : claimTotal === 0 ? (
               <EmptyState
-                title="No claim data"
-                description="Monthly claim totals will appear here."
+                title="No claims"
+                description="Submitted claims will appear here."
               />
             ) : (
-              <div className="space-y-4">
-                {monthlyClaims.map((claim) => (
-                  <div
-                    key={claim.month}
-                    className="flex items-center justify-between border-b border-border-subtle pb-3 last:border-0 last:pb-0"
-                  >
-                    <span className="font-semibold text-dark font-inter">
-                      {claim.month}
-                    </span>
-
-                    <span className="whitespace-nowrap font-semibold text-primary font-inter">
-                      {renderAmount(claim.amount)}
-                    </span>
-                  </div>
-                ))}
-              </div>
+              <StatusSummaryList items={claimItems} total={claimTotal} />
             )}
           </Card>
         </Section>
 
         <Section
-          title="Monthly work sessions"
+          title="Pending appointments by module"
+          description="Modules currently waiting on admin approval for assistant appointments."
           noMargin
-          className="flex h-full min-w-0 flex-col"
-        >
-          <Card className="flex-1">
-            {loading ? (
-              <p className="py-6 text-center text-neutral font-inter">
-                Loading…
-              </p>
-            ) : monthlyWork.length === 0 ? (
-              <EmptyState
-                title="No session data"
-                description="Monthly work session totals will appear here."
-              />
-            ) : (
-              <div className="space-y-4">
-                {monthlyWork.map((month) => (
-                  <div
-                    key={month.month}
-                    className="flex items-center justify-between border-b border-border-subtle pb-3 last:border-0 last:pb-0"
-                  >
-                    <span className="font-semibold text-dark font-inter">
-                      {month.month}
-                    </span>
-
-                    <span className="whitespace-nowrap font-semibold text-primary font-inter">
-                      {month.total_sessions}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            )}
-          </Card>
-        </Section>
-
-        <Section
-          title="Pending appointments"
-          noMargin
-          className="flex h-full min-w-0 flex-col"
+          className="flex h-full min-w-0 flex-col xl:col-span-2"
           actions={
             <Button
               variant="ghost"
@@ -263,108 +375,42 @@ const AdminDashboard = () => {
           }
         >
           <Card className="flex flex-1 flex-col">
-            <div className="flex-1 space-y-3">
+            <div className="flex-1">
               {loading ? (
                 <p className="py-6 text-center text-neutral font-inter">
                   Loading…
                 </p>
-              ) : currentAppointments.length === 0 ? (
+              ) : pendingAppointmentsByModule.length === 0 ? (
                 <EmptyState
                   title="No pending appointments"
                   description="New appointment requests will appear here."
                 />
               ) : (
-                currentAppointments.map((appointment, index) => (
-                  <div
-                    key={`${appointment.module}-${appointment.date}-${index}`}
-                    className="border-b border-border-subtle pb-3 last:border-0 last:pb-0"
-                  >
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                <ul className="divide-y divide-border-subtle">
+                  {pendingAppointmentsByModule.map((item) => (
+                    <li
+                      key={item.module_code}
+                      className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0"
+                    >
                       <div className="min-w-0">
                         <p className="truncate text-sm font-semibold text-dark font-inter">
-                          {appointment.module}
+                          {item.module_code}
                         </p>
 
-                        <p className="mt-1 truncate text-xs text-neutral font-inter">
-                          {appointment.lecturer} → {appointment.assistant}
-                        </p>
-
-                        <p className="mt-1 text-xs text-neutral font-inter">
-                          {appointment.date}
+                        <p className="mt-0.5 truncate text-xs text-neutral font-inter">
+                          {item.module_name}
                         </p>
                       </div>
 
-                      <div className="shrink-0">
-                        <StatusBadge status={appointment.status} />
-                      </div>
-                    </div>
-                  </div>
-                ))
+                      <span className="shrink-0 rounded-full bg-primary-lightest px-3 py-1 text-sm font-semibold text-primary-dark font-poppins">
+                        {item.pending_count}{' '}
+                        {item.pending_count === 1 ? 'appointment' : 'appointments'}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
-
-            {pendingAppointments.length > 0 && (
-              <div className="mt-4 flex flex-col gap-2 border-t border-border-subtle pt-3 sm:flex-row sm:items-center sm:justify-between">
-                <span className="text-xs text-neutral font-inter">
-                  Showing {(appointmentPage - 1) * APPOINTMENTS_PER_PAGE + 1}–
-                  {Math.min(
-                    appointmentPage * APPOINTMENTS_PER_PAGE,
-                    pendingAppointments.length
-                  )}{' '}
-                  of {pendingAppointments.length}
-                </span>
-
-                <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    type="button"
-                    onClick={() =>
-                      setAppointmentPage((page) => Math.max(page - 1, 1))
-                    }
-                    disabled={appointmentPage === 1}
-                    aria-label="Previous page"
-                  >
-                    ‹
-                  </Button>
-
-                  {Array.from(
-                    { length: totalAppointmentPages },
-                    (_, index) => index + 1
-                  ).map((page) => (
-                    <Button
-                      key={page}
-                      variant={page === appointmentPage ? 'primary' : 'ghost'}
-                      size="sm"
-                      type="button"
-                      aria-label={`Go to page ${page}`}
-                      aria-current={
-                        page === appointmentPage ? 'page' : undefined
-                      }
-                      onClick={() => setAppointmentPage(page)}
-                      className="min-w-9 px-2"
-                    >
-                      {page}
-                    </Button>
-                  ))}
-
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    type="button"
-                    onClick={() =>
-                      setAppointmentPage((page) =>
-                        Math.min(page + 1, totalAppointmentPages)
-                      )
-                    }
-                    disabled={appointmentPage === totalAppointmentPages}
-                    aria-label="Next page"
-                  >
-                    ›
-                  </Button>
-                </div>
-              </div>
-            )}
           </Card>
         </Section>
       </div>

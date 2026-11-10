@@ -3,16 +3,34 @@ import BaseRepository from '../repositories/BaseRepository.js';
 
 class AdminService {
     static async getDashboardSummary() {
-        const stats = await AdminRepository.getDashboardMetrics();
-        const monthlyWork = await AdminRepository.getMonthlyWorkSessions();
-        const monthlyClaims = await AdminRepository.getMonthlyClaims();
-        const pendingAppointments = await AdminRepository.getPendingAppointments();
+        const [
+            stats,
+            monthlyUtilization,
+            moduleUtilization,
+            budgetStats,
+            positionApprovals,
+            claimBreakdown,
+            pendingAppointmentsByModule
+        ] = await Promise.all([
+            AdminRepository.getDashboardMetrics(),
+            AdminRepository.getMonthlySessionUtilization(),
+            AdminRepository.getSessionUtilizationByModule(),
+            AdminRepository.getBudgetsMetrics(),
+            AdminRepository.getPositionApprovalBreakdown(),
+            AdminRepository.getClaimsStatusBreakdown(),
+            AdminRepository.getPendingAppointmentsByModule()
+        ]);
 
         return {
             stats,
-            monthlyWork,
-            monthlyClaims,
-            pendingAppointments
+            budgetUtilization: {
+                ...monthlyUtilization,
+                moduleTotals: moduleUtilization
+            },
+            budgetStats,
+            positionApprovals,
+            claimBreakdown,
+            pendingAppointmentsByModule
         };
     }
 

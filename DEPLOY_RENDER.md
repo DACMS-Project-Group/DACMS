@@ -42,6 +42,14 @@ creating the Blueprint.
    psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /app/backend/init.sql
    ```
 
+   `backend/init.sql` creates the schema only. It does not insert any records.
+   For a demo or development database you can optionally load the bundled test
+   data (all accounts use the password `password`):
+
+   ```sh
+   psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f /app/backend/seed.sql
+   ```
+
    Verify that initialization created the tables:
 
    ```sh
@@ -55,10 +63,12 @@ creating the Blueprint.
    `"$DATABASE_URL"` ensures the command targets the same database as the app.
 
    **Important:** `backend/init.sql` drops existing DACMS tables before
-   recreating them and inserts bundled seed data. Run it only against a new,
-   empty database. Do not run it on a database containing data, because it will
-   erase those tables and records. Review the seeded demo/test records and
-   replace them before opening the application to real users.
+   recreating them. Run it only against a new, empty database. Do not run it on
+   a database containing data, because it will erase those tables and records.
+   `backend/seed.sql` inserts demo accounts with a shared, well-known password
+   and other fake records. Review or omit it before opening the application to
+   real users. The dev Docker stack loads both files automatically
+   (`docker-compose.yml` mounts them into `/docker-entrypoint-initdb.d`).
 
 6. Open the service URL shown in the Render dashboard and test registration,
    login, document uploads, notifications, and PDF export.

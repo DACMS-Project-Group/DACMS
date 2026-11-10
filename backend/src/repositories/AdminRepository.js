@@ -6,45 +6,196 @@ class AdminRepository {
     static async getDashboardMetrics() {
         const query = `
             SELECT
-                (SELECT COUNT(*) FROM "NWU_MODULE") AS total_modules,
-                (SELECT COUNT(*) FROM "LECTURER") AS total_lecturers,
-                (
-                    SELECT COUNT(*) FROM "DEMI_POSITION"
-                    WHERE "StartDate" <= CURRENT_DATE AND "TerminationDate" >= CURRENT_DATE
-                ) AS total_demis,
                 (SELECT COUNT(*) FROM "DEMI_POSITION" WHERE "PositionStatus" = 'Pending Admin Review') AS total_pending_approvals,
-                (SELECT COUNT(*) FROM "REMUNERATION_CLAIM" WHERE "ClaimStatus" = 'Pending') AS total_pending_claims;
+                (SELECT COUNT(*) FROM "REMUNERATION_CLAIM" WHERE "ClaimStatus" = 'Approved by Lecturer') AS total_pending_claims;
         `;
 
         const result = await pool.query(query);
         const row = result.rows[0] || {};
 
         return {
-            total_modules: Number(row.total_modules ?? 0),
-            total_lecturers: Number(row.total_lecturers ?? 0),
-            total_demis: Number(row.total_demis ?? 0),
             total_pending_approvals: Number(row.total_pending_approvals ?? 0),
             total_pending_claims: Number(row.total_pending_claims ?? 0),
         };
     }
 
-    static async getMonthlyWorkSessions() {
+    /**
+     * Rand value of logged work sessions per module per month for the previous
+     * 12 months. This is the utilisation actually incurred against the budget,
+     * as opposed to claim amounts (which are only submitted later).
+     */
+    static async getMonthlySessionUtilization() {
         const query = `
             SELECT
-                TO_CHAR("StartTime", 'FMMonth') AS month,
-                COUNT(*) AS total_sessions
-            FROM "WORK_SESSION"
-            WHERE "StartTime" >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months'
-            GROUP BY TO_CHAR("StartTime", 'FMMonth')
-            ORDER BY month;
+                TO_CHAR(m.month_date, 'YYYY-MM') AS month_key,
+                TO_CHAR(m.month_date, 'Mon YYYY') AS month_label,
+                nm."ModuleCode" AS module_code,
+                COALESCE(SUM(
+                    COALESCE(
+                        ws."EstimatedRemuneration",
+                        ws."TotalHoursWorked" * ps."StandardHourlyRate"
+                    )
+                ), 0) AS amount
+            FROM generate_series(
+                DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months',
+                DATE_TRUNC('month', CURRENT_DATE),
+                INTERVAL '1 month'
+            ) AS m(month_date)
+            LEFT JOIN "WORK_SESSION" ws
+                ON DATE_TRUNC('month', ws."StartTime") = m.month_date
+            LEFT JOIN "DEMI_POSITION" p
+                ON p."PositionID" = ws."PositionID"
+            LEFT JOIN "DEMI_APPLICATION" a
+                ON a."ApplicationID" = p."ApplicationID"
+            LEFT JOIN "DEMI_LISTING" l
+                ON l."ListingID" = a."ListingID"
+            LEFT JOIN "NWU_MODULE" nm
+                ON nm."ModuleID" = l."ModuleID"
+            LEFT JOIN "PAYMENT_SCALE" ps
+                ON ps."ScaleID" = p."PaymentScaleID"
+            GROUP BY m.month_date, nm."ModuleCode"
+            ORDER BY m.month_date ASC, nm."ModuleCode" ASC;
+        `;
+
+        const result = await pool.query(query);
+        const months = new Map();
+        const moduleCodes = new Set();
+
+        for (const row of result.rows) {
+            if (!months.has(row.month_key)) {
+                months.set(row.month_key, {
+                    key: row.month_key,
+                    label: row.month_label,
+                    segments: {},
+                    total: 0,
+                });
+            }
+
+            if (!row.module_code) continue;
+
+            const month = months.get(row.month_key);
+            const amount = Number(row.amount ?? 0);
+
+            month.segments[row.module_code] = amount;
+            month.total += amount;
+            moduleCodes.add(row.module_code);
+        }
+
+        return {
+            months: Array.from(months.values()),
+            modules: Array.from(moduleCodes).sort(),
+        };
+    }
+
+    /**
+     * Session-based utilisation for the previous 12 months aggregated per
+     * module, alongside the module's current-year budget allocation.
+     */
+    static async getSessionUtilizationByModule() {
+        const query = `
+            SELECT
+                nm."ModuleCode" AS module_code,
+                COALESCE(b."AllocatedBudget", 0) AS allocated,
+                COALESCE(SUM(
+                    COALESCE(
+                        ws."EstimatedRemuneration",
+                        ws."TotalHoursWorked" * ps."StandardHourlyRate"
+                    )
+                ), 0) AS utilised
+            FROM "NWU_MODULE" nm
+            LEFT JOIN (
+                SELECT
+                    "ModuleID",
+                    SUM("AllocatedBudget") AS "AllocatedBudget"
+                FROM "MODULE_BUDGET"
+                WHERE "AcademicYear" = EXTRACT(YEAR FROM CURRENT_DATE)
+                GROUP BY "ModuleID"
+            ) b
+                ON b."ModuleID" = nm."ModuleID"
+            LEFT JOIN "DEMI_LISTING" l
+                ON l."ModuleID" = nm."ModuleID"
+            LEFT JOIN "DEMI_APPLICATION" a
+                ON a."ListingID" = l."ListingID"
+            LEFT JOIN "DEMI_POSITION" p
+                ON p."ApplicationID" = a."ApplicationID"
+            LEFT JOIN "WORK_SESSION" ws
+                ON ws."PositionID" = p."PositionID"
+                AND ws."StartTime" >= DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months'
+                AND ws."StartTime" < DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month'
+            LEFT JOIN "PAYMENT_SCALE" ps
+                ON ps."ScaleID" = p."PaymentScaleID"
+            GROUP BY nm."ModuleCode", b."AllocatedBudget"
+            ORDER BY nm."ModuleCode" ASC;
         `;
 
         const result = await pool.query(query);
 
         return result.rows.map((row) => ({
-            month: row.month || null,
-            total_sessions: Number(row.total_sessions ?? 0),
+            module: row.module_code,
+            allocated: Number(row.allocated ?? 0),
+            utilised: Number(row.utilised ?? 0),
         }));
+    }
+
+    static async getPositionApprovalBreakdown() {
+        const query = `
+            SELECT
+                (SELECT COUNT(*) FROM "DEMI_POSITION" WHERE "PositionStatus" = 'Approved') AS approved,
+                (
+                    SELECT COUNT(*) FROM "DEMI_APPLICATION"
+                    WHERE "ApplicationStatus" IN ('Pending', 'In Review')
+                ) AS awaiting_lecturer,
+                (
+                    SELECT COUNT(*) FROM "DEMI_POSITION"
+                    WHERE "PositionStatus" = 'Pending Admin Review'
+                ) AS awaiting_admin;
+        `;
+
+        const result = await pool.query(query);
+        const row = result.rows[0] || {};
+
+        return {
+            approved: Number(row.approved ?? 0),
+            awaiting_lecturer: Number(row.awaiting_lecturer ?? 0),
+            awaiting_admin: Number(row.awaiting_admin ?? 0),
+        };
+    }
+
+    static async getClaimsStatusBreakdown() {
+        const query = `
+            SELECT
+                COUNT(*) FILTER (
+                    WHERE "ClaimStatus" IN ('Verified', 'Approved', 'Paid')
+                ) AS approved,
+                COUNT(*) FILTER (
+                    WHERE "ClaimStatus" IN ('Pending', 'Under Review')
+                ) AS awaiting_lecturer,
+                COUNT(*) FILTER (
+                    WHERE "ClaimStatus" = 'Approved by Lecturer'
+                ) AS awaiting_admin,
+                COALESCE(SUM("TotalClaimAmount") FILTER (
+                    WHERE "ClaimStatus" IN ('Verified', 'Approved', 'Paid')
+                ), 0) AS approved_amount,
+                COALESCE(SUM("TotalClaimAmount") FILTER (
+                    WHERE "ClaimStatus" IN ('Pending', 'Under Review')
+                ), 0) AS awaiting_lecturer_amount,
+                COALESCE(SUM("TotalClaimAmount") FILTER (
+                    WHERE "ClaimStatus" = 'Approved by Lecturer'
+                ), 0) AS awaiting_admin_amount
+            FROM "REMUNERATION_CLAIM";
+        `;
+
+        const result = await pool.query(query);
+        const row = result.rows[0] || {};
+
+        return {
+            approved: Number(row.approved ?? 0),
+            awaiting_lecturer: Number(row.awaiting_lecturer ?? 0),
+            awaiting_admin: Number(row.awaiting_admin ?? 0),
+            approved_amount: Number(row.approved_amount ?? 0),
+            awaiting_lecturer_amount: Number(row.awaiting_lecturer_amount ?? 0),
+            awaiting_admin_amount: Number(row.awaiting_admin_amount ?? 0),
+        };
     }
 
     static async getMonthlyClaims() {
@@ -76,15 +227,16 @@ class AdminRepository {
         });
     }
 
-    static async getPendingAppointments() {
+    /**
+     * Pending admin appointments grouped per module, so the dashboard shows
+     * how many appointments each module is waiting on.
+     */
+    static async getPendingAppointmentsByModule() {
         const query = `
             SELECT
-                p."PositionID" AS position_id,
-                p."PositionStatus" AS status,
-                da."DateSubmitted" AS date_submitted,
-                nm."ModuleCode" AS module,
-                CONCAT(au_lect."Title", ' ', au_lect."FName", ' ', au_lect."LName") AS lecturer,
-                CONCAT(au_stud."Title", ' ', au_stud."FName", ' ', au_stud."LName") AS student
+                nm."ModuleCode" AS module_code,
+                nm."ModuleName" AS module_name,
+                COUNT(*) AS pending_count
             FROM "DEMI_POSITION" p
             JOIN "DEMI_APPLICATION" da
                 ON p."ApplicationID" = da."ApplicationID"
@@ -92,27 +244,17 @@ class AdminRepository {
                 ON dl."ListingID" = da."ListingID"
             JOIN "NWU_MODULE" nm
                 ON nm."ModuleID" = dl."ModuleID"
-            JOIN "STUDENT" st
-                ON st."StudentID" = da."StudentID"
-            JOIN "APP_USER" au_stud
-                ON au_stud."UserID" = st."StudentID"
-            JOIN "LECTURER" lect
-                ON lect."LecturerID" = dl."LecturerID"
-            JOIN "APP_USER" au_lect
-                ON au_lect."UserID" = lect."LecturerID"
             WHERE p."PositionStatus" = 'Pending Admin Review'
-            ORDER BY da."DateSubmitted" DESC;
+            GROUP BY nm."ModuleID", nm."ModuleCode", nm."ModuleName"
+            ORDER BY pending_count DESC, nm."ModuleCode" ASC;
         `;
 
         const result = await pool.query(query);
 
         return result.rows.map((row) => ({
-            position_id: row.position_id,
-            status: row.status,
-            date_submitted: row.date_submitted,
-            module: row.module,
-            lecturer: row.lecturer,
-            student: row.student,
+            module_code: row.module_code,
+            module_name: row.module_name,
+            pending_count: Number(row.pending_count ?? 0),
         }));
     }
 
@@ -232,7 +374,10 @@ class AdminRepository {
                 COALESCE(SUM("AllocatedBudget" - "CurrentBudgetUsage"), 0) AS total_remaining,
                 COUNT(*) FILTER (
                     WHERE "CurrentBudgetUsage" >= "AllocatedBudget" * $1
-                ) AS count_near_limit
+                ) AS count_near_limit,
+                COUNT(*) FILTER (
+                    WHERE "CurrentBudgetUsage" > "AllocatedBudget"
+                ) AS count_over_budget
             FROM "MODULE_BUDGET"
             WHERE "AcademicYear" = EXTRACT(YEAR FROM CURRENT_DATE);`;
         const result = await pool.query(query, [BUDGET_WARNING]);
@@ -242,7 +387,8 @@ class AdminRepository {
             total_allocated: Number(row.total_allocated ?? 0),
             total_used: Number(row.total_used ?? 0),
             total_remaining: Number(row.total_remaining ?? 0),
-            count_near_limit: Number(row.count_near_limit ?? 0)
+            count_near_limit: Number(row.count_near_limit ?? 0),
+            count_over_budget: Number(row.count_over_budget ?? 0)
         }
     }
 
