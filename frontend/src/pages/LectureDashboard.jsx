@@ -176,10 +176,16 @@ const LectureDashboard = () => {
   );
 
   // Work sessions awaiting verification, grouped by module
+  const pendingSessions = sessions.filter((session) => {
+    const approval =
+      session.LecturerApproval ?? session.lecturer_approval;
+    return !(approval === true || approval === 'true' || approval === 1);
+  });
+
   const sessionModules = (() => {
     const groups = new Map();
 
-    sessions.forEach((session) => {
+    pendingSessions.forEach((session) => {
       const code = String(
         session.ModuleCode ?? session.module_code ?? 'Unknown'
       ).trim();
@@ -218,7 +224,7 @@ const LectureDashboard = () => {
     },
     {
       label: 'Work sessions awaiting verification',
-      count: sessions.length,
+      count: pendingSessions.length,
       to: '/verify-hours',
       cta: 'Verify hours',
     },
@@ -291,7 +297,7 @@ const LectureDashboard = () => {
               </p>
 
               <p className="mt-1 whitespace-nowrap text-2xl font-bold text-primary-dark font-poppins md:text-3xl">
-                {loading ? '—' : sessions.length}
+                {loading ? '—' : pendingSessions.length}
               </p>
             </div>
 
@@ -527,14 +533,14 @@ const LectureDashboard = () => {
             <p className="py-6 text-center text-neutral font-inter">
               Loading…
             </p>
-          ) : sessions.length === 0 ? (
+          ) : pendingSessions.length === 0 ? (
             <EmptyState
               title="No work sessions awaiting verification"
               description="Sessions submitted by your assistants will appear here."
             />
           ) : (
             <div className="space-y-4">
-              {sessions.slice(0, 5).map((session, index) => (
+              {pendingSessions.slice(0, 5).map((session, index) => (
                 <div
                   key={session.SessionID ?? session.session_id ?? index}
                   className="border-b border-border-subtle pb-4 last:border-0 last:pb-0"
